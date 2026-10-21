@@ -1,0 +1,11 @@
+{
+  "id": "com.lgapp.lab",
+  "version": "0.5.0",
+  "vendor": "LG Lab local",
+  "type": "web",
+  "main": "index.html",
+  "title": "Luma Browser Lab",
+  "icon": "icon.png",
+  "resolution": "1920x1080",
+  "requiredACG": []
+}

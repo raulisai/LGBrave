@@ -1,0 +1,258 @@
+[
+  {
+    "name": ".github",
+    "path": ".github",
+    "sha": "052431c82eb07ce454b6bfdc139c2feacca9f4df",
+    "size": 0,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/.github?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/tree/master/.github",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/trees/052431c82eb07ce454b6bfdc139c2feacca9f4df",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/.github?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/trees/052431c82eb07ce454b6bfdc139c2feacca9f4df",
+      "html": "https://github.com/brave/adblock-resources/tree/master/.github"
+    }
+  },
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "2a14cf2667a8f397b94785cefe0b71ed0a71d78d",
+    "size": 31,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/.gitignore?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/.gitignore",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/2a14cf2667a8f397b94785cefe0b71ed0a71d78d",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/.gitignore?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/2a14cf2667a8f397b94785cefe0b71ed0a71d78d",
+      "html": "https://github.com/brave/adblock-resources/blob/master/.gitignore"
+    }
+  },
+  {
+    "name": "LICENSE",
+    "path": "LICENSE",
+    "sha": "a612ad9813b006ce81d1ee438dd784da99a54007",
+    "size": 16725,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/LICENSE?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/LICENSE",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/a612ad9813b006ce81d1ee438dd784da99a54007",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/LICENSE",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/LICENSE?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/a612ad9813b006ce81d1ee438dd784da99a54007",
+      "html": "https://github.com/brave/adblock-resources/blob/master/LICENSE"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "README.md",
+    "sha": "ae21ed8be03c9cf5483fe5198904b012d310a6e3",
+    "size": 6016,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/README.md?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/README.md",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/ae21ed8be03c9cf5483fe5198904b012d310a6e3",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/README.md?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/ae21ed8be03c9cf5483fe5198904b012d310a6e3",
+      "html": "https://github.com/brave/adblock-resources/blob/master/README.md"
+    }
+  },
+  {
+    "name": "build.js",
+    "path": "build.js",
+    "sha": "964ad6601b3c320b525aaa5fff82c21e25fd99f5",
+    "size": 197,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/build.js?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/build.js",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/964ad6601b3c320b525aaa5fff82c21e25fd99f5",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/build.js",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/build.js?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/964ad6601b3c320b525aaa5fff82c21e25fd99f5",
+      "html": "https://github.com/brave/adblock-resources/blob/master/build.js"
+    }
+  },
+  {
+    "name": "dist",
+    "path": "dist",
+    "sha": "a18e668db0597212931f792eaa2968a8e818a396",
+    "size": 0,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/dist?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/tree/master/dist",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/trees/a18e668db0597212931f792eaa2968a8e818a396",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/dist?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/trees/a18e668db0597212931f792eaa2968a8e818a396",
+      "html": "https://github.com/brave/adblock-resources/tree/master/dist"
+    }
+  },
+  {
+    "name": "filter_lists",
+    "path": "filter_lists",
+    "sha": "669fa4565a9c8737b7308ff4a23ee1351b0f5ba5",
+    "size": 0,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/filter_lists?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/tree/master/filter_lists",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/trees/669fa4565a9c8737b7308ff4a23ee1351b0f5ba5",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/filter_lists?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/trees/669fa4565a9c8737b7308ff4a23ee1351b0f5ba5",
+      "html": "https://github.com/brave/adblock-resources/tree/master/filter_lists"
+    }
+  },
+  {
+    "name": "generateMetadataJsonFromScriptResources.js",
+    "path": "generateMetadataJsonFromScriptResources.js",
+    "sha": "a99aa76df0fec02bb715b02f2c5221b8d9e87475",
+    "size": 900,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/generateMetadataJsonFromScriptResources.js?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/generateMetadataJsonFromScriptResources.js",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/a99aa76df0fec02bb715b02f2c5221b8d9e87475",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/generateMetadataJsonFromScriptResources.js",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/generateMetadataJsonFromScriptResources.js?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/a99aa76df0fec02bb715b02f2c5221b8d9e87475",
+      "html": "https://github.com/brave/adblock-resources/blob/master/generateMetadataJsonFromScriptResources.js"
+    }
+  },
+  {
+    "name": "generate_component.sh",
+    "path": "generate_component.sh",
+    "sha": "417c204a6c406ad54575e85e2af3a6bb37434a6d",
+    "size": 769,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/generate_component.sh?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/generate_component.sh",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/417c204a6c406ad54575e85e2af3a6bb37434a6d",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/generate_component.sh",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/generate_component.sh?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/417c204a6c406ad54575e85e2af3a6bb37434a6d",
+      "html": "https://github.com/brave/adblock-resources/blob/master/generate_component.sh"
+    }
+  },
+  {
+    "name": "index.js",
+    "path": "index.js",
+    "sha": "3e66c482a5e8311d616e47e71fc22a80f853de8e",
+    "size": 744,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/index.js?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/index.js",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/3e66c482a5e8311d616e47e71fc22a80f853de8e",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/index.js",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/index.js?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/3e66c482a5e8311d616e47e71fc22a80f853de8e",
+      "html": "https://github.com/brave/adblock-resources/blob/master/index.js"
+    }
+  },
+  {
+    "name": "metadata.json",
+    "path": "metadata.json",
+    "sha": "10a394fe4f8d141e20709f1720e8877805ea1a48",
+    "size": 3579,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/metadata.json?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/metadata.json",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/10a394fe4f8d141e20709f1720e8877805ea1a48",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/metadata.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/metadata.json?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/10a394fe4f8d141e20709f1720e8877805ea1a48",
+      "html": "https://github.com/brave/adblock-resources/blob/master/metadata.json"
+    }
+  },
+  {
+    "name": "package.json",
+    "path": "package.json",
+    "sha": "b491303d0cac14ac5d3cfbf85346a6815b635064",
+    "size": 722,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/package.json?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/package.json",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/b491303d0cac14ac5d3cfbf85346a6815b635064",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/package.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/package.json?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/b491303d0cac14ac5d3cfbf85346a6815b635064",
+      "html": "https://github.com/brave/adblock-resources/blob/master/package.json"
+    }
+  },
+  {
+    "name": "pnpm-lock.yaml",
+    "path": "pnpm-lock.yaml",
+    "sha": "26d9c11b8898e290c23f59107f001bd4f3f380ae",
+    "size": 642,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/pnpm-lock.yaml?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/pnpm-lock.yaml",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/26d9c11b8898e290c23f59107f001bd4f3f380ae",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/pnpm-lock.yaml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/pnpm-lock.yaml?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/26d9c11b8898e290c23f59107f001bd4f3f380ae",
+      "html": "https://github.com/brave/adblock-resources/blob/master/pnpm-lock.yaml"
+    }
+  },
+  {
+    "name": "pnpm-workspace.yaml",
+    "path": "pnpm-workspace.yaml",
+    "sha": "746016a28269ed7d9990398c1c64029f834aa8cb",
+    "size": 124,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/pnpm-workspace.yaml?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/pnpm-workspace.yaml",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/746016a28269ed7d9990398c1c64029f834aa8cb",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/pnpm-workspace.yaml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/pnpm-workspace.yaml?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/746016a28269ed7d9990398c1c64029f834aa8cb",
+      "html": "https://github.com/brave/adblock-resources/blob/master/pnpm-workspace.yaml"
+    }
+  },
+  {
+    "name": "resources",
+    "path": "resources",
+    "sha": "43d1602a53d041cb7220ca93f64ff9444c2b8cfd",
+    "size": 0,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/resources?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/tree/master/resources",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/trees/43d1602a53d041cb7220ca93f64ff9444c2b8cfd",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/resources?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/trees/43d1602a53d041cb7220ca93f64ff9444c2b8cfd",
+      "html": "https://github.com/brave/adblock-resources/tree/master/resources"
+    }
+  },
+  {
+    "name": "verify.js",
+    "path": "verify.js",
+    "sha": "fd0e2f28684171e7fbae1bf2f47bd93621a0276c",
+    "size": 4154,
+    "url": "https://api.github.com/repos/brave/adblock-resources/contents/verify.js?ref=master",
+    "html_url": "https://github.com/brave/adblock-resources/blob/master/verify.js",
+    "git_url": "https://api.github.com/repos/brave/adblock-resources/git/blobs/fd0e2f28684171e7fbae1bf2f47bd93621a0276c",
+    "download_url": "https://raw.githubusercontent.com/brave/adblock-resources/master/verify.js",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/adblock-resources/contents/verify.js?ref=master",
+      "git": "https://api.github.com/repos/brave/adblock-resources/git/blobs/fd0e2f28684171e7fbae1bf2f47bd93621a0276c",
+      "html": "https://github.com/brave/adblock-resources/blob/master/verify.js"
+    }
+  }
+]

@@ -1,0 +1,68 @@
+{
+  "capturedAt": "2026-10-21T08:27:34.537Z",
+  "scope": "Semántica del motor Node; cada integración en TV se mide por separado.",
+  "passed": 15,
+  "total": 15,
+  "tests": [
+    {
+      "name": "Bloqueo por dominio",
+      "pass": true
+    },
+    {
+      "name": "No confundir dominio parecido",
+      "pass": true
+    },
+    {
+      "name": "Excepción",
+      "pass": true
+    },
+    {
+      "name": "Tipo script",
+      "pass": true
+    },
+    {
+      "name": "Terceros",
+      "pass": true
+    },
+    {
+      "name": "Mismo sitio permitido por third-party",
+      "pass": true
+    },
+    {
+      "name": "Regla específica del sitio",
+      "pass": true
+    },
+    {
+      "name": "Regla no afecta otro sitio",
+      "pass": true
+    },
+    {
+      "name": "important domina excepción",
+      "pass": true
+    },
+    {
+      "name": "Respuesta de reemplazo",
+      "pass": true
+    },
+    {
+      "name": "Eliminar parámetro de seguimiento",
+      "pass": true
+    },
+    {
+      "name": "CSS por dominio",
+      "pass": true
+    },
+    {
+      "name": "Excepción de CSS",
+      "pass": true
+    },
+    {
+      "name": "Selector genérico",
+      "pass": true
+    },
+    {
+      "name": "Generación de scriptlet",
+      "pass": true
+    }
+  ]
+}

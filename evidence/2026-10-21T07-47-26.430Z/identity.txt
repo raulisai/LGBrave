@@ -1,0 +1,6 @@
+[Info] Set target device : lg-lab
+modelName : 75UR8750PSA
+sdkVersion : 10.3.2
+firmwareVersion : 33.31.75
+boardType : K8LPN_ATSC_US
+otaId : HE_DTV_W23P_AFADATAA

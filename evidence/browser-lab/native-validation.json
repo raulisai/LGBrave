@@ -1,0 +1,176 @@
+{
+  "capturedAt": "2026-10-21T08:27:46.359Z",
+  "mode": "TV autónoma: WASM y hooks JavaScript; CDP solo observa",
+  "engine": "brave/adblock-rust 0.13.3 compilado a WASM; ejecutado en la TV",
+  "initializationMs": 2674,
+  "binaryBytes": 2244249,
+  "memoryBytes": 48627712,
+  "filterLines": 141878,
+  "cases": [
+    {
+      "name": "Anuncio Google",
+      "expected": true,
+      "blocked": true,
+      "pass": true
+    },
+    {
+      "name": "Rastreador Analytics",
+      "expected": true,
+      "blocked": true,
+      "pass": true
+    },
+    {
+      "name": "Imagen editorial",
+      "expected": false,
+      "blocked": false,
+      "pass": true
+    },
+    {
+      "name": "Script editorial",
+      "expected": false,
+      "blocked": false,
+      "pass": true
+    },
+    {
+      "name": "Excepción",
+      "expected": false,
+      "blocked": false,
+      "pass": true
+    }
+  ],
+  "before": {
+    "visibleAds": 3,
+    "adScripts": 2
+  },
+  "after": {
+    "visibleAds": 0,
+    "editorialVisible": true
+  },
+  "requests": [
+    {
+      "url": "http://192.168.1.148:43187/ad-fixture/late-fetch?run=native-after",
+      "blocked": true
+    },
+    {
+      "url": "http://192.168.1.148:43187/content-fixture/late-fetch?run=native-after",
+      "blocked": false
+    }
+  ],
+  "limitations": [
+    "Las solicitudes iniciales ya se descargaron antes del evento load.",
+    "El hook solo se aplicó a fetch después de cargar.",
+    "No es un interceptor global de red.",
+    "La prueba solo permite la página controlada del laboratorio."
+  ],
+  "serverRequests": [
+    {
+      "time": "2026-10-21T08:27:45.207Z",
+      "port": 43187,
+      "path": "/fixture",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.398Z",
+      "port": 43187,
+      "path": "/content-fixture/style.css",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.441Z",
+      "port": 43187,
+      "path": "/ad-fixture/style.css",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.443Z",
+      "port": 43187,
+      "path": "/content-fixture/good.js",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.444Z",
+      "port": 43187,
+      "path": "/ad-fixture/banner.js",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.444Z",
+      "port": 43187,
+      "path": "/ad-fixture/allowed.js",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.444Z",
+      "port": 43187,
+      "path": "/content-fixture/pixel.png",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.445Z",
+      "port": 43187,
+      "path": "/ad-fixture/pixel.png",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.586Z",
+      "port": 43187,
+      "path": "/ad-fixture/frame",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.641Z",
+      "port": 43187,
+      "path": "/content-fixture/frame",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.679Z",
+      "port": 43187,
+      "path": "/ad-fixture/fetch",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.683Z",
+      "port": 43187,
+      "path": "/content-fixture/fetch",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.699Z",
+      "port": 43187,
+      "path": "/ad-fixture/xhr",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.715Z",
+      "port": 43187,
+      "path": "/content-fixture/cookie",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.716Z",
+      "port": 43188,
+      "path": "/ad-fixture/cross",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:45.718Z",
+      "port": 43188,
+      "path": "/content-fixture/cross",
+      "run": "native"
+    },
+    {
+      "time": "2026-10-21T08:27:46.274Z",
+      "port": 43187,
+      "path": "/content-fixture/late-fetch",
+      "run": "native-after"
+    }
+  ],
+  "metrics": {
+    "initialAdRequestsReachingServer": 7,
+    "initialAdRequestsExpected": 7,
+    "initialNetworkBlockingPercentage": 0,
+    "lateFetchBlocked": true,
+    "lateAllowedFetchPreserved": true
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+artifacts/
+.env*
+*.pem
+*.key
+*rsa*
+evidence/private/
+wasm-engine/target/
+.local/

@@ -1,0 +1,12 @@
+{
+  "capturedAt": "2026-10-21T09:18:13.499Z",
+  "version": "0.4.0",
+  "test": "Cerrar y volver a lanzar la app real de TV.",
+  "beforeInspector": "http://localhost:60803",
+  "afterInspector": "http://localhost:60830",
+  "newTarget": "27DEE7B1A22A2CB0B944AFF58F46F4D8",
+  "url": "http://192.168.1.148:43187/luma-home/",
+  "title": "Luma Browser Lab",
+  "binding": "function",
+  "connected": true
+}

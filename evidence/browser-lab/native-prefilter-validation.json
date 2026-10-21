@@ -1,0 +1,154 @@
+{
+  "capturedAt": "2026-10-21T08:27:47.153Z",
+  "mode": "HTML propio prefiltrado antes de mostrarlo; WASM en TV, sin interceptor CDP",
+  "decisions": [
+    {
+      "url": "http://192.168.1.148:43187/content-fixture/good.js?run=native-prefilter",
+      "kind": "script",
+      "blocked": false
+    },
+    {
+      "url": "http://192.168.1.148:43187/ad-fixture/banner.js?run=native-prefilter",
+      "kind": "script",
+      "blocked": true
+    },
+    {
+      "url": "http://192.168.1.148:43187/ad-fixture/allowed.js?run=native-prefilter",
+      "kind": "script",
+      "blocked": false
+    },
+    {
+      "url": "http://192.168.1.148:43187/content-fixture/style.css?run=native-prefilter",
+      "kind": "stylesheet",
+      "blocked": false
+    },
+    {
+      "url": "http://192.168.1.148:43187/ad-fixture/style.css?run=native-prefilter",
+      "kind": "stylesheet",
+      "blocked": true
+    },
+    {
+      "url": "http://192.168.1.148:43187/content-fixture/pixel.png?run=native-prefilter",
+      "kind": "image",
+      "blocked": false
+    },
+    {
+      "url": "http://192.168.1.148:43187/ad-fixture/pixel.png?run=native-prefilter",
+      "kind": "image",
+      "blocked": true
+    },
+    {
+      "url": "http://192.168.1.148:43187/ad-fixture/frame?run=native-prefilter",
+      "kind": "subdocument",
+      "blocked": true
+    },
+    {
+      "url": "http://192.168.1.148:43187/content-fixture/frame?run=native-prefilter",
+      "kind": "subdocument",
+      "blocked": false
+    },
+    {
+      "url": "http://192.168.1.148:43187/ad-fixture/fetch?run=native-prefilter",
+      "kind": "xmlhttprequest",
+      "blocked": true
+    },
+    {
+      "url": "http://192.168.1.148:43187/content-fixture/fetch?run=native-prefilter",
+      "kind": "xmlhttprequest",
+      "blocked": false
+    },
+    {
+      "url": "http://192.168.1.148:43187/ad-fixture/xhr?run=native-prefilter",
+      "kind": "xmlhttprequest",
+      "blocked": true
+    },
+    {
+      "url": "http://192.168.1.148:43188/ad-fixture/cross?run=native-prefilter",
+      "kind": "xmlhttprequest",
+      "blocked": true
+    },
+    {
+      "url": "http://192.168.1.148:43188/content-fixture/cross?run=native-prefilter",
+      "kind": "xmlhttprequest",
+      "blocked": false
+    },
+    {
+      "url": "http://192.168.1.148:43187/content-fixture/cookie?run=native-prefilter",
+      "kind": "xmlhttprequest",
+      "blocked": false
+    }
+  ],
+  "adScripts": 1,
+  "goodScript": true,
+  "visibleAds": 0,
+  "editorialVisible": true,
+  "limitations": [
+    "Solo HTML controlado del laboratorio.",
+    "srcdoc cambia el contexto de URL y origen; no demuestra compatibilidad con sitios públicos.",
+    "No cubre WebSocket, workers, solicitudes CSS anidadas ni APIs de red distintas de las probadas.",
+    "No usar con páginas ajenas hasta diseñar aislamiento y navegación seguros."
+  ],
+  "serverRequests": [
+    {
+      "time": "2026-10-21T08:27:46.378Z",
+      "port": 43187,
+      "path": "/fixture",
+      "run": "native-prefilter"
+    },
+    {
+      "time": "2026-10-21T08:27:46.458Z",
+      "port": 43187,
+      "path": "/content-fixture/style.css",
+      "run": "native-prefilter"
+    },
+    {
+      "time": "2026-10-21T08:27:46.460Z",
+      "port": 43187,
+      "path": "/content-fixture/good.js",
+      "run": "native-prefilter"
+    },
+    {
+      "time": "2026-10-21T08:27:46.474Z",
+      "port": 43187,
+      "path": "/ad-fixture/allowed.js",
+      "run": "native-prefilter"
+    },
+    {
+      "time": "2026-10-21T08:27:46.475Z",
+      "port": 43187,
+      "path": "/content-fixture/pixel.png",
+      "run": "native-prefilter"
+    },
+    {
+      "time": "2026-10-21T08:27:46.526Z",
+      "port": 43187,
+      "path": "/content-fixture/fetch",
+      "run": "native-prefilter"
+    },
+    {
+      "time": "2026-10-21T08:27:46.539Z",
+      "port": 43187,
+      "path": "/content-fixture/frame",
+      "run": "native-prefilter"
+    },
+    {
+      "time": "2026-10-21T08:27:46.551Z",
+      "port": 43187,
+      "path": "/content-fixture/cookie",
+      "run": "native-prefilter"
+    },
+    {
+      "time": "2026-10-21T08:27:46.552Z",
+      "port": 43188,
+      "path": "/content-fixture/cross",
+      "run": "native-prefilter"
+    }
+  ],
+  "metrics": {
+    "adRequestsReachingServer": 0,
+    "expectedAdRequests": 7,
+    "blockedPercentage": 100,
+    "legitimateRequestsPreserved": 8,
+    "expectedLegitimateRequests": 8
+  }
+}

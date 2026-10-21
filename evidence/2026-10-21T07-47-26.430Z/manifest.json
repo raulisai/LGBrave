@@ -1,0 +1,126 @@
+{
+  "capturedAt": "2026-10-21T07:47:29.290Z",
+  "localTime": "21/10/2026, 1:47:29 a.m.",
+  "device": "lg-lab",
+  "scope": "Lectura mediante Developer Mode; no es un respaldo de firmware.",
+  "results": [
+    {
+      "name": "identity",
+      "command": [
+        "ares-device",
+        "--system-info",
+        "--device",
+        "lg-lab"
+      ],
+      "status": 0
+    },
+    {
+      "name": "permissions",
+      "command": [
+        "ares-novacom",
+        "--device",
+        "lg-lab",
+        "--run",
+        "id"
+      ],
+      "status": 0
+    },
+    {
+      "name": "kernel",
+      "command": [
+        "ares-novacom",
+        "--device",
+        "lg-lab",
+        "--run",
+        "uname -a"
+      ],
+      "status": 0
+    },
+    {
+      "name": "cpu",
+      "command": [
+        "ares-novacom",
+        "--device",
+        "lg-lab",
+        "--run",
+        "cat /proc/cpuinfo"
+      ],
+      "status": 0
+    },
+    {
+      "name": "memory",
+      "command": [
+        "ares-novacom",
+        "--device",
+        "lg-lab",
+        "--run",
+        "cat /proc/meminfo"
+      ],
+      "status": 0
+    },
+    {
+      "name": "storage",
+      "command": [
+        "ares-novacom",
+        "--device",
+        "lg-lab",
+        "--run",
+        "df -h"
+      ],
+      "status": 0
+    },
+    {
+      "name": "partitions",
+      "command": [
+        "ares-novacom",
+        "--device",
+        "lg-lab",
+        "--run",
+        "cat /proc/partitions"
+      ],
+      "status": 0
+    },
+    {
+      "name": "os-release",
+      "command": [
+        "ares-novacom",
+        "--device",
+        "lg-lab",
+        "--run",
+        "cat /etc/os-release"
+      ],
+      "status": 255
+    },
+    {
+      "name": "device-tree",
+      "command": [
+        "ares-novacom",
+        "--device",
+        "lg-lab",
+        "--run",
+        "cat /sys/firmware/devicetree/base/model"
+      ],
+      "status": 255
+    },
+    {
+      "name": "development-apps",
+      "command": [
+        "ares-install",
+        "--device",
+        "lg-lab",
+        "--list"
+      ],
+      "status": 0
+    },
+    {
+      "name": "running-apps",
+      "command": [
+        "ares-launch",
+        "--device",
+        "lg-lab",
+        "--running"
+      ],
+      "status": 0
+    }
+  ]
+}

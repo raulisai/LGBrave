@@ -1,0 +1,4 @@
+[Info] Set target device : lg-lab
+
+ares-novacom ERR! [ssh exec failure]: Command 'cat /sys/firmware/devicetree/base/model' exited with code=1
+ares-novacom ERR! [ssh exec failure]: (Original Message: cat: can't open '/sys/firmware/devicetree/base/model': No such file or directory)

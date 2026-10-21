@@ -1,0 +1,8 @@
+{
+  "capturedAt": "2026-10-21T08:41:27.626Z",
+  "test": "Terminar únicamente el proceso inspector del laboratorio para simular un corte.",
+  "result": "El iniciador detectó cierre, reabrió inspector y conectó otra vez el motor.",
+  "before": "http://localhost:58796",
+  "after": "http://localhost:58814",
+  "uiVerified": true
+}

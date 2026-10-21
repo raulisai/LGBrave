@@ -1,0 +1,2 @@
+[Info] Set target device : lg-lab
+com.lgapp.lab

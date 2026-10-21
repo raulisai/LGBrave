@@ -1,0 +1,137 @@
+{
+  "sha": "6028a6d5735f1e81346eeef73c194c7240035248",
+  "node_id": "C_kwDOCoLwMtoAKDYwMjhhNmQ1NzM1ZjFlODEzNDZlZWVmNzNjMTk0YzcyNDAwMzUyNDg",
+  "commit": {
+    "author": {
+      "name": "Mikhail Atuchin",
+      "email": "matuchin@brave.com",
+      "date": "2026-09-29T17:20:26Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-09-29T17:20:26Z"
+    },
+    "message": "Skip flatbuffer verification in some cases (#730)\n\nThe PR provides an ability to skip flatbuffer verification for the browser startup when we load/create a DAT file with the same version the engine version + DAT seahash matches.",
+    "tree": {
+      "sha": "040c365e0d76f9582141850a4c5320eaa1dbeca7",
+      "url": "https://api.github.com/repos/brave/adblock-rust/git/trees/040c365e0d76f9582141850a4c5320eaa1dbeca7"
+    },
+    "url": "https://api.github.com/repos/brave/adblock-rust/git/commits/6028a6d5735f1e81346eeef73c194c7240035248",
+    "comment_count": 1,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqu/NaCRC1aQ7uu5UhlAAAf1wQADLJT3fg5XVPRY20dfl0QQJz\nwzQIIY0TNESzMwLcmB2HAdV7VAxNjeE65zSVD2nJBb7fqLlegKomnF1psJmV9Yrp\nj60F/I1+6rXEUpsTNSgo/UewLPFYbyHyqJwCuaJEsF5WRIertctcdz3ts0S032OK\nSPR6uE1H+mOWlVsjRn0rAQwiNhGBP+oGldePGlwYvr2jEOzCEpF3poQ46nxsb0ua\nCDGk8Lshqc/fLFw6nYQY/AM9iuSLRHrnpWmuh/Bsq+mHheBEuM6/3QZ4c7ohTTpw\nd0uyPeVuhOpNJ6D5btzJE628ikl14NTazr9kjCadBCS+1q/39/Msip/P+S0nMAAb\nRely6QNKDFr1xpYrP30W4ZTkxzw3b4ke1cWP9EsuSO9le/6gO6MTkqgAzCPzkMrc\nh7YBFSMmkt7tU5FMShTeCDlOA+Ev7bEIEZdIzwrbRX5h7bAqUFxrRUb3r7JC2dF3\nV0BV7aTTbXrGMLzVQawfkdKdmkLDKn24DQvSi28JJjTtPXkWGkGUpfIWw8pgg+q/\nC1B+VxYe0vvzynPALBmdz7SBsIQ0zt3wUQlZ3SbkamuzIosrQOVWDv0EDKxZPklL\n+VHADz+GxPHpN6Ym9OYYDC47ijnHahkO9lfZB/pncQ6bmZxaRdKmnl89+OAfjvBs\nI+YN01Un8J9rhHvuv/Gc\n=d3bv\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 040c365e0d76f9582141850a4c5320eaa1dbeca7\nparent 1c0740d27d531a2389c808212a8702592bb74138\nauthor Mikhail Atuchin <matuchin@brave.com> 1790702426 +0400\ncommitter GitHub <noreply@github.com> 1790702426 +0000\n\nSkip flatbuffer verification in some cases (#730)\n\nThe PR provides an ability to skip flatbuffer verification for the browser startup when we load/create a DAT file with the same version the engine version + DAT seahash matches.",
+      "verified_at": "2026-09-29T17:20:28Z"
+    }
+  },
+  "url": "https://api.github.com/repos/brave/adblock-rust/commits/6028a6d5735f1e81346eeef73c194c7240035248",
+  "html_url": "https://github.com/brave/adblock-rust/commit/6028a6d5735f1e81346eeef73c194c7240035248",
+  "comments_url": "https://api.github.com/repos/brave/adblock-rust/commits/6028a6d5735f1e81346eeef73c194c7240035248/comments",
+  "author": {
+    "login": "atuchin-m",
+    "id": 45488748,
+    "node_id": "MDQ6VXNlcjQ1NDg4NzQ4",
+    "avatar_url": "https://avatars.githubusercontent.com/u/45488748?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/atuchin-m",
+    "html_url": "https://github.com/atuchin-m",
+    "followers_url": "https://api.github.com/users/atuchin-m/followers",
+    "following_url": "https://api.github.com/users/atuchin-m/following{/other_user}",
+    "gists_url": "https://api.github.com/users/atuchin-m/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/atuchin-m/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/atuchin-m/subscriptions",
+    "organizations_url": "https://api.github.com/users/atuchin-m/orgs",
+    "repos_url": "https://api.github.com/users/atuchin-m/repos",
+    "events_url": "https://api.github.com/users/atuchin-m/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/atuchin-m/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "1c0740d27d531a2389c808212a8702592bb74138",
+      "url": "https://api.github.com/repos/brave/adblock-rust/commits/1c0740d27d531a2389c808212a8702592bb74138",
+      "html_url": "https://github.com/brave/adblock-rust/commit/1c0740d27d531a2389c808212a8702592bb74138"
+    }
+  ],
+  "stats": {
+    "total": 193,
+    "additions": 164,
+    "deletions": 29
+  },
+  "files": [
+    {
+      "sha": "6047a05e72810176d1ad4308471fd05ca2a9f808",
+      "filename": "src/data_format/mod.rs",
+      "status": "modified",
+      "additions": 64,
+      "deletions": 11,
+      "changes": 75,
+      "blob_url": "https://github.com/brave/adblock-rust/blob/6028a6d5735f1e81346eeef73c194c7240035248/src%2Fdata_format%2Fmod.rs",
+      "raw_url": "https://github.com/brave/adblock-rust/raw/6028a6d5735f1e81346eeef73c194c7240035248/src%2Fdata_format%2Fmod.rs",
+      "contents_url": "https://api.github.com/repos/brave/adblock-rust/contents/src%2Fdata_format%2Fmod.rs?ref=6028a6d5735f1e81346eeef73c194c7240035248",
+      "patch": "@@ -7,9 +7,10 @@\n //!\n //! The current .dat file format:\n //! 1. magic (4 bytes)\n-//! 2. version (1 byte)\n+//! 2. DAT format version (1 byte)\n //! 3. seahash of the data (8 bytes)\n-//! 4. data (the rest of the file)\n+//! 4. crate version (16 bytes, NUL-padded `CARGO_PKG_VERSION`)\n+//! 5. data (the rest of the file)\n \n use thiserror::Error;\n \n@@ -19,10 +20,28 @@ const ADBLOCK_RUST_DAT_MAGIC: [u8; 4] = [0xd1, 0xd9, 0x3a, 0xaf];\n \n /// The version of the data format.\n /// If the data format version is incremented, the data is considered as incompatible.\n-const ADBLOCK_RUST_DAT_VERSION: u8 = 7;\n-\n-/// The total length of the header prefix (magic + version + seahash)\n-const HEADER_PREFIX_LENGTH: usize = 4 + 1 + 8;\n+const ADBLOCK_RUST_DAT_VERSION: u8 = 8;\n+\n+/// Offset of the 8-byte seahash checksum within the serialized header.\n+const HASH_OFFSET: usize = ADBLOCK_RUST_DAT_MAGIC.len() + 1;\n+/// Offset of the 16-byte crate version field within the serialized header.\n+const PKG_VERSION_OFFSET: usize = HASH_OFFSET + 8;\n+\n+/// The 16-byte crate version field within the serialized header.\n+const ADBLOCK_RUST_PKG_VERSION: [u8; 16] = {\n+    const VERSION_BYTES: &[u8] = env!(\"CARGO_PKG_VERSION\").as_bytes();\n+    const _: () = assert!(\n+        4 <= VERSION_BYTES.len() && VERSION_BYTES.len() <= ADBLOCK_RUST_PKG_VERSION.len(),\n+        \"CARGO_PKG_VERSION must fit in ADBLOCK_RUST_PKG_VERSION header field\"\n+    );\n+    let mut encoded = [0u8; 16];\n+    let (head, _) = encoded.split_at_mut(VERSION_BYTES.len());\n+    head.copy_from_slice(VERSION_BYTES);\n+    encoded\n+};\n+\n+/// The total length of the header prefix (magic + version + seahash + crate version)\n+pub(crate) const HEADER_PREFIX_LENGTH: usize = PKG_VERSION_OFFSET + ADBLOCK_RUST_PKG_VERSION.len();\n \n /// Failure cases for deserialization of the [crate::Engine].\n #[derive(Error, Debug, PartialEq)]\n@@ -49,13 +68,27 @@ pub(crate) fn serialize_dat_file(data: &[u8]) -> Vec<u8> {\n     serialized.extend_from_slice(&ADBLOCK_RUST_DAT_MAGIC);\n     serialized.push(ADBLOCK_RUST_DAT_VERSION);\n     serialized.extend_from_slice(&hash);\n+    serialized.extend_from_slice(&ADBLOCK_RUST_PKG_VERSION);\n     assert_eq!(serialized.len(), HEADER_PREFIX_LENGTH);\n \n     serialized.extend_from_slice(data);\n     serialized\n }\n \n-pub(crate) fn deserialize_dat_file(serialized: &[u8]) -> Result<&[u8], DeserializationError> {\n+/// Parsed DAT payload.\n+///\n+/// `crate_version_matches` is true when the DAT file is produced by this same-version build.\n+/// That is a reload hint, not proof the file is authentic.\n+/// See [`crate::Engine::deserialize`].\n+#[derive(Debug)]\n+pub(crate) struct DatFilePayload<'a> {\n+    pub data: &'a [u8],\n+    pub crate_version_matches: bool,\n+}\n+\n+pub(crate) fn deserialize_dat_file(\n+    serialized: &[u8],\n+) -> Result<DatFilePayload<'_>, DeserializationError> {\n     if serialized.len() < HEADER_PREFIX_LENGTH || !serialized.starts_with(&ADBLOCK_RUST_DAT_MAGIC) {\n         return Err(DeserializationError::BadHeader);\n     }\n@@ -67,8 +100,8 @@ pub(crate) fn deserialize_dat_file(serialized: &[u8]) -> Result<&[u8], Deseriali\n     let data = &serialized[HEADER_PREFIX_LENGTH..];\n \n     // Check the hash to ensure the data isn't corrupted.\n-    let expected_hash = &serialized[(ADBLOCK_RUST_DAT_MAGIC.len() + 1)..HEADER_PREFIX_LENGTH];\n-    debug_assert_eq!(HEADER_PREFIX_LENGTH - (ADBLOCK_RUST_DAT_MAGIC.len() + 1), 8);\n+    let expected_hash = &serialized[HASH_OFFSET..PKG_VERSION_OFFSET];\n+    debug_assert_eq!(PKG_VERSION_OFFSET - HASH_OFFSET, 8);\n     let actual_hash = seahash::hash(data).to_le_bytes();\n     if expected_hash != actual_hash {\n         return Err(DeserializationError::BadChecksum {\n@@ -77,7 +110,12 @@ pub(crate) fn deserialize_dat_file(serialized: &[u8]) -> Result<&[u8], Deseriali\n             actual: actual_hash,\n         });\n     }\n-    Ok(data)\n+    let crate_version_matches =\n+        serialized[PKG_VERSION_OFFSET..HEADER_PREFIX_LENGTH] == ADBLOCK_RUST_PKG_VERSION;\n+    Ok(DatFilePayload {\n+        data,\n+        crate_version_matches,\n+    })\n }\n \n #[cfg(test)]\n@@ -102,7 +140,22 @@ mod tests {\n         let data = b\"test\";\n         let serialized = serialize_dat_file(data);\n         let deserialized = deserialize_dat_file(&serialized).unwrap();\n-        assert_eq!(data, deserialized);\n+        assert_eq!(data.as_slice(), deserialized.data);\n+        assert!(deserialized.crate_version_matches);\n+        assert_eq!(\n+            &serialized[HEADER_PREFIX_LENGTH - 16..HEADER_PREFIX_LENGTH],\n+            ADBLOCK_RUST_PKG_VERSION\n+        );\n+    }\n+\n+    #[test]\n+    fn crate_version_mismatch_still_returns_data() {\n+        let data = b\"test\";\n+        let mut serialized = serialize_dat_file(data);\n+        serialized[HEADER_PREFIX_LENGTH - 1] ^= 1;\n+        let deserialized = deserialize_dat_file(&serialized).unwrap();\n+        assert!(!deserialized.crate_version_matches);\n+        assert_eq!(data.as_slice(), deserialized.data);\n     }\n \n     #[test]"
+    },
+    {
+      "sha": "e0852a20dec490131533d8860d1a105a0c0b3c02",
+      "filename": "src/engine.rs",
+      "status": "modified",
+      "additions": 21,
+      "deletions": 5,
+      "changes": 26,
+      "blob_url": "https://github.com/brave/adblock-rust/blob/6028a6d5735f1e81346eeef73c194c7240035248/src%2Fengine.rs",
+      "raw_url": "https://github.com/brave/adblock-rust/raw/6028a6d5735f1e81346eeef73c194c7240035248/src%2Fengine.rs",
+      "contents_url": "https://api.github.com/repos/brave/adblock-rust/contents/src%2Fengine.rs?ref=6028a6d5735f1e81346eeef73c194c7240035248",
+      "patch": "@@ -3,7 +3,7 @@\n use crate::blocker::{Blocker, BlockerResult};\n use crate::cosmetic_filter_cache::{CosmeticFilterCache, UrlSpecificResources};\n use crate::cosmetic_filter_cache_builder::CosmeticFilterCacheBuilder;\n-use crate::data_format::{deserialize_dat_file, serialize_dat_file};\n+use crate::data_format::{DatFilePayload, deserialize_dat_file, serialize_dat_file};\n use crate::filters::fb_builder::EngineFlatBuilder;\n use crate::filters::fb_network_builder::{NetworkFilterDebugData, NetworkRulesBuilder};\n use crate::filters::filter_data_context::{FilterDataContext, FilterDataContextRef};\n@@ -438,17 +438,20 @@ impl Engine {\n         serialize_dat_file(data)\n     }\n \n-    /// Deserialize the `Engine` from the binary format generated by `Engine::serialize`.\n+    /// Deserialize the `Engine` from the binary format generated by [`Engine::serialize`].\n+    ///\n+    /// The checksum rejects truncated or corrupt files. Files serialized and deserialized by the\n+    /// same crate version skip FlatBuffer verification so reload stays fast; other versions are\n+    /// still verified. A local rewrite of the stored file is outside this crate's threat model.\n     ///\n     /// Note that the binary format has a built-in version number that may be incremented. There is\n     /// no guarantee that later versions of the format will be deserializable across minor versions\n     /// of adblock-rust; the format is provided only as a caching optimization.\n     pub fn deserialize(&mut self, serialized: &[u8]) -> Result<(), DeserializationError> {\n         let current_tags = self.blocker.tags_enabled();\n \n-        let data = deserialize_dat_file(serialized)?;\n-        let memory = VerifiedFlatbufferMemory::from_raw(data)\n-            .map_err(DeserializationError::FlatBufferParsingError)?;\n+        let payload = deserialize_dat_file(serialized)?;\n+        let memory = load_flatbuffer_memory(payload)?;\n \n         let context = FilterDataContext::new(memory);\n         self.filter_data_context = context;\n@@ -463,6 +466,19 @@ impl Engine {\n     }\n }\n \n+fn load_flatbuffer_memory(\n+    payload: DatFilePayload<'_>,\n+) -> Result<VerifiedFlatbufferMemory, DeserializationError> {\n+    if payload.crate_version_matches {\n+        // Same crate version and a matching SeaHash. Skip `fb::root_as_engine`.\n+        // The checksum catches corruption. It does not stop someone who can rewrite the file.\n+        Ok(VerifiedFlatbufferMemory::from_raw_unchecked(payload.data))\n+    } else {\n+        VerifiedFlatbufferMemory::from_raw(payload.data)\n+            .map_err(DeserializationError::FlatBufferParsingError)\n+    }\n+}\n+\n /// Static assertions for `Engine: Send + Sync` traits.\n #[cfg(not(feature = \"single-thread\"))]\n fn _assertions() {"
+    },
+    {
+      "sha": "90a36e590bf0961da56fadaf2862148d7e06342e",
+      "filename": "src/flatbuffers/unsafe_tools.rs",
+      "status": "modified",
+      "additions": 27,
+      "deletions": 5,
+      "changes": 32,
+      "blob_url": "https://github.com/brave/adblock-rust/blob/6028a6d5735f1e81346eeef73c194c7240035248/src%2Fflatbuffers%2Funsafe_tools.rs",
+      "raw_url": "https://github.com/brave/adblock-rust/raw/6028a6d5735f1e81346eeef73c194c7240035248/src%2Fflatbuffers%2Funsafe_tools.rs",
+      "contents_url": "https://api.github.com/repos/brave/adblock-rust/contents/src%2Fflatbuffers%2Funsafe_tools.rs?ref=6028a6d5735f1e81346eeef73c194c7240035248",
+      "patch": "@@ -35,7 +35,9 @@ pub fn fb_vector_to_slice<T>(vector: flatbuffers::Vector<'_, T>) -> &[T] {\n // It could be constructed from raw data (includes the flatbuffer verification)\n // or from a builder that have just been used to construct the flatbuffer\n // Invariants:\n-// 1. self.data() is properly verified flatbuffer contains the root object.\n+// 1. self.data() is a flatbuffer root safe to read without the verifier. It was checked in\n+//    `from_raw` or accepted by `Engine::deserialize` after\n+//    the same-version DAT checksum matched.\n // 2. self.data() is aligned to MIN_ALIGNMENT bytes.\n //    This is necessary for fb_vector_to_slice.\n pub(crate) struct VerifiedFlatbufferMemory {\n@@ -49,9 +51,11 @@ pub(crate) struct VerifiedFlatbufferMemory {\n \n impl VerifiedFlatbufferMemory {\n     pub(crate) fn from_raw(data: &[u8]) -> Result<Self, flatbuffers::InvalidFlatbuffer> {\n-        let memory = Self::from_slice(data);\n+        let memory = Self::from_raw_unchecked(data);\n \n         // Verify that the data is a valid flatbuffer.\n+        #[cfg(test)]\n+        root_as_engine_calls::record();\n         let _ = fb::root_as_engine(memory.data())?;\n \n         Ok(memory)\n@@ -60,11 +64,12 @@ impl VerifiedFlatbufferMemory {\n     // Creates a new VerifiedFlatbufferMemory from a builder.\n     // Skip the verification, the builder must contains a valid FilterList.\n     pub(crate) fn from_builder(builder: flatbuffers::FlatBufferBuilder<'_>) -> Self {\n-        Self::from_slice(builder.finished_data())\n+        Self::from_raw_unchecked(builder.finished_data())\n     }\n \n-    // Properly align the buffer to MIN_ALIGNMENT bytes.\n-    pub(crate) fn from_slice(data: &[u8]) -> Self {\n+    // Aligns `data` and wraps it without running the FlatBuffer verifier.\n+    // The caller must already know `data` satisfies invariant 1.\n+    pub(crate) fn from_raw_unchecked(data: &[u8]) -> Self {\n         let mut vec = Vec::with_capacity(data.len() + MIN_ALIGNMENT);\n         let shift = vec.as_ptr() as usize % MIN_ALIGNMENT;\n \n@@ -97,3 +102,20 @@ impl VerifiedFlatbufferMemory {\n         &self.raw_data[self.start..]\n     }\n }\n+\n+#[cfg(test)]\n+pub(crate) mod root_as_engine_calls {\n+    use std::cell::Cell;\n+\n+    thread_local! {\n+        static COUNT: Cell<usize> = const { Cell::new(0) };\n+    }\n+\n+    pub(super) fn record() {\n+        COUNT.set(COUNT.get() + 1);\n+    }\n+\n+    pub(crate) fn count() -> usize {\n+        COUNT.get()\n+    }\n+}"
+    },
+    {
+      "sha": "7880a5815744b8bf2c4ac06b72b3c8a5fd572ad7",
+      "filename": "tests/unit/engine.rs",
+      "status": "modified",
+      "additions": 52,
+      "deletions": 8,
+      "changes": 60,
+      "blob_url": "https://github.com/brave/adblock-rust/blob/6028a6d5735f1e81346eeef73c194c7240035248/tests%2Funit%2Fengine.rs",
+      "raw_url": "https://github.com/brave/adblock-rust/raw/6028a6d5735f1e81346eeef73c194c7240035248/tests%2Funit%2Fengine.rs",
+      "contents_url": "https://api.github.com/repos/brave/adblock-rust/contents/tests%2Funit%2Fengine.rs?ref=6028a6d5735f1e81346eeef73c194c7240035248",
+      "patch": "@@ -8,6 +8,11 @@ mod tests {\n     use base64::{engine::Engine as _, prelude::BASE64_STANDARD};\n     use seahash::hash;\n \n+    fn hash_without_header(data: &[u8]) -> u64 {\n+        let data_without_header = &data[crate::data_format::HEADER_PREFIX_LENGTH..];\n+        hash(data_without_header)\n+    }\n+\n     #[test]\n     #[allow(deprecated)]\n     fn tags_enable_adds_tags() {\n@@ -195,8 +200,12 @@ mod tests {\n     fn deserialization_generate_simple() {\n         let mut engine = Engine::new_with_list_text(\"ad-banner\");\n         let data = engine.serialize().to_vec();\n-        const EXPECTED_HASH: u64 = 10113207146074251361;\n-        assert_eq!(hash(&data), EXPECTED_HASH, \"{HASH_MISMATCH_MSG}\");\n+        const EXPECTED_HASH: u64 = 12118781176882813401;\n+        assert_eq!(\n+            hash_without_header(&data),\n+            EXPECTED_HASH,\n+            \"{HASH_MISMATCH_MSG}\"\n+        );\n         engine.deserialize(&data).unwrap();\n     }\n \n@@ -206,8 +215,12 @@ mod tests {\n         let mut engine = Engine::new_with_list_text(\"ad-banner$tag=abc\");\n         engine.use_tags(&[\"abc\"]);\n         let data = engine.serialize().to_vec();\n-        const EXPECTED_HASH: u64 = 5079383995588202479;\n-        assert_eq!(hash(&data), EXPECTED_HASH, \"{HASH_MISMATCH_MSG}\");\n+        const EXPECTED_HASH: u64 = 9882893794091536255;\n+        assert_eq!(\n+            hash_without_header(&data),\n+            EXPECTED_HASH,\n+            \"{HASH_MISMATCH_MSG}\"\n+        );\n         engine.deserialize(&data).unwrap();\n     }\n \n@@ -229,7 +242,7 @@ mod tests {\n     fn deserialization_brave_list() {\n         let rules = rules_from_lists([\"data/brave/brave-main-list.txt\"]);\n         let mut engine = Engine::new_with_list_text(rules);\n-        let data = engine.serialize().to_vec();\n+        let data = engine.serialize();\n \n         #[cfg(feature = \"debug-info\")]\n         {\n@@ -262,14 +275,45 @@ mod tests {\n             assert_eq!(debug_info.source_info[0].cosmetic_filter_count, 42775);\n         }\n         let expected_hash: u64 = if cfg!(feature = \"css-validation\") {\n-            4595639195770030762\n+            8871275760195103815\n         } else {\n-            12609292311627976202\n+            8180986015489572218\n         };\n \n-        assert_eq!(hash(&data), expected_hash, \"{HASH_MISMATCH_MSG}\");\n+        assert_eq!(\n+            hash_without_header(&data),\n+            expected_hash,\n+            \"{HASH_MISMATCH_MSG}\"\n+        );\n+\n+        use crate::flatbuffers::unsafe_tools::root_as_engine_calls;\n \n+        let initial_count = root_as_engine_calls::count();\n         engine.deserialize(&data).unwrap();\n+        assert_eq!(\n+            root_as_engine_calls::count(),\n+            initial_count,\n+            \"matching crate version should skip fb::root_as_engine\"\n+        );\n+\n+        let mut verified = data.clone();\n+        verified[crate::data_format::HEADER_PREFIX_LENGTH - 1] ^= 1;\n+        engine.deserialize(&verified).unwrap();\n+        assert_eq!(\n+            root_as_engine_calls::count(),\n+            initial_count + 1,\n+            \"mismatched crate version should call fb::root_as_engine\"\n+        );\n+    }\n+\n+    #[test]\n+    fn deserialize_rejects_invalid_flatbuffer() {\n+        let mut garbage = crate::data_format::serialize_dat_file(b\"not a flatbuffer\");\n+        garbage[crate::data_format::HEADER_PREFIX_LENGTH - 1] ^= 1;\n+        assert!(matches!(\n+            Engine::default().deserialize(&garbage),\n+            Err(DeserializationError::FlatBufferParsingError(_))\n+        ));\n     }\n \n     #[test]"
+    }
+  ]
+}

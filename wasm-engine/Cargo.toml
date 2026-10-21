@@ -1,0 +1,18 @@
+[package]
+name = "luma-adblock-wasm"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+adblock = "=0.13.3"
+serde_json = "1"
+
+[profile.release]
+opt-level = "s"
+lto = true
+panic = "abort"
+strip = true

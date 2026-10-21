@@ -1,0 +1,194 @@
+[
+  {
+    "time": "2026-10-21T09:16:11.008Z",
+    "port": 43187,
+    "path": "/fixture",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:11.099Z",
+    "port": 43187,
+    "path": "/content-fixture/style.css",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:11.100Z",
+    "port": 43187,
+    "path": "/content-fixture/good.js",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:11.122Z",
+    "port": 43187,
+    "path": "/ad-fixture/allowed.js",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:11.123Z",
+    "port": 43187,
+    "path": "/content-fixture/pixel.png",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:11.342Z",
+    "port": 43187,
+    "path": "/content-fixture/fetch",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:11.374Z",
+    "port": 43188,
+    "path": "/content-fixture/cross",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:11.402Z",
+    "port": 43187,
+    "path": "/content-fixture/frame",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:11.403Z",
+    "port": 43187,
+    "path": "/content-fixture/cookie",
+    "run": "filtered"
+  },
+  {
+    "time": "2026-10-21T09:16:47.719Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:16:48.736Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-D7kcEklh.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:17:58.435Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:17:58.963Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-D7kcEklh.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:24:11.119Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:24:12.437Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-Dr8TuWqY.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:24:54.706Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:24:55.118Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-Dr8TuWqY.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:24:56.755Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:24:57.277Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-Dr8TuWqY.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:24:57.735Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:24:57.804Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-Dr8TuWqY.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:27:15.442Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:27:18.843Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-BQepSFHv.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:27:20.077Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:27:20.407Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-BQepSFHv.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:27:21.223Z",
+    "port": 43187,
+    "path": "/simple",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:27:21.896Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:27:22.008Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-BQepSFHv.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:30:54.682Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:30:55.885Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-BQepSFHv.js",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:40:04.932Z",
+    "port": 43187,
+    "path": "/luma-home/",
+    "run": null
+  },
+  {
+    "time": "2026-10-21T09:40:09.577Z",
+    "port": 43187,
+    "path": "/luma-home/assets/index-BQepSFHv.js",
+    "run": null
+  }
+]

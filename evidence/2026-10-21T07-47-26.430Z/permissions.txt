@@ -1,0 +1,2 @@
+[Info] Set target device : lg-lab
+uid=5874(prisoner) gid=5000(jailer) groups=29(audio),44(video),505(compositor),509(se),777(crashd)

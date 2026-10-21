@@ -1,0 +1,19 @@
+{
+  "capturedAt": "2026-10-21T07:49:19.395Z",
+  "before": {
+    "title": "LG Lab",
+    "text": "LG LAB / 001\nSvelte · webOS TV\nTu pantalla.\nUn nuevo comienzo.\n\nPrueba de aplicaciones con Developer Mode\n\nExplora con tu control\n\nUsa las flechas y OK. Atrás cierra el patrón de color.\n\nProbar OK\nPatrón de color\nActualizar datos\n0\npulsaciones de OK\n\nEsperando el control remoto\n\nDatos de esta ejecución\nÁrea de la app\n1920 × 1080\nPantalla reportada\n1920 × 1080\nEscala de píxel\n2\nIdioma\nes-MX\nWebGL\nDisponible\nMotor web\nMozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.270 Safari/537.36 WebAppManager\nLG Lab 0.1.0 · Interfaz de prueba a 1920 × 1080",
+    "width": 1920,
+    "height": 1080,
+    "userAgent": "Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.270 Safari/537.36 WebAppManager"
+  },
+  "checks": {
+    "rendered": true,
+    "enter": true,
+    "arrows": true,
+    "colorPattern": true,
+    "back": true
+  },
+  "exceptionsDuringCheck": [],
+  "note": "Teclas simuladas mediante DevTools. Control físico pendiente."
+}

@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-10-21T08:29:50.557Z",
+  "npmEngine": "adblock-rs@0.13.3",
+  "rustEngine": "adblock=0.13.3",
+  "upstreamHeads": {
+    "adblock-rust": "6028a6d5735f1e81346eeef73c194c7240035248",
+    "brave-core": "3555505b7ef05e5e3931ed337ededaeafdaaad8c"
+  },
+  "files": [
+    {
+      "path": "research/brave/README.md",
+      "bytes": 3526,
+      "sha256": "2f6e62c5187d264629da4eb2b19c7f291641791d8e082a48bbcf8b1a4764768a"
+    },
+    {
+      "path": "research/brave/network-helper.cc",
+      "bytes": 19761,
+      "sha256": "b1639961e12dd30091ffef9bf4d3ffd50c720efe8b5ea396c173bc0d6ed97dad"
+    },
+    {
+      "path": "research/brave/csp-helper.cc",
+      "bytes": 4708,
+      "sha256": "4760aafe3160735a44433376a03fee08c5051fe13d52693f17a1712eb53b29aa"
+    },
+    {
+      "path": "research/brave/resources.json",
+      "bytes": 596542,
+      "sha256": "d085eb0754b7a54d9e1a18a0314b1946b066f61a15457de834d98beb53b4e40f"
+    },
+    {
+      "path": "research/lists/easylist.txt",
+      "bytes": 2212151,
+      "sha256": "e490725f70b6cbd999302dcfc068600ca7336c525630989de7a6b55521712623"
+    },
+    {
+      "path": "research/lists/easyprivacy.txt",
+      "bytes": 1510550,
+      "sha256": "5887c1603536654f0af4b97bfc8715ead2660b67f6113c0ea5224d97f76a2755"
+    },
+    {
+      "path": "public/adblock.wasm",
+      "bytes": 2244249,
+      "sha256": "1c702ee662fe65eda4563df5181bd968ee90c63f61536b17b1237654f69cf774"
+    },
+    {
+      "path": "public/native-filters.txt",
+      "bytes": 3722795,
+      "sha256": "0deeac237d15204ee948e0397c059989f8bffb5bffb513103f2ffafc35864026"
+    },
+    {
+      "path": "wasm-engine/Cargo.lock",
+      "bytes": 14648,
+      "sha256": "de79555811d4f15b9c4534c7d36c867e5d16783b9f91e3ca70cc9289f350700e"
+    },
+    {
+      "path": "artifacts/com.lgapp.lab_0.3.0_all.ipk",
+      "bytes": 1968766,
+      "sha256": "ec5e58f5fec1e15960731f6ed43f09f73864fb2af259ad23e91809eb8e6e43df"
+    }
+  ]
+}

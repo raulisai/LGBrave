@@ -1,0 +1,1186 @@
+[
+  {
+    "name": "BUILD.gn",
+    "path": "browser/net/BUILD.gn",
+    "sha": "0bfd15a44105fb12ce61dc37d1a25758f1463d91",
+    "size": 4692,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/BUILD.gn?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/BUILD.gn",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/0bfd15a44105fb12ce61dc37d1a25758f1463d91",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/BUILD.gn",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/BUILD.gn?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/0bfd15a44105fb12ce61dc37d1a25758f1463d91",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/BUILD.gn"
+    }
+  },
+  {
+    "name": "DEPS",
+    "path": "browser/net/DEPS",
+    "sha": "1874f4e10be38c8ea16b851535f744e8fa1ebee5",
+    "size": 1137,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/DEPS?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/DEPS",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/1874f4e10be38c8ea16b851535f744e8fa1ebee5",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/DEPS",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/DEPS?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/1874f4e10be38c8ea16b851535f744e8fa1ebee5",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/DEPS"
+    }
+  },
+  {
+    "name": "brave_accept_header_browsertest.cc",
+    "path": "browser/net/brave_accept_header_browsertest.cc",
+    "sha": "8a4d70f817dfae87677aba34d6abede3602919ff",
+    "size": 2878,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_accept_header_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_accept_header_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/8a4d70f817dfae87677aba34d6abede3602919ff",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_accept_header_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_accept_header_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/8a4d70f817dfae87677aba34d6abede3602919ff",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_accept_header_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_ad_block_csp_network_delegate_helper.cc",
+    "path": "browser/net/brave_ad_block_csp_network_delegate_helper.cc",
+    "sha": "2f15d3f20377be4064397f7ff52d0e969443b957",
+    "size": 4708,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_csp_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_csp_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/2f15d3f20377be4064397f7ff52d0e969443b957",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_ad_block_csp_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_csp_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/2f15d3f20377be4064397f7ff52d0e969443b957",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_csp_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_ad_block_csp_network_delegate_helper.h",
+    "path": "browser/net/brave_ad_block_csp_network_delegate_helper.h",
+    "sha": "8e9d7f0cfa143bbb1384d95dc4d0d6eae9043a8f",
+    "size": 1029,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_csp_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_csp_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/8e9d7f0cfa143bbb1384d95dc4d0d6eae9043a8f",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_ad_block_csp_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_csp_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/8e9d7f0cfa143bbb1384d95dc4d0d6eae9043a8f",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_csp_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_ad_block_tp_network_delegate_helper.cc",
+    "path": "browser/net/brave_ad_block_tp_network_delegate_helper.cc",
+    "sha": "22b123bc93c898e2fc4ed0f87b83e8587cbdd43c",
+    "size": 19761,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_tp_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_tp_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/22b123bc93c898e2fc4ed0f87b83e8587cbdd43c",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_ad_block_tp_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_tp_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/22b123bc93c898e2fc4ed0f87b83e8587cbdd43c",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_tp_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_ad_block_tp_network_delegate_helper.h",
+    "path": "browser/net/brave_ad_block_tp_network_delegate_helper.h",
+    "sha": "a0996124f07a0e223d1a8263852574a9e7dfa0ff",
+    "size": 1013,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_tp_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_tp_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/a0996124f07a0e223d1a8263852574a9e7dfa0ff",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_ad_block_tp_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_tp_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/a0996124f07a0e223d1a8263852574a9e7dfa0ff",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_tp_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_ad_block_tp_network_delegate_helper_unittest.cc",
+    "path": "browser/net/brave_ad_block_tp_network_delegate_helper_unittest.cc",
+    "sha": "166c742eefdeaca239067230fc5f5d2bcf148b6d",
+    "size": 14054,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_tp_network_delegate_helper_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_tp_network_delegate_helper_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/166c742eefdeaca239067230fc5f5d2bcf148b6d",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_ad_block_tp_network_delegate_helper_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_ad_block_tp_network_delegate_helper_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/166c742eefdeaca239067230fc5f5d2bcf148b6d",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_ad_block_tp_network_delegate_helper_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_block_safebrowsing_urls.cc",
+    "path": "browser/net/brave_block_safebrowsing_urls.cc",
+    "sha": "869508b522072885f83a7641cf42a0b9439f0bd3",
+    "size": 2241,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_block_safebrowsing_urls.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_block_safebrowsing_urls.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/869508b522072885f83a7641cf42a0b9439f0bd3",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_block_safebrowsing_urls.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_block_safebrowsing_urls.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/869508b522072885f83a7641cf42a0b9439f0bd3",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_block_safebrowsing_urls.cc"
+    }
+  },
+  {
+    "name": "brave_block_safebrowsing_urls.h",
+    "path": "browser/net/brave_block_safebrowsing_urls.h",
+    "sha": "dca6f2617c0ba48cf955a017e0cd67fbd52240b6",
+    "size": 647,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_block_safebrowsing_urls.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_block_safebrowsing_urls.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/dca6f2617c0ba48cf955a017e0cd67fbd52240b6",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_block_safebrowsing_urls.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_block_safebrowsing_urls.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/dca6f2617c0ba48cf955a017e0cd67fbd52240b6",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_block_safebrowsing_urls.h"
+    }
+  },
+  {
+    "name": "brave_block_safebrowsing_urls_unittest.cc",
+    "path": "browser/net/brave_block_safebrowsing_urls_unittest.cc",
+    "sha": "69fd2717263f452ed1c8f9d1f38f752c25348ef3",
+    "size": 2721,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_block_safebrowsing_urls_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_block_safebrowsing_urls_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/69fd2717263f452ed1c8f9d1f38f752c25348ef3",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_block_safebrowsing_urls_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_block_safebrowsing_urls_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/69fd2717263f452ed1c8f9d1f38f752c25348ef3",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_block_safebrowsing_urls_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_common_static_redirect_network_delegate_helper.cc",
+    "path": "browser/net/brave_common_static_redirect_network_delegate_helper.cc",
+    "sha": "a54b59e9d844150d965c61a4438f4ac3068e4a26",
+    "size": 3530,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_common_static_redirect_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_common_static_redirect_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/a54b59e9d844150d965c61a4438f4ac3068e4a26",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_common_static_redirect_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_common_static_redirect_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/a54b59e9d844150d965c61a4438f4ac3068e4a26",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_common_static_redirect_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_common_static_redirect_network_delegate_helper.h",
+    "path": "browser/net/brave_common_static_redirect_network_delegate_helper.h",
+    "sha": "f2da8cce4abc174422e80b622f3ba0a5203bba9e",
+    "size": 877,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_common_static_redirect_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_common_static_redirect_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/f2da8cce4abc174422e80b622f3ba0a5203bba9e",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_common_static_redirect_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_common_static_redirect_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/f2da8cce4abc174422e80b622f3ba0a5203bba9e",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_common_static_redirect_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_common_static_redirect_network_delegate_helper_unittest.cc",
+    "path": "browser/net/brave_common_static_redirect_network_delegate_helper_unittest.cc",
+    "sha": "54f48f9bd15a2c6a9e5f4b2fd65391a0c40bf63c",
+    "size": 5383,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_common_static_redirect_network_delegate_helper_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_common_static_redirect_network_delegate_helper_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/54f48f9bd15a2c6a9e5f4b2fd65391a0c40bf63c",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_common_static_redirect_network_delegate_helper_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_common_static_redirect_network_delegate_helper_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/54f48f9bd15a2c6a9e5f4b2fd65391a0c40bf63c",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_common_static_redirect_network_delegate_helper_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_network_audit_allowed_lists.h",
+    "path": "browser/net/brave_network_audit_allowed_lists.h",
+    "sha": "b827b398ef1d98620e1eef89a9d0917a157a42e2",
+    "size": 2328,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_allowed_lists.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_allowed_lists.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/b827b398ef1d98620e1eef89a9d0917a157a42e2",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_audit_allowed_lists.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_allowed_lists.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/b827b398ef1d98620e1eef89a9d0917a157a42e2",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_allowed_lists.h"
+    }
+  },
+  {
+    "name": "brave_network_audit_browsertest.cc",
+    "path": "browser/net/brave_network_audit_browsertest.cc",
+    "sha": "a987638b98c45000f891e13f65a0adced566177d",
+    "size": 7738,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/a987638b98c45000f891e13f65a0adced566177d",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_audit_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/a987638b98c45000f891e13f65a0adced566177d",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_network_audit_rewards_browsertest.cc",
+    "path": "browser/net/brave_network_audit_rewards_browsertest.cc",
+    "sha": "fabf6cacd6fe429bc8f8f2a2ae8d6807510c35d9",
+    "size": 5531,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_rewards_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_rewards_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/fabf6cacd6fe429bc8f8f2a2ae8d6807510c35d9",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_audit_rewards_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_rewards_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/fabf6cacd6fe429bc8f8f2a2ae8d6807510c35d9",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_rewards_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_network_audit_search_ad_browsertest.cc",
+    "path": "browser/net/brave_network_audit_search_ad_browsertest.cc",
+    "sha": "aae5d04a731e89cc0a3276b84c7159d743b70fa8",
+    "size": 6973,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_search_ad_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_search_ad_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/aae5d04a731e89cc0a3276b84c7159d743b70fa8",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_audit_search_ad_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_search_ad_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/aae5d04a731e89cc0a3276b84c7159d743b70fa8",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_search_ad_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_network_audit_test_helper.cc",
+    "path": "browser/net/brave_network_audit_test_helper.cc",
+    "sha": "f6145d48548f47c4bd2af7cc9156f227ec412e75",
+    "size": 5751,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_test_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_test_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/f6145d48548f47c4bd2af7cc9156f227ec412e75",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_audit_test_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_test_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/f6145d48548f47c4bd2af7cc9156f227ec412e75",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_test_helper.cc"
+    }
+  },
+  {
+    "name": "brave_network_audit_test_helper.h",
+    "path": "browser/net/brave_network_audit_test_helper.h",
+    "sha": "61726221a64327cfc01da99063c7d43e33477607",
+    "size": 880,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_test_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_test_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/61726221a64327cfc01da99063c7d43e33477607",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_audit_test_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_audit_test_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/61726221a64327cfc01da99063c7d43e33477607",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_audit_test_helper.h"
+    }
+  },
+  {
+    "name": "brave_network_delegate_base_unittest.cc",
+    "path": "browser/net/brave_network_delegate_base_unittest.cc",
+    "sha": "e543e0297b08ef547df71aab72bd1eb0cb3f2406",
+    "size": 4473,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_delegate_base_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_delegate_base_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/e543e0297b08ef547df71aab72bd1eb0cb3f2406",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_delegate_base_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_delegate_base_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/e543e0297b08ef547df71aab72bd1eb0cb3f2406",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_delegate_base_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_network_delegate_browsertest.cc",
+    "path": "browser/net/brave_network_delegate_browsertest.cc",
+    "sha": "5e146d92868f3dff44cadab9671ecb1e603d2234",
+    "size": 22899,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_delegate_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_delegate_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/5e146d92868f3dff44cadab9671ecb1e603d2234",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_delegate_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_delegate_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/5e146d92868f3dff44cadab9671ecb1e603d2234",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_delegate_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_network_delegate_hsts_fingerprinting_browsertest.cc",
+    "path": "browser/net/brave_network_delegate_hsts_fingerprinting_browsertest.cc",
+    "sha": "1e0bc6a76a65f00d88d8b64cbf1c6a54d97cc349",
+    "size": 3998,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_delegate_hsts_fingerprinting_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_delegate_hsts_fingerprinting_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/1e0bc6a76a65f00d88d8b64cbf1c6a54d97cc349",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_network_delegate_hsts_fingerprinting_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_network_delegate_hsts_fingerprinting_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/1e0bc6a76a65f00d88d8b64cbf1c6a54d97cc349",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_network_delegate_hsts_fingerprinting_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_proxying_url_loader_factory.cc",
+    "path": "browser/net/brave_proxying_url_loader_factory.cc",
+    "sha": "7511921f6e7c0da50f99cde08aff99befda7d5a5",
+    "size": 35947,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_url_loader_factory.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_url_loader_factory.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/7511921f6e7c0da50f99cde08aff99befda7d5a5",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_proxying_url_loader_factory.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_url_loader_factory.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/7511921f6e7c0da50f99cde08aff99befda7d5a5",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_url_loader_factory.cc"
+    }
+  },
+  {
+    "name": "brave_proxying_url_loader_factory.h",
+    "path": "browser/net/brave_proxying_url_loader_factory.h",
+    "sha": "401c8a044dec8552c626add8e96d3fc6e79ab53d",
+    "size": 13841,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_url_loader_factory.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_url_loader_factory.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/401c8a044dec8552c626add8e96d3fc6e79ab53d",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_proxying_url_loader_factory.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_url_loader_factory.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/401c8a044dec8552c626add8e96d3fc6e79ab53d",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_url_loader_factory.h"
+    }
+  },
+  {
+    "name": "brave_proxying_url_loader_factory_browsertest.cc",
+    "path": "browser/net/brave_proxying_url_loader_factory_browsertest.cc",
+    "sha": "3ee09369af22a23c408e01052c1bd01396a0a69b",
+    "size": 13311,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_url_loader_factory_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_url_loader_factory_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/3ee09369af22a23c408e01052c1bd01396a0a69b",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_proxying_url_loader_factory_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_url_loader_factory_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/3ee09369af22a23c408e01052c1bd01396a0a69b",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_url_loader_factory_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_proxying_url_loader_factory_unittest.cc",
+    "path": "browser/net/brave_proxying_url_loader_factory_unittest.cc",
+    "sha": "79b6bdc80f00ba59ee388f874f933f4bc2bf7c29",
+    "size": 16710,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_url_loader_factory_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_url_loader_factory_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/79b6bdc80f00ba59ee388f874f933f4bc2bf7c29",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_proxying_url_loader_factory_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_url_loader_factory_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/79b6bdc80f00ba59ee388f874f933f4bc2bf7c29",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_url_loader_factory_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_proxying_web_socket.cc",
+    "path": "browser/net/brave_proxying_web_socket.cc",
+    "sha": "6291e09780daf596808087c189472ae886bc01fb",
+    "size": 18222,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_web_socket.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_web_socket.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/6291e09780daf596808087c189472ae886bc01fb",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_proxying_web_socket.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_web_socket.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/6291e09780daf596808087c189472ae886bc01fb",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_web_socket.cc"
+    }
+  },
+  {
+    "name": "brave_proxying_web_socket.h",
+    "path": "browser/net/brave_proxying_web_socket.h",
+    "sha": "1de1a86734151e8b26e209ec0affe6a170d9565b",
+    "size": 8083,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_web_socket.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_web_socket.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/1de1a86734151e8b26e209ec0affe6a170d9565b",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_proxying_web_socket.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_web_socket.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/1de1a86734151e8b26e209ec0affe6a170d9565b",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_web_socket.h"
+    }
+  },
+  {
+    "name": "brave_proxying_web_socket_unittest.cc",
+    "path": "browser/net/brave_proxying_web_socket_unittest.cc",
+    "sha": "d0acc5e6358fa679c34118b7dd828fd167cdddc6",
+    "size": 10424,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_web_socket_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_web_socket_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/d0acc5e6358fa679c34118b7dd828fd167cdddc6",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_proxying_web_socket_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_proxying_web_socket_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/d0acc5e6358fa679c34118b7dd828fd167cdddc6",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_proxying_web_socket_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_reduce_language_network_delegate_helper.cc",
+    "path": "browser/net/brave_reduce_language_network_delegate_helper.cc",
+    "sha": "f7814c781372f226813ab9079248669ef7c871de",
+    "size": 7434,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_reduce_language_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_reduce_language_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/f7814c781372f226813ab9079248669ef7c871de",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_reduce_language_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_reduce_language_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/f7814c781372f226813ab9079248669ef7c871de",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_reduce_language_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_reduce_language_network_delegate_helper.h",
+    "path": "browser/net/brave_reduce_language_network_delegate_helper.h",
+    "sha": "b1635af765ea37e60c337dc133bc7b886be53122",
+    "size": 872,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_reduce_language_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_reduce_language_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/b1635af765ea37e60c337dc133bc7b886be53122",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_reduce_language_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_reduce_language_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/b1635af765ea37e60c337dc133bc7b886be53122",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_reduce_language_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_request_handler.h",
+    "path": "browser/net/brave_request_handler.h",
+    "sha": "87bb542571e7e38ae1a76c58cf9e65fcc07df91c",
+    "size": 1963,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_request_handler.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_request_handler.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/87bb542571e7e38ae1a76c58cf9e65fcc07df91c",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_request_handler.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_request_handler.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/87bb542571e7e38ae1a76c58cf9e65fcc07df91c",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_request_handler.h"
+    }
+  },
+  {
+    "name": "brave_request_handler_impl.cc",
+    "path": "browser/net/brave_request_handler_impl.cc",
+    "sha": "a724959a0cc9c423701845e846b40f3a846ad08c",
+    "size": 12680,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_request_handler_impl.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_request_handler_impl.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/a724959a0cc9c423701845e846b40f3a846ad08c",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_request_handler_impl.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_request_handler_impl.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/a724959a0cc9c423701845e846b40f3a846ad08c",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_request_handler_impl.cc"
+    }
+  },
+  {
+    "name": "brave_request_handler_impl.h",
+    "path": "browser/net/brave_request_handler_impl.h",
+    "sha": "4ee3c90e141121618f9085f0f34ebbf2361b5b12",
+    "size": 2725,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_request_handler_impl.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_request_handler_impl.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/4ee3c90e141121618f9085f0f34ebbf2361b5b12",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_request_handler_impl.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_request_handler_impl.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/4ee3c90e141121618f9085f0f34ebbf2361b5b12",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_request_handler_impl.h"
+    }
+  },
+  {
+    "name": "brave_service_key_network_delegate_helper.cc",
+    "path": "browser/net/brave_service_key_network_delegate_helper.cc",
+    "sha": "d42e694299ad20555b49e6ad622af8223ede624d",
+    "size": 3225,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_service_key_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_service_key_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/d42e694299ad20555b49e6ad622af8223ede624d",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_service_key_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_service_key_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/d42e694299ad20555b49e6ad622af8223ede624d",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_service_key_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_service_key_network_delegate_helper.h",
+    "path": "browser/net/brave_service_key_network_delegate_helper.h",
+    "sha": "f14292541350c0f6f0940664ce7aa3cb895fc3ad",
+    "size": 768,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_service_key_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_service_key_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/f14292541350c0f6f0940664ce7aa3cb895fc3ad",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_service_key_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_service_key_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/f14292541350c0f6f0940664ce7aa3cb895fc3ad",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_service_key_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_service_key_network_delegate_helper_browsertest.cc",
+    "path": "browser/net/brave_service_key_network_delegate_helper_browsertest.cc",
+    "sha": "ed5247b9acf804d9931d19c6060884b8ee94e053",
+    "size": 5820,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_service_key_network_delegate_helper_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_service_key_network_delegate_helper_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/ed5247b9acf804d9931d19c6060884b8ee94e053",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_service_key_network_delegate_helper_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_service_key_network_delegate_helper_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/ed5247b9acf804d9931d19c6060884b8ee94e053",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_service_key_network_delegate_helper_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_site_hacks_network_delegate_helper.cc",
+    "path": "browser/net/brave_site_hacks_network_delegate_helper.cc",
+    "sha": "7173ed55197b5bbbc51e86095620d700be819a7b",
+    "size": 4876,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_site_hacks_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_site_hacks_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/7173ed55197b5bbbc51e86095620d700be819a7b",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_site_hacks_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_site_hacks_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/7173ed55197b5bbbc51e86095620d700be819a7b",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_site_hacks_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_site_hacks_network_delegate_helper.h",
+    "path": "browser/net/brave_site_hacks_network_delegate_helper.h",
+    "sha": "d769d67982eefffd2ed75ec43c194f7e2cf99d75",
+    "size": 979,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_site_hacks_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_site_hacks_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/d769d67982eefffd2ed75ec43c194f7e2cf99d75",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_site_hacks_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_site_hacks_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/d769d67982eefffd2ed75ec43c194f7e2cf99d75",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_site_hacks_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_site_hacks_network_delegate_helper_browsertest.cc",
+    "path": "browser/net/brave_site_hacks_network_delegate_helper_browsertest.cc",
+    "sha": "017ae490deb9c843bd76e1ebb1bf5f7f09fd0ef5",
+    "size": 22422,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_site_hacks_network_delegate_helper_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_site_hacks_network_delegate_helper_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/017ae490deb9c843bd76e1ebb1bf5f7f09fd0ef5",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_site_hacks_network_delegate_helper_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_site_hacks_network_delegate_helper_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/017ae490deb9c843bd76e1ebb1bf5f7f09fd0ef5",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_site_hacks_network_delegate_helper_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_site_hacks_network_delegate_helper_unittest.cc",
+    "path": "browser/net/brave_site_hacks_network_delegate_helper_unittest.cc",
+    "sha": "2f0decec67a133a57d5aa3061025ccb899d2b8d7",
+    "size": 19910,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_site_hacks_network_delegate_helper_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_site_hacks_network_delegate_helper_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/2f0decec67a133a57d5aa3061025ccb899d2b8d7",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_site_hacks_network_delegate_helper_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_site_hacks_network_delegate_helper_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/2f0decec67a133a57d5aa3061025ccb899d2b8d7",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_site_hacks_network_delegate_helper_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_speech_to_text_network_delegate_helper.cc",
+    "path": "browser/net/brave_speech_to_text_network_delegate_helper.cc",
+    "sha": "c0b76f330a4d0654bea1e7fa516a8bbbd0ea4ebf",
+    "size": 2973,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_speech_to_text_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_speech_to_text_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/c0b76f330a4d0654bea1e7fa516a8bbbd0ea4ebf",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_speech_to_text_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_speech_to_text_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/c0b76f330a4d0654bea1e7fa516a8bbbd0ea4ebf",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_speech_to_text_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_speech_to_text_network_delegate_helper.h",
+    "path": "browser/net/brave_speech_to_text_network_delegate_helper.h",
+    "sha": "d7cb360e3f70a2ba2124cbb68a2cf2772879273b",
+    "size": 641,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_speech_to_text_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_speech_to_text_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/d7cb360e3f70a2ba2124cbb68a2cf2772879273b",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_speech_to_text_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_speech_to_text_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/d7cb360e3f70a2ba2124cbb68a2cf2772879273b",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_speech_to_text_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_static_redirect_network_delegate_helper.cc",
+    "path": "browser/net/brave_static_redirect_network_delegate_helper.cc",
+    "sha": "5be92e1e59aca626790f65017ed9a1acb71e8544",
+    "size": 770,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_static_redirect_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_static_redirect_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/5be92e1e59aca626790f65017ed9a1acb71e8544",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_static_redirect_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_static_redirect_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/5be92e1e59aca626790f65017ed9a1acb71e8544",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_static_redirect_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_static_redirect_network_delegate_helper.h",
+    "path": "browser/net/brave_static_redirect_network_delegate_helper.h",
+    "sha": "62782c858671e700f3bef8c49a18bb3e44e41a90",
+    "size": 709,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_static_redirect_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_static_redirect_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/62782c858671e700f3bef8c49a18bb3e44e41a90",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_static_redirect_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_static_redirect_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/62782c858671e700f3bef8c49a18bb3e44e41a90",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_static_redirect_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_static_redirect_network_delegate_helper_unittest.cc",
+    "path": "browser/net/brave_static_redirect_network_delegate_helper_unittest.cc",
+    "sha": "0fac6c36a060fee253ef133aab30159784016312",
+    "size": 10131,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_static_redirect_network_delegate_helper_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_static_redirect_network_delegate_helper_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/0fac6c36a060fee253ef133aab30159784016312",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_static_redirect_network_delegate_helper_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_static_redirect_network_delegate_helper_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/0fac6c36a060fee253ef133aab30159784016312",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_static_redirect_network_delegate_helper_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_stp_util.cc",
+    "path": "browser/net/brave_stp_util.cc",
+    "sha": "51b80509f2e948a801db76e514cde61ecffdb0a3",
+    "size": 1367,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_stp_util.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_stp_util.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/51b80509f2e948a801db76e514cde61ecffdb0a3",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_stp_util.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_stp_util.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/51b80509f2e948a801db76e514cde61ecffdb0a3",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_stp_util.cc"
+    }
+  },
+  {
+    "name": "brave_stp_util.h",
+    "path": "browser/net/brave_stp_util.h",
+    "sha": "60cfd6dab7e243a0e4a096608985aee74b7c3b59",
+    "size": 1126,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_stp_util.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_stp_util.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/60cfd6dab7e243a0e4a096608985aee74b7c3b59",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_stp_util.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_stp_util.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/60cfd6dab7e243a0e4a096608985aee74b7c3b59",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_stp_util.h"
+    }
+  },
+  {
+    "name": "brave_system_request_handler.cc",
+    "path": "browser/net/brave_system_request_handler.cc",
+    "sha": "5dba3b466cec9edc17c682f4488716a7b0daa895",
+    "size": 2171,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_system_request_handler.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_system_request_handler.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/5dba3b466cec9edc17c682f4488716a7b0daa895",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_system_request_handler.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_system_request_handler.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/5dba3b466cec9edc17c682f4488716a7b0daa895",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_system_request_handler.cc"
+    }
+  },
+  {
+    "name": "brave_system_request_handler.h",
+    "path": "browser/net/brave_system_request_handler.h",
+    "sha": "2f7edec0b0e34a3e64875148cc1eb47d62581123",
+    "size": 768,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_system_request_handler.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_system_request_handler.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/2f7edec0b0e34a3e64875148cc1eb47d62581123",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_system_request_handler.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_system_request_handler.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/2f7edec0b0e34a3e64875148cc1eb47d62581123",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_system_request_handler.h"
+    }
+  },
+  {
+    "name": "brave_system_request_handler_browsertest.cc",
+    "path": "browser/net/brave_system_request_handler_browsertest.cc",
+    "sha": "d096d36dd26244af319013047f940db8dc1437c7",
+    "size": 6006,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_system_request_handler_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_system_request_handler_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/d096d36dd26244af319013047f940db8dc1437c7",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_system_request_handler_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_system_request_handler_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/d096d36dd26244af319013047f940db8dc1437c7",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_system_request_handler_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_system_request_handler_unittest.cc",
+    "path": "browser/net/brave_system_request_handler_unittest.cc",
+    "sha": "23acf9c3661db13e89c244bc7b8390150b5ac0e7",
+    "size": 1572,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_system_request_handler_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_system_request_handler_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/23acf9c3661db13e89c244bc7b8390150b5ac0e7",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_system_request_handler_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_system_request_handler_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/23acf9c3661db13e89c244bc7b8390150b5ac0e7",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_system_request_handler_unittest.cc"
+    }
+  },
+  {
+    "name": "brave_user_agent_network_delegate_helper.cc",
+    "path": "browser/net/brave_user_agent_network_delegate_helper.cc",
+    "sha": "171ecd8115636c035039d80c8c23915f20b8090b",
+    "size": 2440,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_user_agent_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_user_agent_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/171ecd8115636c035039d80c8c23915f20b8090b",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_user_agent_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_user_agent_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/171ecd8115636c035039d80c8c23915f20b8090b",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_user_agent_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "brave_user_agent_network_delegate_helper.h",
+    "path": "browser/net/brave_user_agent_network_delegate_helper.h",
+    "sha": "a32fe99a6a38516a7b0e7d703fca8e2a0e8a6ca0",
+    "size": 764,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_user_agent_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_user_agent_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/a32fe99a6a38516a7b0e7d703fca8e2a0e8a6ca0",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_user_agent_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_user_agent_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/a32fe99a6a38516a7b0e7d703fca8e2a0e8a6ca0",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_user_agent_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "brave_user_agent_network_delegate_helper_browsertest.cc",
+    "path": "browser/net/brave_user_agent_network_delegate_helper_browsertest.cc",
+    "sha": "1eb8ae32890dc3a59d7f3fcc54012ca21ecace01",
+    "size": 15395,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_user_agent_network_delegate_helper_browsertest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_user_agent_network_delegate_helper_browsertest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/1eb8ae32890dc3a59d7f3fcc54012ca21ecace01",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_user_agent_network_delegate_helper_browsertest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_user_agent_network_delegate_helper_browsertest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/1eb8ae32890dc3a59d7f3fcc54012ca21ecace01",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_user_agent_network_delegate_helper_browsertest.cc"
+    }
+  },
+  {
+    "name": "brave_user_agent_network_delegate_helper_unittest.cc",
+    "path": "browser/net/brave_user_agent_network_delegate_helper_unittest.cc",
+    "sha": "e3efe1248d7373fba090ab93efd502a4984b968d",
+    "size": 7583,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_user_agent_network_delegate_helper_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/brave_user_agent_network_delegate_helper_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/e3efe1248d7373fba090ab93efd502a4984b968d",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/brave_user_agent_network_delegate_helper_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/brave_user_agent_network_delegate_helper_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/e3efe1248d7373fba090ab93efd502a4984b968d",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/brave_user_agent_network_delegate_helper_unittest.cc"
+    }
+  },
+  {
+    "name": "decentralized_dns_network_delegate_helper.cc",
+    "path": "browser/net/decentralized_dns_network_delegate_helper.cc",
+    "sha": "815d27c367dd651b3b7433869392c63327283da9",
+    "size": 6037,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/decentralized_dns_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/decentralized_dns_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/815d27c367dd651b3b7433869392c63327283da9",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/decentralized_dns_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/decentralized_dns_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/815d27c367dd651b3b7433869392c63327283da9",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/decentralized_dns_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "decentralized_dns_network_delegate_helper.h",
+    "path": "browser/net/decentralized_dns_network_delegate_helper.h",
+    "sha": "f7446a462b0a6bb746567fa888b9abc773184bcb",
+    "size": 2213,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/decentralized_dns_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/decentralized_dns_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/f7446a462b0a6bb746567fa888b9abc773184bcb",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/decentralized_dns_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/decentralized_dns_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/f7446a462b0a6bb746567fa888b9abc773184bcb",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/decentralized_dns_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "decentralized_dns_network_delegate_helper_unittest.cc",
+    "path": "browser/net/decentralized_dns_network_delegate_helper_unittest.cc",
+    "sha": "0a7425979763342cb2df4935bcaf0d085a257741",
+    "size": 28286,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/decentralized_dns_network_delegate_helper_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/decentralized_dns_network_delegate_helper_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/0a7425979763342cb2df4935bcaf0d085a257741",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/decentralized_dns_network_delegate_helper_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/decentralized_dns_network_delegate_helper_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/0a7425979763342cb2df4935bcaf0d085a257741",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/decentralized_dns_network_delegate_helper_unittest.cc"
+    }
+  },
+  {
+    "name": "fake_brave_request_handler.h",
+    "path": "browser/net/fake_brave_request_handler.h",
+    "sha": "bc32326b7dd1b95dcd779ca6985c4a5cbc307670",
+    "size": 3025,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/fake_brave_request_handler.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/fake_brave_request_handler.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/bc32326b7dd1b95dcd779ca6985c4a5cbc307670",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/fake_brave_request_handler.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/fake_brave_request_handler.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/bc32326b7dd1b95dcd779ca6985c4a5cbc307670",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/fake_brave_request_handler.h"
+    }
+  },
+  {
+    "name": "features.cc",
+    "path": "browser/net/features.cc",
+    "sha": "1cde1cb23b47596d8d0178474b9adba4e344e021",
+    "size": 921,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/features.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/features.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/1cde1cb23b47596d8d0178474b9adba4e344e021",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/features.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/features.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/1cde1cb23b47596d8d0178474b9adba4e344e021",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/features.cc"
+    }
+  },
+  {
+    "name": "features.h",
+    "path": "browser/net/features.h",
+    "sha": "8f6e5a4dfefe9e647fe435b8b38ffb1b3dfab130",
+    "size": 518,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/features.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/features.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/8f6e5a4dfefe9e647fe435b8b38ffb1b3dfab130",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/features.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/features.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/8f6e5a4dfefe9e647fe435b8b38ffb1b3dfab130",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/features.h"
+    }
+  },
+  {
+    "name": "global_privacy_control_network_delegate_helper.cc",
+    "path": "browser/net/global_privacy_control_network_delegate_helper.cc",
+    "sha": "43399ef28fb22ec74deec1ff8cc80420cffadf99",
+    "size": 1657,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/global_privacy_control_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/global_privacy_control_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/43399ef28fb22ec74deec1ff8cc80420cffadf99",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/global_privacy_control_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/global_privacy_control_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/43399ef28fb22ec74deec1ff8cc80420cffadf99",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/global_privacy_control_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "global_privacy_control_network_delegate_helper.h",
+    "path": "browser/net/global_privacy_control_network_delegate_helper.h",
+    "sha": "8484bccd565fd37361fdede9b410fda70bff935f",
+    "size": 792,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/global_privacy_control_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/global_privacy_control_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/8484bccd565fd37361fdede9b410fda70bff935f",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/global_privacy_control_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/global_privacy_control_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/8484bccd565fd37361fdede9b410fda70bff935f",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/global_privacy_control_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "resource_context_data.cc",
+    "path": "browser/net/resource_context_data.cc",
+    "sha": "818a8f99f812607feaac8b337e8878f47c208042",
+    "size": 5043,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/resource_context_data.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/resource_context_data.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/818a8f99f812607feaac8b337e8878f47c208042",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/resource_context_data.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/resource_context_data.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/818a8f99f812607feaac8b337e8878f47c208042",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/resource_context_data.cc"
+    }
+  },
+  {
+    "name": "resource_context_data.h",
+    "path": "browser/net/resource_context_data.h",
+    "sha": "328be98863ec748a96647e4111205fc499127233",
+    "size": 3973,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/resource_context_data.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/resource_context_data.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/328be98863ec748a96647e4111205fc499127233",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/resource_context_data.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/resource_context_data.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/328be98863ec748a96647e4111205fc499127233",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/resource_context_data.h"
+    }
+  },
+  {
+    "name": "search_ads_header_network_delegate_helper.cc",
+    "path": "browser/net/search_ads_header_network_delegate_helper.cc",
+    "sha": "e1959297e681fd0ca3cb5e044f4010c1c5dd7a59",
+    "size": 3151,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/search_ads_header_network_delegate_helper.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/search_ads_header_network_delegate_helper.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/e1959297e681fd0ca3cb5e044f4010c1c5dd7a59",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/search_ads_header_network_delegate_helper.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/search_ads_header_network_delegate_helper.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/e1959297e681fd0ca3cb5e044f4010c1c5dd7a59",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/search_ads_header_network_delegate_helper.cc"
+    }
+  },
+  {
+    "name": "search_ads_header_network_delegate_helper.h",
+    "path": "browser/net/search_ads_header_network_delegate_helper.h",
+    "sha": "01e000dedafe56b0d8a89299e93046f404157eb9",
+    "size": 952,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/search_ads_header_network_delegate_helper.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/search_ads_header_network_delegate_helper.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/01e000dedafe56b0d8a89299e93046f404157eb9",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/search_ads_header_network_delegate_helper.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/search_ads_header_network_delegate_helper.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/01e000dedafe56b0d8a89299e93046f404157eb9",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/search_ads_header_network_delegate_helper.h"
+    }
+  },
+  {
+    "name": "search_ads_header_network_delegate_helper_unittest.cc",
+    "path": "browser/net/search_ads_header_network_delegate_helper_unittest.cc",
+    "sha": "62bd347ba2a13ae6a285403d8bbbb285b201e248",
+    "size": 11357,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/search_ads_header_network_delegate_helper_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/search_ads_header_network_delegate_helper_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/62bd347ba2a13ae6a285403d8bbbb285b201e248",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/search_ads_header_network_delegate_helper_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/search_ads_header_network_delegate_helper_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/62bd347ba2a13ae6a285403d8bbbb285b201e248",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/search_ads_header_network_delegate_helper_unittest.cc"
+    }
+  },
+  {
+    "name": "sources.gni",
+    "path": "browser/net/sources.gni",
+    "sha": "9ae7ab5dcc525996532191868f80997ce533b459",
+    "size": 5591,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/sources.gni?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/sources.gni",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/9ae7ab5dcc525996532191868f80997ce533b459",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/sources.gni",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/sources.gni?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/9ae7ab5dcc525996532191868f80997ce533b459",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/sources.gni"
+    }
+  },
+  {
+    "name": "url_context.cc",
+    "path": "browser/net/url_context.cc",
+    "sha": "4db31d91ec336f57d18f4620e9cfedfcf9a34e16",
+    "size": 19378,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/url_context.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/url_context.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/4db31d91ec336f57d18f4620e9cfedfcf9a34e16",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/url_context.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/url_context.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/4db31d91ec336f57d18f4620e9cfedfcf9a34e16",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/url_context.cc"
+    }
+  },
+  {
+    "name": "url_context.h",
+    "path": "browser/net/url_context.h",
+    "sha": "06d67b789094d952a2fedac860810ae71b5432f5",
+    "size": 10555,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/url_context.h?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/url_context.h",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/06d67b789094d952a2fedac860810ae71b5432f5",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/url_context.h",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/url_context.h?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/06d67b789094d952a2fedac860810ae71b5432f5",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/url_context.h"
+    }
+  },
+  {
+    "name": "url_context_unittest.cc",
+    "path": "browser/net/url_context_unittest.cc",
+    "sha": "27041058b3a9f1bb57be7eda11bb36466245572f",
+    "size": 7435,
+    "url": "https://api.github.com/repos/brave/brave-core/contents/browser/net/url_context_unittest.cc?ref=master",
+    "html_url": "https://github.com/brave/brave-core/blob/master/browser/net/url_context_unittest.cc",
+    "git_url": "https://api.github.com/repos/brave/brave-core/git/blobs/27041058b3a9f1bb57be7eda11bb36466245572f",
+    "download_url": "https://raw.githubusercontent.com/brave/brave-core/master/browser/net/url_context_unittest.cc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/brave/brave-core/contents/browser/net/url_context_unittest.cc?ref=master",
+      "git": "https://api.github.com/repos/brave/brave-core/git/blobs/27041058b3a9f1bb57be7eda11bb36466245572f",
+      "html": "https://github.com/brave/brave-core/blob/master/browser/net/url_context_unittest.cc"
+    }
+  }
+]

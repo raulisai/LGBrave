@@ -1,0 +1,36 @@
+{
+  "capturedAt": "2026-10-21T09:27:13.865Z",
+  "checks": [
+    {
+      "name": "Google predeterminado en la barra inicial",
+      "pass": true
+    },
+    {
+      "name": "Configuración accesible desde páginas y elección de Bing",
+      "pass": true
+    },
+    {
+      "name": "Preferencia conservada tras recargar",
+      "pass": true
+    },
+    {
+      "name": "Preferencia conservada al reiniciar el puente",
+      "pass": true
+    },
+    {
+      "name": "Bing aplicado a la barra de páginas",
+      "pass": true
+    },
+    {
+      "name": "Cuatro opciones seleccionables; Google restaurado y guardado",
+      "pass": true
+    }
+  ],
+  "layout": {
+    "width": 1920,
+    "height": 1080,
+    "scrollWidth": 1920,
+    "scrollHeight": 1080
+  },
+  "pass": true
+}

@@ -1,0 +1,221 @@
+{
+  "sha": "3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+  "node_id": "C_kwDOBpF-cNoAKDM1NTU1MDViN2VmMDVlNWUzOTMxZWQzMzdlZGVkYWVhZmRhYWFkOGM",
+  "commit": {
+    "author": {
+      "name": "Anton P",
+      "email": "anton.paymyshev@gmail.com",
+      "date": "2026-10-21T06:26:20Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-21T06:26:20Z"
+    },
+    "message": "[Wallet] Disallow dapps in sandboxed frames (#40736)",
+    "tree": {
+      "sha": "84c78c4871c7f657bbe72c633a7c6dce785d15a0",
+      "url": "https://api.github.com/repos/brave/brave-core/git/trees/84c78c4871c7f657bbe72c633a7c6dce785d15a0"
+    },
+    "url": "https://api.github.com/repos/brave/brave-core/git/commits/3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq2FsMCRC1aQ7uu5UhlAAAvaUQAFDeZrs8WBzRNwcZfGXgBsv5\nO0iR+mlUMCReORgQCcb5RMKjgiViNaFcqLo6HjtNdWi+s+wHh5mB3uAmapaffGpc\nvieUvVWNfPlvOAs6FTdtmfvwqf/tRde72q3X0rRiqzAst0TTBlVtrWDafQu9/8cL\nbDM0dcw05Vk4A2Qjiw+rb8LMG2UOTPb4L/WJobCbOwWvE8KsJJopxNRuHcmUNc1Y\nt8MZFdXGk3qmECvly5WDSIn3zvyfeSMuopXFh6xyhXpWeMsbOdmH+gII0tIf6bCW\nY++JrQLqmULoXKG1L81st9V5n/cnYFpeT84MK6t4z5OC2rIlAxig4I+wFAltJLe2\nRP4AuB2gVHCNBVyHW18hY04QgrqnI/qbbuijYjNHF3MgfFdHaHfdG4GFhGA5gg8K\nyneLyp8LzI+FydKuUcwUnyEg6zrcMcyRt2LGYRwAIyZb22pZXi1OBfd++TG6WR6B\nXD0WB7egmSV59PqIqesJEHtzm5bCwGgIVeuxkbWw+VyBPIrO3QqliZtrDHhWDZK0\n5qlReWOUKInpYTvZnHoogK2fW+mgNxM1Uf7UDGbDW/E0lfNp/HO+qA6AJVip8m2E\ntDmEVxTKbq6dCmwd1vEDP8DMcwM9nxNgPKc3lpg3CY+nI3E5uJvXRGCQ97qGbNro\nzv+6swY1JKIgsSdW0Wg7\n=wIZN\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 84c78c4871c7f657bbe72c633a7c6dce785d15a0\nparent 04845861a39f7df24d3b5a8ccb0ee47380753925\nauthor Anton P <anton.paymyshev@gmail.com> 1792563980 +0700\ncommitter GitHub <noreply@github.com> 1792563980 +0700\n\n[Wallet] Disallow dapps in sandboxed frames (#40736)",
+      "verified_at": "2026-10-21T06:26:21Z"
+    }
+  },
+  "url": "https://api.github.com/repos/brave/brave-core/commits/3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+  "html_url": "https://github.com/brave/brave-core/commit/3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+  "comments_url": "https://api.github.com/repos/brave/brave-core/commits/3555505b7ef05e5e3931ed337ededaeafdaaad8c/comments",
+  "author": {
+    "login": "supermassive",
+    "id": 168356,
+    "node_id": "MDQ6VXNlcjE2ODM1Ng==",
+    "avatar_url": "https://avatars.githubusercontent.com/u/168356?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/supermassive",
+    "html_url": "https://github.com/supermassive",
+    "followers_url": "https://api.github.com/users/supermassive/followers",
+    "following_url": "https://api.github.com/users/supermassive/following{/other_user}",
+    "gists_url": "https://api.github.com/users/supermassive/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/supermassive/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/supermassive/subscriptions",
+    "organizations_url": "https://api.github.com/users/supermassive/orgs",
+    "repos_url": "https://api.github.com/users/supermassive/repos",
+    "events_url": "https://api.github.com/users/supermassive/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/supermassive/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "04845861a39f7df24d3b5a8ccb0ee47380753925",
+      "url": "https://api.github.com/repos/brave/brave-core/commits/04845861a39f7df24d3b5a8ccb0ee47380753925",
+      "html_url": "https://github.com/brave/brave-core/commit/04845861a39f7df24d3b5a8ccb0ee47380753925"
+    }
+  ],
+  "stats": {
+    "total": 99,
+    "additions": 94,
+    "deletions": 5
+  },
+  "files": [
+    {
+      "sha": "845bb4dab808347ede63b4bb2a8845ef5174b175",
+      "filename": "browser/brave_wallet/brave_wallet_tab_helper.cc",
+      "status": "modified",
+      "additions": 12,
+      "deletions": 0,
+      "changes": 12,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/browser%2Fbrave_wallet%2Fbrave_wallet_tab_helper.cc",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/browser%2Fbrave_wallet%2Fbrave_wallet_tab_helper.cc",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/browser%2Fbrave_wallet%2Fbrave_wallet_tab_helper.cc?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -94,6 +94,10 @@ void BraveWalletTabHelper::BindEthereumProvider(\n     return;\n   }\n   url::Origin origin = frame_host->GetLastCommittedOrigin();\n+  if (!IsValidDappOrigin(origin)) {\n+    return;\n+  }\n+\n   tab_helper->ethereum_provider_receivers_.Add(\n       std::make_unique<EthereumProviderImpl>(\n           host_content_settings_map, brave_wallet_service,\n@@ -127,6 +131,10 @@ void BraveWalletTabHelper::BindSolanaProvider(\n   }\n \n   url::Origin origin = frame_host->GetLastCommittedOrigin();\n+  if (!IsValidDappOrigin(origin)) {\n+    return;\n+  }\n+\n   tab_helper->solana_provider_receivers_.Add(\n       std::make_unique<SolanaProviderImpl>(\n           *host_content_settings_map, brave_wallet_service,\n@@ -163,6 +171,10 @@ void BraveWalletTabHelper::BindCardanoProvider(\n   }\n \n   url::Origin origin = frame_host->GetLastCommittedOrigin();\n+  if (!IsValidDappOrigin(origin)) {\n+    return;\n+  }\n+\n   tab_helper->cardano_provider_receivers_.Add(\n       std::make_unique<CardanoProviderImpl>(\n           *brave_wallet_service,"
+    },
+    {
+      "sha": "5d63ba5bce7f5f66c73110d61211168fd93f9e56",
+      "filename": "components/brave_wallet/browser/cardano/cardano_provider_impl.cc",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fbrowser%2Fcardano%2Fcardano_provider_impl.cc",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fbrowser%2Fcardano%2Fcardano_provider_impl.cc",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/components%2Fbrave_wallet%2Fbrowser%2Fcardano%2Fcardano_provider_impl.cc?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -8,11 +8,13 @@\n #include <utility>\n #include <vector>\n \n+#include \"base/check.h\"\n #include \"base/notreached.h\"\n #include \"brave/components/brave_wallet/browser/brave_wallet_provider_delegate.h\"\n #include \"brave/components/brave_wallet/browser/brave_wallet_service.h\"\n #include \"brave/components/brave_wallet/browser/cardano/cardano_api_impl.h\"\n #include \"brave/components/brave_wallet/browser/cardano/cardano_dapp_utils.h\"\n+#include \"brave/components/brave_wallet/common/common_utils.h\"\n #include \"components/grit/brave_components_strings.h\"\n #include \"ui/base/l10n/l10n_util.h\"\n \n@@ -34,6 +36,8 @@ CardanoProviderImpl::CardanoProviderImpl(\n     : brave_wallet_service_(brave_wallet_service),\n       delegate_factory_(std::move(delegate_factory)),\n       origin_(origin) {\n+  CHECK(IsValidDappOrigin(origin_));\n+\n   brave_wallet_service_->keyring_service()->AddObserver(\n       keyring_observer_receiver_.BindNewPipeAndPassRemote());\n   delegate_ = delegate_factory_.Run();"
+    },
+    {
+      "sha": "bd9d77f9ffa3efb3b485c3610170a01e54032264",
+      "filename": "components/brave_wallet/browser/ethereum_provider_impl.cc",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "changes": 3,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fbrowser%2Fethereum_provider_impl.cc",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fbrowser%2Fethereum_provider_impl.cc",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/components%2Fbrave_wallet%2Fbrowser%2Fethereum_provider_impl.cc?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -31,6 +31,7 @@\n #include \"brave/components/brave_wallet/browser/siwe_message_parser.h\"\n #include \"brave/components/brave_wallet/browser/tx_service.h\"\n #include \"brave/components/brave_wallet/common/brave_wallet_response_helpers.h\"\n+#include \"brave/components/brave_wallet/common/common_utils.h\"\n #include \"brave/components/brave_wallet/common/eth_address.h\"\n #include \"brave/components/brave_wallet/common/eth_request_helper.h\"\n #include \"brave/components/brave_wallet/common/eth_sign_typed_data_helper.h\"\n@@ -177,6 +178,8 @@ EthereumProviderImpl::EthereumProviderImpl(\n       eth_block_tracker_(json_rpc_service_),\n       eth_logs_tracker_(json_rpc_service_),\n       prefs_(prefs) {\n+  CHECK(IsValidDappOrigin(origin_));\n+\n   SetupMethodHandlers();\n \n   DCHECK(json_rpc_service_);"
+    },
+    {
+      "sha": "b43f190b4f74b9e2547f3a3c1a6cac90e279817f",
+      "filename": "components/brave_wallet/browser/solana_provider_impl.cc",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "changes": 3,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fbrowser%2Fsolana_provider_impl.cc",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fbrowser%2Fsolana_provider_impl.cc",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/components%2Fbrave_wallet%2Fbrowser%2Fsolana_provider_impl.cc?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -27,6 +27,7 @@\n #include \"brave/components/brave_wallet/browser/tx_service.h\"\n #include \"brave/components/brave_wallet/common/brave_wallet.mojom.h\"\n #include \"brave/components/brave_wallet/common/brave_wallet_constants.h\"\n+#include \"brave/components/brave_wallet/common/common_utils.h\"\n #include \"brave/components/brave_wallet/common/encoding_utils.h\"\n #include \"brave/components/brave_wallet/common/solana_utils.h\"\n #include \"components/grit/brave_components_strings.h\"\n@@ -66,6 +67,8 @@ SolanaProviderImpl::SolanaProviderImpl(\n       delegate_(std::move(delegate)),\n       origin_(origin),\n       weak_factory_(this) {\n+  CHECK(IsValidDappOrigin(origin_));\n+\n   DCHECK(keyring_service_);\n   keyring_service_->AddObserver(\n       keyring_observer_receiver_.BindNewPipeAndPassRemote());"
+    },
+    {
+      "sha": "8576c4aa6904c1b644d627dbc673d5772cd45f8d",
+      "filename": "components/brave_wallet/common/common_utils.cc",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 0,
+      "changes": 8,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils.cc",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils.cc",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils.cc?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -568,4 +568,12 @@ bool IsHTTPSOrLocalhostURL(const std::string& url_string) {\n   return net::IsHTTPSOrLocalhostURL(GURL(url_string));\n }\n \n+bool IsValidDappOrigin(const url::Origin& origin) {\n+  if (origin.opaque()) {\n+    return false;\n+  }\n+  return origin.scheme() == url::kHttpsScheme ||\n+         origin.scheme() == url::kHttpScheme;\n+}\n+\n }  // namespace brave_wallet"
+    },
+    {
+      "sha": "43ffa49b9258de53d490e49a81ef12bcd998111e",
+      "filename": "components/brave_wallet/common/common_utils.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils.h",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils.h",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils.h?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -17,6 +17,7 @@\n #include \"brave/components/brave_wallet/common/buildflags/buildflags.h\"\n #include \"build/build_config.h\"\n #include \"url/gurl.h\"\n+#include \"url/origin.h\"\n \n static_assert(BUILDFLAG(ENABLE_BRAVE_WALLET));\n \n@@ -122,6 +123,9 @@ mojom::AccountIdPtr MakeIndexBasedAccountId(mojom::CoinType coin,\n \n bool IsHTTPSOrLocalhostURL(const std::string& url);\n \n+// True for non-opaque http/https origins.\n+bool IsValidDappOrigin(const url::Origin& origin);\n+\n template <typename T>\n std::vector<T> CloneVector(const std::vector<T>& v) {\n   return base::ToVector(v, &T::Clone);"
+    },
+    {
+      "sha": "1a71b3a02770df9f696d3bd5a59a2b2e0212f69b",
+      "filename": "components/brave_wallet/common/common_utils_unittest.cc",
+      "status": "modified",
+      "additions": 29,
+      "deletions": 0,
+      "changes": 29,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils_unittest.cc",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils_unittest.cc",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/components%2Fbrave_wallet%2Fcommon%2Fcommon_utils_unittest.cc?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -13,6 +13,7 @@\n #include \"brave/components/brave_wallet/common/test_utils.h\"\n #include \"testing/gmock/include/gmock/gmock.h\"\n #include \"testing/gtest/include/gtest/gtest.h\"\n+#include \"url/origin.h\"\n \n using testing::ElementsAreArray;\n \n@@ -975,4 +976,32 @@ TEST(CommonUtils, IsSnapFeatureEnabled) {\n #endif\n }\n \n+TEST(CommonUtils, IsValidDappOrigin) {\n+  EXPECT_TRUE(IsValidDappOrigin(\n+      url::Origin::CreateFromNormalizedTuple(\"https\", \"a.com\", 443)));\n+  EXPECT_TRUE(IsValidDappOrigin(\n+      url::Origin::CreateFromNormalizedTuple(\"https\", \"a.com\", 8443)));\n+  EXPECT_TRUE(IsValidDappOrigin(\n+      url::Origin::CreateFromNormalizedTuple(\"http\", \"a.com\", 80)));\n+  EXPECT_TRUE(IsValidDappOrigin(\n+      url::Origin::CreateFromNormalizedTuple(\"http\", \"localhost\", 80)));\n+\n+  // Opaque origins, including the one a sandboxed frame without\n+  // allow-same-origin gets.\n+  EXPECT_FALSE(IsValidDappOrigin(url::Origin()));\n+  EXPECT_FALSE(IsValidDappOrigin(\n+      url::Origin::CreateFromNormalizedTuple(\"https\", \"a.com\", 443)\n+          .DeriveNewOpaqueOrigin()));\n+\n+  // Non-HTTP(S) schemes.\n+  EXPECT_FALSE(IsValidDappOrigin(\n+      url::Origin::CreateFromNormalizedTuple(\"wss\", \"a.com\", 443)));\n+  EXPECT_FALSE(IsValidDappOrigin(\n+      url::Origin::CreateFromNormalizedTuple(\"chrome\", \"wallet\", 0)));\n+  EXPECT_FALSE(IsValidDappOrigin(\n+      url::Origin::CreateFromNormalizedTuple(\"chrome-extension\", \"abc\", 0)));\n+  EXPECT_FALSE(\n+      IsValidDappOrigin(url::Origin::CreateFromNormalizedTuple(\"file\", \"\", 0)));\n+}\n+\n }  // namespace brave_wallet"
+    },
+    {
+      "sha": "3f026579c14aaa769b80b61de2290dc7860d2e7e",
+      "filename": "ios/browser/api/brave_wallet/brave_wallet_api.mm",
+      "status": "modified",
+      "additions": 10,
+      "deletions": 0,
+      "changes": 10,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/ios%2Fbrowser%2Fapi%2Fbrave_wallet%2Fbrave_wallet_api.mm",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/ios%2Fbrowser%2Fapi%2Fbrave_wallet%2Fbrave_wallet_api.mm",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/ios%2Fbrowser%2Fapi%2Fbrave_wallet%2Fbrave_wallet_api.mm?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -13,6 +13,7 @@\n #include \"brave/components/brave_wallet/browser/cardano/cardano_provider_impl.h\"\n #include \"brave/components/brave_wallet/browser/ethereum_provider_impl.h\"\n #include \"brave/components/brave_wallet/browser/solana_provider_impl.h\"\n+#include \"brave/components/brave_wallet/common/common_utils.h\"\n #include \"brave/components/brave_wallet/resources/grit/brave_wallet_script_generated.h\"\n #include \"brave/ios/browser/api/brave_wallet/brave_wallet.mojom.objc+private.h\"\n #include \"brave/ios/browser/api/brave_wallet/brave_wallet_provider_delegate_ios+private.h\"\n@@ -88,6 +89,9 @@ - (bool)isAllowed {\n   }\n \n   url::Origin committed_origin([origin underlyingOrigin]);\n+  if (!brave_wallet::IsValidDappOrigin(committed_origin)) {\n+    return nil;\n+  }\n \n   auto provider = std::make_unique<brave_wallet::EthereumProviderImpl>(\n       ios::HostContentSettingsMapFactory::GetForProfile(profile),\n@@ -125,6 +129,9 @@ - (bool)isAllowed {\n   }\n \n   url::Origin committed_origin([origin underlyingOrigin]);\n+  if (!brave_wallet::IsValidDappOrigin(committed_origin)) {\n+    return nil;\n+  }\n \n   auto provider = std::make_unique<brave_wallet::SolanaProviderImpl>(\n       *host_content_settings_map, brave_wallet_service,\n@@ -155,6 +162,9 @@ - (bool)isAllowed {\n   }\n \n   url::Origin committed_origin([origin underlyingOrigin]);\n+  if (!brave_wallet::IsValidDappOrigin(committed_origin)) {\n+    return nil;\n+  }\n \n   auto provider = std::make_unique<brave_wallet::CardanoProviderImpl>(\n       *brave_wallet_service,"
+    },
+    {
+      "sha": "62c56b7f32773b8168a85c0282abf2f8c301c0f0",
+      "filename": "ios/browser/brave_wallet/cardano_provider_tab_helper.mm",
+      "status": "modified",
+      "additions": 7,
+      "deletions": 1,
+      "changes": 8,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/ios%2Fbrowser%2Fbrave_wallet%2Fcardano_provider_tab_helper.mm",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/ios%2Fbrowser%2Fbrave_wallet%2Fcardano_provider_tab_helper.mm",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/ios%2Fbrowser%2Fbrave_wallet%2Fcardano_provider_tab_helper.mm?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -12,6 +12,7 @@\n #include \"base/functional/bind.h\"\n #include \"brave/components/brave_wallet/browser/brave_wallet_utils.h\"\n #include \"brave/components/brave_wallet/browser/cardano/cardano_provider_impl.h\"\n+#include \"brave/components/brave_wallet/common/common_utils.h\"\n #include \"brave/ios/browser/api/brave_wallet/brave_wallet_provider_delegate_ios+private.h\"\n #include \"brave/ios/browser/brave_wallet/brave_wallet_service_factory.h\"\n #include \"brave/ios/browser/brave_wallet/brave_wallet_utils.h\"\n@@ -90,6 +91,11 @@\n     return;\n   }\n \n+  url::Origin origin = url::Origin::Create(web_state_->GetLastCommittedURL());\n+  if (!IsValidDappOrigin(origin)) {\n+    return;\n+  }\n+\n   provider_ = std::make_unique<CardanoProviderImpl>(\n       *brave_wallet_service_,\n       base::BindRepeating(\n@@ -98,7 +104,7 @@\n             return std::make_unique<BraveWalletProviderDelegateBridge>(bridge);\n           },\n           bridge_),\n-      url::Origin::Create(web_state_->GetLastCommittedURL()));\n+      origin);\n }\n \n void CardanoProviderTabHelper::DidFinishNavigation("
+    },
+    {
+      "sha": "0a7b0385edbf8794d1a32d7afe296e6f69f635cd",
+      "filename": "ios/browser/brave_wallet/ethereum_provider_tab_helper.mm",
+      "status": "modified",
+      "additions": 7,
+      "deletions": 2,
+      "changes": 9,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/ios%2Fbrowser%2Fbrave_wallet%2Fethereum_provider_tab_helper.mm",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/ios%2Fbrowser%2Fbrave_wallet%2Fethereum_provider_tab_helper.mm",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/ios%2Fbrowser%2Fbrave_wallet%2Fethereum_provider_tab_helper.mm?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -22,6 +22,7 @@\n #include \"base/values.h\"\n #include \"brave/components/brave_wallet/browser/brave_wallet_utils.h\"\n #include \"brave/components/brave_wallet/browser/ethereum_provider_impl.h\"\n+#include \"brave/components/brave_wallet/common/common_utils.h\"\n #include \"brave/components/brave_wallet/common/web_ui_constants.h\"\n #include \"brave/ios/browser/api/brave_wallet/brave_wallet_provider_delegate_ios+private.h\"\n #include \"brave/ios/browser/brave_wallet/brave_wallet_service_factory.h\"\n@@ -282,11 +283,15 @@ void EmitEthereumEvent(web::WebState* web_state,\n     return;\n   }\n \n+  url::Origin origin = url::Origin::Create(web_state_->GetLastCommittedURL());\n+  if (!IsValidDappOrigin(origin)) {\n+    return;\n+  }\n+\n   provider_ = std::make_unique<EthereumProviderImpl>(\n       host_content_settings_map_, brave_wallet_service_,\n       std::make_unique<BraveWalletProviderDelegateBridge>(bridge_),\n-      profile->GetPrefs(),\n-      url::Origin::Create(web_state_->GetLastCommittedURL()));\n+      profile->GetPrefs(), origin);\n \n   // Register this tab helper as the provider's events listener so the provider\n   // can emit `chainChanged` / `accountsChanged` / `message` events to the page."
+    },
+    {
+      "sha": "4d38e376f380a577082a60ed1d05917ff17e2dfd",
+      "filename": "renderer/brave_wallet/brave_wallet_render_frame_observer.cc",
+      "status": "modified",
+      "additions": 7,
+      "deletions": 2,
+      "changes": 9,
+      "blob_url": "https://github.com/brave/brave-core/blob/3555505b7ef05e5e3931ed337ededaeafdaaad8c/renderer%2Fbrave_wallet%2Fbrave_wallet_render_frame_observer.cc",
+      "raw_url": "https://github.com/brave/brave-core/raw/3555505b7ef05e5e3931ed337ededaeafdaaad8c/renderer%2Fbrave_wallet%2Fbrave_wallet_render_frame_observer.cc",
+      "contents_url": "https://api.github.com/repos/brave/brave-core/contents/renderer%2Fbrave_wallet%2Fbrave_wallet_render_frame_observer.cc?ref=3555505b7ef05e5e3931ed337ededaeafdaaad8c",
+      "patch": "@@ -9,14 +9,17 @@\n \n #include \"base/check.h\"\n #include \"base/notreached.h\"\n+#include \"brave/components/brave_wallet/common/common_utils.h\"\n #include \"brave/components/brave_wallet/renderer/js_cardano_provider.h\"\n #include \"brave/components/brave_wallet/renderer/js_ethereum_provider.h\"\n #include \"brave/components/brave_wallet/renderer/js_polkadot_provider.h\"\n #include \"brave/components/brave_wallet/renderer/js_solana_provider.h\"\n #include \"brave/components/brave_wallet/renderer/v8_helper.h\"\n #include \"content/public/renderer/render_frame.h\"\n #include \"third_party/blink/public/platform/scheduler/web_agent_group_scheduler.h\"\n+#include \"third_party/blink/public/web/web_document.h\"\n #include \"third_party/blink/public/web/web_local_frame.h\"\n+#include \"url/origin.h\"\n #include \"v8/include/v8-microtask-queue.h\"\n \n namespace brave_wallet {\n@@ -32,8 +35,10 @@ BraveWalletRenderFrameObserver::~BraveWalletRenderFrameObserver() = default;\n bool BraveWalletRenderFrameObserver::CanCreateProviders() {\n   auto* web_frame = render_frame()->GetWebFrame();\n \n-  // Only allow HTTP or HTTPS schemes for the document URL.\n-  if (!GURL(web_frame->GetDocument().Url()).SchemeIsHTTPOrHTTPS()) {\n+  // Rejects opaque origins, which includes sandboxed frames without\n+  // allow-same-origin.\n+  const url::Origin origin = web_frame->GetDocument().GetSecurityOrigin();\n+  if (!IsValidDappOrigin(origin)) {\n     return false;\n   }\n "
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "capturedAt": "2026-10-21T09:17:06.856Z",
+  "version": "0.4.0",
+  "device": "75UR8750PSA",
+  "files": [
+    {
+      "path": "src/App.svelte",
+      "bytes": 11738,
+      "sha256": "46d119a26610274ca0459f774ff7f3adbf7beadc0f67da0a735f83092639b551"
+    },
+    {
+      "path": "src/navigation.js",
+      "bytes": 1063,
+      "sha256": "246c51ec988e84f5c42483b17d03c231f64005e18eff7e2d52a63eb2ec0aa220"
+    },
+    {
+      "path": "src/NavigationFeedback.svelte",
+      "bytes": 2498,
+      "sha256": "d45365dc00aa722fb1edfc9d560c25406d2845c6921d370dd46eeeaddea1354e"
+    },
+    {
+      "path": "scripts/browser-bridge.mjs",
+      "bytes": 18199,
+      "sha256": "19807c654e7f087774ad3d21b3cdcbdfffdd217b5f1562c2869324541e5b7dfa"
+    },
+    {
+      "path": "scripts/toolbar.mjs",
+      "bytes": 9509,
+      "sha256": "e8a43be7e89793e37518283c19031e74ffab7f7fd7f595daaf150a09b36af463"
+    },
+    {
+      "path": "scripts/start-lab.mjs",
+      "bytes": 2525,
+      "sha256": "a789b7f70ce960d5f29251053d6bd23e1cb721964ab4b8ea3cf0384a7e14f54c"
+    },
+    {
+      "path": "scripts/cdp.mjs",
+      "bytes": 2906,
+      "sha256": "b1da3233ea58be1344d099a5edaa5722fd0feef7dbc9c6d279463a007d68bf7c"
+    },
+    {
+      "path": "artifacts/com.lgapp.lab_0.4.0_all.ipk",
+      "bytes": 1971198,
+      "sha256": "cfe6435d722d80270a8792e7a1bcd236fb30792958a077833afd77a9e8cd4c67"
+    }
+  ]
+}
