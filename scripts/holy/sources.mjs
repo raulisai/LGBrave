@@ -107,6 +107,32 @@ export const cuevana = {
       players: [...html.matchAll(/data-server="([^"]+)"/g)].map(match => decode(match[1]))
     };
   },
+  searchURL: query => 'https://cuevana3c.pro/explorar?s=' + encodeURIComponent(query),
+  parseSearch(html, base = this.site) {
+    return html.split('<div class="movie-item">').slice(1).map(block => {
+      const link = absolute(/<a href="?([^"\s>]+)/.exec(block)?.[1], base);
+      const image = /<img[^>]*>/.exec(block)?.[0];
+      const movie = /\/pelicula\//.test(link);
+      if (!movie && !/\/serie\/[^/]+$/.test(link)) return null;
+      return item({ source: 'cuevana', kind: movie ? 'movie' : 'series', url: link, ...(movie ? {} : { show: link, isShow: true }),
+        title: text(/<div class="item-detail"><p>([\s\S]*?)<\/p>/.exec(block)?.[1]), year: text(/class="year[^"]*">([^<]*)/.exec(block)?.[1]),
+        poster: tmdb(absolute(attr(image, 'src'), base), 'w342') });
+    }).filter(Boolean);
+  },
+  // Seasons are separate pages; each lists its episodes.
+  async episodes(show, load) {
+    const html = await load(show);
+    const seasons = [...new Set([...html.matchAll(/href="([^"]+\/temporada-(\d+))"/g)].map(match => match[1]))].slice(0, 15);
+    const lists = await Promise.all(seasons.map(async url => {
+      const number = Number(/temporada-(\d+)$/.exec(url)[1]);
+      const page = await load(url).catch(() => '');
+      const episodes = [...new Set([...page.matchAll(/href="([^"]+\/episodio-(\d+)x(\d+))"/g)].map(match => match[1]))]
+        .map(link => { const [, season, episode] = /episodio-(\d+)x(\d+)$/.exec(link); return { url: absolute(link, show), season: Number(season), episode: Number(episode), label: `Episodio ${season}x${episode}` }; })
+        .filter(entry => entry.season === number).sort((a, b) => a.episode - b.episode);
+      return { title: 'Temporada ' + number, number, episodes };
+    }));
+    return lists.filter(list => list.episodes.length).sort((a, b) => a.number - b.number);
+  },
   // The page lists Latino first. The site's own player supports pops=false (fewer ad windows).
   player(detail, page) {
     for (const value of detail.players) {
@@ -154,6 +180,39 @@ export const jkanime = {
     const url = frames.find(value => /^https:\/\/jkanime\.net\/jkplayer\//.test(value));
     return url ? { url, referrer: entry.url } : null;
   },
+  searchURL: query => 'https://jkanime.net/buscar/' + encodeURIComponent(query.trim().replace(/\s+/g, '_')) + '/',
+  parseSearch(html, base = this.site) {
+    return html.split('class="anime__item">').slice(1).map(block => {
+      const show = absolute(/<a\s+href="([^"]+)"/.exec(block)?.[1], base);
+      if (!/^https:\/\/jkanime\.net\/[^/]+\/$/.test(show)) return null;
+      return item({ source: 'jkanime', kind: 'anime', url: show, show, isShow: true, title: text(/<h5><a[^>]*>([\s\S]*?)<\/a>/.exec(block)?.[1]),
+        poster: absolute(attr(/<div[^>]*data-setbg="[^"]*"[^>]*>/.exec(block)?.[0], 'data-setbg'), base),
+        badge: text(/<li class="anime">([^<]*)/.exec(block)?.[1]), subtitle: text(/<ul><li>([^<]*)/.exec(block)?.[1]) });
+    }).filter(Boolean);
+  },
+  // The site's own episode list (paginated JSON); ongoing shows report 0 on the page itself.
+  async episodes(show, load, post) {
+    const html = await load(show);
+    const id = /ajax\/episodes\/(\d+)\//.exec(html)?.[1];
+    if (!id) return [];
+    const page = async n => JSON.parse(await post(`https://jkanime.net/ajax/episodes/${id}/${n}`, show));
+    const first = await page(1);
+    const last = first.last_page > 1 ? await page(first.last_page) : first;
+    const thumbs = new Map([...first.data, ...last.data].map(entry => [entry.number, entry.image]));
+    const top = Math.max(0, ...last.data.map(entry => entry.number), ...first.data.map(entry => entry.number));
+    const episodes = Array.from({ length: top }, (_, index) => {
+      const number = top - index;
+      const image = thumbs.get(number);
+      return { url: show + number + '/', episode: number, label: 'Episodio ' + number, still: image ? 'https://cdn.jkdesa.com/assets/images/animes/video/image/' + image : '' };
+    });
+    // Long shows read better in blocks of 50, newest first.
+    const blocks = [];
+    for (let index = 0; index < episodes.length; index += 50) {
+      const chunk = episodes.slice(index, index + 50);
+      blocks.push({ title: `Episodios ${chunk.at(-1).episode}–${chunk[0].episode}`, episodes: chunk });
+    }
+    return blocks;
+  },
   next(entry) {
     return entry.show && entry.episode ? { ...entry, url: entry.show + (entry.episode + 1) + '/', episode: entry.episode + 1, subtitle: 'Episodio ' + (entry.episode + 1), badge: 'Ep ' + (entry.episode + 1) } : null;
   }
@@ -186,6 +245,17 @@ export const repelishd = {
       overview: unrepeated(decode(/og:description" content="([^"]*)"/.exec(html)?.[1] || '')),
       imdb: /var imdb\s*=\s*'(tt\d+)'/.exec(html)?.[1] || ''
     };
+  },
+  searchURL: query => 'https://repelishd.blog/index.php?do=search&subaction=search&story=' + encodeURIComponent(query),
+  parseSearch(html, base = this.site) {
+    return html.split('<article class="item movies"').slice(1).map(block => {
+      const link = /<a href="([^"]+)"/.exec(block)?.[1];
+      if (!/\/ver-pelicula\//.test(link || '')) return null;
+      const image = /<img[^>]*>/.exec(block)?.[0];
+      return item({ source: 'repelishd', kind: 'movie', url: absolute(link, base), title: text(/<h3>([\s\S]*?)<\/h3>/.exec(block)?.[1]) || attr(image, 'alt'),
+        poster: absolute(attr(image, 'src') || attr(image, 'data-src'), base), year: text(/<\/h3>\s*<span>([^<]*)/.exec(block)?.[1]),
+        rating: text(/icon-star2><\/span>([^<]*)/.exec(block)?.[1]), badge: text(/class="quality">([^<]*)/.exec(block)?.[1]) });
+    }).filter(Boolean);
   },
   // The page embeds playlatinsrc.co/movie/<imdb>, which asks its own API for servers.
   // Holy asks the same API and opens Mixdrop (then Doodstream) directly. Dropload/
@@ -251,6 +321,28 @@ export const doramasmp4 = {
       genres: [...new Set([...between(html, 'class="genxed"', '</div>').matchAll(/\/genres\/[^"]*" rel="tag">([^<]+)/g)].map(match => genre(match[1])))],
       players
     };
+  },
+  searchURL: query => 'https://doramasmp4.cyou/?s=' + encodeURIComponent(query),
+  parseSearch(html, base = this.site) {
+    return html.split('<article class="bs"').slice(1).map(block => {
+      const anchor = /<a href="([^"]+)"[^>]*title="([^"]*)"/.exec(block);
+      if (!anchor) return null;
+      const url = absolute(anchor[1], base);
+      const image = /<img[^>]*>/.exec(block)?.[0];
+      const show = /\/series\/[^/]+\/$/.test(url);
+      if (!show && !/\/cap\//.test(url)) return null;
+      return item({ source: 'doramasmp4', kind: 'dorama', url, ...(show ? { show: url, isShow: true } : {}), title: decode(anchor[2]),
+        poster: absolute(attr(image, 'src'), base), badge: text(/class="epx">([^<]*)/.exec(block)?.[1]) });
+    }).filter(Boolean);
+  },
+  async episodes(show, load) {
+    const slug = /\/series\/([^/]+)\/$/.exec(show)?.[1];
+    if (!slug) return [];
+    const html = await load(show);
+    const pattern = new RegExp(`href="(https://[^"]+/cap/${slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-capitulo-(\\d+)/)"`, 'g');
+    const episodes = [...new Map([...html.matchAll(pattern)].map(match => [Number(match[2]), match[1]]))]
+      .sort((a, b) => a[0] - b[0]).map(([episode, url]) => ({ url, episode, label: 'Capítulo ' + episode }));
+    return episodes.length ? [{ title: 'Capítulos', episodes }] : [];
   },
   // ok.ru is a plain video host page: prefer it over unknown embeds.
   player(detail, page) {

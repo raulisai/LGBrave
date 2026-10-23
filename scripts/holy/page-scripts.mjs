@@ -76,6 +76,8 @@ export function holyAutoplay(options = {}) {
   };
   let videos = [...document.querySelectorAll('video')];
   if (!videos.length) videos = deep('video');
+  // Validation runs keep the TV silent.
+  if (options.mute) for (const video of videos) video.muted = true;
   const report = videos.map(video => ({ t: video.currentTime, d: Number.isFinite(video.duration) ? video.duration : 0, paused: video.paused, ready: video.readyState, area: video.clientWidth * video.clientHeight, ended: video.ended }));
   const out = { url: location.href, top: window.top === window, videos: report, action: '' };
   if (videos.some(video => !video.paused && video.currentTime > 0)) return out;

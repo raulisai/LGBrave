@@ -48,6 +48,18 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
         res.end(JSON.stringify({ ...catalog.home(library), catalogVersion: catalog.version, libraryVersion: library.version }));
+      } else if (url.pathname === '/holy-api/search') {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        const source = url.searchParams.get('source') || '';
+        const query = url.searchParams.get('q') || '';
+        const started = Date.now();
+        if (source === 'local') { res.end(JSON.stringify({ source, ms: 0, items: catalog.searchLocal(query) })); return; }
+        const items = await catalog.search(source, query).catch(error => ({ error: error.message }));
+        res.end(JSON.stringify(Array.isArray(items) ? { source, ms: Date.now() - started, items } : { source, ms: Date.now() - started, items: [], error: items.error }));
+      } else if (url.pathname === '/holy-api/episodes') {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        const seasons = await catalog.episodes(url.searchParams.get('source') || '', url.searchParams.get('show') || '').catch(error => ({ error: error.message }));
+        res.end(JSON.stringify(Array.isArray(seasons) ? { seasons } : { seasons: [], error: seasons.error }));
       } else if (url.pathname === '/holy-api/refresh' && req.method === 'POST') {
         catalog.refresh().catch(() => {});
         res.end('{"ok":true}');

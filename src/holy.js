@@ -4,13 +4,14 @@ export const SECTIONS = [
   { id: 'movie', name: 'Películas' },
   { id: 'anime', name: 'Anime' },
   { id: 'dorama', name: 'Doramas' },
-  { id: 'series', name: 'Series' }
+  { id: 'series', name: 'Series' },
+  { id: 'buscar', name: 'Buscar' }
 ];
 const KINDS = { movie: 'Película', anime: 'Anime', dorama: 'Dorama', series: 'Serie' };
 export const kindLabel = kind => KINDS[kind] || '';
 
 // Episode rows read best as wide stills; films as posters.
-function withLayout(row) {
+export function withLayout(row) {
   const wide = row.id === 'continue' || (row.items.filter(item => item.backdrop).length >= row.items.length * 0.7 && row.items.some(item => item.kind !== 'movie'));
   return { ...row, layout: wide ? 'landscape' : 'poster' };
 }
@@ -33,6 +34,17 @@ export function sectionRows(data, section) {
     out.push({ id: 'genre-' + name, title: name, items: items.filter(item => item.genres?.includes(name)) });
   }
   return out.map(withLayout);
+}
+
+// A show's seasons (or blocks of episodes) as wide rows of playable episodes.
+export function episodeRows(show, seasons) {
+  return seasons.map((season, index) => ({
+    id: 'season-' + index, title: season.title, layout: 'landscape',
+    items: season.episodes.map(episode => ({
+      source: show.source, kind: show.kind, title: show.title, poster: show.poster, genres: show.genres || [], overview: show.overview || '',
+      show: show.show, url: episode.url, episode: episode.episode || null, subtitle: episode.label, backdrop: episode.still || show.backdrop || ''
+    }))
+  }));
 }
 
 export function clock(seconds) {

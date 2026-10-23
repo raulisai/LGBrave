@@ -87,6 +87,46 @@ export class Catalog {
   }
   stop() { clearInterval(this.timer); }
   find(url) { return this.items.find(item => item.url === url) || null; }
+  cached(key, ttl, work) {
+    this.cache ||= new Map();
+    const hit = this.cache.get(key);
+    if (hit && Date.now() - hit.at < ttl) return hit.value;
+    const value = work().catch(error => { this.cache.delete(key); throw error; });
+    this.cache.set(key, { at: Date.now(), value });
+    if (this.cache.size > 200) this.cache.delete(this.cache.keys().next().value);
+    return value;
+  }
+  // One site's search results; the home asks every site at once and shows the fastest first.
+  async search(sourceId, query) {
+    const connector = connectorFor(sourceId);
+    const words = String(query || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    if (!connector?.searchURL || words.length < 2) return [];
+    return this.cached('search\n' + sourceId + '\n' + words.toLowerCase(), 10 * 60000, async () =>
+      connector.parseSearch(await this.fetch(connector.searchURL(words), { referrer: connector.site, timeout: 9000 }), connector.site).slice(0, 40).map(item => this.enrich(item)));
+  }
+  // Titles already in the catalogue that match, instantly.
+  searchLocal(query) {
+    const fold = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const words = fold(query).split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    return this.items.filter(item => words.every(word => fold(item.title).includes(word))).slice(0, 30);
+  }
+  async episodes(sourceId, show) {
+    const connector = connectorFor(sourceId);
+    if (!connector?.episodes || !/^https:\/\//.test(String(show || ''))) return [];
+    return this.cached('episodes\n' + show, 20 * 60000, () => connector.episodes(show, (url, options) => this.fetch(url, { referrer: connector.site, ...options }), (url, referrer) => this.post(url, referrer)));
+  }
+  // Same-site form POST (JKAnime's episode list needs its session cookie and token).
+  async post(url, referrer) {
+    const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+    const page = await fetch(referrer, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) });
+    const html = await page.text();
+    const token = /csrf-token" content="([^"]+)"/.exec(html)?.[1] || '';
+    const cookie = page.headers.getSetCookie().map(value => value.split(';')[0]).join('; ');
+    const response = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(10000), headers: { 'User-Agent': UA, Referer: referrer, Cookie: cookie, 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body: '_token=' + encodeURIComponent(token) });
+    if (!response.ok) throw Error(new URL(url).hostname + ' respondió ' + response.status);
+    return response.text();
+  }
   // Some sites' own pages lead to players that close the TV app: never open those as a fallback.
   pageFallback(item) { return !connectorFor(item.source)?.noPageFallback; }
   // The player page the site itself would open for this title, resolved fresh.

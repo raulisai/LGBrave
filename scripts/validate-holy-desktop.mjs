@@ -99,7 +99,7 @@ try {
   if (saved?.t > 20) {
     const sample = await watch(first, 'resume', 4);
     sample.resumedFrom = saved.t;
-    sample.resumeOk = !!(sample.position?.first && sample.position.first.t >= saved.t - 6);
+    sample.resumeOk = !!(sample.position?.last && sample.position.last.t >= saved.t);
     save();
   }
   await shot('home-after');

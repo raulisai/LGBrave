@@ -15,6 +15,7 @@ export class HolyBridge extends BrowserBridge {
     this.catalog = options.catalog;
     this.library = options.library;
     this.apiBase = options.apiBase || origin();
+    this.mute = options.mute === true;
     this.remoteContexts = new Set();
     // Cross-origin player iframes may run as their own targets (sessions).
     this.childSessions = new Map();
@@ -149,7 +150,7 @@ export class HolyBridge extends BrowserBridge {
     try {
       const passive = session.phase !== 'opening';
       const results = (await Promise.all((await this.playerContexts()).map(({ id, sessionId }) => Promise.race([
-        this.evaluateWithGesture(autoplaySource({ passive }), id, sessionId).catch(() => null),
+        this.evaluateWithGesture(autoplaySource({ passive, mute: this.mute }), id, sessionId).catch(() => null),
         new Promise(resolve => setTimeout(resolve, 2500, null))
       ])))).filter(Boolean);
       if (this.session !== session) return;

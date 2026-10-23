@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte';
   import Icon from './Icon.svelte';
   import NavigationFeedback from './NavigationFeedback.svelte';
-  import { SECTIONS, sectionRows, kindLabel, clock, remaining } from './holy.js';
+  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, clock, remaining } from './holy.js';
 
   let apiBase = $state(/^https?:/.test(location.protocol) ? location.origin : '');
   let data = $state({ rows: [], items: [], sources: [], hero: null, updatedAt: 0 });
@@ -21,8 +21,18 @@
   let previewTimer;
   let openingTimer;
   let rowsEl = $state();
+  // Search: every site is asked at once; each row appears as soon as its site answers.
+  let query = $state('');
+  let searchRows = $state([]);
+  let searchStatus = $state([]);
+  let inSearch = $state(false);
+  let searchInput = $state();
+  let searchTimer;
+  let searchToken = 0;
+  // A show's episodes, opened from search; Back returns to where it was opened.
+  let episodesView = $state(null);
 
-  const rows = $derived(sectionRows(data, section));
+  const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(withLayout) : sectionRows(data, section));
   const row = $derived(rows[Math.min(rowIndex, rows.length - 1)]);
   const column = $derived(row ? Math.min(columns[row.id] || 0, row.items.length - 1) : 0);
   const focused = $derived(row?.items[column] || null);
@@ -39,7 +49,7 @@
 
   // The big preview follows focus, a moment later so fast scrolling stays smooth.
   $effect(() => {
-    const next = focused || data.hero;
+    const next = focused || episodesView?.show || (section === 'buscar' ? null : data.hero);
     clearTimeout(previewTimer);
     if (!preview) { preview = next; return; }
     previewTimer = setTimeout(() => { preview = next; }, 160);
@@ -85,7 +95,65 @@
     data.rows = data.rows.map(entry => entry.id === 'continue' ? { ...entry, items: entry.items.filter(other => other.key !== item.key) } : entry);
   }
   function chooseSection(id) {
-    section = id; rowIndex = 0; inNav = false;
+    section = id; rowIndex = 0; inNav = false; episodesView = null;
+    if (id === 'buscar') focusSearch();
+  }
+  function focusSearch() {
+    inNav = false; inSearch = true;
+    // Focusing the field opens the TV's on-screen keyboard.
+    tick().then(() => searchInput?.focus());
+  }
+  function leaveSearch(direction) {
+    inSearch = false; searchInput?.blur();
+    if (direction === 'up') { inNav = true; navIndex = SECTIONS.findIndex(entry => entry.id === 'buscar'); }
+  }
+  function search() {
+    clearTimeout(searchTimer);
+    const words = query.trim();
+    if (words.length < 2 || !apiBase) return;
+    const token = ++searchToken;
+    searchRows = []; rowIndex = 0;
+    columns = Object.fromEntries(Object.entries(columns).filter(([id]) => !id.startsWith('s-')));
+    const sources = [{ id: 'local', name: 'Tu catálogo' }, ...data.sources];
+    searchStatus = sources.map(source => ({ id: source.id, name: source.name, state: 'loading' }));
+    const started = Date.now();
+    for (const source of sources) {
+      fetch(`${apiBase}/holy-api/search?source=${encodeURIComponent(source.id)}&q=${encodeURIComponent(words)}`)
+        .then(response => response.json())
+        .then(result => {
+          if (token !== searchToken) return;
+          const seconds = ((Date.now() - started) / 1000).toFixed(1).replace('.', ',');
+          searchStatus = searchStatus.map(entry => entry.id === source.id ? { ...entry, state: result.error ? 'error' : 'done', count: result.items.length, seconds } : entry);
+          if (result.items.length) searchRows = [...searchRows, { id: 's-' + source.id, title: source.id === 'local' ? 'En tu catálogo' : `${source.name} · ${result.items.length}`, items: result.items }];
+        })
+        .catch(() => { if (token === searchToken) searchStatus = searchStatus.map(entry => entry.id === source.id ? { ...entry, state: 'error' } : entry); });
+    }
+  }
+  function typed() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(search, 700);
+  }
+  let episodesToken = 0;
+  async function openEpisodes(show) {
+    // $state stores a proxy, so the pending request is matched by token, not identity.
+    const token = ++episodesToken;
+    const view = { token, show: $state.snapshot(show), seasons: [], loading: true, error: '', from: { rowIndex } };
+    episodesView = view; rowIndex = 0; inSearch = false; searchInput?.blur();
+    try {
+      const response = await fetch(`${apiBase}/holy-api/episodes?source=${encodeURIComponent(show.source)}&show=${encodeURIComponent(show.show)}`);
+      const result = await response.json();
+      if (episodesView?.token !== token) return;
+      episodesView = { ...view, seasons: result.seasons, loading: false, error: result.error || (result.seasons.length ? '' : 'No se encontraron episodios.') };
+    } catch { if (episodesView?.token === token) episodesView = { ...view, loading: false, error: 'No se pudo leer la lista de episodios.' }; }
+  }
+  function closeEpisodes() {
+    const from = episodesView?.from;
+    episodesView = null;
+    rowIndex = from?.rowIndex || 0;
+  }
+  function choose(item) {
+    if (item?.isShow) openEpisodes(item);
+    else play(item);
   }
   function move(direction) {
     if (inNav) {
@@ -94,12 +162,18 @@
       else if (direction === 'down' && rows.length) inNav = false;
       return;
     }
-    if (!row) { if (direction === 'up') inNav = true; return; }
+    if (inSearch) {
+      if (direction === 'up') leaveSearch('up');
+      else if (direction === 'down' && rows.length) { leaveSearch('down'); rowIndex = 0; }
+      return;
+    }
+    if (!row) { if (direction === 'up') { if (section === 'buscar' && !episodesView) focusSearch(); else inNav = true; } return; }
     if (direction === 'left' || direction === 'right') {
       const next = Math.max(0, Math.min(row.items.length - 1, column + (direction === 'right' ? 1 : -1)));
       columns = { ...columns, [row.id]: next };
     } else if (direction === 'up') {
-      if (rowIndex === 0) { inNav = true; navIndex = Math.max(0, SECTIONS.findIndex(entry => entry.id === section)); }
+      if (rowIndex === 0 && section === 'buscar' && !episodesView) focusSearch();
+      else if (rowIndex === 0) { inNav = true; navIndex = Math.max(0, SECTIONS.findIndex(entry => entry.id === section)); }
       else rowIndex--;
     } else if (direction === 'down' && rowIndex < rows.length - 1) rowIndex++;
   }
@@ -107,15 +181,23 @@
     const code = event.keyCode;
     if (navigationError) return;
     const direction = { 37: 'left', 38: 'up', 39: 'right', 40: 'down' }[code];
+    // While typing, letters and left/right belong to the field; Enter submits it.
+    if (inSearch && document.activeElement === searchInput) {
+      if (direction === 'up' || direction === 'down') { event.preventDefault(); move(direction); }
+      else if (code === 461 || code === 27) { event.preventDefault(); leaveSearch(rows.length ? 'down' : 'up'); }
+      return;
+    }
     if (direction) { event.preventDefault(); if (!opening) move(direction); return; }
     if (code === 13) {
       event.preventDefault();
       if (opening) return;
       if (inNav) { if (navIndex === SECTIONS.length) refresh(); else chooseSection(SECTIONS[navIndex].id); }
-      else play(focused);
+      else if (inSearch) focusSearch();
+      else choose(focused);
     } else if (code === 403) { event.preventDefault(); forget(focused); }
     else if (code === 461 || code === 27) {
       if (opening) { event.preventDefault(); opening = null; command('home'); }
+      else if (episodesView) { event.preventDefault(); closeEpisodes(); }
       else if (inNav) { event.preventDefault(); inNav = false; }
       else if (rowIndex > 0) { event.preventDefault(); rowIndex = 0; }
       else if (section !== 'inicio') { event.preventDefault(); chooseSection('inicio'); }
@@ -128,7 +210,7 @@
   }
   // Pointer (Magic Remote): hovering focuses, clicking plays.
   function hover(r, c) {
-    inNav = false; rowIndex = r;
+    inNav = false; inSearch = false; rowIndex = r;
     columns = { ...columns, [rows[r].id]: c };
   }
 
@@ -172,15 +254,29 @@
     <div class="brand" aria-label="Holy">HOLY</div>
     <nav aria-label="Secciones">
       {#each SECTIONS as entry, index}
-        <button class:current={section === entry.id} class:focus={inNav && navIndex === index} onclick={() => chooseSection(entry.id)}>{entry.name}</button>
+        <button class:current={section === entry.id} class:focus={inNav && navIndex === index} onclick={() => chooseSection(entry.id)}>{#if entry.id === 'buscar'}<Icon name="search" size={24} stroke={2.4} />{/if}{entry.name}</button>
       {/each}
       <button class="icon" class:focus={inNav && navIndex === SECTIONS.length} aria-label="Buscar estrenos ahora" onclick={refresh}><Icon name="reload" size={26} stroke={2.4} /></button>
     </nav>
     <span class="status" class:offline={!connected}>{connected ? 'Conectado al Mac' : 'Sin Mac'}</span>
   </header>
 
-  {#if preview}
-    <section class="preview" aria-live="polite">
+  {#if section === 'buscar' && !episodesView}
+    <form class="searchbar" class:focus={inSearch} onsubmit={event => { event.preventDefault(); search(); }}>
+      <Icon name="search" size={34} stroke={2.4} />
+      <input bind:this={searchInput} bind:value={query} oninput={typed} onfocus={() => { inSearch = true; inNav = false; }} placeholder="Película, anime o dorama…" autocomplete="off" spellcheck="false" aria-label="Buscar en todos los sitios" />
+    </form>
+    {#if searchStatus.length}
+      <p class="sources-status">
+        {#each searchStatus as entry}
+          <span class={entry.state}>{entry.name}{entry.state === 'done' ? ` · ${entry.count} · ${entry.seconds} s` : entry.state === 'error' ? ' · sin respuesta' : ' · buscando…'}</span>
+        {/each}
+      </p>
+    {/if}
+  {/if}
+
+  {#if preview && !(section === 'buscar' && !episodesView && (inSearch || !rows.length))}
+    <section class="preview" class:lower={section === 'buscar' && !episodesView} aria-live="polite">
       {#key preview.url}
         <div class="preview-text">
           {#if preview.reason}<p class="reason">{preview.reason}</p>{/if}
@@ -196,7 +292,7 @@
           {#if preview.genres?.length}<p class="genres">{preview.genres.slice(0, 4).join(' · ')}</p>{/if}
           {#if preview.overview}<p class="overview">{preview.overview}</p>{/if}
           <p class="hint">
-            <span class="key">OK</span>{preview.resume ? 'Continuar desde ' + clock(preview.t) : preview.upNext ? 'Ver ' + (preview.subtitle || 'siguiente') : 'Reproducir'}
+            <span class="key">OK</span>{preview.isShow ? 'Ver episodios' : preview.resume ? 'Continuar desde ' + clock(preview.t) : preview.upNext ? 'Ver ' + (preview.subtitle || 'siguiente') : 'Reproducir'}
             {#if preview.resume && preview.duration}<span class="left">{remaining(preview.t, preview.duration)}</span>{/if}
             {#if row?.id === 'continue' && !inNav}<span class="key red-key"></span>Quitar de la fila{/if}
           </p>
@@ -208,20 +304,29 @@
   <main class="shelves" class:nav-focus={inNav}>
     {#if !rows.length}
       <div class="empty">
-        <h2>{notice || (apiBase ? 'Preparando tu catálogo…' : 'Conectando con el Mac…')}</h2>
-        <p>Holy toma los estrenos de tus sitios favoritos y los ordena según lo que ves.</p>
+        {#if episodesView}
+          <h2>{episodesView.loading ? 'Cargando episodios de ' + episodesView.show.title + '…' : episodesView.error}</h2>
+          <p>Atrás vuelve a los resultados.</p>
+        {:else if section === 'buscar'}
+          <h2>{searchStatus.length && searchStatus.every(entry => entry.state !== 'loading') ? 'Sin resultados para «' + query.trim() + '»' : searchStatus.length ? 'Buscando en todos tus sitios…' : 'Busca en todos tus sitios a la vez'}</h2>
+          <p>Cuevana 3, RePelisHD, JKAnime y DoramasMP4. Los que respondan primero aparecen primero.</p>
+        {:else}
+          <h2>{notice || (apiBase ? 'Preparando tu catálogo…' : 'Conectando con el Mac…')}</h2>
+          <p>Holy toma los estrenos de tus sitios favoritos y los ordena según lo que ves.</p>
+        {/if}
       </div>
     {/if}
     <div class="rows" bind:this={rowsEl}>
       {#each rows as shelf, r (section + shelf.id)}
-        <section class="row" class:active={!inNav && r === rowIndex} class:past={r < rowIndex} aria-label={shelf.title}>
+        <section class="row" class:landscape-row={shelf.layout === 'landscape'} class:active={!inNav && !inSearch && r === rowIndex} class:past={r < rowIndex} aria-label={shelf.title}>
           <h2>{shelf.title}</h2>
           <div class="track-clip">
             <div class="track" style:transform={`translateX(${-(columns[shelf.id] || 0) * ((shelf.layout === 'landscape' ? 400 : 230) + 20)}px)`}>
-              {#each shelf.items as item, c (item.url + c)}
-                {@const active = !inNav && r === rowIndex && c === column}
+              <!-- Only rows near the focus get cards: long episode lists stay light on the TV. -->
+              {#each Math.abs(r - rowIndex) <= 2 ? shelf.items : [] as item, c (item.url + c)}
+                {@const active = !inNav && !inSearch && r === rowIndex && c === column}
                 <button class="card" class:landscape={shelf.layout === 'landscape'} class:focus={active} aria-label={item.title + (item.subtitle ? ', ' + item.subtitle : '')}
-                  onmouseenter={() => hover(r, c)} onclick={() => { hover(r, c); play(item); }}>
+                  onmouseenter={() => hover(r, c)} onclick={() => { hover(r, c); choose(item); }}>
                   <span class="art">
                     <span class="fallback">{item.title}</span>
                     {#if shelf.layout === 'landscape' ? item.backdrop || item.poster : item.poster || item.backdrop}
@@ -313,7 +418,8 @@
   .row h2{margin:0 0 4px 96px;font-size:30px;font-weight:700;color:#e5e5e5;letter-spacing:-.2px}
   .row.active h2{color:#fff}
   .track-clip{overflow:hidden;padding:18px 0 24px 96px}
-  .track{display:flex;gap:20px;transition:transform .4s var(--ease);will-change:transform}
+  .track{display:flex;gap:20px;min-height:345px;transition:transform .4s var(--ease);will-change:transform}
+  .landscape-row .track{min-height:225px}
   .card{flex:none;width:230px;padding:0;border:0;background:none;border-radius:10px;transition:transform .3s var(--ease)}
   .card.landscape{width:400px}
   .art{position:relative;display:block;width:100%;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#1f1f1f;box-shadow:0 8px 20px rgba(0,0,0,.5)}
@@ -333,6 +439,18 @@
   .card:focus{outline:none}
 
   .empty{position:absolute;left:96px;top:40px;max-width:1100px}
+  .searchbar{position:absolute;left:96px;top:140px;z-index:4;width:1100px;height:88px;display:flex;align-items:center;gap:20px;padding:0 32px;border-radius:14px;background:rgba(40,40,40,.92);border:3px solid transparent;color:#bbb;transition:border-color .2s,background .2s}
+  .searchbar.focus{border-color:#fff;background:rgba(60,60,60,.95);color:#fff}
+  .searchbar input{flex:1;min-width:0;height:100%;border:0;outline:none;background:transparent;font-size:34px;color:#fff;font-family:inherit}
+  .searchbar input::placeholder{color:#8c8c8c}
+  .sources-status{position:absolute;left:96px;top:244px;z-index:4;display:flex;flex-wrap:wrap;gap:12px;margin:0;font-size:19px}
+  .sources-status span{padding:6px 14px;border-radius:20px;background:rgba(255,255,255,.1);color:#cfcfcf}
+  .sources-status .done{background:rgba(70,180,90,.22);color:#c9f5d0}
+  .sources-status .error{background:rgba(229,9,20,.22);color:#ffc2c5}
+  .preview.lower{top:300px}
+  .preview.lower h1{font-size:56px}
+  .preview.lower .overview{-webkit-line-clamp:2}
+  nav button :global(svg){margin-right:8px;vertical-align:-4px}
   .empty h2{font-size:38px;margin:0 0 10px}
   .empty p{font-size:24px;color:var(--secondary);margin:0}
   .toast{position:absolute;right:96px;top:130px;z-index:6;max-width:640px;padding:16px 24px;border-radius:12px;background:rgba(30,30,30,.92);font-size:21px;animation:rise .35s var(--ease)}

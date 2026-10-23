@@ -1,6 +1,6 @@
-# Holy 0.1.0 · informe
+# Holy · informe
 
-Fecha: 2026-10-23. Rama `holy`. App webOS `com.lgapp.holy`, separada de Luma (`com.lgapp.lab`). **Probado solo en el Mac** (Chrome de escritorio sin interfaz y el panel del navegador); la TV no se usó porque otra sesión tenía pruebas activas.
+Fecha: 2026-10-23. Rama `holy`. App webOS `com.lgapp.holy`, separada de Luma (`com.lgapp.lab`). 0.1.0 se probó en el Mac; **0.2.0 (con buscador) se instaló y probó en la TV** a las 13:00–13:35, sin otras sesiones activas.
 
 ## Rama
 
@@ -18,6 +18,7 @@ Fecha: 2026-10-23. Rama `holy`. App webOS `com.lgapp.holy`, separada de Luma (`c
 | Al dar clic, directo al vídeo, transparente | Hecho en Mac: el Mac resuelve el reproductor; cortina de Holy; autoplay; pantalla completa |
 | Recomendar según gustos | Hecho: perfil por géneros/tipo con decaimiento temporal; «Porque viste X»; filas «Porque te gusta: …» |
 | «La lista que te voy a enviar» | Pendiente de recibir; ahora se usan los favoritos que ya existían |
+| Buscador en todas las páginas, las más rápidas primero | Hecho (0.2.0): los 4 sitios a la vez; cada fila aparece cuando su sitio responde |
 
 ## Directo al vídeo, por sitio
 
@@ -55,3 +56,22 @@ Hallazgos durante la prueba:
 ## Pendiente
 
 Ver «Pendiente» en `docs/SOUL.md`. Lo principal: instalar `artifacts/com.lgapp.holy_0.1.0_all.ipk` y repetir el recorrido en la TV cuando nadie más la use.
+
+## Prueba en la TV (`evidence/holy/tv/`)
+
+LG 75UR8750PSA real, `validate-holy-tv.mjs`: un solo proceso (servidor + catálogo + puente pasivo de Holy), vídeo silenciado, historial de prueba en un archivo aparte que se borra. Antes: Luma al frente en su inicio. Después: se reabrió Luma y su laboratorio pasivo se reconectó solo.
+
+| Muestra (segunda pasada completa) | Hasta reproducir | Avanza | Atrás → Holy | Posición guardada |
+| --- | --- | --- | --- | --- |
+| Cuevana · Street Fighter | 12,7 s | Sí | Sí | 78 s |
+| RePelisHD · Idiots (Mixdrop) | 22,4 s | Sí | Sí | 10 s |
+| JKAnime · Hyouken II ep. 3 | 11,7 s | Sí | Sí | 11 s |
+| DoramasMP4 · Till I See You cap. 9 (ok.ru) | 13,1 s | Sí | Sí | 19 s |
+| Cuevana · Shaque 1x5 | 8,5 s | Sí | Sí | 30 s |
+| Reanudar Street Fighter | 10,3 s | Sí, desde 78 s | Sí | 84 s |
+
+La app no se cerró en ninguna muestra (dos pasadas completas y dos de búsqueda). Memoria libre de la TV 154 MB antes y 189 MB después en la primera pasada. Cuevana y ok.ru recuerdan su propia posición entre pruebas, por eso algunas muestras no empiezan en 0. Las capturas con vídeo salen negras: la TV dibuja el vídeo en una capa de hardware que no entra en la captura; se mide con la posición del `<video>`.
+
+Primera pasada: un error de medición del validador marcó «no avanza» en tres muestras (leía la posición antes de que el puente la registrara); corregido, las posiciones finales sí avanzaban.
+
+**Buscador en TV** (`search-validation.json`): «one piece» → Tu catálogo 0,2 s, Cuevana 0,4 s (23), RePelisHD 0,7 s (16), JKAnime 0,8 s (22), DoramasMP4 1,2 s (1). OK en One Piece (JKAnime) → 24 bloques de episodios → episodio 1180 reproduciendo en 10,3 s → Atrás a Holy. El texto se escribió por código; falta probar el teclado en pantalla con el control real.

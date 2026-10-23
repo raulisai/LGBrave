@@ -1,0 +1,52 @@
+{
+  "capturedAt": "2026-10-23T19:20:08.057Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "search",
+      "query": "one piece",
+      "seconds": 2.063,
+      "status": [
+        "Tu catálogo · 0 · 0,2 s",
+        "Cuevana 3 · 23 · 0,4 s",
+        "RePelisHD · 16 · 0,7 s",
+        "JKAnime · 22 · 0,8 s",
+        "DoramasMP4 · 1 · 1,2 s"
+      ],
+      "rows": [
+        "Cuevana 3 · 23",
+        "RePelisHD · 16",
+        "JKAnime · 22",
+        "DoramasMP4 · 1"
+      ],
+      "episodes": 24,
+      "focus": "One Piece, Episodio 1180",
+      "phase": "playing",
+      "secondsToPlay": 10.324,
+      "appAlive": true,
+      "player": "https://jkanime.net/jkplayer/um",
+      "position": {
+        "t": 8.237878,
+        "d": 1415.6647179999986
+      },
+      "homeShown": true
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.lab"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.lab",
+        "url": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html"
+      }
+    ],
+    "memory": "memory  1252016  933556  62164   45980   256296      213300"
+  },
+  "after": {
+    "memory": "memory  1252016  856264  145812  44120   249940      292192"
+  },
+  "bridgeErrors": []
+}

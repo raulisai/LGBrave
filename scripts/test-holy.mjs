@@ -105,6 +105,27 @@ try {
     delete globalThis.window; delete globalThis.document; delete globalThis.location; delete globalThis.getComputedStyle;
   });
 
+  await check('Búsqueda: resultados de los 4 sitios, series como fichas con episodios', async () => {
+    const cv = cuevana.parseSearch('<div class="movie-item"><a href="https://cuevana3c.pro/pelicula/batman-x" data-instant><figure><img src=https://image.tmdb.org/t/p/w200/b.jpg class="poster"><span class="year text-center">2026</span></figure><div class="item-detail"><p>Batman X</p></div></a></div><div class="movie-item"><a href="https://cuevana3c.pro/serie/nadie-quiere-esto"><img src=x><div class="item-detail"><p>Nadie quiere esto</p></div></a></div>');
+    assert.deepEqual(cv.map(item => [item.kind, item.title, !!item.isShow]), [['movie', 'Batman X', false], ['series', 'Nadie quiere esto', true]]);
+    assert.equal(cv[0].poster, 'https://image.tmdb.org/t/p/w342/b.jpg');
+    assert.equal(jkanime.searchURL('one piece'), 'https://jkanime.net/buscar/one_piece/');
+    const jk = jkanime.parseSearch('<div class="anime__item"> <a  href="https://jkanime.net/one-piece/"><div class="g-0 anime__item__pic set-bg" data-setbg="https://cdn.jkdesa.com/op.jpg"></div></a><div class="anime__item__text"><ul><li>En emision</li> <li class="anime">Serie</li></ul><h5><a  href="https://jkanime.net/one-piece/">One Piece</a></h5></div>');
+    assert.deepEqual([jk[0].title, jk[0].show, jk[0].poster, jk[0].badge], ['One Piece', 'https://jkanime.net/one-piece/', 'https://cdn.jkdesa.com/op.jpg', 'Serie']);
+    assert.equal(repelishd.parseSearch(repelisHome.replace('<h2>Últimas Películas Agregadas</h2>', ''))[0].title, 'Idiots');
+    const dm = doramasmp4.parseSearch('<article class="bs"><a href="https://doramasmp4.cyou/series/love-on-hire/" itemprop="url" title="Love on Hire" class="tip"><span class="epx">En emisión</span><img src="https://i1.wp.com/p.jpg"/></a></article>');
+    assert.deepEqual([dm[0].title, dm[0].isShow, dm[0].badge], ['Love on Hire', true, 'En emisión']);
+    // Episodes: Cuevana by season pages, DoramasMP4 by the show's own chapter links, JKAnime by its paginated list.
+    const seasons = await cuevana.episodes('https://cuevana3c.pro/serie/x', async url => url.endsWith('/x') ? '<a href="https://cuevana3c.pro/serie/x/temporada-2"></a><a href="https://cuevana3c.pro/serie/x/temporada-1"></a>' : url.endsWith('temporada-1') ? '<a href="https://cuevana3c.pro/serie/x/episodio-1x2"></a><a href="https://cuevana3c.pro/serie/x/episodio-1x1"></a>' : '<a href="https://cuevana3c.pro/serie/x/episodio-2x1"></a>');
+    assert.deepEqual(seasons.map(season => season.title + ':' + season.episodes.map(e => e.label).join('|')), ['Temporada 1:Episodio 1x1|Episodio 1x2', 'Temporada 2:Episodio 2x1']);
+    const chapters = await doramasmp4.episodes('https://doramasmp4.cyou/series/love-on-hire/', async () => '<a href="https://doramasmp4.cyou/cap/love-on-hire-capitulo-2/"></a><a href="https://doramasmp4.cyou/cap/love-on-hire-capitulo-1/"></a><a href="https://doramasmp4.cyou/cap/otra-capitulo-9/"></a>');
+    assert.deepEqual(chapters[0].episodes.map(e => e.episode), [1, 2]);
+    const pages = { 1: { last_page: 2, data: [{ number: 1, image: 'a.jpg' }] }, 2: { last_page: 2, data: [{ number: 60, image: 'z.jpg' }] } };
+    const blocks = await jkanime.episodes('https://jkanime.net/x/', async () => 'ajax/episodes/201/', async url => JSON.stringify(pages[url.split('/').at(-1)]));
+    assert.deepEqual(blocks.map(block => block.title), ['Episodios 11–60', 'Episodios 1–10']);
+    assert.equal(blocks[0].episodes[0].still, 'https://cdn.jkdesa.com/assets/images/animes/video/image/z.jpg');
+  });
+
   let now = Date.UTC(2026, 9, 23);
   const library = new Library(join(directory, 'library.json'), () => now);
   const anime = { source: 'jkanime', kind: 'anime', title: 'One Piece', url: 'https://jkanime.net/one-piece/1180/', show: 'https://jkanime.net/one-piece/', episode: 1180, genres: ['Acción', 'Shounen'] };
