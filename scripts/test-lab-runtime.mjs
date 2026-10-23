@@ -12,7 +12,7 @@ import {findLumaTarget} from './cdp.mjs';
 
 let passed = 0;
 const check = async (name,fn) => { await fn(); passed++; };
-const luma = id => ({id,description:'com.lgapp.lab',url:'https://example.com/'});
+const luma = id => ({id,description:'com.lgapp.holy',url:'https://example.com/'});
 const pluto = {id:'pluto',description:'tv.pluto',url:'https://pluto.tv/'};
 let current = [pluto], offline = false;
 const calls = [];
@@ -22,7 +22,7 @@ const runtime = new LabRuntime({
  openTunnel:async()=>({endpoint:'http://127.0.0.1:1234',close:()=>calls.push('tunnel-close')}),
  targets:async()=>{ if(offline)throw Error('TV apagada');return current; },
  connect:async()=>{
-  let resolve; const c={target:current.find(t=>t.description==='com.lgapp.lab'),closed:new Promise(r=>{resolve=r}),
+  let resolve; const c={target:current.find(t=>t.description==='com.lgapp.holy'),closed:new Promise(r=>{resolve=r}),
    close(){calls.push('cdp-close');resolve()}, call(){throw Error('Must not navigate, launch, activate or focus')}};
   connections.push(c);calls.push('connect');return c;
  },
@@ -55,9 +55,9 @@ try {
   current=[luma('three')];await runtime.step();assert.equal(calls.filter(x=>x==='connect').length,4);
  });
  await check('Other apps cannot match by a coincidental URL path',()=>{
-  assert.equal(findLumaTarget([{...pluto,url:'https://example.com/com.lgapp.lab/'}]),undefined);
-  assert.equal(findLumaTarget([{...pluto,url:'file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html'}]),undefined);
-  assert.ok(findLumaTarget([{id:'file',url:'file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html'}]));
+  assert.equal(findLumaTarget([{...pluto,url:'https://example.com/com.lgapp.holy/'}]),undefined);
+  assert.equal(findLumaTarget([{...pluto,url:'file:///media/developer/apps/usr/palm/applications/com.lgapp.holy/index.html'}]),undefined);
+  assert.ok(findLumaTarget([{id:'file',url:'file:///media/developer/apps/usr/palm/applications/com.lgapp.holy/index.html'}]));
  });
  await check('Stopping the runtime prevents further connections',async()=>{
   await runtime.close();const size=calls.length;await runtime.step();assert.equal(calls.length,size);

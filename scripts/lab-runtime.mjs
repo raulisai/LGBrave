@@ -47,7 +47,7 @@ export class LabRuntime {
       if (!target) {
         await this.detach();
         this.sessionTabs = null; this.sessionTargetId = null;
-        this.setState('waiting', 'En espera: abre Luma con el control de la TV. No se abrirá automáticamente.');
+        this.setState('waiting', 'En espera: abre Holy con el control de la TV. No se abrirá automáticamente.');
         return;
       }
       if (this.connectionClosed || this.cdp?.target.id !== target.id) {
@@ -62,7 +62,7 @@ export class LabRuntime {
         this.bridge = this.makeBridge(this.cdp, { tabs: this.sessionTargetId === target.id ? this.sessionTabs : undefined });
         await this.bridge.start();
         if (this.stopping) { await this.detach(); return; }
-        this.setState('connected', `Luma conectado de forma pasiva: ${this.tunnel.endpoint}`);
+        this.setState('connected', `Holy conectado de forma pasiva: ${this.tunnel.endpoint}`);
       } else {
         await this.bridge.refreshFilters?.();
         await this.bridge.status();

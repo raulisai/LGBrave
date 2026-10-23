@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { decideCleaning, CleanerRules, cleanerSource } from './ad-cleaner.mjs';
-import { BrowserBridge } from './browser-bridge.mjs';
+import { BrowserBridge, home } from './browser-bridge.mjs';
 
 const directory = mkdtempSync(join(tmpdir(), 'luma-cleaner-'));
 const checks = [];
@@ -108,7 +108,7 @@ try {
     assert.ok(!bridge.documentSource('https://news.example/otra', 'true')?.includes('div.ad-slot'));
   });
   mark = calls.length;
-  bridge.frames.set(bridge.mainFrame, 'http://192.168.1.148:43187/luma-home/');
+  bridge.frames.set(bridge.mainFrame, home);
   await bridge.command({ action: 'clean-ads' });
   await check('En Inicio no se escanea nada', () => {
     assert.equal(report().ok, false);

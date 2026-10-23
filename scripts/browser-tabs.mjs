@@ -1,3 +1,4 @@
+import { packagedPrefix } from './holy/config.mjs';
 // Session-only tabs: one live webOS page, independent histories for suspended tabs.
 // No URLs are written to disk (player URLs can contain private tokens).
 export class BrowserTabs {
@@ -9,7 +10,7 @@ export class BrowserTabs {
   }
   get active() { return this.items.find(tab => tab.id === this.activeId); }
   label(url) {
-    if (url === this.home || url.startsWith('file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/')) return 'Inicio';
+    if (url === this.home || url.startsWith(packagedPrefix)) return 'Inicio';
     try { return new URL(url).hostname.replace(/^www\./, '') || 'Página'; } catch { return 'Página'; }
   }
   create(url = this.home) {

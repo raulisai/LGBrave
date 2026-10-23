@@ -1,4 +1,4 @@
-# Luma Browser Lab
+# Holy (rama `holy`, motor de Luma Browser Lab)
 
 Antes de planear cambios, leer **solo `docs/SOUL.md`**: es el resumen vivo (qué hay, qué falta, reglas, mapa y comandos). No releer todo el proyecto; consultar únicamente los archivos que su mapa señale. Abrir `docs/SEMILLA.md` (detalle histórico) solo si SOUL no basta. Revisar `git status` y cambios existentes antes de editar.
 

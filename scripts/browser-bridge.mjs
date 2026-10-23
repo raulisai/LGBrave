@@ -8,9 +8,10 @@ import { BrowserTabs } from './browser-tabs.mjs';
 import { FlightRecorder } from './flight-recorder.mjs';
 import { cleanerSource, decideCleaning, CleanerRules } from './ad-cleaner.mjs';
 import { dirname, join } from 'node:path';
+import { HOME_PATH, origin, packagedPrefix } from './holy/config.mjs';
 
-export const packagedHome = 'file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html';
-export const home = (process.env.LAB_ORIGIN || 'http://192.168.1.148:43187') + '/luma-home/';
+export const packagedHome = packagedPrefix + 'index.html';
+export const home = origin() + HOME_PATH;
 // Hosts whose filters are registered once at start, so links into them are covered too.
 const PRESETS = [{ key: 'youtube', pattern: '(^|\\.)youtube(-nocookie)?\\.com$', sample: 'https://www.youtube.com/' }];
 // «No soy un robot» is a real check the user must solve, not advertising: never filter or touch it.

@@ -1,0 +1,278 @@
+{
+  "capturedAt": "2026-10-23T10:59:16.621Z",
+  "scope": "Chrome de escritorio sin interfaz en el Mac, no la TV. Muestras cortas, el título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "1-cuevana",
+      "source": "cuevana",
+      "title": "Street Fighter",
+      "page": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "player": "https://tungtungsahur.cuevana3c.pro/",
+      "phase": "playing",
+      "secondsToPlay": 7.2,
+      "frames": [
+        {
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "top": true,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/uf611mx8ayux",
+          "top": false,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 0.943335,
+          "d": 6629.3
+        },
+        "last": {
+          "t": 30.98825,
+          "d": 6629.3
+        }
+      },
+      "advancing": true,
+      "curtainGone": false,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 31,
+        "duration": 6629
+      }
+    },
+    {
+      "label": "2-repelishd",
+      "source": "repelishd",
+      "title": "Idiots",
+      "page": "https://repelishd.blog/ver-pelicula/25950-idiots-online-espanol.html",
+      "player": "https://mxdrop.to/e/q11p1n4purnekw",
+      "phase": "playing",
+      "secondsToPlay": 5.6,
+      "frames": [
+        {
+          "url": "https://mxdrop.click/e/q11p1n4purnekw",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "https://www.google.com/recaptcha/api2/anchor",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        }
+      ],
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 0.536488,
+          "d": 5987.008
+        },
+        "last": {
+          "t": 8.549151,
+          "d": 5987.008
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 9,
+        "duration": 5987
+      }
+    },
+    {
+      "label": "3-jkanime",
+      "source": "jkanime",
+      "title": "Hyouken no Majutsushi ga Sekai wo Suberu II",
+      "page": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "phase": "playing",
+      "secondsToPlay": 5.7,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 0.941635,
+          "d": 1454.9538949999999
+        },
+        "last": {
+          "t": 8.952908,
+          "d": 1454.9538949999999
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 9,
+        "duration": 1455
+      }
+    },
+    {
+      "label": "4-doramasmp4",
+      "source": "doramasmp4",
+      "title": "Till I See You",
+      "page": "https://doramasmp4.cyou/cap/till-i-see-you-capitulo-9/",
+      "player": "https://ok.ru/videoembed/17400240671298",
+      "phase": "playing",
+      "secondsToPlay": 10.8,
+      "frames": [
+        {
+          "url": "https://ok.ru/videoembed/17400240671298",
+          "top": true,
+          "videos": 2,
+          "action": ""
+        }
+      ],
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 0.850983,
+          "d": 1129.13
+        },
+        "last": {
+          "t": 8.865593,
+          "d": 1129.13
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 9,
+        "duration": 1129
+      }
+    },
+    {
+      "label": "5-cuevana",
+      "source": "cuevana",
+      "title": "Shaque: No confíes en nadie",
+      "page": "https://cuevana3c.pro/serie/shaka-trust-no-one/episodio-1x5",
+      "player": "https://tungtungsahur.cuevana3c.pro/",
+      "phase": "playing",
+      "secondsToPlay": 3.5,
+      "frames": [
+        {
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "top": true,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/1axfrsky38mx",
+          "top": false,
+          "videos": 1,
+          "action": ""
+        },
+        {
+          "url": "https://mc.yandex.ru/metrika/match.html",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        }
+      ],
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 0.224868,
+          "d": 2288.583
+        },
+        "last": {
+          "t": 8.239468,
+          "d": 2288.583
+        }
+      },
+      "advancing": true,
+      "curtainGone": false,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 8,
+        "duration": 2289
+      }
+    },
+    {
+      "label": "resume",
+      "source": "cuevana",
+      "title": "Street Fighter",
+      "page": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "player": "https://tungtungsahur.cuevana3c.pro/",
+      "phase": "playing",
+      "secondsToPlay": 2.5,
+      "frames": [
+        {
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "top": true,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/uf611mx8ayux",
+          "top": false,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 30.851342,
+          "d": 6629.3
+        },
+        "last": {
+          "t": 34.858357,
+          "d": 6629.3
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 35,
+        "duration": 6629
+      },
+      "resumedFrom": 31,
+      "resumeOk": true
+    }
+  ],
+  "errors": [],
+  "homeRows": [
+    "Continuar viendo",
+    "Recomendado para ti",
+    "Películas recién llegadas",
+    "Anime · nuevos episodios",
+    "Doramas · nuevos capítulos",
+    "Series · últimos episodios",
+    "Porque te gusta: Acción",
+    "Porque te gusta: Fantasía"
+  ],
+  "bridgeErrors": []
+}

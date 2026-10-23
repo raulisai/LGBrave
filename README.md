@@ -1,3 +1,15 @@
+# Holy · LG webOS
+
+App de películas, anime, doramas y series con interfaz tipo Netflix para la LG 75UR8750PSA (`com.lgapp.holy`). Usa el motor de Luma Browser Lab (puente del Mac, bloqueo de Brave, escudos) y abre directamente el reproductor de cada sitio. Estado y comandos en [docs/SOUL.md](docs/SOUL.md); informe en [docs/HOLY.md](docs/HOLY.md).
+
+```sh
+npm run holy      # en el Mac: inicio, catálogo y puente (espera a que abras Holy en la TV)
+npm test
+npm run package   # IPK en artifacts/
+```
+
+---
+
 # Luma Browser Lab · LG webOS
 
 Prototipo Svelte con interfaz inspirada en Safari y motor de bloqueo de Brave. Instalado como `com.lgapp.lab`, versión 0.6.0, en LG 75UR8750PSA. Trabajo del 21 de octubre de 2026.
