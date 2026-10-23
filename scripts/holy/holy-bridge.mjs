@@ -7,6 +7,8 @@ import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource 
 // opened at the player its site would show, started automatically behind a
 // curtain, and its position is remembered for «Continuar viendo».
 const START_TIMEOUT = 45000;
+// A server that shows nothing playable this long is swapped for the title's next one.
+const SERVER_TIMEOUT = 28000;
 const SAVE_EVERY = 10000;
 
 export class HolyBridge extends BrowserBridge {
@@ -16,6 +18,9 @@ export class HolyBridge extends BrowserBridge {
     this.library = options.library;
     this.apiBase = options.apiBase || origin();
     this.mute = options.mute === true;
+    this.serverTimeout = options.serverTimeout || SERVER_TIMEOUT;
+    this.startTimeout = options.startTimeout || START_TIMEOUT;
+    this.stallTimeout = options.stallTimeout || 20000;
     this.remoteContexts = new Set();
     // Cross-origin player iframes may run as their own targets (sessions).
     this.childSessions = new Map();
@@ -114,13 +119,34 @@ export class HolyBridge extends BrowserBridge {
     // Without a resolved player, open the title's page: the autoplay step finds the player there.
     target ||= { url: item.url };
     this.library.start(item);
-    session.phase = 'opening'; session.opened = Date.now(); session.target = target.url;
-    await this.prepareDocument(target.url);
-    this.explicitNavigationURL = target.url;
-    this.beginNavigation(target.url);
+    session.queue = [...(target.alternatives || [])];
+    session.referrer = target.referrer;
+    session.servers = 1;
+    await this.openServer(session, target.url);
+  }
+  async openServer(session, url) {
+    session.phase = 'opening'; session.opened = Date.now(); session.target = url; session.position = null;
+    await this.prepareDocument(url);
+    this.explicitNavigationURL = url;
+    this.beginNavigation(url);
     await this.status();
-    const result = await this.cdp.call('Page.navigate', { url: target.url, ...(target.referrer ? { referrer: target.referrer } : {}) });
-    if (result.errorText && this.session === session) { session.phase = 'failed'; await this.navigationFailed(this.readableError(result.errorText)); }
+    const result = await this.cdp.call('Page.navigate', { url, ...(session.referrer ? { referrer: session.referrer } : {}) }).catch(error => ({ errorText: error.message }));
+    if (result.errorText && this.session === session) {
+      if (session.queue?.length) return this.nextServer(session);
+      session.phase = 'failed'; await this.navigationFailed(this.readableError(result.errorText));
+    }
+  }
+  // The title's next server, behind the same curtain.
+  async nextServer(session) {
+    const url = session.queue.shift();
+    session.servers++;
+    // After a start the curtain script was dropped: cover the next server's page again.
+    if (!this.curtainScript) {
+      const item = session.item;
+      this.curtainScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: curtainSource({ title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Probando otro servidor…' }), worldName: this.toolbarWorld }).catch(() => ({})))?.identifier || null;
+    }
+    await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify('Probando otro servidor (' + session.servers + ')…')})`);
+    await this.openServer(session, url);
   }
   async evaluateWithGesture(expression, contextId, sessionId) {
     const result = await this.cdp.call('Runtime.evaluate', { expression, contextId, returnByValue: true, awaitPromise: true, userGesture: true }, sessionId);
@@ -142,7 +168,11 @@ export class HolyBridge extends BrowserBridge {
   async watch() {
     const session = this.session;
     if (!session || this.watching || !['opening', 'playing', 'manual'].includes(session.phase)) return;
-    if (this.navigation.phase === 'error') { await this.endSession(); await this.status(); return; }
+    if (this.navigation.phase === 'error') {
+      if (session.phase === 'opening' && session.queue?.length) { await this.nextServer(session); return; }
+      await this.endSession(); await this.status(); return;
+    }
+    if (session.phase === 'opening' && session.queue?.length && Date.now() - session.opened > this.serverTimeout && !session.position) { await this.nextServer(session); return; }
     if (this.navigation.phase === 'loading' && session.phase === 'opening' && Date.now() - session.opened < 4000) return;
     const page = this.frames.get(this.mainFrame) || '';
     if (!/^https?:/.test(page) || page.startsWith(home)) return;
@@ -158,13 +188,20 @@ export class HolyBridge extends BrowserBridge {
       const videos = results.flatMap(frame => frame.videos).filter(video => video.d > 60);
       const playing = videos.filter(video => !video.paused && video.t > 0).sort((a, b) => b.d - a.d)[0];
       if (playing && session.phase !== 'playing') await this.started(session);
+      // A server that starts but never gets past its first seconds (still «playing») is
+      // stalled: swap it for the next one. A paused video is the owner's choice and stays.
+      if (playing && session.queue?.length && playing.t < 15) {
+        const stall = session.stall;
+        if (!stall || playing.t > stall.t + 0.5) session.stall = { t: playing.t, since: Date.now() };
+        else if (Date.now() - stall.since > this.stallTimeout) { session.stall = null; await this.nextServer(session); return; }
+      }
       const best = playing || (session.phase === 'playing' ? videos.sort((a, b) => b.d - a.d)[0] : null);
       if (best && Date.now() - session.lastSave > SAVE_EVERY) {
         session.lastSave = Date.now();
         this.library.progress(session.key, session.item.url, best.t, best.d);
       }
       session.position = best ? { t: best.t, d: best.d } : session.position;
-      if (session.phase === 'opening' && Date.now() - session.opened > START_TIMEOUT) {
+      if (session.phase === 'opening' && Date.now() - session.opened > this.startTimeout) {
         // Leave the page usable: the owner can pick another server with the remote.
         session.phase = 'manual'; session.error = 'No se pudo iniciar solo';
         await this.curtain(`window.__holyCurtain&&(__holyCurtain.say('No arrancó solo. Elige un servidor con el control.'),setTimeout(()=>__holyCurtain.hide(),2500))`);

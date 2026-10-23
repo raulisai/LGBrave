@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-23T19:21:09.235Z",
+  "capturedAt": "2026-10-23T20:32:21.244Z",
   "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
   "samples": [
     {
@@ -11,7 +11,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 12.7,
+      "secondsToPlay": 14,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -26,13 +26,15 @@
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "position": {
         "first": {
-          "t": 55,
+          "t": 85,
           "d": 6629.3
         },
         "last": {
-          "t": 78.433333,
+          "t": 107.866666,
           "d": 6629.3
         }
       },
@@ -40,7 +42,7 @@
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 78,
+        "t": 108,
         "duration": 6629
       }
     },
@@ -53,7 +55,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 22.4,
+      "secondsToPlay": 13.4,
       "frames": [
         {
           "url": "https://mxdrop.click/e/4ddr8x8rag7qzd",
@@ -72,21 +74,17 @@
           "top": false,
           "videos": 0,
           "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://mxdrop.to/e/4ddr8x8rag7qzd",
       "position": {
         "first": {
-          "t": 0.034,
+          "t": 0.322,
           "d": 6809.845
         },
         "last": {
-          "t": 9.874,
+          "t": 10.173,
           "d": 6809.845
         }
       },
@@ -107,7 +105,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 11.7,
+      "secondsToPlay": 10.1,
       "frames": [
         {
           "url": "https://jkanime.net/jkplayer/um",
@@ -116,6 +114,8 @@
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
       "position": {
         "first": {
           "t": 1.189167,
@@ -137,37 +137,39 @@
     {
       "label": "4-doramasmp4",
       "source": "doramasmp4",
-      "title": "Till I See You",
-      "page": "https://doramasmp4.cyou/cap/till-i-see-you-capitulo-9/",
-      "player": "https://ok.ru/videoembed/17400240671298",
+      "title": "Pls Love",
+      "page": "https://doramasmp4.cyou/cap/pls-love-capitulo-7/",
+      "player": "https://ok.ru/videoembed/17414104222274",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 13.1,
+      "secondsToPlay": 20.2,
       "frames": [
         {
-          "url": "https://ok.ru/videoembed/17400240671298",
+          "url": "https://ok.ru/videoembed/17414104222274",
           "top": true,
-          "videos": 2,
+          "videos": 1,
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://ok.ru/videoembed/17414104222274",
       "position": {
         "first": {
-          "t": 14,
-          "d": 1129.13
+          "t": 0.84,
+          "d": 2898.291
         },
         "last": {
-          "t": 19.4,
-          "d": 1129.13
+          "t": 10.6,
+          "d": 2898.291
         }
       },
       "advancing": true,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 19,
-        "duration": 1129
+        "t": 11,
+        "duration": 2898
       }
     },
     {
@@ -179,7 +181,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 8.5,
+      "secondsToPlay": 9.6,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -194,13 +196,15 @@
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "position": {
         "first": {
-          "t": 20,
+          "t": 30,
           "d": 2288.583
         },
         "last": {
-          "t": 29.833333,
+          "t": 39.75,
           "d": 2288.583
         }
       },
@@ -208,8 +212,122 @@
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 30,
+        "t": 40,
         "duration": 2289
+      }
+    },
+    {
+      "label": "6-animeyt",
+      "source": "animeyt",
+      "title": "Tokyo Revengers: Santen Sensou-hen",
+      "page": "https://animeyt.cc/118807/anime/tokyo-revengers-santen-sensou-hen-capitulo-4/",
+      "player": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 6.6,
+      "frames": [
+        {
+          "url": "https://ia801404.us.archive.org/8/items/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+      "position": {
+        "first": {
+          "t": 0.593,
+          "d": 1469.051
+        },
+        "last": {
+          "t": 10.634,
+          "d": 1469.051
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1469
+      }
+    },
+    {
+      "label": "7-doramasflix",
+      "source": "doramasflix",
+      "title": "Teach Me Touch Me",
+      "page": "https://doramasflix.io/capitulos/teach-me-touch-me-1x2",
+      "player": "https://voe.sx/e/s0ifvttbegby",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 12.4,
+      "frames": [
+        {
+          "url": "https://derricknationtop.com/e/s0ifvttbegby",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://voe.sx/e/s0ifvttbegby",
+      "position": {
+        "first": {
+          "t": 0.13,
+          "d": 3311.792
+        },
+        "last": {
+          "t": 0.88,
+          "d": 3311.792
+        }
+      },
+      "advancing": false,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 1,
+        "duration": 3312
+      }
+    },
+    {
+      "label": "8-asialiveaction",
+      "source": "asialiveaction",
+      "title": "Merry Berry Love",
+      "page": "https://asialiveaction.com/e/27/305551t1/0325115/",
+      "player": "https://ok.ru/videoembed/17403982582082",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 23,
+      "frames": [
+        {
+          "url": "https://ok.ru/videoembed/17403982582082",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://ok.ru/videoembed/17403982582082",
+      "position": {
+        "first": {
+          "t": 1.113,
+          "d": 2790.891
+        },
+        "last": {
+          "t": 9.743,
+          "d": 2790.891
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 10,
+        "duration": 2791
       }
     },
     {
@@ -221,7 +339,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 10.3,
+      "secondsToPlay": 10.1,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -236,13 +354,15 @@
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "position": {
         "first": {
-          "t": 80,
+          "t": 110.116666,
           "d": 6629.3
         },
         "last": {
-          "t": 83.866666,
+          "t": 114.7,
           "d": 6629.3
         }
       },
@@ -250,28 +370,28 @@
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 84,
+        "t": 115,
         "duration": 6629
       },
-      "resumedFrom": 78,
+      "resumedFrom": 108,
       "resumeOk": true
     }
   ],
   "errors": [],
   "before": {
     "running": [
-      "com.lgapp.lab"
+      "com.lgapp.holy"
     ],
     "targets": [
       {
-        "app": "com.lgapp.lab",
-        "url": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html"
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.148:43190/holy/"
       }
     ],
-    "memory": "memory  1252016  911088  89760   44892   251168      236552"
+    "memory": "memory  1252016  945996  82844   64452   223176      184588"
   },
   "after": {
-    "memory": "memory  1252016  831992  191556  58468   228468      301772"
+    "memory": "memory  1252016  831092  204536  47276   216388      315004"
   },
   "bridgeErrors": []
 }

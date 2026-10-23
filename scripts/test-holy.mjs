@@ -47,7 +47,7 @@ try {
     const detail = cuevana.parseDetail(cuevanaMovie, 'https://cuevana3c.pro/pelicula/street-fighter-2');
     assert.deepEqual(detail.genres, ['Acción', 'Fantasía']);
     assert.equal(detail.backdrop, 'https://image.tmdb.org/t/p/w1280/back.jpg');
-    assert.deepEqual(cuevana.player(detail, 'https://cuevana3c.pro/pelicula/street-fighter-2'), { url: 'https://tungtungsahur.cuevana3c.pro/?token=AAA&pops=false', referrer: 'https://cuevana3c.pro/pelicula/street-fighter-2' });
+    assert.deepEqual(cuevana.player(detail, 'https://cuevana3c.pro/pelicula/street-fighter-2'), { url: 'https://tungtungsahur.cuevana3c.pro/?token=AAA&pops=false', referrer: 'https://cuevana3c.pro/pelicula/street-fighter-2', alternatives: [] });
     assert.equal(cuevana.player({ players: ['https://ads.example/?x'] }, 'p'), null);
   });
   await check('JKAnime: solo la pestaña Animes, episodio, géneros y su reproductor propio', async () => {
@@ -55,7 +55,7 @@ try {
     assert.equal(items.length, 1);
     assert.deepEqual([items[0].title, items[0].episode, items[0].show], ['One Piece', 1180, 'https://jkanime.net/one-piece/']);
     assert.deepEqual(jkanime.parseDetail(jkShow), { genres: ['Acción', 'Shounen'], overview: 'Luffy "Sombrero de paja" quiere ser rey.' });
-    assert.deepEqual(await jkanime.resolve(items[0], async () => jkEpisode), { url: 'https://jkanime.net/jkplayer/um?e=TOKEN&t=1', referrer: 'https://jkanime.net/one-piece/1180/' });
+    assert.deepEqual(await jkanime.resolve(items[0], async () => jkEpisode), { url: 'https://jkanime.net/jkplayer/um?e=TOKEN&t=1', referrer: 'https://jkanime.net/one-piece/1180/', alternatives: [] });
   });
   await check('RePelisHD: lista, géneros, sinopsis sin repetir; Mixdrop latino directo y nunca servidores que cierran la app', async () => {
     const items = repelishd.parseHome(repelisHome);
@@ -73,16 +73,22 @@ try {
       if (url.endsWith('/movie/tt6628920')) return '<script>body: JSON.stringify({ type: "movie", id: "tt6628920", token: "TOKEN" })</script>';
       return JSON.stringify({ ok: true, sources });
     };
-    assert.deepEqual(await repelishd.resolve(items[0], load), { url: 'https://mxdrop.to/e/4', referrer: 'https://playlatinsrc.co/movie/tt6628920', server: undefined, version: 'latino' });
+    assert.deepEqual(await repelishd.resolve(items[0], load), { url: 'https://mxdrop.to/e/4', referrer: 'https://playlatinsrc.co/movie/tt6628920', server: undefined, version: 'latino', alternatives: ['https://mxdrop.to/e/3', 'https://doodstream.com/e/2'] });
     assert.equal(JSON.parse(requests.at(-1).body).token, 'TOKEN');
     await assert.rejects(repelishd.resolve(items[0], async (url, options) => (options?.method === 'POST' ? '{"ok":true,"sources":[{"url":"https://unlimplay.com/f/1"}]}' : load(url))), error => error.unsafe === true);
   });
-  await check('DoramasMP4: capítulo, géneros propios (no los de la barra) y ok.ru preferido', () => {
+  await check('DoramasMP4: capítulo, géneros propios (no los de la barra) y ok.ru preferido', async () => {
     const items = doramasmp4.parseHome(doramasHome);
     assert.deepEqual([items[0].title, items[0].badge, items[0].kind], ['Till I See You', 'Cap 9', 'dorama']);
     const detail = doramasmp4.parseDetail(doramasEpisode);
     assert.deepEqual(detail.genres, ['Romance']);
     assert.equal(doramasmp4.player(detail, 'p').url, 'https://ok.ru/videoembed/123?autoplay=1');
+    // pkaa.top is a picker: its own servers are used, ok.ru first, VK last.
+    const picker = Buffer.from('<iframe src="https://pkaa.top/embed.php?id=9"></iframe>').toString('base64');
+    const target = await doramasmp4.resolve({ url: 'https://doramasmp4.cyou/cap/x-capitulo-1/' }, async url => url.includes('pkaa')
+      ? "<li onclick=\"go_to_player('https://vkvideo.ru/video_ext.php?id=1')\"></li><li onclick=\"go_to_player('https://voe.sx/e/2')\"></li><li onclick=\"go_to_player('https://ok.ru/videoembed/3')\"></li>"
+      : `<option value="${picker}">Multi</option>`);
+    assert.deepEqual(target, { url: 'https://ok.ru/videoembed/3?autoplay=1', referrer: 'https://doramasmp4.cyou/cap/x-capitulo-1/', alternatives: ['https://voe.sx/e/2', 'https://vkvideo.ru/video_ext.php?id=1'] });
   });
 
   await check('Autoplay en la página: vídeo dentro de shadow DOM, botón del reproductor y nada más', () => {
@@ -161,8 +167,9 @@ try {
       { source: 'repelishd', kind: 'movie', title: 'Acción total', url: 'https://r/2', genres: ['Acción'] }
     ];
     const picks = library.recommend(fresh);
-    assert.deepEqual(picks.map(item => item.title), ['Naruto', 'Acción total']);
-    assert.equal(picks[0].reason, 'Porque viste One Piece');
+    assert.deepEqual(picks.map(item => item.title).sort(), ['Acción total', 'Naruto']);
+    assert.ok(picks.every(item => item.match >= 60));
+    assert.equal(picks.find(item => item.title === 'Naruto').reason, 'Porque viste One Piece');
     assert.deepEqual(new Library(join(directory, 'empty.json')).recommend(fresh), []);
   });
   await check('Secciones del inicio y formatos de tiempo', () => {

@@ -12,7 +12,22 @@ const IMAGE_HOSTS = /(^|\.)(image\.tmdb\.org|jkdesa\.com|jkanime\.net|wp\.com|re
 const local = ip => /^(127\.|::1$|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(ip || '');
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
-export function startServer({ catalog, library, port = PORT, root = 'dist', imageDir = '.local/holy-images', log = console.log } = {}) {
+// Small JSON bodies only (votes).
+function body(req, limit = 16384) {
+  return new Promise((resolve, reject) => {
+    let size = 0; const chunks = [];
+    // Too big: keep draining (so the client still gets an answer) but stop storing.
+    req.on('data', chunk => { size += chunk.length; if (size <= limit) chunks.push(chunk); });
+    req.on('end', () => {
+      if (size > limit) { reject(Error('body')); return; }
+      try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')); } catch { reject(Error('json')); }
+    });
+    req.on('error', reject);
+  });
+}
+
+export function startServer({ catalog, library, port = PORT, root = 'dist', imageDir = '.local/holy-images', log = console.log, status = () => ({}) } = {}) {
+  const started = Date.now();
   mkdirSync(imageDir, { recursive: true });
   // Forget images not used for two weeks.
   for (const name of readdirSync(imageDir)) {
@@ -43,6 +58,7 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
     const url = new URL(req.url, 'http://holy.local');
     // The packaged home (file://) reads these too.
     res.setHeader('Access-Control-Allow-Origin', '*');
+    if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type' }).end(); return; }
     try {
       if (url.pathname === '/holy-api/home') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -53,13 +69,28 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
         const source = url.searchParams.get('source') || '';
         const query = url.searchParams.get('q') || '';
         const started = Date.now();
-        if (source === 'local') { res.end(JSON.stringify({ source, ms: 0, items: catalog.searchLocal(query) })); return; }
+        if (source === 'local') { res.end(JSON.stringify({ source, ms: 0, items: library.scored(catalog.searchLocal(query)) })); return; }
         const items = await catalog.search(source, query).catch(error => ({ error: error.message }));
-        res.end(JSON.stringify(Array.isArray(items) ? { source, ms: Date.now() - started, items } : { source, ms: Date.now() - started, items: [], error: items.error }));
+        res.end(JSON.stringify(Array.isArray(items) ? { source, ms: Date.now() - started, items: library.scored(items) } : { source, ms: Date.now() - started, items: [], error: items.error }));
       } else if (url.pathname === '/holy-api/episodes') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         const seasons = await catalog.episodes(url.searchParams.get('source') || '', url.searchParams.get('show') || '').catch(error => ({ error: error.message }));
         res.end(JSON.stringify(Array.isArray(seasons) ? { seasons } : { seasons: [], error: seasons.error }));
+      } else if (url.pathname === '/holy-api/taste') {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(JSON.stringify(catalog.calibration(library)));
+      } else if (url.pathname === '/holy-api/vote' && req.method === 'POST') {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        const { item, vote } = await body(req);
+        if (vote === 'reset') library.clearVotes();
+        else library.vote(item, [1, -1].includes(vote) ? vote : 0);
+        res.end(JSON.stringify({ ok: true, vote: vote === 'reset' ? 0 : library.voteOf(item), taste: library.summary(), libraryVersion: library.version }));
+      } else if (url.pathname === '/holy-api/health') {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(JSON.stringify({ ok: true, uptime: Math.round((Date.now() - started) / 1000), catalog: { updatedAt: catalog.updatedAt, items: catalog.items.length, refreshing: !!catalog.refreshing },
+          library: { entries: library.entries.length, votes: library.votes.length }, sources: catalog.sources(), ...status() }));
       } else if (url.pathname === '/holy-api/refresh' && req.method === 'POST') {
         catalog.refresh().catch(() => {});
         res.end('{"ok":true}');
@@ -76,10 +107,12 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
         res.end(readFileSync(path));
       } else res.writeHead(404).end();
     } catch (error) {
-      if (!res.headersSent) res.writeHead(error.message === 'host' ? 403 : 404).end();
+      const code = error.message === 'host' ? 403 : ['json', 'body'].includes(error.message) || /dirección válida/.test(error.message) ? 400 : 404;
+      if (!res.headersSent) res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }).end(JSON.stringify({ ok: false, error: code === 400 ? error.message : 'no disponible' }));
       else res.end();
     }
   });
+  server.on('error', error => log(`Holy: el servidor no pudo abrir el puerto ${port}: ${error.message}`));
   server.listen(port, '0.0.0.0', () => log(`Holy: servidor en el puerto ${port}`));
   return server;
 }

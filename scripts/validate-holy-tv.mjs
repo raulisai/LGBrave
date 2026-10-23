@@ -24,7 +24,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const out = 'evidence/holy/tv';
 mkdirSync(out, { recursive: true });
 const report = { capturedAt: new Date().toISOString(), scope: 'LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.', samples: [], errors: [] };
-const reportFile = join(out, process.argv.includes('--search') ? 'search-validation.json' : 'validation.json');
+const reportFile = join(out, process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : 'validation.json');
 const save = () => writeFileSync(reportFile, JSON.stringify(report, null, 2));
 const memory = async () => (await ares('ares-device', '-r').catch(() => '')).split('\n').find(line => line.startsWith('memory'))?.trim();
 const libraryFile = '.local/holy-library-tvtest.json';
@@ -53,19 +53,22 @@ try {
   await sleep(2500); await shot('home');
   const alive = () => runtime.bridge === bridge && !runtime.connectionClosed;
   const pick = (source, kind) => catalog.items.find(item => item.source === source && (!kind || item.kind === kind));
-  const samples = [pick('cuevana', 'movie'), pick('repelishd'), pick('jkanime'), pick('doramasmp4'), pick('cuevana', 'series')].filter(Boolean);
+  const pickPlayable = source => catalog.items.find(item => item.source === source && !item.isShow);
+  const samples = [pick('cuevana', 'movie'), pick('repelishd'), pick('jkanime'), pick('doramasmp4'), pick('cuevana', 'series'), pickPlayable('animeyt'), pickPlayable('doramasflix'), pickPlayable('asialiveaction')].filter(Boolean);
   const watch = async (item, label, holdSeconds) => {
     const sample = { label, source: item.source, title: item.title, page: item.url };
     report.samples.push(sample); save();
     const started = Date.now();
     await bridge.command({ action: 'play', value: item });
     sample.player = bridge.session?.target?.split('?')[0];
-    await waitFor(() => !alive() || ['playing', 'manual', 'failed'].includes(bridge.session?.phase) || bridge.navigation.phase === 'error', 80000).catch(() => {});
+    await waitFor(() => !alive() || ['playing', 'manual', 'failed'].includes(bridge.session?.phase) || (bridge.navigation.phase === 'error' && !bridge.session?.queue?.length), 120000).catch(() => {});
     sample.appAlive = alive();
     sample.phase = bridge.session?.phase || 'ended';
     sample.error = bridge.session?.error || (bridge.navigation.phase === 'error' ? bridge.navigation.error : '');
     sample.secondsToPlay = sample.phase === 'playing' ? Math.round((Date.now() - started) / 100) / 10 : null;
     sample.frames = bridge.session?.frames;
+    sample.servers = bridge.session?.servers || 0;
+    sample.finalPlayer = bridge.session?.target?.split('?')[0];
     if (sample.phase === 'playing') {
       // The bridge records the position on its next one-second pass.
       await waitFor(() => bridge.session?.position, 5000).catch(() => {});
@@ -84,7 +87,7 @@ try {
     }
     const entry = library.get(entryKey(item));
     sample.saved = entry ? { t: entry.t, duration: entry.duration } : null;
-    console.log(JSON.stringify({ label, phase: sample.phase, secondsToPlay: sample.secondsToPlay, advancing: sample.advancing, alive: sample.appAlive, back: sample.homeShown, saved: sample.saved, error: sample.error }));
+    console.log(JSON.stringify({ label, phase: sample.phase, secondsToPlay: sample.secondsToPlay, advancing: sample.advancing, alive: sample.appAlive, back: sample.homeShown, servers: sample.servers, player: sample.finalPlayer, saved: sample.saved, error: sample.error }));
     save();
     return sample;
   };
@@ -119,6 +122,27 @@ try {
       sample.homeShown = await waitFor(() => cdp.evaluate('document.querySelectorAll(".row").length > 0'), 20000).then(() => true, () => false);
     }
     console.log(JSON.stringify(sample));
+    save();
+    samples.length = 0;
+  }
+  // --taste: the «Gustos» screen with the remote (test profile only, deleted at the end).
+  if (process.argv.includes('--taste')) {
+    const keys = codes => cdp.evaluate(`(async()=>{for(const code of ${JSON.stringify(codes)}){window.dispatchEvent(new KeyboardEvent('keydown',{keyCode:code,bubbles:true}));await new Promise(r=>setTimeout(r,250))}})()`);
+    const sample = { label: 'taste' };
+    report.samples.push(sample);
+    await keys([38, 39, 39, 39, 39, 39, 13]);
+    await waitFor(() => cdp.evaluate('document.querySelectorAll(".row .card").length > 5'), 20000).catch(() => {});
+    sample.rows = await cdp.evaluate(`[...document.querySelectorAll('.row h2')].map(h=>h.textContent)`);
+    await keys([40, 13, 39, 13, 39, 403]);
+    await sleep(3000);
+    sample.panel = await cdp.evaluate(`document.querySelector('.taste')?.innerText`);
+    sample.marks = await cdp.evaluate(`document.querySelectorAll('.vote').length`);
+    sample.badges = await cdp.evaluate(`[...document.querySelectorAll('.match-badge')].slice(0,6).map(b=>b.textContent)`);
+    sample.votes = library.votes.length;
+    await shot('taste');
+    sample.ok = sample.votes === 3 && sample.marks >= 3 && /me gusta/.test(sample.panel || '');
+    console.log(JSON.stringify(sample));
+    library.clearVotes();
     save();
     samples.length = 0;
   }

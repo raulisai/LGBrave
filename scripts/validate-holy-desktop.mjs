@@ -49,14 +49,15 @@ try {
   await cdp.call('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false });
   await cdp.call('Page.navigate', { url: home });
   await waitFor(() => cdp.evaluate('window.__lumaReady === true'), 15000);
-  bridge = await new HolyBridge(cdp, { catalog, library, preferencesFile: join(scratch, 'settings.json'), recorder: false }).start();
+  bridge = await new HolyBridge(cdp, { catalog, library, preferencesFile: join(scratch, 'settings.json'), recorder: false, mute: true }).start();
   const tick = setInterval(() => bridge.status().catch(() => {}), 1000);
   const shot = async name => writeFileSync(join(out, name + '.jpg'), Buffer.from((await cdp.call('Page.captureScreenshot', { format: 'jpeg', quality: 70 })).data, 'base64'));
   await waitFor(() => cdp.evaluate('document.querySelectorAll(".card").length > 10'), 20000);
   await sleep(1500); await shot('home');
 
   const pick = (source, kind) => catalog.items.find(item => item.source === source && (!kind || item.kind === kind));
-  const samples = [pick('cuevana', 'movie'), pick('repelishd'), pick('jkanime'), pick('doramasmp4'), pick('cuevana', 'series')].filter(Boolean);
+  const pickPlayable = source => catalog.items.find(item => item.source === source && !item.isShow);
+  const samples = [pick('cuevana', 'movie'), pick('repelishd'), pick('jkanime'), pick('doramasmp4'), pick('cuevana', 'series'), pickPlayable('animeyt'), pickPlayable('doramasflix'), pickPlayable('asialiveaction')].filter(Boolean);
   const only = process.argv.find(arg => arg.startsWith('--only='))?.slice(7);
   const watch = async (item, label, holdSeconds = 8) => {
     const sample = { label, source: item.source, title: item.title, page: item.url };
@@ -64,13 +65,16 @@ try {
     const started = Date.now();
     await bridge.command({ action: 'play', value: item });
     sample.player = bridge.session?.target?.split('?')[0]; // player addresses carry site tokens
-    await waitFor(() => ['playing', 'manual'].includes(bridge.session?.phase) || bridge.navigation.phase === 'error', 70000).catch(() => {});
+    await waitFor(() => ['playing', 'manual', 'failed'].includes(bridge.session?.phase) || bridge.navigation.phase === 'error', 100000).catch(() => {});
     sample.phase = bridge.session?.phase || 'ended';
     sample.secondsToPlay = sample.phase === 'playing' ? Math.round((Date.now() - started) / 100) / 10 : null;
     sample.frames = bridge.session?.frames;
+    sample.servers = bridge.session?.servers || 0;
+    sample.finalPlayer = bridge.session?.target?.split('?')[0];
     sample.navigation = bridge.navigation.phase === 'error' ? bridge.navigation.error : 'ok';
     if (sample.phase === 'playing') {
-      const first = bridge.session.position;
+      await waitFor(() => bridge.session?.position, 5000).catch(() => {});
+      const first = bridge.session?.position;
       await sleep(holdSeconds * 1000);
       const last = bridge.session?.position;
       sample.position = { first, last };
@@ -84,7 +88,7 @@ try {
     sample.homeShown = await waitFor(() => cdp.evaluate('document.querySelectorAll(".row").length > 0'), 10000).then(() => true, () => false);
     const entry = library.get(entryKey(item));
     sample.saved = entry ? { t: entry.t, duration: entry.duration } : null;
-    console.log(JSON.stringify({ label, phase: sample.phase, secondsToPlay: sample.secondsToPlay, advancing: sample.advancing, saved: sample.saved }));
+    console.log(JSON.stringify({ label, phase: sample.phase, secondsToPlay: sample.secondsToPlay, advancing: sample.advancing, servers: sample.servers, player: sample.finalPlayer, saved: sample.saved }));
     save();
     return sample;
   };

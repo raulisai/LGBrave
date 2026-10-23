@@ -1,0 +1,49 @@
+{
+  "capturedAt": "2026-10-23T20:38:46.888Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "taste",
+      "rows": [
+        "Drama",
+        "Romance",
+        "Comedia",
+        "Acción",
+        "Fantasía",
+        "Aventura",
+        "Suspenso",
+        "Misterio",
+        "Shounen"
+      ],
+      "panel": "Tu perfil\n\n2 me gusta · 1 no me gusta · 0 vistos\n\nTerror\nRomance\nFantasía\nFamilia\n\nEvitas: Shoujo, Comedia\n\nOK\nMe gusta\nNo me gusta\nBorrar todo",
+      "marks": 3,
+      "badges": [
+        "52 %",
+        "49 %",
+        "54 %",
+        "52 %",
+        "54 %",
+        "53 %"
+      ],
+      "votes": 3,
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.148:43190/holy/"
+      }
+    ],
+    "memory": "memory  1252016  821152  174104  43212   256760      329780"
+  },
+  "after": {
+    "memory": "memory  1252016  893952  165144  41096   192920      259080"
+  },
+  "bridgeErrors": []
+}

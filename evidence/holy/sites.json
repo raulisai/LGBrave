@@ -1,0 +1,283 @@
+{
+  "capturedAt": "2026-10-23T20:18:59.209Z",
+  "scope": "Lectura desde el Mac de cada sitio; no reproduce vídeo ni toca la TV.",
+  "sites": [
+    {
+      "id": "cuevana",
+      "name": "Cuevana 3",
+      "titles": 35,
+      "error": "",
+      "withGenres": 35,
+      "checks": {
+        "players": [
+          {
+            "title": "Street Fighter",
+            "ok": true,
+            "host": "tungtungsahur.cuevana3c.pro",
+            "alternatives": 3,
+            "ms": 76,
+            "error": ""
+          },
+          {
+            "title": "Identification",
+            "ok": true,
+            "host": "tungtungsahur.cuevana3c.pro",
+            "alternatives": 3,
+            "ms": 73,
+            "error": ""
+          }
+        ],
+        "search": {
+          "query": "batman",
+          "ok": true,
+          "results": 24,
+          "ms": 81,
+          "error": ""
+        },
+        "episodes": {
+          "show": "https://cuevana3c.pro/serie/shaka-trust-no-one",
+          "ok": true,
+          "episodes": 5,
+          "ms": 151,
+          "error": ""
+        }
+      },
+      "ok": true
+    },
+    {
+      "id": "repelishd",
+      "name": "RePelisHD",
+      "titles": 31,
+      "error": "",
+      "withGenres": 31,
+      "checks": {
+        "players": [
+          {
+            "title": "Oro sin ley",
+            "ok": true,
+            "host": "mxdrop.to",
+            "alternatives": 1,
+            "ms": 1041,
+            "error": ""
+          },
+          {
+            "title": "The American Dream",
+            "ok": true,
+            "host": "mxdrop.to",
+            "alternatives": 1,
+            "ms": 633,
+            "error": ""
+          }
+        ],
+        "search": {
+          "query": "batman",
+          "ok": true,
+          "results": 30,
+          "ms": 75,
+          "error": ""
+        }
+      },
+      "ok": true
+    },
+    {
+      "id": "jkanime",
+      "name": "JKAnime",
+      "titles": 32,
+      "error": "",
+      "withGenres": 30,
+      "checks": {
+        "players": [
+          {
+            "title": "Tokyo Revengers: Santen Sensou-hen",
+            "ok": true,
+            "host": "jkanime.net",
+            "alternatives": 1,
+            "ms": 275,
+            "error": ""
+          },
+          {
+            "title": "Uchi no Otouto-domo ga Sumimasen",
+            "ok": true,
+            "host": "jkanime.net",
+            "alternatives": 1,
+            "ms": 282,
+            "error": ""
+          }
+        ],
+        "search": {
+          "query": "one piece",
+          "ok": true,
+          "results": 22,
+          "ms": 378,
+          "error": ""
+        },
+        "episodes": {
+          "show": "https://jkanime.net/tokyo-revengers-santen-sensou-hen/",
+          "ok": true,
+          "episodes": 4,
+          "ms": 1172,
+          "error": ""
+        }
+      },
+      "ok": true
+    },
+    {
+      "id": "animeyt",
+      "name": "AnimeYT",
+      "titles": 26,
+      "error": "",
+      "withGenres": 26,
+      "checks": {
+        "players": [
+          {
+            "title": "Tokyo Revengers: Santen Sensou-hen",
+            "ok": true,
+            "host": "mytsumi.com",
+            "alternatives": 0,
+            "ms": 847,
+            "error": ""
+          },
+          {
+            "title": "Uchi no Otouto-domo ga Sumimasen",
+            "ok": true,
+            "host": "mytsumi.com",
+            "alternatives": 0,
+            "ms": 395,
+            "error": ""
+          }
+        ],
+        "search": {
+          "query": "one piece",
+          "ok": true,
+          "results": 7,
+          "ms": 692,
+          "error": ""
+        },
+        "episodes": {
+          "show": "https://animeyt.cc/tv/one-piece-arco-de-elbaph/",
+          "ok": true,
+          "episodes": 22,
+          "ms": 439,
+          "error": ""
+        }
+      },
+      "ok": true
+    },
+    {
+      "id": "doramasflix",
+      "name": "DoramasFlix",
+      "titles": 19,
+      "error": "",
+      "withGenres": 19,
+      "checks": {
+        "players": [
+          {
+            "title": "Teach Me Touch Me",
+            "ok": true,
+            "host": "streamtape.com",
+            "alternatives": 2,
+            "ms": 1917,
+            "error": ""
+          },
+          {
+            "title": "Echo of a Letter",
+            "ok": true,
+            "host": "flaswish.com",
+            "alternatives": 2,
+            "ms": 795,
+            "error": ""
+          }
+        ],
+        "search": {
+          "query": "amor",
+          "ok": true,
+          "results": 10,
+          "ms": 748,
+          "error": ""
+        },
+        "episodes": {
+          "show": "https://doramasflix.io/doramas/teach-me-touch-me",
+          "ok": true,
+          "episodes": 8,
+          "ms": 374,
+          "error": ""
+        }
+      },
+      "ok": true
+    },
+    {
+      "id": "doramasmp4",
+      "name": "DoramasMP4",
+      "titles": 20,
+      "error": "",
+      "withGenres": 19,
+      "checks": {
+        "players": [
+          {
+            "title": "Pls Love",
+            "ok": true,
+            "host": "pkaa.top",
+            "alternatives": 0,
+            "ms": 905,
+            "error": ""
+          },
+          {
+            "title": "How Do We Relationship?",
+            "ok": true,
+            "host": "ok.ru",
+            "alternatives": 1,
+            "ms": 516,
+            "error": ""
+          }
+        ],
+        "search": {
+          "query": "amor",
+          "ok": true,
+          "results": 10,
+          "ms": 481,
+          "error": ""
+        }
+      },
+      "ok": true
+    },
+    {
+      "id": "asialiveaction",
+      "name": "Asia Live Action",
+      "titles": 11,
+      "error": "",
+      "withGenres": 11,
+      "checks": {
+        "players": [
+          {
+            "title": "Merry Berry Love",
+            "ok": true,
+            "host": "ok.ru",
+            "alternatives": 2,
+            "ms": 1549,
+            "error": ""
+          },
+          {
+            "title": "Unlucky Bae",
+            "ok": true,
+            "host": "ok.ru",
+            "alternatives": 2,
+            "ms": 217,
+            "error": ""
+          }
+        ],
+        "search": {
+          "ok": null,
+          "note": "El sitio no ofrece búsqueda utilizable."
+        },
+        "episodes": {
+          "show": "https://asialiveaction.com/tv/305551t1-merry-berry-love-sub-espanol/",
+          "ok": true,
+          "episodes": 3,
+          "ms": 1471,
+          "error": ""
+        }
+      },
+      "ok": true
+    }
+  ]
+}

@@ -25,14 +25,14 @@ export function decode(value = '') {
     return match;
   }).replace(/\s+/g, ' ').trim();
 }
-const text = html => decode(String(html || '').replace(/<[^>]+>/g, ' '));
+export const text = html => decode(String(html || '').replace(/<[^>]+>/g, ' '));
 // Attribute values may be quoted or bare (Cuevana writes src=https://…).
 export function attr(tag, name) {
   const match = new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i').exec(tag || '');
   return match ? decode(match[1] ?? match[2] ?? match[3]) : '';
 }
-const absolute = (value, base) => { try { return value ? new URL(value, base).href : ''; } catch { return ''; } };
-const between = (html, start, end) => {
+export const absolute = (value, base) => { try { return value ? new URL(value, base).href : ''; } catch { return ''; } };
+export const between = (html, start, end) => {
   const from = html.indexOf(start);
   if (from < 0) return '';
   const to = end ? html.indexOf(end, from + start.length) : -1;
@@ -51,9 +51,11 @@ const GENRES = {
   'recuentos de la vida': 'Vida cotidiana', 'slice of life': 'Vida cotidiana', sobrenatural: 'Sobrenatural', psicologico: 'Psicológico', juegos: 'Juegos', samurai: 'Samurái',
   vampiros: 'Vampiros', militar: 'Bélica', policial: 'Crimen', medico: 'Médico', melodrama: 'Melodrama', juvenil: 'Juvenil', 'artes marciales': 'Artes marciales'
 };
-const fold = value => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+export const fold = value => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 export function genre(value) {
   const key = fold(decode(value));
+  // Quality and format tags are not genres.
+  if (/^(\d+k|hd|full hd|fhd|uhd|latino|castellano|subtitulado|sub espanol|tv|ova|ona|pelicula)$/.test(key)) return '';
   return GENRES[key] || (key ? key[0].toUpperCase() + key.slice(1) : '');
 }
 // RePelisHD lists genres as plain words ("Comedia Crimen"); match known names, longest first.
@@ -68,10 +70,10 @@ export function genresFromWords(value) {
 
 // og:description sometimes repeats its own opening after the full text.
 const unrepeated = value => { const again = value.indexOf(value.slice(0, 30), 30); return again > 0 ? value.slice(0, again).trim() : value; };
-const item = fields => ({ genres: [], overview: '', backdrop: '', year: '', rating: '', badge: '', subtitle: '', ...fields });
+export const item = fields => ({ genres: [], overview: '', backdrop: '', year: '', rating: '', badge: '', subtitle: '', ...fields });
 
 export const cuevana = {
-  id: 'cuevana', name: 'Cuevana 3', site: 'https://cuevana3c.pro/',
+  id: 'cuevana', name: 'Cuevana 3', site: 'https://cuevana3c.pro/', pageFallback: true,
   parseHome(html, base = this.site) {
     const items = [];
     for (const block of between(html, '<section class="home-movies"', '</section').split('<li class="TPostMv').slice(1)) {
@@ -134,21 +136,24 @@ export const cuevana = {
     return lists.filter(list => list.episodes.length).sort((a, b) => a.number - b.number);
   },
   // The page lists Latino first. The site's own player supports pops=false (fewer ad windows).
+  // The rest of the site's servers stay as alternatives if the first never starts.
   player(detail, page) {
+    const urls = [];
     for (const value of detail.players) {
       try {
         const url = new URL(value);
         if (url.protocol !== 'https:' || !/(^|\.)cuevana3c\.pro$/.test(url.hostname)) continue;
         url.searchParams.set('pops', 'false');
-        return { url: url.href, referrer: page };
+        if (!urls.includes(url.href)) urls.push(url.href);
       } catch { /* Next server. */ }
     }
-    return null;
+    return urls.length ? { url: urls[0], referrer: page, alternatives: urls.slice(1, 4) } : null;
   }
 };
 
 export const jkanime = {
-  id: 'jkanime', name: 'JKAnime', site: 'https://jkanime.net/',
+  id: 'jkanime', name: 'JKAnime', site: 'https://jkanime.net/', pageFallback: true,
+  detailURL: entry => entry.show || entry.url,
   parseHome(html, base = this.site) {
     // Only the «Animes» tab: the page also carries donghua and adult tabs.
     const pane = between(html, 'id="animes" role="tabpanel"', 'class="tab-pane');
@@ -177,8 +182,8 @@ export const jkanime = {
   async resolve(entry, load) {
     const html = await load(entry.url);
     const frames = [...html.matchAll(/video\[\d+\]\s*=\s*'<iframe[^']*?src="([^"]+)"/g)].map(match => decode(match[1]));
-    const url = frames.find(value => /^https:\/\/jkanime\.net\/jkplayer\//.test(value));
-    return url ? { url, referrer: entry.url } : null;
+    const own = frames.filter(value => /^https:\/\/jkanime\.net\/jkplayer\//.test(value));
+    return own.length ? { url: own[0], referrer: entry.url, alternatives: own.slice(1, 3) } : null;
   },
   searchURL: query => 'https://jkanime.net/buscar/' + encodeURIComponent(query.trim().replace(/\s+/g, '_')) + '/',
   parseSearch(html, base = this.site) {
@@ -261,7 +266,6 @@ export const repelishd = {
   // Holy asks the same API and opens Mixdrop (then Doodstream) directly. Dropload/
   // dr0pstream and UnlimPlay load a Cloudflare check that closes the TV app: a title
   // with only those is refused instead of opened.
-  noPageFallback: true,
   async resolve(entry, load) {
     const detail = this.parseDetail(await load(entry.url));
     if (!detail.imdb) throw Error('RePelisHD no indicó el reproductor de este título.');
@@ -273,23 +277,25 @@ export const repelishd = {
       method: 'POST', referrer: page, headers: { 'Content-Type': 'application/json', Origin: 'https://playlatinsrc.co' },
       body: JSON.stringify({ type: 'movie', id: detail.imdb, token })
     }));
-    const choice = pickServer(data.sources || []);
+    const [choice, ...rest] = rankServers(data.sources || []);
     if (!choice) throw Object.assign(Error('Este título solo tiene servidores que cierran la app en la TV.'), { unsafe: true });
-    return { url: choice.url, referrer: page, server: choice.name, version: choice.version };
+    return { url: choice.url, referrer: page, server: choice.name, version: choice.version, alternatives: rest.slice(0, 3).map(source => source.url) };
   }
 };
 
 const RISKY = /(^|\.)(dr0pstream\.com|dropload\.(io|tv)|unlimplay\.com)$/;
 const SERVER_RANK = [/(^|\.)(mixdrop|mxdrop|m1xdrop)\.[a-z]+$/, /(^|\.)(doodstream|dood|d0000d|dsvplay)\.[a-z]+$/];
 const VERSION_RANK = ['latino', 'castellano', 'subtitulado'];
-export function pickServer(sources) {
+export const pickServer = sources => rankServers(sources)[0] || null;
+// Safe servers only, best first (Mixdrop, Doodstream; Latino, Castellano, Subtitulado).
+export function rankServers(sources) {
   const host = source => { try { const url = new URL(source.url); return url.protocol === 'https:' ? url.hostname : ''; } catch { return ''; } };
   const rank = source => {
     const server = SERVER_RANK.findIndex(pattern => pattern.test(host(source)));
     const version = VERSION_RANK.indexOf(String(source.version || '').toLowerCase());
     return (server < 0 ? SERVER_RANK.length : server) * 10 + (version < 0 ? VERSION_RANK.length : version);
   };
-  return sources.filter(source => host(source) && !RISKY.test(host(source))).sort((a, b) => rank(a) - rank(b))[0] || null;
+  return (Array.isArray(sources) ? sources : []).filter(source => host(source) && !RISKY.test(host(source))).sort((a, b) => rank(a) - rank(b));
 }
 
 export const doramasmp4 = {
@@ -344,16 +350,30 @@ export const doramasmp4 = {
       .sort((a, b) => a[0] - b[0]).map(([episode, url]) => ({ url, episode, label: 'Capítulo ' + episode }));
     return episodes.length ? [{ title: 'Capítulos', episodes }] : [];
   },
-  // ok.ru is a plain video host page: prefer it over unknown embeds.
+  // Some episodes only offer pkaa.top, itself a server picker (go_to_player('…')): open it on the
+  // Mac and use its servers, so the TV goes straight to ok.ru.
+  async resolve(entry, load) {
+    const detail = this.parseDetail(await load(entry.url));
+    const players = [];
+    for (const player of detail.players) {
+      if (/(^|\.)pkaa\.top$/.test(new URL(player.src).hostname)) {
+        const html = await load(player.src, { referrer: entry.url }).catch(() => '');
+        const inner = [...html.matchAll(/go_to_player\('(https:\/\/[^']+)'\)/g)].map(match => ({ name: '', src: decode(match[1]) }));
+        players.push(...(inner.length ? inner : [player]));
+      } else players.push(player);
+    }
+    return this.player({ ...detail, players }, entry.url);
+  },
+  // ok.ru is a plain video host page: prefer it over unknown embeds; VK last.
   player(detail, page) {
-    const choice = detail.players.find(player => /(^|\.)ok\.ru$/.test(new URL(player.src).hostname)) || detail.players[0];
-    if (!choice) return null;
-    const url = new URL(choice.src);
+    const host = player => { try { return new URL(player.src).hostname; } catch { return ''; } };
+    const okru = player => /(^|\.)ok\.ru$/.test(host(player));
+    const rank = player => (okru(player) ? 0 : /(^|\.)vk(video)?\.(ru|com)$/.test(host(player)) ? 2 : 1);
+    const ordered = [...detail.players].filter(player => host(player)).sort((a, b) => rank(a) - rank(b));
+    if (!ordered.length) return null;
     // ok.ru's embed supports starting on its own.
-    if (/(^|\.)ok\.ru$/.test(url.hostname)) url.searchParams.set('autoplay', '1');
-    return { url: url.href, referrer: page };
+    const urls = ordered.map(player => { const url = new URL(player.src); if (okru(player)) url.searchParams.set('autoplay', '1'); return url.href; });
+    return { url: urls[0], referrer: page, alternatives: urls.slice(1, 3) };
   }
 };
 
-export const CONNECTORS = [cuevana, repelishd, jkanime, doramasmp4];
-export const connectorFor = id => CONNECTORS.find(connector => connector.id === id);

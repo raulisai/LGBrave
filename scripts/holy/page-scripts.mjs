@@ -96,6 +96,11 @@ export function holyAutoplay(options = {}) {
     if (button && visible(button) && once(selector)) { button.click(); out.action = 'click ' + selector; return out; }
   }
   const host = location.hostname;
+  // ok.ru with autoplay sometimes waits for a press on its video area.
+  if (/(^|\.)ok\.ru$/.test(host) && state.steps >= 3) {
+    const area = document.querySelector('.vid_play, .one-video-player_display-w, .uv-display_controls-wrapper_inner');
+    if (area && visible(area) && once('okru', 4)) { area.click(); out.action = 'ok.ru area'; return out; }
+  }
   // 3. Site pages, when the direct player could not be resolved on the Mac.
   if (out.top && /(^|\.)jkanime\.net$/.test(host) && !/\/jkplayer\//.test(location.pathname)) {
     const frame = document.querySelector('iframe.player_conte[src^="https://jkanime.net/jkplayer/"]');

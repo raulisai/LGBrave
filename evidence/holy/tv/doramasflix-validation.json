@@ -1,0 +1,101 @@
+{
+  "capturedAt": "2026-10-23T20:37:33.477Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "7-doramasflix",
+      "source": "doramasflix",
+      "title": "Teach Me Touch Me",
+      "page": "https://doramasflix.io/capitulos/teach-me-touch-me-1x2",
+      "player": "https://flaswish.com/e/3qagi9debwkc",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 9.2,
+      "frames": [
+        {
+          "url": "https://flaswish.com/e/3qagi9debwkc",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://flaswish.com/e/3qagi9debwkc",
+      "position": {
+        "first": {
+          "t": 1.2,
+          "d": 3311.76
+        },
+        "last": {
+          "t": 21.16,
+          "d": 3311.76
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 21,
+        "duration": 3312
+      }
+    },
+    {
+      "label": "resume",
+      "source": "doramasflix",
+      "title": "Teach Me Touch Me",
+      "page": "https://doramasflix.io/capitulos/teach-me-touch-me-1x2",
+      "player": "https://flaswish.com/e/3qagi9debwkc",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 8.3,
+      "frames": [
+        {
+          "url": "https://flaswish.com/e/3qagi9debwkc",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://flaswish.com/e/3qagi9debwkc",
+      "position": {
+        "first": {
+          "t": 20,
+          "d": 3311.76
+        },
+        "last": {
+          "t": 24.88,
+          "d": 3311.76
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 25,
+        "duration": 3312
+      },
+      "resumedFrom": 21,
+      "resumeOk": true
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.148:43190/holy/"
+      }
+    ],
+    "memory": "memory  1252016  802216  200668  45616   249132      345488"
+  },
+  "after": {
+    "memory": "memory  1252016  819600  179816  39392   252600      335168"
+  },
+  "bridgeErrors": []
+}

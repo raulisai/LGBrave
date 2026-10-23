@@ -5,6 +5,7 @@ export const SECTIONS = [
   { id: 'anime', name: 'Anime' },
   { id: 'dorama', name: 'Doramas' },
   { id: 'series', name: 'Series' },
+  { id: 'gustos', name: 'Gustos' },
   { id: 'buscar', name: 'Buscar' }
 ];
 const KINDS = { movie: 'Película', anime: 'Anime', dorama: 'Dorama', series: 'Serie' };
@@ -45,6 +46,25 @@ export function episodeRows(show, seasons) {
       show: show.show, url: episode.url, episode: episode.episode || null, subtitle: episode.label, backdrop: episode.still || show.backdrop || ''
     }))
   }));
+}
+
+// 87 → green, 60 → amber, lower → grey: how sure Holy is that you'll like it.
+export const matchTone = percent => (percent >= 75 ? 'high' : percent >= 55 ? 'mid' : 'low');
+
+// fetch with a deadline and one retry: a slow or restarting Mac never freezes the TV.
+export async function getJSON(url, { timeout = 12000, retries = 1, ...options } = {}) {
+  for (let attempt = 0; ; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { cache: 'no-store', ...options, signal: controller.signal });
+      if (!response.ok) throw Error('HTTP ' + response.status);
+      return await response.json();
+    } catch (error) {
+      if (attempt >= retries) throw error;
+      await new Promise(resolve => setTimeout(resolve, 800));
+    } finally { clearTimeout(timer); }
+  }
 }
 
 export function clock(seconds) {

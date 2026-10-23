@@ -7,9 +7,13 @@ import { Library } from './holy/library.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
 import { startServer } from './holy/server.mjs';
 import { APP_ID, origin } from './holy/config.mjs';
+import { installCrashGuard } from './holy/guard.mjs';
 
 // One process for Holy: home server, catalogue, and the passive bridge to the TV.
 // Like Luma's lab it never opens the app; it connects when Holy is already open.
+// `npm run holy` runs it under holy-supervisor.mjs, which restarts it if it stops.
+
+installCrashGuard();
 let release = () => {};
 if (process.env.HOLY_TV !== '0') {
   try { release = acquireRuntimeLock('.local/holy-runtime.lock'); }
@@ -17,7 +21,7 @@ if (process.env.HOLY_TV !== '0') {
 }
 const library = new Library();
 const catalog = new Catalog({ log: console.log }).start(console.log);
-const server = startServer({ catalog, library });
+const server = startServer({ catalog, library, status: () => ({ tv: runtime?.state || 'sin TV', playing: runtime?.bridge?.session ? { title: runtime.bridge.session.item.title, phase: runtime.bridge.session.phase } : null }) });
 // HOLY_TV=0 serves the home and catalogue only (desktop preview, or while another session uses the TV).
 const withTV = process.env.HOLY_TV !== '0';
 const runtime = new LabRuntime({ makeBridge: (cdp, options) => new HolyBridge(cdp, { ...options, catalog, library }) });

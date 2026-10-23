@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-23T10:59:16.621Z",
+  "capturedAt": "2026-10-23T20:31:10.168Z",
   "scope": "Chrome de escritorio sin interfaz en el Mac, no la TV. Muestras cortas, el título más nuevo de cada sitio.",
   "samples": [
     {
@@ -9,7 +9,7 @@
       "page": "https://cuevana3c.pro/pelicula/street-fighter-2",
       "player": "https://tungtungsahur.cuevana3c.pro/",
       "phase": "playing",
-      "secondsToPlay": 7.2,
+      "secondsToPlay": 4.5,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -24,14 +24,16 @@
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "navigation": "ok",
       "position": {
         "first": {
-          "t": 0.943335,
+          "t": 0.488559,
           "d": 6629.3
         },
         "last": {
-          "t": 30.98825,
+          "t": 29.52073,
           "d": 6629.3
         }
       },
@@ -47,16 +49,22 @@
     {
       "label": "2-repelishd",
       "source": "repelishd",
-      "title": "Idiots",
-      "page": "https://repelishd.blog/ver-pelicula/25950-idiots-online-espanol.html",
-      "player": "https://mxdrop.to/e/q11p1n4purnekw",
+      "title": "Oro sin ley",
+      "page": "https://repelishd.blog/ver-pelicula/25954-oro-sin-ley-online-espanol.html",
+      "player": "https://mxdrop.to/e/4ddr8x8rag7qzd",
       "phase": "playing",
-      "secondsToPlay": 5.6,
+      "secondsToPlay": 5.8,
       "frames": [
         {
-          "url": "https://mxdrop.click/e/q11p1n4purnekw",
+          "url": "https://mxdrop.click/e/4ddr8x8rag7qzd",
           "top": true,
           "videos": 1,
+          "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
           "action": ""
         },
         {
@@ -70,23 +78,19 @@
           "top": false,
           "videos": 0,
           "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://mxdrop.to/e/4ddr8x8rag7qzd",
       "navigation": "ok",
       "position": {
         "first": {
-          "t": 0.536488,
-          "d": 5987.008
+          "t": 0.31701,
+          "d": 6809.844656
         },
         "last": {
-          "t": 8.549151,
-          "d": 5987.008
+          "t": 8.326034,
+          "d": 6809.844656
         }
       },
       "advancing": true,
@@ -94,18 +98,18 @@
       "afterBack": "http://127.0.0.1:43191/holy/",
       "homeShown": true,
       "saved": {
-        "t": 9,
-        "duration": 5987
+        "t": 8,
+        "duration": 6810
       }
     },
     {
       "label": "3-jkanime",
       "source": "jkanime",
-      "title": "Hyouken no Majutsushi ga Sekai wo Suberu II",
-      "page": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+      "title": "Tokyo Revengers: Santen Sensou-hen",
+      "page": "https://jkanime.net/tokyo-revengers-santen-sensou-hen/4/",
       "player": "https://jkanime.net/jkplayer/um",
       "phase": "playing",
-      "secondsToPlay": 5.7,
+      "secondsToPlay": 4.7,
       "frames": [
         {
           "url": "https://jkanime.net/jkplayer/um",
@@ -114,15 +118,17 @@
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
       "navigation": "ok",
       "position": {
         "first": {
-          "t": 0.941635,
-          "d": 1454.9538949999999
+          "t": 0.917418,
+          "d": 1469.0510520000023
         },
         "last": {
-          "t": 8.952908,
-          "d": 1454.9538949999999
+          "t": 8.89758,
+          "d": 1469.0510520000023
         }
       },
       "advancing": true,
@@ -131,34 +137,36 @@
       "homeShown": true,
       "saved": {
         "t": 9,
-        "duration": 1455
+        "duration": 1469
       }
     },
     {
       "label": "4-doramasmp4",
       "source": "doramasmp4",
-      "title": "Till I See You",
-      "page": "https://doramasmp4.cyou/cap/till-i-see-you-capitulo-9/",
-      "player": "https://ok.ru/videoembed/17400240671298",
+      "title": "Pls Love",
+      "page": "https://doramasmp4.cyou/cap/pls-love-capitulo-7/",
+      "player": "https://ok.ru/videoembed/17414104222274",
       "phase": "playing",
-      "secondsToPlay": 10.8,
+      "secondsToPlay": 19.8,
       "frames": [
         {
-          "url": "https://ok.ru/videoembed/17400240671298",
+          "url": "https://ok.ru/videoembed/17414104222274",
           "top": true,
-          "videos": 2,
+          "videos": 1,
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://ok.ru/videoembed/17414104222274",
       "navigation": "ok",
       "position": {
         "first": {
-          "t": 0.850983,
-          "d": 1129.13
+          "t": 0.868941,
+          "d": 2898.291
         },
         "last": {
-          "t": 8.865593,
-          "d": 1129.13
+          "t": 8.878994,
+          "d": 2898.291
         }
       },
       "advancing": true,
@@ -167,7 +175,7 @@
       "homeShown": true,
       "saved": {
         "t": 9,
-        "duration": 1129
+        "duration": 2898
       }
     },
     {
@@ -177,7 +185,7 @@
       "page": "https://cuevana3c.pro/serie/shaka-trust-no-one/episodio-1x5",
       "player": "https://tungtungsahur.cuevana3c.pro/",
       "phase": "playing",
-      "secondsToPlay": 3.5,
+      "secondsToPlay": 9.8,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -190,22 +198,18 @@
           "top": false,
           "videos": 1,
           "action": ""
-        },
-        {
-          "url": "https://mc.yandex.ru/metrika/match.html",
-          "top": false,
-          "videos": 0,
-          "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "navigation": "ok",
       "position": {
         "first": {
-          "t": 0.224868,
+          "t": 0.70738,
           "d": 2288.583
         },
         "last": {
-          "t": 8.239468,
+          "t": 8.719202,
           "d": 2288.583
         }
       },
@@ -214,8 +218,146 @@
       "afterBack": "http://127.0.0.1:43191/holy/",
       "homeShown": true,
       "saved": {
-        "t": 8,
+        "t": 9,
         "duration": 2289
+      }
+    },
+    {
+      "label": "6-animeyt",
+      "source": "animeyt",
+      "title": "Tokyo Revengers: Santen Sensou-hen",
+      "page": "https://animeyt.cc/118807/anime/tokyo-revengers-santen-sensou-hen-capitulo-4/",
+      "player": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+      "phase": "playing",
+      "secondsToPlay": 7.7,
+      "frames": [
+        {
+          "url": "https://ia601404.us.archive.org/8/items/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 0.423502,
+          "d": 1469.050917
+        },
+        "last": {
+          "t": 8.455201,
+          "d": 1469.050917
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 8,
+        "duration": 1469
+      }
+    },
+    {
+      "label": "7-doramasflix",
+      "source": "doramasflix",
+      "title": "Teach Me Touch Me",
+      "page": "https://doramasflix.io/capitulos/teach-me-touch-me-1x2",
+      "player": "https://streamtape.com/e/OdLz2VBp6BIZBjY",
+      "phase": "playing",
+      "secondsToPlay": 6.8,
+      "frames": [
+        {
+          "url": "https://streamtape.com/e/OdLz2VBp6BIZBjY",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "https://www.google.com/recaptcha/api2/anchor",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://streamtape.com/e/OdLz2VBp6BIZBjY",
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 0.046442,
+          "d": 3311.769002
+        },
+        "last": {
+          "t": 8.05617,
+          "d": 3311.769002
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 8,
+        "duration": 3312
+      }
+    },
+    {
+      "label": "8-asialiveaction",
+      "source": "asialiveaction",
+      "title": "Merry Berry Love",
+      "page": "https://asialiveaction.com/e/27/305551t1/0325115/",
+      "player": "https://ok.ru/videoembed/17403982582082",
+      "phase": "playing",
+      "secondsToPlay": 26.8,
+      "frames": [
+        {
+          "url": "https://ok.ru/videoembed/17403982582082",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://ok.ru/videoembed/17403982582082",
+      "navigation": "ok",
+      "position": {
+        "first": {
+          "t": 0.1,
+          "d": 2790.891
+        },
+        "last": {
+          "t": 6.683261,
+          "d": 2790.891
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "afterBack": "http://127.0.0.1:43191/holy/",
+      "homeShown": true,
+      "saved": {
+        "t": 7,
+        "duration": 2791
       }
     },
     {
@@ -225,7 +367,7 @@
       "page": "https://cuevana3c.pro/pelicula/street-fighter-2",
       "player": "https://tungtungsahur.cuevana3c.pro/",
       "phase": "playing",
-      "secondsToPlay": 2.5,
+      "secondsToPlay": 5.7,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -240,19 +382,21 @@
           "action": ""
         }
       ],
+      "servers": 1,
+      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "navigation": "ok",
       "position": {
         "first": {
-          "t": 30.851342,
+          "t": 30.899595,
           "d": 6629.3
         },
         "last": {
-          "t": 34.858357,
+          "t": 34.907991,
           "d": 6629.3
         }
       },
       "advancing": true,
-      "curtainGone": true,
+      "curtainGone": false,
       "afterBack": "http://127.0.0.1:43191/holy/",
       "homeShown": true,
       "saved": {
@@ -271,8 +415,13 @@
     "Anime · nuevos episodios",
     "Doramas · nuevos capítulos",
     "Series · últimos episodios",
-    "Porque te gusta: Acción",
-    "Porque te gusta: Fantasía"
+    "Porque te gusta: Drama",
+    "Porque te gusta: Acción"
   ],
-  "bridgeErrors": []
+  "bridgeErrors": [
+    {
+      "phase": "request",
+      "error": "{\"code\":-32602,\"message\":\"Invalid InterceptionId.\"}"
+    }
+  ]
 }

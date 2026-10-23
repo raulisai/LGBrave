@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte';
   import Icon from './Icon.svelte';
   import NavigationFeedback from './NavigationFeedback.svelte';
-  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, clock, remaining } from './holy.js';
+  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, clock, remaining, matchTone, getJSON } from './holy.js';
 
   let apiBase = $state(/^https?:/.test(location.protocol) ? location.origin : '');
   let data = $state({ rows: [], items: [], sources: [], hero: null, updatedAt: 0 });
@@ -31,8 +31,14 @@
   let searchToken = 0;
   // A show's episodes, opened from search; Back returns to where it was opened.
   let episodesView = $state(null);
+  // «Gustos»: titles to rate and the resulting taste profile.
+  let tasteRows = $state([]);
+  let taste = $state(null);
+  let tasteLoading = $state(false);
+  let resetArmed = 0;
 
-  const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(withLayout) : sectionRows(data, section));
+  const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(withLayout) : section === 'gustos' ? tasteRows.map(row => ({ ...row, layout: 'poster' })) : sectionRows(data, section));
+  const profile = $derived(taste || data.taste || null);
   const row = $derived(rows[Math.min(rowIndex, rows.length - 1)]);
   const column = $derived(row ? Math.min(columns[row.id] || 0, row.items.length - 1) : 0);
   const focused = $derived(row?.items[column] || null);
@@ -49,7 +55,7 @@
 
   // The big preview follows focus, a moment later so fast scrolling stays smooth.
   $effect(() => {
-    const next = focused || episodesView?.show || (section === 'buscar' ? null : data.hero);
+    const next = focused || episodesView?.show || (section === 'buscar' || section === 'gustos' ? null : data.hero);
     clearTimeout(previewTimer);
     if (!preview) { preview = next; return; }
     previewTimer = setTimeout(() => { preview = next; }, 160);
@@ -67,9 +73,8 @@
   async function load() {
     if (!apiBase) return;
     try {
-      const response = await fetch(apiBase + '/holy-api/home', { cache: 'no-store' });
-      if (!response.ok) throw Error(response.status);
-      const fresh = await response.json();
+      const fresh = await getJSON(apiBase + '/holy-api/home');
+      if (!Array.isArray(fresh?.rows)) throw Error('formato');
       data = fresh;
       loadedVersions = fresh.catalogVersion + ':' + fresh.libraryVersion;
       notice = '';
@@ -83,7 +88,7 @@
   function play(item) {
     if (!item) return;
     const payload = $state.snapshot(item);
-    for (const key of ['score', 'reason', 'percent', 'resume', 'layout']) delete payload[key];
+    for (const key of ['score', 'reason', 'percent', 'resume', 'layout', 'match', 'matchReason', 'vote']) delete payload[key];
     if (!command('play', payload)) { notice = 'Holy necesita el Mac para abrir títulos. Abre «npm run holy» y vuelve a intentar.'; return; }
     opening = item; navigationError = '';
     clearTimeout(openingTimer);
@@ -97,6 +102,44 @@
   function chooseSection(id) {
     section = id; rowIndex = 0; inNav = false; episodesView = null;
     if (id === 'buscar') focusSearch();
+    if (id === 'gustos') loadTaste();
+  }
+  async function loadTaste() {
+    if (!apiBase) { notice = 'Conecta el Mac para calibrar tus gustos.'; return; }
+    tasteLoading = true;
+    try {
+      const result = await getJSON(apiBase + '/holy-api/taste');
+      tasteRows = Array.isArray(result?.rows) ? result.rows : [];
+      taste = result?.taste || null;
+    } catch { notice = 'No se pudo leer tus gustos del Mac.'; }
+    finally { tasteLoading = false; }
+  }
+  // OK: «me gusta» (again: quitar). Rojo: «no me gusta». The profile updates at once.
+  async function rate(item, value) {
+    if (!item?.url || !apiBase) return;
+    const vote = item.vote === value ? 0 : value;
+    const mark = row => ({ ...row, items: row.items.map(other => (other.url === item.url ? { ...other, vote } : other)) });
+    tasteRows = tasteRows.map(mark);
+    try {
+      const payload = $state.snapshot(item);
+      for (const key of ['match', 'matchReason', 'vote', 'layout', 'score', 'reason', 'percent']) delete payload[key];
+      const result = await getJSON(apiBase + '/holy-api/vote', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ item: payload, vote }), retries: 0 });
+      taste = result.taste;
+      load();
+      // Fresh percentages for the cards on screen, without reshuffling the rows under the focus.
+      const fresh = await getJSON(apiBase + '/holy-api/taste', { retries: 0 }).catch(() => null);
+      const matches = new Map((fresh?.rows || []).flatMap(row => row.items).map(entry => [entry.url, entry.match]));
+      if (matches.size) tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (matches.has(other.url) ? { ...other, match: matches.get(other.url) } : other)) }));
+    } catch { notice = 'No se guardó tu voto. Revisa la conexión con el Mac.'; tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === item.url ? { ...other, vote: item.vote } : other)) })); }
+  }
+  async function resetTaste() {
+    if (Date.now() - resetArmed > 4000) { resetArmed = Date.now(); notice = 'Pulsa el botón amarillo otra vez para borrar tus gustos calibrados.'; return; }
+    resetArmed = 0;
+    try {
+      await getJSON(apiBase + '/holy-api/vote', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ vote: 'reset' }), retries: 0 });
+      notice = 'Gustos calibrados borrados. Lo que ves sigue contando.';
+      await loadTaste(); load();
+    } catch { notice = 'No se pudieron borrar. Revisa la conexión con el Mac.'; }
   }
   function focusSearch() {
     inNav = false; inSearch = true;
@@ -118,9 +161,9 @@
     searchStatus = sources.map(source => ({ id: source.id, name: source.name, state: 'loading' }));
     const started = Date.now();
     for (const source of sources) {
-      fetch(`${apiBase}/holy-api/search?source=${encodeURIComponent(source.id)}&q=${encodeURIComponent(words)}`)
-        .then(response => response.json())
+      getJSON(`${apiBase}/holy-api/search?source=${encodeURIComponent(source.id)}&q=${encodeURIComponent(words)}`, { timeout: 20000, retries: 0 })
         .then(result => {
+          if (!Array.isArray(result?.items)) throw Error('formato');
           if (token !== searchToken) return;
           const seconds = ((Date.now() - started) / 1000).toFixed(1).replace('.', ',');
           searchStatus = searchStatus.map(entry => entry.id === source.id ? { ...entry, state: result.error ? 'error' : 'done', count: result.items.length, seconds } : entry);
@@ -140,10 +183,10 @@
     const view = { token, show: $state.snapshot(show), seasons: [], loading: true, error: '', from: { rowIndex } };
     episodesView = view; rowIndex = 0; inSearch = false; searchInput?.blur();
     try {
-      const response = await fetch(`${apiBase}/holy-api/episodes?source=${encodeURIComponent(show.source)}&show=${encodeURIComponent(show.show)}`);
-      const result = await response.json();
+      const result = await getJSON(`${apiBase}/holy-api/episodes?source=${encodeURIComponent(show.source)}&show=${encodeURIComponent(show.show)}`, { timeout: 30000 });
       if (episodesView?.token !== token) return;
-      episodesView = { ...view, seasons: result.seasons, loading: false, error: result.error || (result.seasons.length ? '' : 'No se encontraron episodios.') };
+      const seasons = Array.isArray(result?.seasons) ? result.seasons : [];
+      episodesView = { ...view, seasons, loading: false, error: result?.error || (seasons.length ? '' : 'No se encontraron episodios.') };
     } catch { if (episodesView?.token === token) episodesView = { ...view, loading: false, error: 'No se pudo leer la lista de episodios.' }; }
   }
   function closeEpisodes() {
@@ -152,7 +195,9 @@
     rowIndex = from?.rowIndex || 0;
   }
   function choose(item) {
-    if (item?.isShow) openEpisodes(item);
+    if (!item) return;
+    if (section === 'gustos' && !episodesView) rate(item, 1);
+    else if (item.isShow) openEpisodes(item);
     else play(item);
   }
   function move(direction) {
@@ -194,7 +239,8 @@
       if (inNav) { if (navIndex === SECTIONS.length) refresh(); else chooseSection(SECTIONS[navIndex].id); }
       else if (inSearch) focusSearch();
       else choose(focused);
-    } else if (code === 403) { event.preventDefault(); forget(focused); }
+    } else if (code === 403) { event.preventDefault(); if (section === 'gustos' && !inNav) rate(focused, -1); else forget(focused); }
+    else if (code === 405 && section === 'gustos') { event.preventDefault(); resetTaste(); }
     else if (code === 461 || code === 27) {
       if (opening) { event.preventDefault(); opening = null; command('home'); }
       else if (episodesView) { event.preventDefault(); closeEpisodes(); }
@@ -205,7 +251,7 @@
   }
   function refresh() {
     notice = 'Buscando estrenos en tus sitios…';
-    if (!command('refresh-catalog') && apiBase) fetch(apiBase + '/holy-api/refresh', { method: 'POST' }).catch(() => {});
+    if (!command('refresh-catalog') && apiBase) fetch(apiBase + '/holy-api/refresh', { method: 'POST', headers: { 'Content-Type': 'text/plain' } }).catch(() => {});
     setTimeout(load, 4000);
   }
   // Pointer (Magic Remote): hovering focuses, clicking plays.
@@ -254,7 +300,7 @@
     <div class="brand" aria-label="Holy">HOLY</div>
     <nav aria-label="Secciones">
       {#each SECTIONS as entry, index}
-        <button class:current={section === entry.id} class:focus={inNav && navIndex === index} onclick={() => chooseSection(entry.id)}>{#if entry.id === 'buscar'}<Icon name="search" size={24} stroke={2.4} />{/if}{entry.name}</button>
+        <button class:current={section === entry.id} class:focus={inNav && navIndex === index} onclick={() => chooseSection(entry.id)}>{#if entry.id === 'buscar'}<Icon name="search" size={24} stroke={2.4} />{:else if entry.id === 'gustos'}<Icon name="sparkles" size={24} stroke={2.2} />{/if}{entry.name}</button>
       {/each}
       <button class="icon" class:focus={inNav && navIndex === SECTIONS.length} aria-label="Buscar estrenos ahora" onclick={refresh}><Icon name="reload" size={26} stroke={2.4} /></button>
     </nav>
@@ -275,13 +321,30 @@
     {/if}
   {/if}
 
-  {#if preview && !(section === 'buscar' && !episodesView && (inSearch || !rows.length))}
+  {#if section === 'gustos' && !episodesView}
+    <aside class="taste" aria-label="Tu perfil de gustos">
+      <h2>Tu perfil</h2>
+      {#if profile && profile.signals >= 2}
+        <p class="taste-count">{profile.liked} me gusta · {profile.disliked} no me gusta · {profile.watched} vistos</p>
+        {#each profile.genres.slice(0, 6) as entry}
+          <div class="bar"><span class="bar-name">{entry.name}</span><span class="bar-track"><span style:width={entry.value + '%'}></span></span></div>
+        {/each}
+        {#if profile.avoid.length}<p class="avoid">Evitas: {profile.avoid.map(entry => entry.name).join(', ')}</p>{/if}
+      {:else}
+        <p class="taste-count">Califica al menos dos títulos para que Holy calcule cuánto te puede gustar cada uno.</p>
+      {/if}
+      <p class="taste-keys"><span class="key">OK</span>Me gusta <span class="key red-key"></span>No me gusta <span class="key yellow-key"></span>Borrar todo</p>
+    </aside>
+  {/if}
+
+  {#if preview && !(section === 'buscar' && !episodesView && (inSearch || !rows.length)) && !(section === 'gustos' && !episodesView && !focused)}
     <section class="preview" class:lower={section === 'buscar' && !episodesView} aria-live="polite">
       {#key preview.url}
         <div class="preview-text">
           {#if preview.reason}<p class="reason">{preview.reason}</p>{/if}
-          <h1 class:long={preview.title.length > 28}>{preview.title}</h1>
+          <h1 class:long={(preview.title || '').length > 28}>{preview.title || ''}</h1>
           <p class="meta">
+            {#if preview.match != null}<span class="match {matchTone(preview.match)}">{preview.match} % para ti</span>{/if}
             {#if preview.upNext}<span class="pill red">Siguiente</span>{/if}
             {#if preview.subtitle}<span class="strong">{preview.subtitle}</span>{/if}
             {#if preview.year}<span>{preview.year}</span>{/if}
@@ -292,10 +355,15 @@
           {#if preview.genres?.length}<p class="genres">{preview.genres.slice(0, 4).join(' · ')}</p>{/if}
           {#if preview.overview}<p class="overview">{preview.overview}</p>{/if}
           <p class="hint">
+            {#if section === 'gustos' && !episodesView}
+              <span class="key">OK</span>{preview.vote === 1 ? 'Quitar «me gusta»' : 'Me gusta'}<span class="key red-key"></span>{preview.vote === -1 ? 'Quitar «no me gusta»' : 'No me gusta'}
+            {:else}
             <span class="key">OK</span>{preview.isShow ? 'Ver episodios' : preview.resume ? 'Continuar desde ' + clock(preview.t) : preview.upNext ? 'Ver ' + (preview.subtitle || 'siguiente') : 'Reproducir'}
             {#if preview.resume && preview.duration}<span class="left">{remaining(preview.t, preview.duration)}</span>{/if}
             {#if row?.id === 'continue' && !inNav}<span class="key red-key"></span>Quitar de la fila{/if}
+            {/if}
           </p>
+          {#if preview.matchReason && preview.match != null}<p class="match-reason">{preview.matchReason}</p>{/if}
         </div>
       {/key}
     </section>
@@ -307,9 +375,12 @@
         {#if episodesView}
           <h2>{episodesView.loading ? 'Cargando episodios de ' + episodesView.show.title + '…' : episodesView.error}</h2>
           <p>Atrás vuelve a los resultados.</p>
+        {:else if section === 'gustos'}
+          <h2>{tasteLoading ? 'Preparando títulos para calificar…' : 'No hay títulos para calificar todavía.'}</h2>
+          <p>Holy usa el catálogo de tus sitios. Vuelve cuando termine de leerlos.</p>
         {:else if section === 'buscar'}
           <h2>{searchStatus.length && searchStatus.every(entry => entry.state !== 'loading') ? 'Sin resultados para «' + query.trim() + '»' : searchStatus.length ? 'Buscando en todos tus sitios…' : 'Busca en todos tus sitios a la vez'}</h2>
-          <p>Cuevana 3, RePelisHD, JKAnime y DoramasMP4. Los que respondan primero aparecen primero.</p>
+          <p>{data.sources.filter(source => source.search).map(source => source.name).join(', ') || 'Todos tus sitios'}. Los que respondan primero aparecen primero.</p>
         {:else}
           <h2>{notice || (apiBase ? 'Preparando tu catálogo…' : 'Conectando con el Mac…')}</h2>
           <p>Holy toma los estrenos de tus sitios favoritos y los ordena según lo que ves.</p>
@@ -325,10 +396,10 @@
               <!-- Only rows near the focus get cards: long episode lists stay light on the TV. -->
               {#each Math.abs(r - rowIndex) <= 2 ? shelf.items : [] as item, c (item.url + c)}
                 {@const active = !inNav && !inSearch && r === rowIndex && c === column}
-                <button class="card" class:landscape={shelf.layout === 'landscape'} class:focus={active} aria-label={item.title + (item.subtitle ? ', ' + item.subtitle : '')}
+                <button class="card" class:landscape={shelf.layout === 'landscape'} class:focus={active} aria-label={(item.title || '') + (item.subtitle ? ', ' + item.subtitle : '')}
                   onmouseenter={() => hover(r, c)} onclick={() => { hover(r, c); choose(item); }}>
                   <span class="art">
-                    <span class="fallback">{item.title}</span>
+                    <span class="fallback">{item.title || ''}</span>
                     {#if shelf.layout === 'landscape' ? item.backdrop || item.poster : item.poster || item.backdrop}
                       <img src={img(shelf.layout === 'landscape' ? item.backdrop || item.poster : item.poster || item.backdrop)} alt="" loading={c < 8 ? 'eager' : 'lazy'} onerror={event => event.currentTarget.remove()} />
                     {/if}
@@ -338,6 +409,8 @@
                     {/if}
                     {#if item.percent}<span class="progress"><span style:width={item.percent + '%'}></span></span>{/if}
                     {#if item.upNext}<span class="next">Siguiente</span>{/if}
+                    {#if item.match != null && !item.percent}<span class="match-badge {matchTone(item.match)}">{item.match} %</span>{/if}
+                    {#if item.vote === 1}<span class="vote like"><Icon name="check" size={24} stroke={3} /></span>{:else if item.vote === -1}<span class="vote dislike"><Icon name="minus" size={24} stroke={3} /></span>{/if}
                   </span>
                 </button>
               {/each}
@@ -439,6 +512,26 @@
   .card:focus{outline:none}
 
   .empty{position:absolute;left:96px;top:40px;max-width:1100px}
+  .match{font-weight:800}
+  .match.high{color:#46d369}.match.mid{color:#f5c518}.match.low{color:#a3a3a3}
+  .match-reason{margin:10px 0 0;font-size:20px;color:#b9e8c4}
+  .match-badge{position:absolute;left:10px;bottom:12px;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.78);font-size:17px;font-weight:800}
+  .match-badge.high{color:#46d369}.match-badge.mid{color:#f5c518}.match-badge.low{color:#bdbdbd}
+  .landscape .match-badge{left:auto;right:10px;bottom:auto;top:10px}
+  .vote{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+  .vote.like{background:#2e9e4f}.vote.dislike{background:#e31f26}
+  .taste{position:absolute;right:96px;top:140px;z-index:4;width:600px;padding:28px 32px;border-radius:18px;background:rgba(20,20,20,.9);border:1px solid rgba(255,255,255,.12)}
+  .taste h2{margin:0 0 6px;font-size:32px}
+  .taste-count{margin:0 0 18px;font-size:20px;color:var(--secondary)}
+  .bar{display:flex;align-items:center;gap:16px;margin:10px 0}
+  .bar-name{width:190px;font-size:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar-track{flex:1;height:12px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}
+  .bar-track span{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#2e9e4f,#46d369)}
+  .avoid{margin:16px 0 0;font-size:20px;color:#ffb3b6}
+  .taste-keys{display:flex;align-items:center;gap:10px;margin:22px 0 0;font-size:18px;color:#ddd}
+  .taste-keys .key{min-width:44px;height:30px;font-size:15px}
+  .taste-keys .red-key,.taste-keys .yellow-key{min-width:28px;width:28px;margin-left:12px}
+  .yellow-key{border-radius:50%;background:#f5c518}
   .searchbar{position:absolute;left:96px;top:140px;z-index:4;width:1100px;height:88px;display:flex;align-items:center;gap:20px;padding:0 32px;border-radius:14px;background:rgba(40,40,40,.92);border:3px solid transparent;color:#bbb;transition:border-color .2s,background .2s}
   .searchbar.focus{border-color:#fff;background:rgba(60,60,60,.95);color:#fff}
   .searchbar input{flex:1;min-width:0;height:100%;border:0;outline:none;background:transparent;font-size:34px;color:#fff;font-family:inherit}
