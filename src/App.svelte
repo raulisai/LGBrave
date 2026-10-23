@@ -17,6 +17,7 @@
   let bookmarks = $state([]);
   let categories = $state(['Anime', 'Películas', 'Doramas']);
   let editing = $state(false);
+  let riskySites = $state([]);
   let catDialog = $state(null);
   let catError = $state('');
   let dialog = $state(null);
@@ -57,7 +58,7 @@
     const key = Object.keys(brands).find(name => host === name || host.endsWith('.' + name));
     const hash = [...item.url].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
     const [mark, tint, glyph, ink] = key ? brands[key] : [(item.title.match(/[\p{L}\p{N}]/u)?.[0] || '•').toUpperCase(), palette[hash % palette.length]];
-    return { ...item, mark, tint, glyph, ink: ink || '#fff', long: (mark || '').length > 2 };
+    return { ...item, mark, tint, glyph, ink: ink || '#fff', long: (mark || '').length > 2, risky: riskySites.includes(host) || riskySites.includes('www.' + host) };
   }
   const rows = $derived(categories.map(name => ({ name, items: bookmarks.filter(item => item.category === name).map(tileFor) })));
 
@@ -235,6 +236,7 @@
       const detail = event.detail;
       lastHeartbeat = Date.now();
       debug = detail.debug === true;
+      if (Array.isArray(detail.riskySites)) riskySites = detail.riskySites;
       if (Array.isArray(detail.tabs)) { tabs = detail.tabs; activeTabId = detail.activeTabId; }
       connected = !!detail.connected; blocked = detail.blocked || 0; enabled = detail.enabled !== false;
       if (Array.isArray(detail.favorites)) {
@@ -378,10 +380,10 @@
             {:else}<Icon name="chevron" size={22} stroke={2.6} />{/if}</h2>
             <div class="tiles" class:editing>
               {#each row.items as tile, index (tile.category + '\n' + tile.url)}
-                <button class="tile" style:--tint={tile.tint} style:--ink={tile.ink} style:--i={index} aria-label={editing ? 'Quitar ' + tile.title + ' de ' + row.name : tile.title} onclick={() => openTile(tile)}>
+                <button class="tile" style:--tint={tile.tint} style:--ink={tile.ink} style:--i={index} aria-label={editing ? 'Quitar ' + tile.title + ' de ' + row.name : tile.risky ? tile.title + ', cerró la app las últimas veces' : tile.title} onclick={() => openTile(tile)}>
                   <span class="tile-icon" class:solid={tile.mark || tile.glyph}>
                     {#if tile.glyph}<Icon name={tile.glyph} size={58} />{:else}<span class="mark" class:long={tile.long}>{tile.mark}</span>{/if}
-                    {#if editing}<span class="remove"><Icon name="minus" size={20} stroke={3} /></span>{/if}
+                    {#if editing}<span class="remove"><Icon name="minus" size={20} stroke={3} /></span>{:else if tile.risky}<span class="risky" title="Cerró la app las últimas veces"><Icon name="alert" size={20} stroke={2.6} /></span>{/if}
                   </span>
                   <span class="tile-name">{tile.title}</span>
                 </button>
@@ -518,6 +520,7 @@
   .tile:active .tile-icon{transform:scale(.95)}
   .tile-name{max-width:100%;font-size:19px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 8px rgba(0,0,0,.6);transition:color .2s,transform .5s var(--spring)}
   .tile:focus .tile-name{color:#fff;transform:translateY(4px)}
+  .risky{position:absolute;top:-8px;right:-8px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#ff9f0a;color:#1c1c1e;box-shadow:0 4px 10px rgba(0,0,0,.35)}
   .remove{position:absolute;top:-10px;left:-10px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#ff3b30;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.3);animation:pop .4s var(--spring)}
   .editing .tile:not(.add) .tile-icon{animation:jiggle .32s ease-in-out infinite alternate}
 
