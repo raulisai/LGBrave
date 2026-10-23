@@ -4,10 +4,13 @@ import { playerAssist } from './player-assist.mjs';
 // Scoped to the tested site and its embeds: script-opened windows are not needed
 // to play inline media. It does not touch fetch, media URLs, play(), or cookies.
 export function navigationShield() {
+  // The owner's bookmarked sites (and their embeds, through ancestorOrigins). window.open replaces the
+  // single page on this TV, so popups are blocked on all of them; the rest of the shield is exact-match.
+  const SITES = /(^|\.)(cuevana3c\.pro|jkanime\.net|repelishd\.blog|animeyt\.cc|animeonline\.ninja|asialiveaction\.com|framextv\.(cc|xyz)|onlyflix\.to|doramasflix\.(io|beer|in)|doramasia\.com|doramasmp4\.cyou)$/;
   if (location.hostname === 'challenges.cloudflare.com') return; // human check: leave untouched
   const origins = [location.origin, ...Array.from(location.ancestorOrigins || [])];
   const protectedSite = origins.some(origin => {
-    try { return /(^|\.)(cuevana3c\.pro|jkanime\.net|doramasflix\.io|repelishd\.blog)$/.test(new URL(origin).hostname); } catch { return false; }
+    try { return SITES.test(new URL(origin).hostname); } catch { return false; }
   });
   if (!protectedSite || window.__lumaNavigationShield) return;
   const state = { blockedPopups: 0, blockedOverlays: 0, blockedQrOverlays: 0 };

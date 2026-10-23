@@ -4,6 +4,9 @@ import { resolveNavigation } from '../src/navigation.js';
 import { toolbarSource } from './toolbar.mjs';
 import { Preferences } from './preferences.mjs';
 import { navigationShieldSource } from './navigation-shield.mjs';
+import { turnstileDeferSource } from './turnstile-defer.mjs';
+import { devtoolsQuietSource } from './devtools-quiet.mjs';
+import { CrashMemory } from './crash-memory.mjs';
 import { BrowserTabs } from './browser-tabs.mjs';
 import { FlightRecorder } from './flight-recorder.mjs';
 import { cleanerSource, decideCleaning, CleanerRules } from './ad-cleaner.mjs';
@@ -16,6 +19,8 @@ export const home = origin() + HOME_PATH;
 const PRESETS = [{ key: 'youtube', pattern: '(^|\\.)youtube(-nocookie)?\\.com$', sample: 'https://www.youtube.com/' }];
 // «No soy un robot» is a real check the user must solve, not advertising: never filter or touch it.
 export const isHumanVerification = url => { try { return new URL(url).hostname === 'challenges.cloudflare.com'; } catch { return false; } };
+// Cloudflare serves its "verify you are human" page with 403/503 and this header: it is the page to show, not a failure.
+export const isChallengeResponse = response => Object.entries(response?.headers || {}).some(([name, value]) => name.toLowerCase() === 'cf-mitigated' && String(value).toLowerCase() === 'challenge');
 export const scriptletSource = script => `(()=>{const scriptletGlobals={};${script}\n})()`;
 
 export class BrowserBridge {
@@ -31,6 +36,7 @@ export class BrowserBridge {
     this.cleanerWorld = 'luma-cleaner-' + Math.random().toString(36).slice(2, 10);
     this.cleaning = null;
     this.lastCleaning = null;
+    this.crashMemory = new CrashMemory(options.crashFile || join(dirname(options.preferencesFile || '.local/browser-settings.json'), 'crash-sites.json'));
     this.showSettings = false;
     this.engine = createEngine(options);
     this.engineOptions = options;
@@ -72,6 +78,12 @@ export class BrowserBridge {
     this.unsubscribe = this.cdp.onEvent(event => this.event(event));
     await this.cdp.call('Page.enable');
     await this.cdp.call('Runtime.enable');
+    // The app dropping the connection while a site was still opening is remembered (crash-memory.mjs).
+    this.cdp.closed?.then(() => {
+      if (this.stopped) return;
+      const host = this.crashMemory.closed();
+      if (host) this.recorder?.write('CIERRE', host + ' cerró la app al abrirse');
+    });
     if (this.recorder) {
       for (const domain of ['Inspector', 'Log']) await this.cdp.call(domain + '.enable').catch(() => {});
       this.recorder.write('START', 'puente conectado');
@@ -88,6 +100,10 @@ export class BrowserBridge {
     this.mainFrame = frameTree.frame.id;
     this.frames.set(this.mainFrame, frameTree.frame.url);
     this.navigationGuardScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: navigationShieldSource })).identifier;
+    // Not ad blocking: keeps hidden Turnstile widgets from closing the app, so it stays on while paused.
+    this.turnstileScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: turnstileDeferSource })).identifier;
+    // Pages that eject themselves when they notice the inspector (disable-devtool): keep console bait inert.
+    this.quietScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: devtoolsQuietSource })).identifier;
     await this.cdp.call('Fetch.enable', { patterns: [{ urlPattern: '*', requestStage: 'Request' }] });
     await this.cdp.call('Runtime.addBinding', { name: '__lgLabCommand', executionContextName: this.toolbarWorld });
     if (this.toolbar) this.toolbarScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', {
@@ -142,7 +158,7 @@ export class BrowserBridge {
         }
       }
       if (method === 'Network.responseReceived' && params.requestId === this.mainRequest && params.type === 'Document' && !sessionId) {
-        if (params.response.status >= 400) await this.navigationFailed(`El sitio respondió con un error (${params.response.status}). Puedes reintentar o volver al inicio.`);
+        if (params.response.status >= 400 && !isChallengeResponse(params.response)) await this.navigationFailed(`El sitio respondió con un error (${params.response.status}). Puedes reintentar o volver al inicio.`);
         else { this.navigation.progress = 60; await this.status(); }
       }
       if (method === 'Network.loadingFailed' && params.requestId === this.mainRequest && !params.canceled && !sessionId) {
@@ -188,6 +204,7 @@ export class BrowserBridge {
     const id = this.navigationId;
     clearTimeout(this.navigationTimer);
     this.navigation = { phase: 'loading', progress: 12, url, error: '' };
+    this.crashMemory.begin(url, target => target.startsWith(home) || target.startsWith(packagedHome));
     this.navigationTimer = setTimeout(() => {
       if (this.navigationId === id) this.navigationFailed('El sitio está tardando demasiado en responder. Puedes reintentar o volver al inicio.', true).catch(() => {});
     }, this.navigationTimeout);
@@ -443,6 +460,8 @@ export class BrowserBridge {
       await this.status();
     }
     if ((/^https?:/.test(url) && url !== home) || url.includes('/wam/loaderror.html')) {
+      await this.cdp.evaluate(turnstileDeferSource, id).catch(() => {});
+      await this.cdp.evaluate(devtoolsQuietSource, id).catch(() => {});
       if (this.enabled) await this.cdp.evaluate(navigationShieldSource, id);
       if (context.auxData.frameId === this.mainFrame) this.mainContext = id;
       await this.applyCosmetics(id, url, true);
@@ -487,7 +506,7 @@ export class BrowserBridge {
       connected: true, debug: this.debug, blocked: this.blocked, enabled: this.enabled, navigation: this.navigation,
       ...this.tabs.snapshot(),
       searchEngine: this.preferences.searchEngine, showSettings: this.showSettings,
-      favorites: this.preferences.favorites, categories: this.preferences.categories,
+      favorites: this.preferences.favorites, categories: this.preferences.categories, riskySites: this.crashMemory.riskyHosts(),
       favorite: this.preferences.isFavorite(current), favoriteCategories: this.preferences.categoriesOf(current),
       message: this.enabled ? 'Motor de Brave activo desde tu Mac.' : 'Protección en pausa. Recarga la página para comparar.'
     };
@@ -658,10 +677,13 @@ export class BrowserBridge {
   async stop() {
     clearInterval(this.heapTimer);
     clearTimeout(this.navigationTimer);
+    this.stopped = true; this.crashMemory.stop();
     this.unsubscribe?.();
     await this.cdp.call('Fetch.disable').catch(() => {});
     if (this.toolbarScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.toolbarScript }).catch(() => {});
     if (this.navigationGuardScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.navigationGuardScript }).catch(() => {});
+    if (this.turnstileScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.turnstileScript }).catch(() => {});
+    if (this.quietScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.quietScript }).catch(() => {});
     await this.clearDocumentScripts();
     await this.cdp.call('Network.setBypassServiceWorker', { bypass: false }).catch(() => {});
     await this.cdp.call('Network.setCacheDisabled', { cacheDisabled: false }).catch(() => {});

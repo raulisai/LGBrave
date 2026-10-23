@@ -7,7 +7,7 @@
     "inventory": "node scripts/inventory.mjs",
     "verify:tv": "node scripts/verify-browser-ui.mjs",
     "lab:server": "node scripts/fixture-server.mjs",
-    "test": "node scripts/test-navigation.mjs && node scripts/test-shields.mjs && node scripts/test-brave-sync.mjs && node scripts/test-ad-cleaner.mjs && node scripts/test-navigation-shield.mjs && node scripts/test-player-assist.mjs && node scripts/test-bridge.mjs && node scripts/test-browser-tabs.mjs && node scripts/test-lab-runtime.mjs && node scripts/test-holy.mjs && node scripts/validate-engine.mjs > /dev/null && echo 'Pruebas locales correctas.'",
+    "test": "node scripts/test-navigation.mjs && node scripts/test-shields.mjs && node scripts/test-brave-sync.mjs && node scripts/test-ad-cleaner.mjs && node scripts/test-navigation-shield.mjs && node scripts/test-player-assist.mjs && node scripts/test-turnstile-defer.mjs && node scripts/test-devtools-quiet.mjs && node scripts/test-crash-memory.mjs && node scripts/test-bridge.mjs && node scripts/test-browser-tabs.mjs && node scripts/test-lab-runtime.mjs && node scripts/test-holy.mjs && node scripts/validate-engine.mjs > /dev/null && echo 'Pruebas locales correctas.'",
     "lists:update": "node scripts/update-lists.mjs",
     "lists:rollback": "node scripts/update-lists.mjs --rollback",
     "validate:engine": "node scripts/validate-engine.mjs",

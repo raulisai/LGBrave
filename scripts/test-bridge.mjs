@@ -9,6 +9,7 @@ import { toolbarSource } from './toolbar.mjs';
 const directory = mkdtempSync(join(tmpdir(), 'luma-bridge-'));
 const calls = [];
 let script = 0;
+let dropConnection;
 let history = { currentIndex: 0, entries: [{ id: 1, url: 'https://example.com/' }] };
 const cdp = {
   async call(method, params = {}) {
@@ -24,7 +25,8 @@ const cdp = {
     if (expression.includes('hasContent')) return { url: navigationURL(), ready: 'interactive', hasContent: true };
     return 'https://example.com/';
   },
-  onEvent() { return () => {}; }
+  onEvent() { return () => {}; },
+  closed: new Promise(resolve => { dropConnection = resolve; })
 };
 let navigationURL = () => 'https://example.com/';
 const paused = (requestId, url, resourceType, frameId = 'main') => ({ method: 'Fetch.requestPaused', params: { requestId, request: { url, method: 'GET' }, resourceType, frameId } });
@@ -210,6 +212,25 @@ try {
   await bridge.command({ action: 'back' });
   await check('Atrás sin historial vuelve al inicio', () => assert.equal(after(mark).find(call => call.method === 'Page.navigate')?.params.url, home));
 
+  // Cloudflare's human check arrives as a 403 document: it is the page to show, a plain 403 is still an error.
+  const loadMain = async (id, status, headers) => {
+    bridge.beginNavigation('https://ver2.animeonline.ninja/');
+    await bridge.event({ method: 'Network.requestWillBeSent', params: { requestId: id, type: 'Document', frameId: bridge.mainFrame, request: { url: 'https://ver2.animeonline.ninja/' } } });
+    await bridge.event({ method: 'Network.responseReceived', params: { requestId: id, type: 'Document', response: { status, headers } } });
+  };
+  await loadMain('cf-1', 403, { 'Cf-Mitigated': 'challenge', server: 'cloudflare' });
+  await check('Verificación de Cloudflare (403 + cf-mitigated) no se muestra como error', () => assert.equal(bridge.navigation.phase, 'loading'));
+  await loadMain('cf-2', 403, { server: 'cloudflare' });
+  await check('Un 403 normal sigue siendo error', () => assert.equal(bridge.navigation.phase, 'error'));
+  clearTimeout(bridge.navigationTimer);
+  mark = calls.length;
+  await bridge.setProtection(false);
+  await check('El aplazador de Turnstile sigue activo con la protección en pausa', () => {
+    assert.ok(calls.some(call => call.method === 'Page.addScriptToEvaluateOnNewDocument' && call.params.source.includes('__lumaTurnstileDefer')));
+    assert.ok(!after(mark).some(call => call.method === 'Page.removeScriptToEvaluateOnNewDocument' && call.params.identifier === bridge.turnstileScript));
+  });
+  await bridge.setProtection(true);
+
   // An iframe that never answers (busy ad frame) must not keep the page loading.
   bridge.beginNavigation('https://slow.example/');
   bridge.committedNavigation = bridge.navigationId;
@@ -221,6 +242,18 @@ try {
   clearTimeout(bridge.navigationTimer);
 
   await check('Barra sin innerHTML (YouTube exige Trusted Types)', () => assert.ok(!/\.innerHTML\s*=/.test(toolbarSource({}, [home]))));
+
+  // The app dying while a site is still opening is remembered and shown in the status; two in a row mark the site.
+  bridge.beginNavigation('https://crashy.example/watch?t=1');
+  dropConnection();
+  await new Promise(resolve => setTimeout(resolve, 10));
+  await check('Cierre de la app durante la carga se anota por sitio', () => {
+    assert.equal(bridge.crashMemory.sites['crashy.example'].crashes, 1);
+    assert.deepEqual(bridge.statusPayload().riskySites, []);
+    assert.ok(!JSON.stringify(bridge.crashMemory.sites).includes('watch'));
+  });
+  bridge.crashMemory.sites['crashy.example'].crashes = 2;
+  await check('Dos cierres seguidos marcan el sitio en el estado', () => assert.deepEqual(bridge.statusPayload().riskySites, ['crashy.example']));
 
   await bridge.stop();
   console.log(`${checks.length} comprobaciones del puente correctas.`);
