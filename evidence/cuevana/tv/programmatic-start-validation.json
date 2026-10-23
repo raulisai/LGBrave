@@ -1,0 +1,864 @@
+{
+  "capturedAt": "2026-10-21T11:23:55.897Z",
+  "platform": "tv",
+  "scope": "Short playback samples, not entire movies or universal compatibility.",
+  "movies": [
+    {
+      "slug": "omaha",
+      "stages": [
+        {
+          "stage": "detail",
+          "frames": [
+            {
+              "id": 8,
+              "url": "https://cuevana3c.pro/pelicula/omaha",
+              "title": "Película Omaha Gratis Online (2025) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        },
+        {
+          "stage": "player",
+          "frames": [
+            {
+              "id": 12,
+              "url": "https://tungtungsahur.cuevana3c.pro/",
+              "title": "p",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": [
+                "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6"
+              ]
+            },
+            {
+              "id": 16,
+              "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+              "title": "Embed",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [
+                {
+                  "time": 0,
+                  "duration": null,
+                  "paused": true,
+                  "ready": 0,
+                  "error": null,
+                  "decoded": 0
+                }
+              ],
+              "frames": []
+            }
+          ]
+        }
+      ],
+      "before": [
+        {
+          "id": 12,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6"
+          ]
+        },
+        {
+          "id": 16,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 54.958333,
+              "duration": 4985,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 361
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "after": [
+        {
+          "id": 12,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6"
+          ]
+        },
+        {
+          "id": 16,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 59.958333,
+              "duration": 4985,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 481
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "playbackPass": true,
+      "seek": [
+        {
+          "id": 12,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6"
+          ]
+        },
+        {
+          "id": 16,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 64,
+              "duration": 4985,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 838
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "blocked": [
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://tungtungsahur.cuevana3c.pro/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/varkus.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cuevana3c.pro/js/varkus.js$script",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://latgw.fun/js/lib.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://bh.dingerepilobe.com/rzBUh4iyFwTH/156108",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||dingerepilobe.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://gw.waughyciliary.com/sLQvNIbN76nU/156109",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||waughyciliary.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://latgw.fun/js/humanitarian-five.js",
+          "source": "https://tungtungsahur.cuevana3c.pro/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://tungtungsahur.cuevana3c.pro/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://mc.yandex.ru/metrika/tag.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||mc.yandex.ru^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://llvpn.com/tag.min.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||llvpn.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://imasdk.googleapis.com/js/sdkloader/ima3.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||imasdk.googleapis.com^",
+          "exception": null,
+          "redirect": false
+        }
+      ],
+      "blockedNavigations": 0
+    },
+    {
+      "slug": "bad-apples",
+      "stages": [
+        {
+          "stage": "detail",
+          "frames": [
+            {
+              "id": 19,
+              "url": "https://cuevana3c.pro/pelicula/bad-apples",
+              "title": "Película Bad Apples Gratis Online (2026) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        },
+        {
+          "stage": "player",
+          "frames": [
+            {
+              "id": 24,
+              "url": "https://tungtungsahur.cuevana3c.pro/",
+              "title": "p",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": [
+                "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut"
+              ]
+            },
+            {
+              "id": 29,
+              "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+              "title": "Embed",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [
+                {
+                  "time": 0,
+                  "duration": 6204.5730000000885,
+                  "paused": true,
+                  "ready": 0,
+                  "error": null,
+                  "decoded": 0
+                }
+              ],
+              "frames": []
+            }
+          ]
+        }
+      ],
+      "before": [
+        {
+          "id": 24,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut"
+          ]
+        },
+        {
+          "id": 29,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 6.5065,
+              "duration": 6204.5730000000885,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 312
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "after": [
+        {
+          "id": 24,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut"
+          ]
+        },
+        {
+          "id": 29,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 11.5115,
+              "duration": 6204.5730000000885,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 431
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "playbackPass": true,
+      "seek": [
+        {
+          "id": 24,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut"
+          ]
+        },
+        {
+          "id": 29,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 63.980577,
+              "duration": 6204.5730000000885,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 785
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "blocked": [
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://tungtungsahur.cuevana3c.pro/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/varkus.js",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cuevana3c.pro/js/varkus.js$script",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://latgw.fun/js/lib.js",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://bh.dingerepilobe.com/rzBUh4iyFwTH/156108",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||dingerepilobe.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://gw.waughyciliary.com/sLQvNIbN76nU/156109",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||waughyciliary.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://latgw.fun/js/humanitarian-five.js",
+          "source": "https://tungtungsahur.cuevana3c.pro/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://mc.yandex.ru/metrika/tag.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||mc.yandex.ru^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://llvpn.com/tag.min.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||llvpn.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://imasdk.googleapis.com/js/sdkloader/ima3.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/hreid84j6nut",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||imasdk.googleapis.com^",
+          "exception": null,
+          "redirect": false
+        }
+      ],
+      "blockedNavigations": 0
+    },
+    {
+      "slug": "solomamma",
+      "stages": [
+        {
+          "stage": "detail",
+          "frames": [
+            {
+              "id": 32,
+              "url": "https://cuevana3c.pro/pelicula/solomamma",
+              "title": "Película Solomamma Gratis Online (2025) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        },
+        {
+          "stage": "player",
+          "frames": [
+            {
+              "id": 38,
+              "url": "https://tungtungsahur.cuevana3c.pro/",
+              "title": "p",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": [
+                "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc"
+              ]
+            },
+            {
+              "id": 44,
+              "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+              "title": "Embed",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [
+                {
+                  "time": 0,
+                  "duration": 5729,
+                  "paused": true,
+                  "ready": 1,
+                  "error": null,
+                  "decoded": 54
+                }
+              ],
+              "frames": []
+            }
+          ]
+        }
+      ],
+      "before": [
+        {
+          "id": 38,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc"
+          ]
+        },
+        {
+          "id": 44,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 6.36,
+              "duration": 5729,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 307
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "after": [
+        {
+          "id": 38,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc"
+          ]
+        },
+        {
+          "id": 44,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 11.36,
+              "duration": 5729,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 431
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "playbackPass": true,
+      "seek": [
+        {
+          "id": 38,
+          "url": "https://tungtungsahur.cuevana3c.pro/",
+          "title": "p",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [],
+          "frames": [
+            "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc"
+          ]
+        },
+        {
+          "id": 44,
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+          "title": "Embed",
+          "guard": {
+            "blockedPopups": 0
+          },
+          "adOverlays": 0,
+          "video": [
+            {
+              "time": 63.96,
+              "duration": 5729,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 801
+            }
+          ],
+          "frames": []
+        }
+      ],
+      "blocked": [
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://tungtungsahur.cuevana3c.pro/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/varkus.js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cuevana3c.pro/js/varkus.js$script",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://latgw.fun/js/lib.js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://bh.dingerepilobe.com/rzBUh4iyFwTH/156108",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||dingerepilobe.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://gw.waughyciliary.com/sLQvNIbN76nU/156109",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||waughyciliary.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://latgw.fun/js/humanitarian-five.js",
+          "source": "https://tungtungsahur.cuevana3c.pro/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://mc.yandex.ru/metrika/tag.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||mc.yandex.ru^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://llvpn.com/tag.min.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||llvpn.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://imasdk.googleapis.com/js/sdkloader/ima3.js",
+          "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/f1wguj832bvc",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||imasdk.googleapis.com^",
+          "exception": null,
+          "redirect": false
+        }
+      ],
+      "blockedNavigations": 0
+    }
+  ],
+  "errors": [],
+  "bridgeErrors": []
+}

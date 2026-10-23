@@ -1,13 +1,13 @@
 {
-  "capturedAt": "2026-10-21T09:29:23.598Z",
+  "capturedAt": "2026-10-21T11:42:53.807Z",
   "app": "com.lgapp.lab",
-  "version": "0.5.0",
+  "version": "0.7.2",
   "tv": "192.168.1.134",
   "mac": "192.168.1.148",
+  "activeInspector": "http://localhost:64845",
   "launcher": "node scripts/start-lab.mjs",
-  "fixtures": "node scripts/fixture-server.mjs",
-  "activeInspector": "http://localhost:61142",
   "firmwareWrites": false,
   "dnsChanges": false,
-  "searchEngine": "google"
+  "url": "https://jkanime.net/",
+  "binding": "undefined"
 }

@@ -1,0 +1,27 @@
+{
+  "capturedAt": "2026-10-21T10:45:53.455Z",
+  "video": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "lists": "easylist, easyprivacy, easylist-spanish, easylist-cookie, ublock-filters, ublock-privacy, ublock-unbreak + reglas Luma",
+  "method": "Silenciado. Muestras cada 2 s durante 20 s: segundo del vídeo, ▶ reproduciendo / P pausa, AD = clase ad-showing.",
+  "results": [
+    {
+      "protection": true,
+      "phase": "complete",
+      "loadMs": 15826,
+      "toolbarMounted": true,
+      "toolbarHeight": 72,
+      "samples": "0▶ 1▶ 4▶ 6▶ 17P 17▶ 18▶ 20▶ 24▶ 26▶",
+      "bridgeErrors": []
+    },
+    {
+      "protection": false,
+      "phase": "complete",
+      "loadMs": 20828,
+      "toolbarMounted": true,
+      "toolbarHeight": 72,
+      "samples": "0▶AD 1▶AD 3▶AD 5▶AD 7PAD 7PAD 8▶AD 11▶AD 13▶AD 15▶AD",
+      "bridgeErrors": []
+    }
+  ],
+  "scope": "Una cuenta sin sesión, región MX, una visita por modo. YouTube cambia; no garantiza cero anuncios."
+}

@@ -1,0 +1,2144 @@
+{
+  "records": [
+    {
+      "url": "https://jkanime.net/",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery-3.3.1.min.js",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/bootstrap.min.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.35.0/dist/tabler-icons.min.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/elegant-icons.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/plyr.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/nice-select.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/owl.carousel.min.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/slicknav.min.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/jquery-confirm.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/jquery.toast.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/style.css",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/img/jkanimenet.png",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_be2341dd9308dd485354e38060a5b438.jpg",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_2446b3ef411710471fae06a404ff85ae.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_e0cf9990a54f5a092561bd0ad278743e.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_275b302350815481e4a22a12db522476.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/2.2.4/echo.iife.min.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/bootstrap.min.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/player.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.nice-select.min.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/mixitup.min.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.slicknav.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/owl.carousel.min.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.simplemodal.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.toast.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery-confirm.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/bot-detector.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/history.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/notify.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/main.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_67dca82ae747627d6708713a751e1829.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_ef26a0870ed96bb16e36b71a95d3dc75.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_b2ee43053268c7a5693f5d9c235dddc5.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_3936c3d41e0e74e43fbd5a254c06e2b5.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_768fde6fff558275072dd064232585fe.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_dfc37a590bb94d171d2943a896971b92.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_8fed2b9861cbce8f025e84d008a1e911.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_093a71b5de7178e6623aed507326c4e4.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_5ae0e1c9d3d18ddd7b49ea09724396f7.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_0e321f5dbe366e2e75cf3cebb5e95c49.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_1f00f7dc00c30db727e40ab45f0b38a2.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_0e4f035e4e2ab8d5950976864b8b2302.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_6fcb55d6d0a30d9504e0c8793f619f1f.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_9729b97dae6126f4deeb1f3ca9cca1e6.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_1db0641a35ea013fd6d22e83eb1e3ea4.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_0ea9d3ac0e068ae6a80d972b98ef52f6.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_3a3fdafc9889d90a2523e7fa8aa7caea.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_b93ae240229e67d1cef229bdc04f9a61.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_83f0a2f19c3821992f10784965c28821.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_930f7f5d846f7460fb19d45709c9d221.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_740c4156d6ca687a258b6b3d812624ec.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_7631f18fbea08cba6e5044b380606308.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_2506f8cc6d426c8fac9e95ea1ed56d10.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_e6c1e03ce4eacb4e2b03fdb430910499.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_9f9e40da026b3d3fae8cfa250a449b55.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_f6a16c14f39b032339f7cfaee374bb74.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_8a90042f884198d0b16527be48453a7a.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_c04869016b4a2ebbdff2225a5d4cb16e.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_8ff425010fd22bb3913ffc7c81511515.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_0a4e4b7ea51004171e752f76787a9a3a.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_8c75161d75fefe54cf60f527a810b055.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_2522cb451e2b581c13c3a2b7d4783603.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_3fe07ad06ba55854b1d1fce209fa4fc9.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_fee0060a378fdd89057e788ea7b5b6dd.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_203ee544da6a4fa18800f018d1fca5f3.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.35.0/dist/fonts/tabler-icons.woff2",
+      "source": "https://jkanime.net/",
+      "type": "Font",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_abe1b9895d7ec5f1361a9c3d36f14090.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_3e6924a18c35d3f3ac114c2f725af15c.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_7a9461454fdda309d56e2c51f0694f1d.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_3fbeb21c0d79f75dffe314384cb5edf7.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_f151b5ff0fb52876766c335f38aa8099.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_38829fe53a7e652fc7eef08920f9fbbd.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_6fb72600a71e49d0d365a9f285482680.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_16c75dcaccf0359ae79e9a3353cda27f.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_ae5b39ca9110d8f3da3ed7ad54cf077b.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_c3902c624de5be92ebbde896e38ae715.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_2ef8a34e2570bbee7966870927e54564.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_2a800e2cf52c22a459ab8f8780a37d7d.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_689b094ed50c89d473818b7f06cf575c.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_a09faf994640459875c57f4bec2d6a65.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_06df2c055c32f01a323bd216a0240b48.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_8d4a2b7ce0009ca8fd160f5a088fe39f.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_c65b78bd9d69fdb1b0844eb4a289d0c9.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_f545e53d3d68207f1250c6d729ebd0a4.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_da2849c5689e2d93a3d2fc3d55d7f8e1.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_1b17c50a0084b334793cfab760e052e0.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_bb2848f25550ebab92d958d7adfdc303.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_a90e9e2da42df19c6272d1753084791c.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_a39d6598472ea8ef70bf2ff923d7e04d.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_bada46c30a958bf82ac1c214bfd6d19e.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_fdd27f76545b5f659ef7b8dd11399902.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.hentaijk.com/assets/images/animes/video/image/jkvideo_bfccfe675a308e7546162cc7fd74b1ab.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.hentaijk.com/assets/images/animes/video/image/jkvideo_1f557bbafb0d38dc4ded9585e3437200.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.hentaijk.com/assets/images/animes/video/image/jkvideo_7117136a21e89e0f95ab7dd8358508a7.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.hentaijk.com/assets/images/animes/video/image/jkvideo_14a2ffe8cdd2c89575a2ab91588a2738.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.hentaijk.com/assets/images/animes/video/image/jkvideo_f96e5a1ec3dd92c0265d83e4892b5319.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.hentaijk.com/assets/images/animes/video/image/jkvideo_00b4a769313b3cbb24f77f453b80833c.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_51595af5ef13282a46088ba7f09e8e77.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_634d1aa5af9229ec8eafb4fb53a31839.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_1583732dfa1e7d2528b694b87c2c2d4f.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_0e6be8d9a8ad9e180298dd563f318519.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_2ccde39b94334f5d0321d9b508e92c76.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_cd9cceb4bdcfbcdc67a8df62736f5ebb.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_02f967bd71b29199ee4b3b2eb59317bd.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_aad915d43e82b9ae808166b0715e1f93.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/009-1.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/mirai-shounen-conan.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/cyberpunk-edgerunners-2.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/tonagura.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/moyashimon-returns.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/moyashimon.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/marudase-kintarou.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/da-wang-rao-ming-3.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/da-wang-rao-ming-2.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/joshikousei-girls-high-specials.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/joshikousei-girls-high.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/sanxian-lun-hui.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/kenkou-zenrakei-suiei-bu-umishou.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/kyoufu-collector.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/bright-samurai-soul.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/holy-knight.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/tokyo-babylon.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/hanarokushou-ga-akeru-hi-ni.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/gochuumon-wa-usagi-desu-ka-sing-for-you.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/gochuumon-wa-usagi-desu-ka-dear-my-sister.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/keroro-gunsou-2026.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/li-xiongmao.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/onegai-samia-don.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/mahoutsukai-ni-taisetsu-na-koto-natsu-no-sora.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/mahoutsukai-ni-taisetsu-na-koto.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/honoo-no-mirage-muyou-no-michi.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/honoo-no-mirage.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/ansatsu-kyoushitsu-kagaijugyou-hen.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/hoshi-wo-ou-kodomo.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/umayuru-full-gate.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/kanojo-no-tomodachi.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/aoki-denshou-welsh-shedar.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/one-piece.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/kimetsu-no-yaiba-hashira-geiko-hen.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/kono-subarashii-sekai-ni-shukufuku-wo.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/dragon-ball-z.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/dungeon-ni-deai-wo-motomeru-no-wa-machigatteiru-darou-ka.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/kimetsu-no-yaiba.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/sono-bisque-doll-wa-koi-wo-suru.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/kaoru-hana-wa-rin-to-saku.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/ore-dake-level-up-na-ken-season-2-arise-from-the-shadow.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/kaijuu-8-gou.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtag/js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||googletagmanager.com^",
+      "exception": null,
+      "redirect": true
+    },
+    {
+      "url": "https://cvt-s2.agl003.com/o/s/114ceb8fd4b175d08f041c62576b2f82.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||agl003.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/mulish/v18/1Ptvg83HX_SGhgqk3wot.woff2",
+      "source": "https://jkanime.net/",
+      "type": "Font",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "http://stats.jkdesa.com/js/pa-lKuCEqYJhM-34XTHbzbfQ.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||stats.jkdesa.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://db.unboltsecole.com/r5K9akItvISYz1J/128512",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/fonts/ElegantIcons.woff",
+      "source": "https://jkanime.net/",
+      "type": "Font",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/oswald/v57/TK3iWkUHHAIjg752GT8G.woff2",
+      "source": "https://jkanime.net/",
+      "type": "Font",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.35.0/dist/fonts/tabler-icons.woff2",
+      "source": "https://jkanime.net/",
+      "type": "Font",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/mulish/v18/1Ptvg83HX_SGhgqk3wot.woff2",
+      "source": "https://jkanime.net/",
+      "type": "Font",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/fonts/ElegantIcons.woff",
+      "source": "https://jkanime.net/",
+      "type": "Font",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/oswald/v57/TK3iWkUHHAIjg752GT8G.woff2",
+      "source": "https://jkanime.net/",
+      "type": "Font",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_a378ee299a8f0f56f60bef587e56eadf.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_4884a83e476bb1eb0a06c83c2eced914.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_3b3f698bfe9224291245d8d79a283283.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_e4e83d48e6952a960881b6b18cb4ad0e.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_e010e9484c02e8d5d73ea8924e6f1564.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_e0b943cdf8b4af3eb7228673138501fd.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_829d291a999fc7705554679a809bc446.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_6349f16d1d0ec7dd3d2001305a42b472.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://unswung.gurlleviter.cyou/pstr/FE7D0630-CEAF-11F1-B238-3F962E1580E3",
+      "source": "https://jkanime.net/",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://unswung.gurlleviter.cyou/pstr/FE7D0630-CEAF-11F1-B238-3F962E1580E3",
+      "source": "https://jkanime.net/",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://unswung.gurlleviter.cyou/pstr/FE7D0630-CEAF-11F1-B238-3F962E1580E3",
+      "source": "https://jkanime.net/",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://unswung.gurlleviter.cyou/pstr/FE7D0630-CEAF-11F1-B238-3F962E1580E3",
+      "source": "https://jkanime.net/",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://unswung.gurlleviter.cyou/pstr/FE7D0630-CEAF-11F1-B238-3F962E1580E3",
+      "source": "https://jkanime.net/",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://unswung.gurlleviter.cyou/pstr/FE7D0630-CEAF-11F1-B238-3F962E1580E3",
+      "source": "https://jkanime.net/",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://unswung.gurlleviter.cyou/pstr/FE7D0630-CEAF-11F1-B238-3F962E1580E3",
+      "source": "https://jkanime.net/",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://jkanime.net/one-piece/1180",
+      "source": "https://jkanime.net/",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/bootstrap.min.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.35.0/dist/tabler-icons.min.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/elegant-icons.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/plyr.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/nice-select.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/owl.carousel.min.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/slicknav.min.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/jquery-confirm.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/jquery.toast.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/style.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/css/basic.css",
+      "source": "https://jkanime.net/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.cookie.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.base64.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/video_min.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/basic.js",
+      "source": "https://jkanime.net/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/fairy-tail.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/hunter-x-hunter-2011.jpg",
+      "source": "https://jkanime.net/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/ua-parser.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/image/naruto.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtag/js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||googletagmanager.com^",
+      "exception": null,
+      "redirect": true
+    },
+    {
+      "url": "https://cvt-s2.agl003.com/o/s/114ceb8fd4b175d08f041c62576b2f82.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||agl003.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "http://stats.jkdesa.com/js/pa-lKuCEqYJhM-34XTHbzbfQ.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||stats.jkdesa.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://db.unboltsecole.com/r5K9akItvISYz1J/128512",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cvt-s2.agl003.com/o",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||agl003.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://jkanime.net/jkplayer/umv",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://jkanime.net/jkplayer/um",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/bot-detector.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/filters-save.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/dplayer-1.27.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/p2p-media-loader-core.min.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/p2p-media-loader-hlsjs.min.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/hls.min.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/DPlayer.min.css",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/history.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://stats.jkdesa.com/js/script.manual.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||stats.jkdesa.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/notify.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://nika.playmudos.com/WUllVEs1Z1lJWGwxQmNwSS9DaFVhZWZaQllPOHY4THI0RlNJOU4vRHR3OD0.m3u8",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image/jkvideo_829d291a999fc7705554679a809bc446.jpg",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/main.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/cast/sdk/libs/sender/1.0/cast_framework.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/eureka/clank/120/cast_sender.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn3.ducvomes.com/ja/segs/2/v1x/WUllVEs1Z1lJWGwxQmNwSS9DaFVhZWZaQllPOHY4THI0RlNJOU4vRHR3OD0/20v2x.ts",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://jkanime.net/ajax/episodes/201/74",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_949b11897a70d1c4ad770bf777edc264.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_a0f1e098df543ad06a9b77cd2a22fd49.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_eef772f543649423a7650321238537d6.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_76ce7e952e16db5bd1e4ed0c7de6bb6b.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_905946be421405a9c86bca20d8e4b683.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_e80a6ee7b13a543d2c3654a13adad130.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_893e8c43941338a7401c1b7fe540ebad.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_3a23cefeceb6296e40cf00bb34f7c190.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_3fe37896a8338542a2ffebfe34a0f27c.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_deebfcc208c5dc3851a6e7b7254a3609.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_0e7c1e79fc47c64ad7fce5f37d1012a3.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/images/animes/video/image_thumb/jkvideo_829d291a999fc7705554679a809bc446.jpg",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cdn5.ducvomes.com/ja/segs/2/v1x/WUllVEs1Z1lJWGwxQmNwSS9DaFVhZWZaQllPOHY4THI0RlNJOU4vRHR3OD0/21v2x.ts",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    }
+  ],
+  "errors": [],
+  "navigation": {
+    "phase": "complete",
+    "progress": 100,
+    "url": "https://jkanime.net/one-piece/1180",
+    "error": ""
+  }
+}

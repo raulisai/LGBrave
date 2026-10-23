@@ -76,7 +76,9 @@ for (const port of [43187, 43188]) {
       const path = resolve(root, url.pathname.slice('/luma-home/'.length) || 'index.html');
       if (!path.startsWith(root + '/')) { res.writeHead(403).end(); return; }
       try {
-        res.setHeader('Content-Type', ({ '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png' })[extname(path)] || 'application/octet-stream');
+        res.setHeader('Content-Type', ({ '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.wasm': 'application/wasm' })[extname(path)] || 'application/octet-stream');
+        // Hashed bundles never change; index.html is revalidated so a new build shows at once.
+        res.setHeader('Cache-Control', path.includes('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache');
         res.end(readFileSync(path));
       } catch { res.writeHead(404).end(); }
       return;

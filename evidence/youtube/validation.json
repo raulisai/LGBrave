@@ -1,0 +1,55 @@
+{
+  "capturedAt": "2026-10-21T10:32:03.917Z",
+  "scope": "Una visita por página; los anuncios de YouTube varían por cuenta, país y momento.",
+  "pages": [
+    {
+      "name": "home",
+      "requested": "https://www.youtube.com/",
+      "phase": "complete",
+      "url": "https://www.youtube.com/",
+      "title": "YouTube",
+      "shield": true,
+      "adElementsInDOM": 2,
+      "adElementsVisible": 0,
+      "adShowing": false,
+      "playerHasAdPlacements": false,
+      "video": null,
+      "blocked": 4,
+      "blockedSample": [
+        "https://googleads.g.doubleclick.net/pagead/id",
+        "https://www.youtube.com/youtubei/v1/log_event",
+        "https://www.google.com/pagead/lvz",
+        "https://www.google.com.mx/pagead/lvz"
+      ]
+    },
+    {
+      "name": "watch",
+      "requested": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "phase": "complete",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster) - YouTube",
+      "shield": true,
+      "adElementsInDOM": 1,
+      "adElementsVisible": 0,
+      "adShowing": false,
+      "playerHasAdPlacements": false,
+      "video": {
+        "paused": true,
+        "muted": true,
+        "currentTime": 15.4,
+        "duration": 213
+      },
+      "blocked": 13,
+      "blockedSample": [
+        "https://www.youtube.com/api/stats/qoe",
+        "https://www.youtube.com/ptracking",
+        "https://www.youtube.com/pagead/viewthroughconversion/962985656/",
+        "https://www.google.com/pagead/1p-user-list/962985656/",
+        "https://www.youtube.com/youtubei/v1/log_event",
+        "https://www.youtube.com/generate_204",
+        "https://www.youtube.com/youtubei/v1/log_event",
+        "https://www.youtube.com/api/stats/qoe"
+      ]
+    }
+  ]
+}

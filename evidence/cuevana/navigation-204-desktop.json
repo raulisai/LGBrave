@@ -1,0 +1,15 @@
+{
+  "url": "http://127.0.0.1:43187/simple",
+  "blockedNavigations": 1,
+  "blocked": [
+    {
+      "url": "https://luma-navigation-block.invalid/ad",
+      "source": "http://127.0.0.1:43187/simple",
+      "type": "Document",
+      "blocked": true,
+      "rule": "||luma-navigation-block.invalid^$document",
+      "exception": null,
+      "redirect": false
+    }
+  ]
+}

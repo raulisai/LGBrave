@@ -1,0 +1,903 @@
+{
+  "capturedAt": "2026-10-21T11:17:20.752Z",
+  "platform": "tv",
+  "scope": "Short playback samples, not entire movies or universal compatibility.",
+  "movies": [
+    {
+      "slug": "omaha",
+      "stages": [
+        {
+          "stage": "detail",
+          "frames": [
+            {
+              "id": 1,
+              "url": "https://cuevana3c.pro/pelicula/omaha",
+              "title": "Película Omaha Gratis Online (2025) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        },
+        {
+          "stage": "player",
+          "frames": [
+            {
+              "id": 1,
+              "url": "https://cuevana3c.pro/pelicula/omaha",
+              "title": "Película Omaha Gratis Online (2025) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        }
+      ],
+      "error": "No se cumplió la condición",
+      "records": [
+        {
+          "url": "https://cuevana3c.pro/pelicula/omaha",
+          "source": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html",
+          "type": "Document",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/css/movie.css",
+          "source": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html",
+          "type": "Stylesheet",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/image/DiscordMainLogo.svg",
+          "source": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/cuevana3.png",
+          "source": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/8noDLotaCP9J5dpckmRCk9at9tW.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w1280/zqZoK4Uh2e4NiDTkvsUa3Uhk0rY.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/image/cas.png",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/image/sub.png",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/vdQWE5gjut4Omw9NTIDfZYqP0k5.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/gDNMhESCe0iXP2YLZD3cEmi8Edj.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/v67tcRC4mHrNc9ZT5VnMECCoTNl.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/cTnsQaiUq1hR6bOfIw6uBYCGktN.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/9QlCmWYMXlIoN8GhU1iFH8zfVg.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/so8yL8Em4X9sZBksDxbyA9Fgw7M.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/28EOZqFWVSeWtA0qXADj7llHl5.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/j3kjDNFhhGheHQ8uMCvFTy5ziSp.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/xLCg21ip0nw07TtjYsbLrfCxCpW.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/rSn1pEvTkQ526Rnk7OBa2DeGhpO.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/8NT1BRwKbm6qeG24SwRI1Em7ave.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/kRwCVZeTuL1QQFX4LqKg1d8RK1k.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/cuevana-logo.png",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/image/playable.png",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/image/loading.png",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/varkus.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cuevana3c.pro/js/varkus.js$script",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://cuevana3c.pro/js/favorite-button.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/favorites-manager.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/movie-player.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/popa.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://latgw.fun/js/lib.js",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://bh.dingerepilobe.com/rzBUh4iyFwTH/156108",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||dingerepilobe.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://gw.waughyciliary.com/sLQvNIbN76nU/156109",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||waughyciliary.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        }
+      ]
+    },
+    {
+      "slug": "bad-apples",
+      "stages": [
+        {
+          "stage": "detail",
+          "frames": [
+            {
+              "id": 3,
+              "url": "https://cuevana3c.pro/pelicula/bad-apples",
+              "title": "Película Bad Apples Gratis Online (2026) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        },
+        {
+          "stage": "player",
+          "frames": [
+            {
+              "id": 3,
+              "url": "https://cuevana3c.pro/pelicula/bad-apples",
+              "title": "Película Bad Apples Gratis Online (2026) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        }
+      ],
+      "error": "No se cumplió la condición",
+      "records": [
+        {
+          "url": "https://cuevana3c.pro/pelicula/bad-apples",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Document",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/css/movie.css",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Stylesheet",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/kFQaT7NuZvLx7hFmPhigaTedOOB.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w1280/ldeiBXtVM12oDUVSiJtwjESLSOc.jpg",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://cuevana3c.pro/pelicula/omaha",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/image/lat.png",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/vHKlIci8f38GaAd361EW0VSx91k.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/9CHg7tCS8oPdKszDUWw5RnDLKrC.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/zvYgZFoEc2AzFktwIv78rj4qn3e.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/jBXupXZ7WEPUpkYFpkQsdipwBQn.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/d45rHJsby26TSakc5ahkdmE72YH.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/vkxKo08e8PhIKz6itm2b83scYQ7.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/9rpTuk7JIhwNhMiTXzxzQlulkvN.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/gz7uvTuwCTNGQ8rs0l4B0Ock2Ce.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/z6azQ1rE1HYD2tVlGt0POQlLc57.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/hYDiAFCWJTgD2aSfYjYtboPp38r.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/1CjHGpYxtE8ZhLnHh6KN9BqzppR.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/wyEECX6JopQfJPbfVi4sRVLKGpy.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/varkus.js",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cuevana3c.pro/js/varkus.js$script",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://cuevana3c.pro/js/popa.js",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://latgw.fun/js/lib.js",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://bh.dingerepilobe.com/rzBUh4iyFwTH/156108",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||dingerepilobe.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://gw.waughyciliary.com/sLQvNIbN76nU/156109",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||waughyciliary.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        }
+      ]
+    },
+    {
+      "slug": "solomamma",
+      "stages": [
+        {
+          "stage": "detail",
+          "frames": [
+            {
+              "id": 5,
+              "url": "https://cuevana3c.pro/pelicula/solomamma",
+              "title": "Película Solomamma Gratis Online (2025) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        },
+        {
+          "stage": "player",
+          "frames": [
+            {
+              "id": 5,
+              "url": "https://cuevana3c.pro/pelicula/solomamma",
+              "title": "Película Solomamma Gratis Online (2025) - Cuevana 3",
+              "guard": {
+                "blockedPopups": 0
+              },
+              "adOverlays": 0,
+              "video": [],
+              "frames": []
+            }
+          ]
+        }
+      ],
+      "error": "No se cumplió la condición",
+      "records": [
+        {
+          "url": "https://cuevana3c.pro/pelicula/solomamma",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Document",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/css/movie.css",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Stylesheet",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/4zyoBIt9UI2OiTj9jEgY9lrbdmf.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w1280/4BNEdfmgM2cZF1yNeE6bT0tIK63.jpg",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+          "source": "https://cuevana3c.pro/pelicula/bad-apples",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cloudflareinsights.com^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/image/cas.png",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/zB1ZhLWQNiBkRnABbFaULodfEaj.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/iYIIy55PvxPgqdCtWiDkFssxepT.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/1GK1Qyt5SZeRCimVfqG0Wcynth0.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/6Kex0ys4MzI6FCOlFBccrWZL0Kc.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/c5DeFQGW5YJRzo0NU1MYFVHlVbL.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/obXfrcnYvjPoBGw8thSyPAZOxCy.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/saNidIuqNyFSkCoW60cybQg3tL3.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/1jzVlKyEbalDxwbJkFZmfB71chK.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/7xgFjf0zWAQLRwmiQsiPm4ufehb.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/ecoKf7RY0JFAIMBFovT8pwC5dUu.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/reJmewTkOUX1he9Wb3uR3xfQshV.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w200/hTu6AGatoigX8OKOmg9YRxcs1Pw.jpg",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/varkus.js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||cuevana3c.pro/js/varkus.js$script",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://cuevana3c.pro/js/favorite-button.js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/favorites-manager.js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cuevana3c.pro/js/movie-player.js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://latgw.fun/js/lib.js",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||latgw.fun^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://bh.dingerepilobe.com/rzBUh4iyFwTH/156108",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||dingerepilobe.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://gw.waughyciliary.com/sLQvNIbN76nU/156109",
+          "source": "https://cuevana3c.pro/pelicula/solomamma",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||waughyciliary.com^$domain=cuevana3c.pro",
+          "exception": null,
+          "redirect": false
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "bridgeErrors": []
+}

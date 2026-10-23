@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-21T09:16:02.324Z",
+  "capturedAt": "2026-10-21T10:30:48.958Z",
   "hardware": "LG 75UR8750PSA / webOS SDK 10.3.2",
   "autonomous": {
     "runtime": {
@@ -40,97 +40,97 @@
     },
     "baselineRequests": [
       {
-        "time": "2026-10-21T09:16:06.972Z",
+        "time": "2026-10-21T10:30:53.530Z",
         "port": 43187,
         "path": "/fixture",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.559Z",
+        "time": "2026-10-21T10:30:54.942Z",
         "port": 43187,
         "path": "/content-fixture/style.css",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.597Z",
+        "time": "2026-10-21T10:30:54.997Z",
         "port": 43187,
         "path": "/ad-fixture/style.css",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.599Z",
+        "time": "2026-10-21T10:30:54.998Z",
         "port": 43187,
         "path": "/content-fixture/good.js",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.600Z",
+        "time": "2026-10-21T10:30:55.000Z",
         "port": 43187,
         "path": "/ad-fixture/banner.js",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.640Z",
+        "time": "2026-10-21T10:30:55.032Z",
         "port": 43187,
         "path": "/ad-fixture/allowed.js",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.641Z",
+        "time": "2026-10-21T10:30:55.033Z",
         "port": 43187,
         "path": "/content-fixture/pixel.png",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.642Z",
+        "time": "2026-10-21T10:30:55.034Z",
         "port": 43187,
         "path": "/ad-fixture/pixel.png",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.768Z",
+        "time": "2026-10-21T10:30:55.188Z",
         "port": 43187,
         "path": "/ad-fixture/frame",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.889Z",
-        "port": 43187,
-        "path": "/ad-fixture/fetch",
-        "run": "baseline"
-      },
-      {
-        "time": "2026-10-21T09:16:08.905Z",
-        "port": 43187,
-        "path": "/content-fixture/fetch",
-        "run": "baseline"
-      },
-      {
-        "time": "2026-10-21T09:16:08.906Z",
+        "time": "2026-10-21T10:30:55.296Z",
         "port": 43187,
         "path": "/content-fixture/frame",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.917Z",
+        "time": "2026-10-21T10:30:55.360Z",
+        "port": 43187,
+        "path": "/ad-fixture/fetch",
+        "run": "baseline"
+      },
+      {
+        "time": "2026-10-21T10:30:55.381Z",
+        "port": 43187,
+        "path": "/content-fixture/fetch",
+        "run": "baseline"
+      },
+      {
+        "time": "2026-10-21T10:30:55.394Z",
         "port": 43187,
         "path": "/ad-fixture/xhr",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.970Z",
+        "time": "2026-10-21T10:30:55.397Z",
         "port": 43187,
         "path": "/content-fixture/cookie",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.971Z",
+        "time": "2026-10-21T10:30:55.397Z",
         "port": 43188,
         "path": "/ad-fixture/cross",
         "run": "baseline"
       },
       {
-        "time": "2026-10-21T09:16:08.972Z",
+        "time": "2026-10-21T10:30:55.398Z",
         "port": 43188,
         "path": "/content-fixture/cross",
         "run": "baseline"
@@ -148,55 +148,55 @@
     },
     "filteredRequests": [
       {
-        "time": "2026-10-21T09:16:11.008Z",
+        "time": "2026-10-21T10:30:57.488Z",
         "port": 43187,
         "path": "/fixture",
         "run": "filtered"
       },
       {
-        "time": "2026-10-21T09:16:11.099Z",
+        "time": "2026-10-21T10:30:57.587Z",
         "port": 43187,
         "path": "/content-fixture/style.css",
         "run": "filtered"
       },
       {
-        "time": "2026-10-21T09:16:11.100Z",
+        "time": "2026-10-21T10:30:57.602Z",
         "port": 43187,
         "path": "/content-fixture/good.js",
         "run": "filtered"
       },
       {
-        "time": "2026-10-21T09:16:11.122Z",
+        "time": "2026-10-21T10:30:57.612Z",
         "port": 43187,
         "path": "/ad-fixture/allowed.js",
         "run": "filtered"
       },
       {
-        "time": "2026-10-21T09:16:11.123Z",
+        "time": "2026-10-21T10:30:57.614Z",
         "port": 43187,
         "path": "/content-fixture/pixel.png",
         "run": "filtered"
       },
       {
-        "time": "2026-10-21T09:16:11.342Z",
-        "port": 43187,
-        "path": "/content-fixture/fetch",
-        "run": "filtered"
-      },
-      {
-        "time": "2026-10-21T09:16:11.374Z",
-        "port": 43188,
-        "path": "/content-fixture/cross",
-        "run": "filtered"
-      },
-      {
-        "time": "2026-10-21T09:16:11.402Z",
+        "time": "2026-10-21T10:30:57.997Z",
         "port": 43187,
         "path": "/content-fixture/frame",
         "run": "filtered"
       },
       {
-        "time": "2026-10-21T09:16:11.403Z",
+        "time": "2026-10-21T10:30:58.170Z",
+        "port": 43187,
+        "path": "/content-fixture/fetch",
+        "run": "filtered"
+      },
+      {
+        "time": "2026-10-21T10:30:58.190Z",
+        "port": 43188,
+        "path": "/content-fixture/cross",
+        "run": "filtered"
+      },
+      {
+        "time": "2026-10-21T10:30:58.219Z",
         "port": 43187,
         "path": "/content-fixture/cookie",
         "run": "filtered"
@@ -285,6 +285,15 @@
         "redirect": false
       },
       {
+        "url": "http://192.168.1.148:43187/content-fixture/frame",
+        "source": "http://192.168.1.148:43187/fixture",
+        "type": "Document",
+        "blocked": false,
+        "rule": null,
+        "exception": null,
+        "redirect": false
+      },
+      {
         "url": "http://192.168.1.148:43187/ad-fixture/fetch",
         "source": "http://192.168.1.148:43187/fixture",
         "type": "XHR",
@@ -326,15 +335,6 @@
         "type": "XHR",
         "blocked": true,
         "rule": "/ad-fixture/",
-        "exception": null,
-        "redirect": false
-      },
-      {
-        "url": "http://192.168.1.148:43187/content-fixture/frame",
-        "source": "http://192.168.1.148:43187/fixture",
-        "type": "Document",
-        "blocked": false,
-        "rule": null,
         "exception": null,
         "redirect": false
       },
@@ -434,7 +434,7 @@
       "title": "MDN Web Docs",
       "textLength": 4934,
       "toolbar": true,
-      "observedRequests": 66,
+      "observedRequests": 67,
       "blockedRequests": 1,
       "decisions": [
         {
@@ -619,7 +619,7 @@
         },
         {
           "url": "https://developer.mozilla.org/static/client/styles-footer.66072dd619a4ef50.css",
-          "source": "https://example.com/",
+          "source": "https://developer.mozilla.org/en-US/",
           "type": "Stylesheet",
           "blocked": false,
           "rule": null,
@@ -628,7 +628,7 @@
         },
         {
           "url": "https://developer.mozilla.org/static/client/runtime.fcfe7903ea7c41f2.js",
-          "source": "https://example.com/",
+          "source": "https://developer.mozilla.org/en-US/",
           "type": "Script",
           "blocked": false,
           "rule": null,
@@ -637,7 +637,7 @@
         },
         {
           "url": "https://developer.mozilla.org/static/client/5909.489e266d049aa182.js",
-          "source": "https://example.com/",
+          "source": "https://developer.mozilla.org/en-US/",
           "type": "Script",
           "blocked": false,
           "rule": null,
@@ -646,7 +646,7 @@
         },
         {
           "url": "https://developer.mozilla.org/static/client/4585.e30f706b333273cd.js",
-          "source": "https://example.com/",
+          "source": "https://developer.mozilla.org/en-US/",
           "type": "Script",
           "blocked": false,
           "rule": null,
@@ -655,7 +655,7 @@
         },
         {
           "url": "https://developer.mozilla.org/static/client/1216.2fdb44f0bb574bc2.js",
-          "source": "https://example.com/",
+          "source": "https://developer.mozilla.org/en-US/",
           "type": "Script",
           "blocked": false,
           "rule": null,
@@ -664,7 +664,7 @@
         },
         {
           "url": "https://developer.mozilla.org/static/client/index.49937252c2edb888.js",
-          "source": "https://example.com/",
+          "source": "https://developer.mozilla.org/en-US/",
           "type": "Script",
           "blocked": false,
           "rule": null,
@@ -735,7 +735,97 @@
           "redirect": false
         },
         {
-          "url": "https://incoming.telemetry.mozilla.org/submit/mdn-fred/events/1/8307c452-28b4-4f11-b339-4dc61fc6e90c",
+          "url": "https://developer.mozilla.org/static/ssr/search.5dd31cbeea7d1af9.svg",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/client/external-link.4f3a2dc8e402cae5.svg",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/client/quote.894340f7e3ad2575.svg",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/client/github.4d94e1bf436aa7ed.svg",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/client/bluesky.a9421882d093c829.svg",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/client/x.4c7e68bf52af030a.svg",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/client/mastodon.1a5c0fde8353f680.svg",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/client/rss.37214526d7308d0c.svg",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/client/inter-italic-latin.fd2627ec16333c05.woff2",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://developer.mozilla.org/static/ssr/mdn_contributor.9e2a105f50828d5a.png",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://incoming.telemetry.mozilla.org/submit/mdn-fred/events/1/e9a263ba-aada-4103-a61c-f4d85a8e4260",
           "source": "https://developer.mozilla.org/en-US/",
           "type": "Ping",
           "blocked": false,
@@ -915,78 +1005,6 @@
           "redirect": false
         },
         {
-          "url": "https://developer.mozilla.org/static/ssr/search.5dd31cbeea7d1af9.svg",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
-          "url": "https://developer.mozilla.org/static/client/external-link.4f3a2dc8e402cae5.svg",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
-          "url": "https://developer.mozilla.org/static/client/quote.894340f7e3ad2575.svg",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
-          "url": "https://developer.mozilla.org/static/client/github.4d94e1bf436aa7ed.svg",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
-          "url": "https://developer.mozilla.org/static/client/bluesky.a9421882d093c829.svg",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
-          "url": "https://developer.mozilla.org/static/client/x.4c7e68bf52af030a.svg",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
-          "url": "https://developer.mozilla.org/static/client/mastodon.1a5c0fde8353f680.svg",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
-          "url": "https://developer.mozilla.org/static/client/rss.37214526d7308d0c.svg",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
           "url": "https://developer.mozilla.org/static/client/inter-italic-latin.fd2627ec16333c05.woff2",
           "source": "https://developer.mozilla.org/en-US/",
           "type": "Font",
@@ -996,16 +1014,7 @@
           "redirect": false
         },
         {
-          "url": "https://developer.mozilla.org/static/ssr/mdn_contributor.9e2a105f50828d5a.png",
-          "source": "https://developer.mozilla.org/en-US/",
-          "type": "Image",
-          "blocked": false,
-          "rule": null,
-          "exception": null,
-          "redirect": false
-        },
-        {
-          "url": "https://incoming.telemetry.mozilla.org/submit/mdn-fred/events/1/b33ba346-cb89-4d82-af94-a9ce586465e2",
+          "url": "https://incoming.telemetry.mozilla.org/submit/mdn-fred/events/1/be75ce50-f34f-4929-86dc-cef479fbe84a",
           "source": "https://developer.mozilla.org/en-US/",
           "type": "Ping",
           "blocked": false,
@@ -1023,7 +1032,7 @@
           "redirect": false
         },
         {
-          "url": "https://incoming.telemetry.mozilla.org/submit/mdn-fred/events/1/bdd09e7b-d5e0-488f-8372-18d7468c862d",
+          "url": "https://incoming.telemetry.mozilla.org/submit/mdn-fred/events/1/a65923ee-7ddc-477f-9387-cf3e8daa4c19",
           "source": "https://developer.mozilla.org/en-US/",
           "type": "Ping",
           "blocked": false,
@@ -1035,7 +1044,1121 @@
     },
     {
       "requested": "https://www.bbc.com/",
-      "error": "No se cumplió la condición"
+      "url": "https://www.bbc.com/",
+      "title": "BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video & Audio",
+      "textLength": 14866,
+      "toolbar": true,
+      "observedRequests": 123,
+      "blockedRequests": 6,
+      "decisions": [
+        {
+          "url": "https://www.bbc.com/",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Document",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cdn.optimizely.com/public/4621041136/s/bbcx_prod.js",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||optimizely.com/public/",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/grey-placeholder.png",
+          "source": "https://developer.mozilla.org/en-US/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cdn.tinypass.com/api/tinypass.min.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://emp.bbci.co.uk/emp/bump-4/bump-4.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0b-tgv1_m1uo9.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0d9awe5d081.2.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0s_kjwmep8yf2.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0-a6nanpwqpag.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/178~uy1pz6ka4.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/02w2j6a0szhem.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/01ahds4cdfgmx.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/004vauwu48azs.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0k530rgixl5kt.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0zpz-874su9ks.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0jcf7ay9pl-s0.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0gmos.wajd.qx.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0jl4bpoiy-t_p.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0fi49hn5~2abh.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0na6onp8uomzi.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0pr885e78gdj8.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0u17oyz1d609w.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0ogvtm3jmac~r.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0~~24znpk8vc1.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0wvd3r_eaw3c5.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/07but62g~762i.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/05el2iwpn3pyx.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/00su1kxuv.aa_.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/16q5af36gnal7.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/06nzlhdny82mu.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0z3rjge5m4grx.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0sg.r7cks_jx8.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/12w5u9fluro3i.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0.ws-k_jzc8i2.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/16dcr7d4y4lhc.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/04sq1ffotg38c.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/13ad5orspgznk.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0y-nyl-getpga.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0x01rgvk49mtx.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0a--~b-snp6to.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0sm_sfi0c1mq-.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0n-kjrsnwe2tb.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0azuteq0wtknv.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0mckxsxon986f.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/16kj94g7c7rw8.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/turbopack-04y99ggvgi7xy.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0dygf8~f-ark~.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0_.x9qja-1xmd.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Md.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/035cetiu1lmqz.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0ney8voxt0l76.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0r3a.dyaj03jt.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0poljq4b391uk.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0yre_l0bfiy1-.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/17otsw7f7e5qj.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0e0yap1cuptv2.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/turbopack-0x0d1cwaswfg_.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/V-EWQu4bBFbU6KSW2kl6i/_buildManifest.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/V-EWQu4bBFbU6KSW2kl6i/_ssgManifest.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/V-EWQu4bBFbU6KSW2kl6i/_clientMiddlewareManifest.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Bd.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Rg.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://www.bbc.co.uk/userinfo",
+          "source": "https://www.bbc.com/",
+          "type": "XHR",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Md.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Md.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Rg.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Bd.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/640/cpsprodpb/a22e/live/83914ac0-8497-11ef-bf4c-1f355eb87d3c.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/ca83/live/3f595b00-ccba-11f1-a64c-550be9e3c66b.png.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Rg.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/16b5/live/2cbe53a0-cd29-11f1-a64c-550be9e3c66b.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Md.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Rg.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_ExBd.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/1024x576/p0phnvsj.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/1024x576/p0phnpk2.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0phlm3n.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0phnsrc.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0pfq09m.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0pgx0dm.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0phmlgk.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0p00bzf.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0pc7ddm.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/1024/cpsprodpb/ad57/live/10727dd0-cce2-11f1-b759-47986a462148.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/05ce/live/5e5f90f0-cc74-11f1-9a39-31b474234113.png.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/a691/live/0777e580-cd28-11f1-bc2e-018d645d8d21.png.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/1ac3/live/e306fad0-ccad-11f1-a64c-550be9e3c66b.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/46a8/live/08677710-cca3-11f1-bc2e-018d645d8d21.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/b476/live/2a511110-cd11-11f1-92f9-3b44ce9ad221.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/7bc8/live/5a0dcac0-ccbb-11f1-9a39-31b474234113.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/1514/live/d90a36f0-cd02-11f1-9a39-31b474234113.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/0483/live/4a64e3e0-cc72-11f1-a64c-550be9e3c66b.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/483d/live/f2db5f30-cbdd-11f1-9a39-31b474234113.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/6193/live/d6797140-cc02-11f1-bc2e-018d645d8d21.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/1920x1080/p0phjjsn.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0hhhf3p.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/images/ic/480x270/p0p6mlnz.jpg.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://ichef.bbci.co.uk/news/480/cpsprodpb/468f/live/8b7c5530-1b6a-11f0-a455-cf1d5f751d2f.png.webp",
+          "source": "https://www.bbc.com/",
+          "type": "Image",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_ExBd.woff2",
+          "source": "https://www.bbc.com/",
+          "type": "Font",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cdn.privacy-mgmt.com/unified/wrapperMessagingWithoutDetection.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "/wrapperMessagingWithoutDetection.js$domain=10news.com|1erforum.de|2050.de|2dehands.be|2ememain.be|3newsnow.com|4fansites.de|4players.de|9gag.com|abc15.com|abiristeilyt.fi|ableitungsrechner.net|abonnement.hln.be|about-drinks.com|academics.de|ad-alliance.de|adressa.no|advnture.com|aero.de|aesby.no|aftenbladet.no|aftenposten.no|agalega.gal|agalegaaudio.gal|agderposten.no|airliners.de|aktuality.sk|akuankka.fi|altaposten.no|alypaa.com|amateurphotographer.com|andalsnes-avis.no|andoveradvertiser.co.uk|androidcentral.com|androidpolice.com|anfieldwatch.co.uk|anguscountyworld.co.uk|anime2you.de|apotheken-umschau.de|ariadneathome.nl|ariva.de|arizona61.com|autobild.es|autoblog.com|autoexpress.co.uk|automobil-elektronik-kongress.de|autotrack.nl|autotrader.co.uk|autoweek.nl|autowereld.nl|autozeitung.de|av-avis.no|avisa-st.no|avisafroya.no|axelspringer.com|azet.sk|baby-und-familie.de|babygaga.com|backyardboss.net|badoo.com|bafoeg-rechner.de|banburyguardian.co.uk|banett.no|barrons.com|bauer-plus.de|bauermedia.com|bauermedia.de|bautipps.it|bbc.com|bbcgoodfood.com|bbheute.de|bedfordtoday.co.uk|bergfex.at|bergfex.com|berliner-kurier.de|best-of-netflix.com|bestcheck.de|bietigheimerzeitung.de|biggleswadetoday.co.uk|bikeradar.com|bilbasen.dk|birminghamworld.uk|bistro.sk|bitpipe.com|bitpipe.com.br|blackpoolgazette.co.uk|bladet.no|blick.de|blocket.se|bloomberglinea.com|bnr.nl|boerse.de|bomlo-nytt.no|bordercountiesadvertizer.co.uk|borncity.com|bravo.de|brighttalk.com|brigitte.de|bristolworld.com|bt.no|bucksfreepress.co.uk|bucksherald.co.uk|buffed.de|bumble.com|burda-forward.de|burnleyexpress.net|business-punk.com|businessinsider.com|businessinsider.es|buxtonadvertiser.co.uk|bygdanytt.no|calciomercato.com|calculadora-de-derivadas.com|calculadora-de-integrales.com|camping.info|cannstatter-zeitung.de|capital.de|capitalfm.com|capitalxtra.com|caradisiac.com|caravaning.de|carbuzz.com|cardscout.de|carmagazine.co.uk|carthrottle.com|carwow.co.uk|carwow.de|carwow.es|cavallo.de|cbr.com|celticway.co.uk|chad.co.uk|channelpartner.de|charlieintel.com|chefkoch.de|chesterstandard.co.uk|chinahandys.net|cinema.de|cinestar.de|cio.com|cio.de|classical-music.com|classicfm.com|clever-tanken.de|closeronline.co.uk|cmmedia.es|collider.com|company.rtl.com|computec.de|computerfrage.net|computerhoy.com|computerweekly.com|computerwoche.de|computerworld.com|cosmopolitan.de|countypress.co.uk|countytimes.co.uk|cravenherald.co.uk|crn.com|crtvg.gal|cruciverba.it|cryptoticker.io|csoonline.com|dagallemaal.be|dagbladet.no|dagsavisen.no|dailykos.com|dailyresearchplot.com|daventryexpress.co.uk|deine-tierwelt.de|deluxemusic.de|demorgen.be|denofgeek.com|denver7.com|der-postillon.com|derbyshiretimes.co.uk|derbyworld.co.uk|derivative-calculator.net|derryjournal.com|desired.de|dewsburyreporter.co.uk|dexerto.com|die-tagespost.de|digi.no|digilehdet.fi|digitalartsonline.co.uk|digitalfernsehen.de|discoverwildlife.com|dk-online.de|doktoronline.no10kysymysta.fi|dolen.no|donaldduck.nl|doncasterfreepress.co.uk|dpd.com|dpd.de|driva.no|dualshockers.com|duden.de|dudleynews.co.uk|dumont.de|dunfermlinepress.com|dvd-forum.at|e24.no|eatsmarter.com|ecomento.de|economist.com|edpc.eu|eigenhuiseninterieur.nl|einfachbacken.de|eiu.com|elbil24.no|elektroauto-news.net|elle.de|eltern.de|empireonline.com|energeia.nl|entertainmentdaily.co.uk|esquire.de|essen-und-trinken.de|esslinger-zeitung.de|evo.co.uk|ewn.co.za|expertreviews.co.uk|express.de|expressandstar.com|falkirkherald.co.uk|falmouthpacket.co.uk|familie.de|farminglife.com|faroutmagazine.co.uk|fd.nl|fdiintelligence.com|fdmg.nl|feelingwonen.be|ffn.de|fifetoday.co.uk|filext.com|finanzen100.de|finanzfrage.net|finanznachrichten.de|finanztreff.de|findagrave.com|fitforfun.de|fitjarposten.no|fjordabladet.no|fjordingen.no|fjt.no|fjuken.no|flair.nl|flights-idealo.co.uk|flowmagazine.nl|flugrevue.de|folkebladet.no|footballfancast.com|footballleagueworld.co.uk|footballtransfers.com|forum.digitalfernsehen.de|fosna-folket.no|fourfourtwo.com|fox13now.com|fox17online.com|fox47news.com|fox4now.com|frag-mutti.de|framtidinord.no|frankenpost.de|freitag.de|friflyt.no|friflytbestill.no|fubas.it|fussballfieber.de|futisporssi.fi|futurism.com|fvn.no|gaelmaison.be|gala.de|gamerant.com|gamesindustry.biz|gamesradar.com|gamingbible.com|gardenersworld.com|gaspedaal.nl|gat.no|gauldalsposten.no|gaumenfreundin.de|gazetteandherald.co.uk|geo-television.de|geo.de|givemesport.com|gladbachlive.de|glasgowworld.com|globalplayer.com|goal.com|godt.no|goedgevoel.be|goldradiouk.com|goom.net|greenocktelegraph.co.uk|gruenderkueche.de|gruene-zitate.de|guide-epargne.be|guitarworld.com|gutefrage.net|gutekueche.at|gutekueche.de|halifaxcourier.co.uk|hampshirechronicle.co.uk|hannover.de|happinez.de|harboroughmail.co.uk|hardcoregamer.com|harpersbazaar.de|harrogateadvertiser.co.uk|hartlepoolmail.co.uk|haus.de|heart.co.uk|hellomagazine.com|hellorayo.co.uk|helpforum.sky.com|helpster.de|helthjem.no|hemeltoday.co.uk|herefordtimes.com|himosjuhannus.fi|hintaopas.fi|hitc.com|hitra-froya.no|hobbyconsolas.com|hockeygm.fi|hola.com|holidaycheck.at|holidaycheck.de|honk.no|horairesdouverture24.fr|hotcars.com|howtogeek.com|ht.no|hucknalldispatch.co.uk|humo.be|ibancalculator.com|idealo.at|idealo.co.uk|idealo.com|idealo.de|idealo.dk|idealo.es|idealo.fi|idealo.fr|idealo.in|idealo.it|idealo.nl|idealo.no|idealo.pl|idealo.pt|idealo.se|iltapulu.fi|impact-investor.com|impartialreporter.com|indebuurt.nl|independer.be|innherred.no|instyle.de|insuedthueringen.de|integral-calculator.com|integral-calculator.ru|integralrechner.de|intermediair.nl|iontelevision.com|iskelma.fi|iskelmafestivaali.fi|it-boltwise.de|itpro.co.uk|itpro.com|itromso.no|jameda.de|jamiegeller.co|jeger.no|jetzt.de|jobat.be|joe.be|justjared.com|justthenews.com|jysari.fi|kachelmannwetter.com|katc.com|kgun9.com|kiosk.nl|kirche-und-leben.de|kivitv.com|kjrh.com|kk.no|kkuriren.se|klamm.de|klara.be|klikk.no|kn-online.de|kode24.no|komando.com|kotaku.com|kpax.com|kristv.com|krtv.com|krzbb.de|ksby.com|kshb.com|ksta.de|ktnv.com|ktvh.com|ktvq.com|kuechengoetter.de|kuestenfischer.de|kulingen.no|kuopiorock.fi|kurier.de|kvinneguiden.no|kxlf.com|kxlh.com|kxxv.com|kystogfjord.no|kztv10.com|l-a.no|lancashiretelegraph.co.uk|lancasterguardian.co.uk|landevei.no|laptopmag.com|lbc.co.uk|leaderlive.co.uk|lecker.de|ledenicheur.fr|leightonbuzzardonline.co.uk|leijonaporssi.fi|leinanzeigenmarkt-rheinland.de|lemagit.fr|leonberger-kreiszeitung.de|lep.co.uk|lepoint.fr|leserreisen.mz-web.de|leukstetickets.nl|lex18.com|libelle.nl|liberation.fr|liebenswert-magazin.de|ligainsider.de|liigaporssi.fi|lincolnshireworld.com|linux-community.de|linux-magazin.de|lister24.no|livefortheoutdoors.com|liverpoolworld.uk|livescience.com|livingathome.de|livios.be|ln-online.de|londonworld.com|lossebladen.nl|lovelybooks.de|lp.no|lr-online.de|lutontoday.co.uk|maclife.de|macwelt.de|macworld.com|madeformums.com|maennersache.de|makeuseof.com|malservice.aftonbladet.se|manchesterworld.uk|mansionglobal.com|margriet.nl|marieclaire.co.uk|marktplaats.nl|marsteinen.no|mcnmotorcycleshow.com|mediaimpact.de|mein-schoener-garten.de|meineorte.com|meltontimes.co.uk|mensjournal.com|meteologix.com|mijnenergie.be|miltonkeynes.co.uk|mishtalk.com|mixed-news.com|mn24.no|mnm.be|moms.com|monenergie.be|morenytt.no|morewithvpro.com|morgenbladet.no|motorsport-total.com|motscroises.fr|mountainbike-magazin.de|movieweb.com|moz.de|muehlacker-tagblatt.de|mumsnet.com|musicradar.com|myfitnesspal.com|myhomebook.de|n-page.de|nationalevacaturebank.nl|nationalworld.com|nbc26.com|nebenan.de|nehnutelnosti.sk|nelonen.fi|nelonenmedialive.fi|netdoktor.de|netmoms.de|nettavisen.no|networkworld.com|neuepresse.de|newcastleworld.com|newryreporter.com|news5cleveland.com|newschannel5.com|newsletter.co.uk|nexttv.com|nexusmods.com|nitro-tv.de|nnn.de|noff.gg|norsk-klatring.no|northamptonchron.co.uk|northantstelegraph.co.uk|northernirelandworld.com|northumberlandgazette.co.uk|northwaleschronicle.co.uk|nostalgie.be|nottinghamworld.com|nouveau.nl|nowtv.com|nowtv.it|noz.de|np-coburg.de|nrj.be|nyss.no|oberpfalzecho.de|oeffnungszeitenbuch.de|oekotest.de|olivemagazine.com|online-solitaire.com|onvista.de|opp.no|oraridiapertura24.it|oskar.de|ostsee-zeitung.de|oudersvannu.nl|oyposten.no|palabr.as|parade.com|parfumo.com|parfumo.de|parool.nl|pcgamebenchmark.com|pcgamer.com|pcgamesn.com|pch.com|pclifecyclemanagement.com|pcwelt.de|pcworld.com|pcworld.es|pdffiller.com|pensioenpro.nl|pent.no|perry-rhodan.net|peterboroughtoday.co.uk|phonostar.de|photovoltaikforum.com|playboy.de|playpilot.com|plural.place|pocket-lint.com|pocketnow.com|pockettactics.com|podme.com|podplay.com|pokewiki.de|politico.eu|polygon.com|porten.no|portsmouth.co.uk|prad.de|praxisvita.de|pricespy.co.nz|pricespy.co.uk|pricespy.ie|pride.com|prignitzer.de|primediaplus.com|primo.be|prinz.de|prisjagt.dk|prisjakt.no|prisjakt.nu|proplanta.de|psmag.com|qmusic.be|qmusic.nl|qz.com|racefans.net|radio.at|radio.de|radio.dk|radio.es|radio.fr|radio.it|radio.net|radio.pl|radio.pt|radio.se|radio1.be|radio2.be|radiocity.fi|radiome.ar|radiome.at|radiome.bo|radiome.ch|radiome.cl|radiome.com.do|radiome.com.ec|radiome.com.gr|radiome.com.ni|radiome.com.pa|radiome.com.py|radiome.com.sv|radiome.com.ua|radiome.com.uy|radiome.cz|radiome.de|radiome.fr|radiome.gt|radiome.hn|radiome.ht|radiome.lu|radiome.ml|radiome.org|radiome.pe|radiome.si|radiome.sk|radiome.sn|radionova.fi|radioplay.fi|radiopooki.fi|radiox.co.uk|radyome.com|raetsel-hilfe.de|rakennuslehti.fi|randaberg24.no|rbnett.no|realitytitbit.com|reclamefolder.nl|redensarten-index.de|reisefrage.net|rheinpfalz-mediengruppe.de|rheinpfalz.de|rmj.fi|roadbike.de|rockfest.fi|romfordrecorder.co.uk|rotherhamadvertiser.co.uk|rtl-passion.de|rtlplus.de|rtvc.es|rugbydump.com|rugbyonslaught.com|rundschau-online.de|s-n.no|samnytt.se|sanakirja.org|sanoma.fi|scholastic.ca|scholieren.com|schoolbank.nl|schulferien.org|schwarzwaelder-bote.de|sciencealert.com|sciencefocus.com|scotsman.com|screenrant.com|scripps.com|second-hand.it|seher.no|selbermachen.de|selbst.de|senioren-ratgeber.de|shieldsgazette.com|shropshirestar.com|shz.de|si.com|simpleflying.com|sir-apfelot.de|sky.de|skysportaustria.at|skysports.com|smoothradio.com|smp.no|snow-forecast.com|sol.no|solinger-tageblatt.de|somersetcountygazette.co.uk|soundis.gr|southwalesargus.co.uk|spaargids.be|space.com|spectator.com|speed.io|spielaffe.de|sporcle.com|sportnews.bz|sportnieuws.nl|sportsmole.co.uk|sporza.be|spox.com|startpagina.nl|steinkjer24.no|stijlvol-wonen.com|stord24.no|stornowaygazette.co.uk|story.nl|streampicker.de|strilen.no|stubru.be|studis-online.de|studyflix.de|stuff.tv|stuttgarter-nachrichten.de|stuttgarter-zeitung.de|sueddeutsche.de|sueddeutscher-verlag.de|suedtirolnews.it|sunderlandecho.com|sunnhordland.no|suomipopfestivaali.fi|suomitutka.fi|surfer.com|surreyworld.co.uk|sussexexpress.co.uk|sv-veranstaltungen.de|svz.de|swmh.de|swp.de|szbz.de|t-a.no|t3.com|t3n.de|tag24.de|tahkojuhannus.fi|talk.tv|tammerfest.fi|tampabay28.com|tampabay66.com|taskandpurpose.com|tecchannel.de|techadvisor.com|techadvisor.fr|techhive.com|techradar.com|techstage.de|techtarget.com|techtarget.de|techtarget.fr|telegraph.co.uk|telemadrid.es|telemundocc.com|telepolis.de|telmi.it|terrengsykkel.no|testedich.de|teveblad.be|thatgrapejuice.net|the-decoder.com|the-decoder.de|the-sun.com|thebanker.com|theboltonnews.co.uk|thecelticblog.com|thechelseachronicle.com|thedailymash.co.uk|thedrive.com|thegamer.com|theinventory.com|theloadout.com|thenational.scot|thenorthernecho.co.uk|thepeoplesperson.com|thepinknews.com|thepoke.co.uk|therichest.com|thescarboroughnews.co.uk|thescottishsun.co.uk|theserverside.com|thesouthernreporter.co.uk|thesportster.com|thestar.co.uk|thestreet.com|thesun.co.uk|thesun.ie|thetab.com|thethings.com|thetimes.co.uk|thetimes.com|thetravel.com|theweek.com|tichyseinblick.de|tijdschrift.nl|tmj4.com|toggo.de|tomshardware.com|topgear.com|topgear.es|topspeed.com|totaaltv.nl|tronderbladet.no|tu.no|turnto23.com|tv14.de|tv2.no|tv20detroit.com|tvfamilie.be|tvmovie.de|tvnow.at|tvnow.de|unherd.com|unnuetzes.com|unsere-helden.com|upday.com|urlaubsguru.de|utah16.com|utemagasinet.no|utopia.de|vaalikone.fi|vaganavisa.no|varden.no|vdi-nachrichten.com|vegas34.com|venneslatidende.no|verkaufsoffener-sonntag.com|verlagshaus-jaumann.de|veronicasuperguide.nl|vestlandsnytt.no|vestnytt.no|vice.com|vigga.no|vikebladet.no|vip.de|virginradio.co.uk|visit-hannover.com|viva.nl|vkmag.com|vkz.de|vl.no|voetbalzone.nl|voice.fi|vol.no|vox.de|vrt.be|vrtinternational.com|vtm.be|vtmgo.be|vtwonen.be|vtwonen.nl|wakefieldexpress.co.uk|wallpaper.com|wallstreet-online.de|wanajafestival.fi|wargamer.com|warwickshireworld.com|wasserburger-stimme.de|watch.talk.tv|watfordobserver.co.uk|wcpo.com|webwinkel.ad.nl|webwinkel.bndestem.nl|webwinkel.destentor.nl|webwinkel.ed.nl|webwinkel.gelderlander.nl|webwinkel.pzc.nl|webwinkel.volkskrant.nl|wegotthiscovered.com|wetteronline.de|whathifi.com|whats-on-netflix.com|wieistmeineip.at|wieistmeineip.ch|wieistmeineip.de|wigantoday.net|wiki.gg|willy.radio|windowscentral.com|winhappy.com|wirralglobe.co.uk|wisden.com|wiwo.de|wkbw.com|wmar2news.com|wonenlandelijkestijl.com|worcesternews.co.uk|word-grabber.com|worksopguardian.co.uk|wort-suchen.de|woxikon.de|wptv.com|wrtv.com|wsfltv.com|wtkr.com|wtvr.com|wtxl.com|wunderweib.de|www.sky.com|www.sky.it|wxyz.com|xda-developers.com|yorkshireeveningpost.co.uk|yorkshirepost.co.uk|yourimmo.de|zozitdat.nl|zvw.de",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/073u89hsadvk0.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0r-xplh.6.-03.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0_a80-qmpyc3s.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0w54l~99pq3b9.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/04x.wea_ofqc1.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/00w89utsyp_2c.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/02xyfoe1v.vkw.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/04_rrh.j6.wba.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0.gu_l8v2fg11.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0.44191m_y6r1.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0yoghfwkswxeg.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/0yv_0~sh~88vc.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.files.bbci.co.uk/bbcdotcom/web/20261014-124122-9e48a3510a-web-3.24.0-4/_next/static/chunks/127xbfgjo2hre.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cdn.optimizely.com/datafiles/Y67aV8AjKqtntTQvKqk1A.json",
+          "source": "https://www.bbc.com/",
+          "type": "XHR",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://logx.optimizely.com/v1/events",
+          "source": "https://www.bbc.com/",
+          "type": "XHR",
+          "blocked": true,
+          "rule": "||logx.optimizely.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://static.chartbeat.com/js/chartbeat.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "/chartbeat.js",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://uk-script.dotmetrics.net/door.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||dotmetrics.net^$third-party",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://logx.optimizely.com/v1/events",
+          "source": "https://www.bbc.com/",
+          "type": "XHR",
+          "blocked": true,
+          "rule": "||logx.optimizely.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://mybbc-analytics.files.bbci.co.uk/echo-client-js/echo-2.6.0-avi.min.js",
+          "source": "https://www.bbc.com/",
+          "type": "Script",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://mybbc-analytics.files.bbci.co.uk/analytics-remote-config/producers.json",
+          "source": "https://www.bbc.com/",
+          "type": "XHR",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://mybbc-analytics.files.bbci.co.uk/analytics-remote-config/masterbrands.json",
+          "source": "https://www.bbc.com/",
+          "type": "XHR",
+          "blocked": false,
+          "rule": null,
+          "exception": null,
+          "redirect": false
+        }
+      ]
     }
   ],
   "errors": [],

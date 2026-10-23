@@ -2,6 +2,8 @@
 
 Fecha: 2026-10-21. Propuestas basadas en el proyecto actual; no son funciones implementadas ni una auditoría completa.
 
+Estado tras 0.6.0: punto 1 parcial (commit base `003dcae` del usuario; 0.5.1 y 0.6.0 sin commit, IPK anteriores conservados). Punto 5: `npm test` cubre resolver, escudo de YouTube y puente sin TV. Punto 6: `scripts/benchmark.mjs` hace la primera medición. Punto 7: `scripts/update-lists.mjs` implementado, pendiente de ejecutar con permiso.
+
 ## Orden recomendado
 
 | Prioridad | Trabajo concreto | Cómo demostrar que sirve |

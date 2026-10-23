@@ -1,0 +1,1505 @@
+{
+  "records": [
+    {
+      "url": "https://cuevana3c.pro/",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/DiscordMainLogo.svg",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cloudflareinsights.com^$third-party",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/cuevana3.png",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/subj7knTn4DeS6KS7qI66EQKe9i.jpg",
+      "source": "http://192.168.1.148:43187/luma-home/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/original/g4YvZOWYmissloGtaVAeWybkPct.png",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/j9Ukn1hRqSyv5qhHgDHd1s1Dhsg.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/7z7dLsFQftk6rACoKeWIDEPQq2T.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/aNJ1k9gyBPXkpc3zKTymFn8LvRR.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/qJ4UV7YnAweTjosfSzDG80j1nd0.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/fiXF1BmnMKSiIv6Gj9msRYhtvpv.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/qvTiG4LSu6wFCfXjg2KTiqHeQBF.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/cWNkpDIwt1Qt3JtWLL2c2vUWVwd.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/6sLHJk5KNgqTGKhQ4hRabvG18HU.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/fdmSOAcF9X7urBv5A7THG57NyyW.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/7BiRGmRHZTGgQ35vio0w1px4x07.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/vww1uAUCAXfLyyhy3bY21Co8XdB.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/2vrQxy3Xrb6AvPtsa7jAU9DKxvu.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/AtTuSklvQ00QnjBE8cTal4X1xKM.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/hvvRgbHAvZXunLxES47WQBS3kKq.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/ocg5JfJP19fodcv5uQUApkmZMdI.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/brdQS2cD3kfxXncwuBYJmrBrRZF.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/69jd8Vhr9LOdTspOUxDDaF5Q8Cj.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/rsZpzA7Ssu9m3X3fCcEDxjPXFet.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/qLulDwGQElRTqCEzyhpOTlnBVpr.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/la72AK13gJTvU5OfBquwJSuIhdJ.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/la-casa-del-dragon.png",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/cuevana-logo.png",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/discordlogo.png",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js",
+      "source": "https://cuevana3c.pro/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/js/varkus.js",
+      "source": "https://cuevana3c.pro/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cuevana3c.pro/js/varkus.js$script",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtag/js",
+      "source": "https://cuevana3c.pro/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||googletagmanager.com^",
+      "exception": null,
+      "redirect": true
+    },
+    {
+      "url": "https://cuevana3c.pro/js/popa.js",
+      "source": "https://cuevana3c.pro/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/gRun4WE0e2cqxi7QhaCdMswcm6h.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/5SR8XJ2gPZx8SLWnwPzLq91aLYT.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/eH5kIBfgCELGfeNEAW6jrwOAyIe.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/1aK7LOShZe0qw7uOvRyHJrxWT4U.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/uVzYzEsaYW8N6x8sYwEfbiUCqEq.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/q93m28VPAQRNTPub6Xytbltf18U.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/rfxXgdvsAe3T6IprnSmd42fmOnp.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/a61u8GtoXEe1Eay8fNxIh9ON8Jy.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/fDre2m9VKIHtIDIzuK8lwAv2pAd.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/n2MnXWRQywnv5QWXb09a3njxWbz.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/wrgMgtXhexLZzSSCmJ1wYFX4bXC.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/qVQUd6dxAxymh7ymcGWj8u3Kvle.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/qB6qhrMLdwbVgC4CvJq1TkMV6lY.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/zSfx1sCDAGHl5hqevJT6CaWPgVo.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/o7UcD94kLE2r7NLfp9zFTJStijn.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/fDwpR6oVx1TsxvelEQQIXnb3zYx.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/bcrp2ovxirKH81XSMYQZ7eEunzX.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/heoESrHAdmPeYECs2B7R8RIqLyN.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/apCa4rZYNa0sId2cQQ0xSq5h7sM.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/mDhtYLJpN69liz09bmniIscgjWk.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/rElWNrEbdYyPg1opWTtNiYm3ut5.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/5UCLCdz8CMTnrKrERAWUkhZhySQ.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/2XVAJEE6FGUPei4yaFYnMR5TU09.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/sIj9WcA1LkcjGbYjrbfV3pGegbF.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/uVL8tV8z9br3XGsA9DDEY743sRE.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/21pLXbvuyfgUaAhhxkuvoX1pAN1.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/hXlvDq98VMg3WJWTDzwcPeMk39A.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/rN6pM9msiS8IZr782o9aWr6WBJO.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/mdtpJEWW1j5Ns7bIcbw1UeIdvhp.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/mqJ2SwlEHBzAFykQXt820xmyUMF.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/uJNKHZLgnvWqveB4uai0kaWom6M.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/kFQaT7NuZvLx7hFmPhigaTedOOB.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/ptqlN6mDIAqJjVA86J5eOoG82zc.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/8i5iZV50CoEtmDCFM7RSxCkpE8h.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/GUVYjqDLWy61q9hDYiV9M5UEJe.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/iPBQ9btO6VBX6z8qJUdKBwiEGo8.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/q0uTeO1wUGcAuJYdplTbnrz5bEq.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/40I66L7QKguTFDPvcLcdiTbAD7I.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/pLLvKhqTngUispTyDofvoEDKrxa.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/6Lh4ZlsAISFQFVfLZ90sE9ycVnN.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/pq9C3lFo4JZZl33EuCZ1hEhQQD1.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/bYPACmBf5Nomw3I2IEGGTNwgvWj.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/90mQFRWXolU8wS2kCqYvO3LIbHX.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/rNkilVmALgaIb4SenfbaecRStDD.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/kiMhxXmkmqtpeY9jB8il3KajrDu.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/pF0DnAcCryOJqWVsR8uTNJ6WcTB.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/jnbQWjyWxcCf6DaGQXC5AACHCYv.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://bh.dingerepilobe.com/rzBUh4iyFwTH/156108",
+      "source": "https://cuevana3c.pro/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||dingerepilobe.com^$domain=cuevana3c.pro",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/bat.gif",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/yzRnj5GMZEjiW9xTGkz8cVNyzH9.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "source": "https://cuevana3c.pro/",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/css/movie.css",
+      "source": "https://cuevana3c.pro/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/qRN8eqYwG6HPSy0i3fKzuLrUOhp.jpg",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/lat.png",
+      "source": "https://cuevana3c.pro/",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+      "source": "https://cuevana3c.pro/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cloudflareinsights.com^$third-party",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/pelicula/omaha",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/sub.png",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/d7KJjttE1IQECkKNmtunQTmmp6m.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/egKi4jZKKVZzR8NaaNjEwMpEgHs.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/yi8TQ9txgb7wDtGkghQmkkZLL9r.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/uRTI1i5X7UfTjOu6hW4SWcwVas3.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/caPiLw1NOxi3cAIlqvcdmT29xHE.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/4WrSz0dRfq6XwJUQlYvzuhJq8hR.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/pBFqLpJzwYK13XxKoJtARxJiuvf.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/8ZKTXjgIVZQ20w70jdJ9WV3A2OP.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/5sOJTtPJfOT74sSTABd3E0K5Zmy.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/gUIBW4NKSFQ2GiJLLULDmtHT21.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/ed7z2H3hSppnYgWpCLIgrqoF1SR.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/8xoizvqv9k0Am1vNQrTHkVFXzBE.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/playable.png",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/loading.png",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/8noDLotaCP9J5dpckmRCk9at9tW.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w1280/zqZoK4Uh2e4NiDTkvsUa3Uhk0rY.jpg",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+      "source": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cloudflareinsights.com^$third-party",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/image/cas.png",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/qqYrHnstbeUa7CnTNzfxMpq2vLx.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/byTlwLfMUQuFe9HvoA42zCQXk9f.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/z8fNOK4NGWah4qIT3OYiYnuJrZT.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/m6bIdi1u4wq5axdW7gKhga5envh.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/fAfbtF0OuHU5TnAU7w8qeO0cnr7.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/dZ2BjsyCFPliqbHU0FH1c1nzJMw.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/byUH31Dy7HifQ5nV7AYF3MI2UOA.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/zOmwekrXs6M0pxT2BKWMkT1TPcW.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/2MRM4PL6H7yraAkwyUEe2EqoQH3.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/9NDcmDJ7WVliKSEVJ1oJagmTOwP.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/pZAeT1oZQSeT8ZBM3EQ5BSQ8ZEh.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://image.tmdb.org/t/p/w200/vFVKF1xDTkqgKlV1d6ZuM8cujfe.jpg",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/js/varkus.js",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cuevana3c.pro/js/varkus.js$script",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtag/js",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||googletagmanager.com^",
+      "exception": null,
+      "redirect": true
+    },
+    {
+      "url": "https://cuevana3c.pro/js/favorite-button.js",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/js/favorites-manager.js",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cuevana3c.pro/js/movie-player.js",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://latgw.fun/js/lib.js",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||latgw.fun^$domain=cuevana3c.pro",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://bh.dingerepilobe.com/rzBUh4iyFwTH/156108",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||dingerepilobe.com^$domain=cuevana3c.pro",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://gw.waughyciliary.com/sLQvNIbN76nU/156109",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||waughyciliary.com^$domain=cuevana3c.pro",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://tungtungsahur.cuevana3c.pro/",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cloudflareinsights.com^$third-party",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://tungtungsahur.cuevana3c.pro/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js",
+      "source": "https://cuevana3c.pro/pelicula/omaha",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://latgw.fun/js/humanitarian-five.js",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||latgw.fun^$domain=cuevana3c.pro",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/js/jquery.min.js",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/css/main.css",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/js/jquery.cookie.js",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/js/xupload.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cloudflareinsights.com^$third-party",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/jwplayer.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/js/localstorage-slim.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/ad",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://pixibay.cc/sfzn4uy9e1z6_xt.jpg",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/assets/jquery/ev-player.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||ikhjerbhye3wjkhoduh5xiczuvd.lol/assets/jquery/ev-player.js$script",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtag/js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||googletagmanager.com^",
+      "exception": null,
+      "redirect": true
+    },
+    {
+      "url": "https://mc.yandex.ru/metrika/tag.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||mc.yandex.ru^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/vast.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/jwplayer.core.controls.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/translations/es.json",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/provider.hlsjs.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/dl",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/provider.cast.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/master.m3u8",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://pixibay.cc/sfzn4uy9e1z60000.jpg",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/cast/sdk/libs/sender/1.0/cast_framework.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/eureka/clank/120/cast_sender.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/index-f1-v1-a1.m3u8",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-1-f1-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-2-f1-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/index-f2-v1-a1.m3u8",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-3-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://imasdk.googleapis.com/js/sdkloader/ima3.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||imasdk.googleapis.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/dl",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-4-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-96-f1-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-97-f1-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    }
+  ],
+  "errors": [],
+  "navigation": {
+    "phase": "complete",
+    "progress": 100,
+    "url": "https://tungtungsahur.cuevana3c.pro/?token=1ElJPCARBGlxIA0kP&pops=false",
+    "error": ""
+  }
+}

@@ -1,8 +1,14 @@
 import WebSocket from 'ws';
 
+export function findLumaTarget(targets) {
+  if (!Array.isArray(targets)) return undefined;
+  return targets.find(target => target.description ? target.description === 'com.lgapp.lab' :
+    target.url?.startsWith('file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/'));
+}
+
 export async function connectTV(endpoint) {
-  const targets = await (await fetch(`${endpoint}/json`)).json();
-  const target = targets.find(t => t.description === 'com.lgapp.lab' || t.url?.includes('/com.lgapp.lab/'));
+  const targets = await (await fetch(`${endpoint}/json`, {signal:AbortSignal.timeout(3000)})).json();
+  const target = findLumaTarget(targets);
   if (!target) throw Error('No se encontró la app com.lgapp.lab en el inspector.');
   const socket = new WebSocket(target.webSocketDebuggerUrl);
   await new Promise((resolve, reject) => { socket.once('open', resolve); socket.once('error', reject); });
