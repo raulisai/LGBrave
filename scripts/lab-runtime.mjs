@@ -67,7 +67,8 @@ export class LabRuntime {
         await this.bridge.refreshFilters?.();
         await this.bridge.status();
       }
-    } catch {
+    } catch (error) {
+      this.lastError = String(error?.message || error).slice(0, 160);
       await this.disconnect();
       if (!this.stopping) this.setState('offline', 'Sin conexión con la TV. Se esperará sin abrir ninguna aplicación.');
     }

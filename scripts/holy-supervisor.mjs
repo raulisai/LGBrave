@@ -7,9 +7,11 @@ let child = null;
 let failures = [];
 
 function start() {
-  child = spawn(process.execPath, ['scripts/holy.mjs'], { stdio: 'inherit', env: process.env });
+  child = spawn(process.execPath, ['scripts/holy.mjs'], { stdio: 'inherit', env: { ...process.env, HOLY_SUPERVISED: '1' } });
   child.on('exit', (code, signal) => {
     if (stopping) { process.exit(0); return; }
+    // 2 = another Holy owns the lock: wait and take over when it ends (not a failure).
+    if (code === 2) { console.log('Hay otro Holy en marcha; se espera 30 s por si termina.'); setTimeout(start, 30000); return; }
     failures = failures.filter(at => Date.now() - at < 60000);
     failures.push(Date.now());
     const wait = failures.length > 5 ? 30000 : 2000;

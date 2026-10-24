@@ -501,6 +501,9 @@ try {
     assert.match(voice, /voiceRetry < 2/);
     // The key is handled before the search field takes the letters, so it also works while typing.
     assert.ok(source.indexOf('code === 406') < source.indexOf('While typing, letters'));
+    // The TV only says whether it reaches the Mac; the Doctor lives in the Mac's menu bar.
+    assert.ok(!/doctor/i.test(source));
+    assert.match(source, /Conectado al Mac/);
   });
 
   await check('Servidor: rutas con datos malos responden sin caerse', async () => {

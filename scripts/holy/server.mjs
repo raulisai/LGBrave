@@ -28,7 +28,7 @@ function body(req, limit = 16384) {
   });
 }
 
-export function startServer({ catalog, library, port = PORT, root = 'dist', imageDir = '.local/holy-images', log = console.log, status = () => ({}) } = {}) {
+export function startServer({ catalog, library, doctor, port = PORT, root = 'dist', imageDir = '.local/holy-images', log = console.log, status = () => ({}) } = {}) {
   const started = Date.now();
   mkdirSync(imageDir, { recursive: true });
   // Forget images not used for two weeks.
@@ -101,6 +101,11 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
         res.setHeader('Cache-Control', 'no-store');
         res.end(JSON.stringify({ ok: true, uptime: Math.round((Date.now() - started) / 1000), catalog: { updatedAt: catalog.updatedAt, items: catalog.items.length, refreshing: !!catalog.refreshing },
           library: { entries: library.entries.length, votes: library.votes.length }, sources: catalog.sources(), ...status() }));
+      } else if (url.pathname === '/holy-api/doctor' && doctor) {
+        // GET looks, POST «prescribes» the safe fixes (reconnect, refresh, restart…).
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(JSON.stringify(req.method === 'POST' ? { ...(await doctor.prescribe()), report: await doctor.diagnose() } : await doctor.diagnose()));
       } else if (url.pathname === '/holy-api/refresh' && req.method === 'POST') {
         catalog.refresh().catch(() => {});
         res.end('{"ok":true}');

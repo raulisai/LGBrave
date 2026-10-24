@@ -6,7 +6,11 @@ import { Catalog } from './holy/catalog.mjs';
 import { Library } from './holy/library.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
 import { startServer } from './holy/server.mjs';
-import { APP_ID, origin } from './holy/config.mjs';
+import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { APP_ID, origin, lanAddress } from './holy/config.mjs';
+import { createDoctor } from './holy/doctor.mjs';
+import { createAutostart } from './holy/autostart.mjs';
 import { installCrashGuard } from './holy/guard.mjs';
 
 // One process for Holy: home server, catalogue, and the passive bridge to the TV.
@@ -17,12 +21,22 @@ installCrashGuard();
 let release = () => {};
 if (process.env.HOLY_TV !== '0') {
   try { release = acquireRuntimeLock('.local/holy-runtime.lock'); }
-  catch (error) { console.error(error.message); process.exit(1); }
+  catch (error) { console.error(error.message); process.exit(2); }
 }
 // HOLY_LIBRARY: another history file (a preview that must not touch the owner's).
 const library = new Library(process.env.HOLY_LIBRARY || undefined);
 const catalog = new Catalog({ log: console.log }).start(console.log);
-const server = startServer({ catalog, library, status: () => ({ tv: runtime?.state || 'sin TV', playing: runtime?.bridge?.session ? { title: runtime.bridge.session.item.title, phase: runtime.bridge.session.phase } : null }) });
+// The TV's address comes from the webOS CLI profile (it changes; never trust a saved port as live).
+function tvAddress() {
+  try {
+    const device = JSON.parse(readFileSync(`${homedir()}/.webos/tv/novacom-devices.json`, 'utf8')).find(entry => entry.name === 'lg-lab');
+    if (device?.host) return { host: process.env.TV_IP || device.host, port: Number(device.port) || 9922 };
+  } catch { /* Use the default below. */ }
+  return { host: process.env.TV_IP || '192.168.1.134', port: 9922 };
+}
+const startedAddress = lanAddress();
+const doctor = createDoctor({ catalog, library, startedAddress, currentAddress: lanAddress, tv: tvAddress(), autostart: createAutostart(), runtime: { get state() { return runtime?.state; }, get lastError() { return runtime?.lastError; }, disconnect: () => runtime.disconnect() } });
+const server = startServer({ catalog, library, doctor, status: () => ({ tv: runtime?.state || 'sin TV', playing: runtime?.bridge?.session ? { title: runtime.bridge.session.item.title, phase: runtime.bridge.session.phase } : null }) });
 // HOLY_TV=0 serves the home and catalogue only (desktop preview, or while another session uses the TV).
 const withTV = process.env.HOLY_TV !== '0';
 const runtime = new LabRuntime({ makeBridge: (cdp, options) => new HolyBridge(cdp, { ...options, catalog, library }) });

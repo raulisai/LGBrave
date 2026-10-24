@@ -12,30 +12,16 @@
   let inNav = $state(false);
   let navIndex = $state(0);
   let connected = $state(false);
-  // Semáforo: verde = todo bien, naranja = hay algo que revisar, rojo = esta pantalla no alcanza al Mac.
-  let doctorReport = $state(null);
+  // Only whether this screen reaches the Mac (and the Mac the TV). Diagnosis and repairs
+  // live in the Mac's menu-bar app, never on the TV.
   let macReachable = $state(true);
-  let doctorOpen = $state(false);
-  let doctorBusy = $state(false);
-  let doctorResult = $state(null);
-  const level = $derived(!apiBase || !macReachable ? 'red' : doctorReport?.level === 'green' && connected ? 'green' : 'orange');
-  const levelText = $derived({ red: 'Sin Mac', orange: 'Revisar · Doctor', green: 'Todo conectado' }[level]);
-  async function checkDoctor() {
+  const link = $derived(!apiBase || !macReachable ? 'red' : connected ? 'green' : 'orange');
+  const linkText = $derived({ red: 'Sin conexión con el Mac', orange: 'Conectando con el Mac…', green: 'Conectado al Mac' }[link]);
+  async function checkMac() {
     if (!apiBase) return;
-    try { doctorReport = await getJSON(apiBase + '/holy-api/doctor', { timeout: 8000, retries: 0 }); macReachable = true; }
+    try { await getJSON(apiBase + '/holy-api/health', { timeout: 6000, retries: 0 }); macReachable = true; }
     catch { macReachable = false; }
   }
-  async function prescribe() {
-    if (doctorBusy || !apiBase) return;
-    doctorBusy = true; doctorResult = null;
-    try {
-      const result = await getJSON(apiBase + '/holy-api/doctor', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, timeout: 30000, retries: 0 });
-      doctorResult = result; doctorReport = result.report; macReachable = true;
-    } catch { doctorResult = { done: [], failed: true }; macReachable = false; }
-    doctorBusy = false;
-    if (doctorResult?.restarting) setTimeout(checkDoctor, 8000);
-  }
-  function openDoctor() { doctorOpen = true; doctorResult = null; checkDoctor(); }
   let opening = $state(null);
   let notice = $state('');
   let navigationError = $state('');
@@ -368,7 +354,7 @@
   function move(direction) {
     if (inNav) {
       if (direction === 'left') navIndex = Math.max(0, navIndex - 1);
-      else if (direction === 'right') navIndex = Math.min(SECTIONS.length + 1, navIndex + 1);
+      else if (direction === 'right') navIndex = Math.min(SECTIONS.length, navIndex + 1);
       else if (direction === 'down' && rows.length) inNav = false;
       return;
     }
@@ -393,12 +379,6 @@
     if (code === 406) { event.preventDefault(); voiceRetry = 0; voiceSearch(); return; }
     const direction = { 37: 'left', 38: 'up', 39: 'right', 40: 'down' }[code];
     // The rating sheet has the remote while open.
-    if (doctorOpen) {
-      event.preventDefault();
-      if (code === 13) { if (!doctorBusy) prescribe(); }
-      else if (code === 461 || code === 27) doctorOpen = false;
-      return;
-    }
     if (sheet) {
       event.preventDefault();
       const options = RATINGS.length + 1;
@@ -418,7 +398,7 @@
     if (code === 13) {
       event.preventDefault();
       if (opening) return;
-      if (inNav) { if (navIndex === SECTIONS.length + 1) openDoctor(); else if (navIndex === SECTIONS.length) refresh(); else chooseSection(SECTIONS[navIndex].id); }
+      if (inNav) { if (navIndex === SECTIONS.length) refresh(); else chooseSection(SECTIONS[navIndex].id); }
       else if (inSearch) focusSearch();
       else choose(focused);
     } else if (code === 403) { event.preventDefault(); if (section === 'gustos' && !inNav) rate(focused, -1); else forget(focused); }
@@ -459,8 +439,8 @@
       if (cached?.rows) data = cached;
       if (!apiBase) apiBase = localStorage.getItem('holy-api') || '';
     } catch { /* No cache yet. */ }
-    load(); checkDoctor();
-    const doctorTimer = setInterval(checkDoctor, 20000);
+    load(); checkMac();
+    const macTimer = setInterval(checkMac, 20000);
     const update = event => {
       const detail = event.detail || {};
       lastHeartbeat = Date.now();
@@ -477,7 +457,7 @@
     const heartbeat = setInterval(() => { if (connected && Date.now() - lastHeartbeat > 6500) connected = false; }, 2000);
     window.addEventListener('lg-lab-status', update);
     window.__lumaReady = true;
-    return () => { window.removeEventListener('lg-lab-status', update); clearInterval(heartbeat); clearInterval(doctorTimer); clearTimeout(previewTimer); clearTimeout(openingTimer); };
+    return () => { window.removeEventListener('lg-lab-status', update); clearInterval(heartbeat); clearInterval(macTimer); clearTimeout(previewTimer); clearTimeout(openingTimer); };
   });
 </script>
 
@@ -500,8 +480,7 @@
       {/each}
       <button class="icon" class:focus={inNav && navIndex === SECTIONS.length} aria-label="Buscar estrenos ahora" onclick={refresh}><Icon name="reload" size={26} stroke={2.4} /></button>
     </nav>
-    <button class="doctor" class:focus={inNav && navIndex === SECTIONS.length + 1} aria-label="Doctor" onclick={openDoctor}>Doctor</button>
-    <span class="status {level}" role="status">{levelText}</span>
+    <span class="status {link}" role="status">{linkText}</span>
   </header>
 
   {#if section === 'buscar' && !episodesView}
@@ -648,36 +627,6 @@
   </div>
 {/if}
 
-{#if doctorOpen}
-  <div class="sheet-scrim" role="dialog" aria-label="Doctor">
-    <div class="sheet doctor-sheet">
-      <p class="sheet-kicker">Doctor</p>
-      <h2 class="doctor-title {level}">{levelText}</h2>
-      {#if level === 'red'}
-        <p class="sheet-sub">Esta pantalla no alcanza al Mac. Comprueba que el Mac está encendido, en el mismo Wi-Fi, y que Holy corre en él (se inicia sola al encender el Mac si el arranque automático está activado).</p>
-      {:else}
-        <ul class="doctor-list">
-          {#each doctorReport?.checks || [] as item}
-            <li class={item.level}><span class="dot"></span><b>{item.label}</b><span>{item.detail}</span>{#if item.level !== 'ok'}<em>{item.fix ? '→ el Doctor lo arregla' : item.hint}</em>{/if}</li>
-          {/each}
-        </ul>
-        {#if doctorResult}
-          <ul class="doctor-list result">
-            {#each doctorResult.done || [] as step}<li class={step.ok ? 'ok' : 'warn'}><span class="dot"></span>{step.text}</li>{/each}
-            {#if doctorResult.failed}<li class="warn"><span class="dot"></span>No se pudo hablar con el Mac.</li>{/if}
-            {#if !doctorResult.failed && !(doctorResult.done || []).length}<li class="ok"><span class="dot"></span>No había nada que arreglar automáticamente.</li>{/if}
-          </ul>
-        {/if}
-      {/if}
-      <div class="sheet-options">
-        {#if level !== 'red'}<button class="sheet-option focus" disabled={doctorBusy} onclick={prescribe}>{doctorBusy ? 'Recetando…' : 'Recetar arreglos'}</button>{/if}
-        <button class="sheet-option plain" onclick={() => (doctorOpen = false)}>Cerrar</button>
-      </div>
-      <p class="sheet-note">OK recibe la receta · Atrás cierra. El Doctor nunca abre ni cambia nada en la TV.</p>
-    </div>
-  </div>
-{/if}
-
 {#if listening || voiceRetrying}
   <div class="listening" role="status" aria-live="assertive">
     <div class="mic"><span class="wave"></span><span class="wave late"></span><span class="mic-icon"><Icon name="mic" size={84} stroke={2} /></span></div>
@@ -737,18 +686,6 @@
   .status::before{content:'';width:12px;height:12px;border-radius:50%;background:currentColor}
   .status.orange{color:#ffb020}
   .status.red{color:#ff5a52}
-  nav button.doctor,.top>button.doctor{margin-left:auto;height:54px;padding:0 24px;border:0;border-radius:27px;background:rgba(255,255,255,.12);font-size:22px;font-weight:700;color:#fff}
-  .top>button.doctor+.status{margin-left:0}
-  .top>button.doctor.focus{background:#fff;color:#000;transform:scale(1.06)}
-  .doctor-sheet .doctor-title{font-size:40px}
-  .doctor-title.green{color:#9fe3a8}.doctor-title.orange{color:#ffb020}.doctor-title.red{color:#ff5a52}
-  .doctor-list{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:8px;font-size:22px}
-  .doctor-list li{display:flex;align-items:baseline;gap:14px}
-  .doctor-list li b{min-width:330px}
-  .doctor-list li em{margin-left:auto;font-style:normal;color:#ffb020;font-size:19px;max-width:420px;text-align:right}
-  .doctor-list .dot{width:14px;height:14px;border-radius:50%;flex:none;align-self:center;background:#9fe3a8}
-  .doctor-list li.warn .dot{background:#ffb020}
-  .doctor-list.result{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.14)}
 
   .preview{position:absolute;left:96px;top:150px;width:900px;z-index:2}
   .preview-text{animation:rise .45s var(--ease)}
