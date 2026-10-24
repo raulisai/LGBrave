@@ -58,6 +58,16 @@ export function genre(value) {
   if (/^(\d+k|hd|full hd|fhd|uhd|latino|castellano|subtitulado|sub espanol|tv|ova|ona|pelicula)$/.test(key)) return '';
   return GENRES[key] || (key ? key[0].toUpperCase() + key.slice(1) : '');
 }
+// Countries in one spelling across sites (DoramasFlix uses slugs).
+const COUNTRIES = { corea: 'Corea del Sur', 'corea del sur': 'Corea del Sur', 'south korea': 'Corea del Sur', china: 'China', japon: 'Japón', tailandia: 'Tailandia', taiwan: 'Taiwán',
+  filipinas: 'Filipinas', 'estados unidos': 'Estados Unidos', 'reino unido': 'Reino Unido', mexico: 'México', espana: 'España', francia: 'Francia', india: 'India', canada: 'Canadá', alemania: 'Alemania', italia: 'Italia',
+  korea: 'Corea del Sur', 'republic of korea': 'Corea del Sur', japan: 'Japón', thailand: 'Tailandia', philippines: 'Filipinas', 'united states': 'Estados Unidos', usa: 'Estados Unidos',
+  'united kingdom': 'Reino Unido', uk: 'Reino Unido', spain: 'España', france: 'Francia', germany: 'Alemania', italy: 'Italia', 'hong kong': 'Hong Kong', vietnam: 'Vietnam', indonesia: 'Indonesia' };
+export function country(value) {
+  const key = fold(decode(value || ''));
+  if (!key || key === 'paises') return '';
+  return COUNTRIES[key] || key.replace(/(^|\s)\S/g, letter => letter.toUpperCase());
+}
 // RePelisHD lists genres as plain words ("Comedia Crimen"); match known names, longest first.
 export function genresFromWords(value) {
   let rest = ' ' + fold(decode(value)) + ' ';
@@ -70,6 +80,21 @@ export function genresFromWords(value) {
 
 // og:description sometimes repeats its own opening after the full text.
 const unrepeated = value => { const again = value.indexOf(value.slice(0, 30), 30); return again > 0 ? value.slice(0, again).trim() : value; };
+// Extra listing pages (genre pages, directories) for a bigger catalogue. A page that only
+// repeats the site's default listing (unknown genre slug) is skipped, so no title is mislabelled.
+export async function genrePages(load, pages, parse, defaultURL) {
+  const first = defaultURL ? parse(await load(defaultURL).catch(() => '')).slice(0, 3).map(entry => entry.url).join('|') : '';
+  const out = [];
+  for (let index = 0; index < pages.length; index += 3) {
+    const lists = await Promise.all(pages.slice(index, index + 3).map(async ([url, name]) => {
+      const items = parse(await load(url).catch(() => ''));
+      if (!items.length || (first && items.slice(0, 3).map(entry => entry.url).join('|') === first)) return [];
+      return items.map(entry => ({ ...entry, genres: name ? [genre(name)] : entry.genres, listed: name || entry.listed }));
+    }));
+    out.push(...lists.flat());
+  }
+  return out;
+}
 export const item = fields => ({ genres: [], overview: '', backdrop: '', year: '', rating: '', badge: '', subtitle: '', ...fields });
 
 export const cuevana = {
@@ -108,6 +133,12 @@ export const cuevana = {
       backdrop: tmdb(absolute(attr(/backdrop-image"><figure><img[^>]*>/.exec(html)?.[0], 'src'), base), 'w1280'),
       players: [...html.matchAll(/data-server="([^"]+)"/g)].map(match => decode(match[1]))
     };
+  },
+  async more(load) {
+    const slugs = [['accion', 'Acción'], ['comedia', 'Comedia'], ['drama', 'Drama'], ['terror', 'Terror'], ['suspense', 'Suspenso'], ['ciencia-ficcion', 'Ciencia ficción'], ['romance', 'Romance'],
+      ['animacion', 'Animación'], ['aventura', 'Aventura'], ['crimen', 'Crimen'], ['fantasia', 'Fantasía'], ['familia', 'Familia'], ['misterio', 'Misterio'], ['documental', 'Documental'], ['belica', 'Bélica']];
+    const pages = [['https://cuevana3c.pro/peliculas?page=2', ''], ...slugs.map(([slug, name]) => ['https://cuevana3c.pro/peliculas?genero=' + slug, name])];
+    return genrePages(load, pages, html => this.parseSearch(html), 'https://cuevana3c.pro/peliculas');
   },
   searchURL: query => 'https://cuevana3c.pro/explorar?s=' + encodeURIComponent(query),
   parseSearch(html, base = this.site) {
@@ -158,6 +189,13 @@ export const jkanime = {
     // Only the «Animes» tab: the page also carries donghua and adult tabs.
     const pane = between(html, 'id="animes" role="tabpanel"', 'class="tab-pane');
     const items = [];
+    // «Animes recientes»: new series, opened as a show with its episode list.
+    for (const block of between(html, '<h4>Animes recientes</h4>', '</section>').split('custom_thumb_home').slice(1)) {
+      const show = absolute(/<a href="([^"]+)"/.exec(block)?.[1], base);
+      if (!/^https:\/\/jkanime\.net\/[^/]+\/$/.test(show)) continue;
+      items.push(item({ source: 'jkanime', kind: 'anime', url: show, show, isShow: true, title: text(/card-title">\s*<a[^>]*>([\s\S]*?)<\/a>/.exec(block)?.[1]),
+        poster: absolute(attr(/<img[^>]*>/.exec(block)?.[0], 'src'), base), badge: text(/class="badge TV">([^<]*)/.exec(block)?.[1]) || 'Serie' }));
+    }
     for (const block of pane.split('class="card ').slice(1)) {
       const link = /<a href="([^"]+)"/.exec(block)?.[1];
       const match = /^(https?:\/\/[^/]+\/[^/]+\/)(\d+)\/?$/.exec(absolute(link, base));
@@ -175,7 +213,8 @@ export const jkanime = {
   parseDetail(html) {
     return {
       genres: [...new Set([...html.matchAll(/\/genero\/[^"]*\/?">([^<]+)</g)].map(match => genre(match[1])))].filter(Boolean),
-      overview: text(/<p class="scroll">([\s\S]*?)<\/p>/.exec(html)?.[1])
+      overview: text(/<p class="scroll">([\s\S]*?)<\/p>/.exec(html)?.[1]),
+      studios: [...new Set([...between(html, 'Studios:</span>', '</li>').matchAll(/>([^<]+)<\/a>/g)].map(match => decode(match[1])))].filter(Boolean).slice(0, 3), country: 'Japón'
     };
   },
   // video[0] is the site's own player (Desu), the one validated on the TV.
@@ -248,8 +287,14 @@ export const repelishd = {
     return {
       genres: spans.flatMap(genresFromWords),
       overview: unrepeated(decode(/og:description" content="([^"]*)"/.exec(html)?.[1] || '')),
-      imdb: /var imdb\s*=\s*'(tt\d+)'/.exec(html)?.[1] || ''
+      imdb: /var imdb\s*=\s*'(tt\d+)'/.exec(html)?.[1] || '',
+      country: country(/class="country"><a[^>]*>([^<]+)/.exec(html)?.[1])
     };
+  },
+  async more(load) {
+    const slugs = [['accion', 'Acción'], ['comedia', 'Comedia'], ['drama', 'Drama'], ['terror', 'Terror'], ['thriller', 'Suspenso'], ['ciencia-ficcion', 'Ciencia ficción'], ['romance', 'Romance'],
+      ['animacion', 'Animación'], ['aventuras', 'Aventura'], ['crimen', 'Crimen'], ['fantasia', 'Fantasía'], ['familia', 'Familia'], ['misterio', 'Misterio'], ['documental', 'Documental'], ['belica', 'Bélica'], ['suspenso', 'Suspenso']];
+    return genrePages(load, slugs.map(([slug, name]) => [`https://repelishd.blog/${slug}/`, name]), html => this.parseSearch(html));
   },
   searchURL: query => 'https://repelishd.blog/index.php?do=search&subaction=search&story=' + encodeURIComponent(query),
   parseSearch(html, base = this.site) {
@@ -325,8 +370,12 @@ export const doramasmp4 = {
     return {
       // Only the episode's own «genxed» block; the sidebar lists other series' genres.
       genres: [...new Set([...between(html, 'class="genxed"', '</div>').matchAll(/\/genres\/[^"]*" rel="tag">([^<]+)/g)].map(match => genre(match[1])))],
+      country: country(/País:<\/b>\s*<a[^>]*>([^<]+)/.exec(html)?.[1]),
       players
     };
+  },
+  async more(load) {
+    return genrePages(load, [['https://doramasmp4.cyou/series/?status=&type=&order=update', ''], ['https://doramasmp4.cyou/series/?page=2&status=&type=&order=update', '']], html => this.parseSearch(html));
   },
   searchURL: query => 'https://doramasmp4.cyou/?s=' + encodeURIComponent(query),
   parseSearch(html, base = this.site) {

@@ -129,3 +129,25 @@ Holy 0.3.0 instalada; TV libre (Holy en su inicio, sin nada reproduciéndose; ni
 Tras el atasco de Voe: DoramasFlix prefiere Streamwish y se añadió el cambio por atasco. Reprobado en TV (`doramasflix-validation.json`): Streamwish 9,2 s, 1→21 s en 20 s; reanuda 20→25 s. «Gustos» en TV (`taste-validation.json`): 3 votos con el control simulado, marcas y panel correctos. Memoria libre de la TV 83 MB antes y 205 MB después de la pasada completa. Cuevana recuerda su propia posición entre pruebas, por eso no empieza en 0.
 
 En el Mac (`evidence/holy/desktop/`): 9/9 muestras de los 7 sitios reproducen y avanzan.
+
+
+## Holy 0.4.0 · reintento en otro sitio, catálogo grande y gustos 2 (2026-10-23 19:40)
+
+### El fallo de «Hope»
+El usuario abrió «Hope» y volvió al inicio sin verla. Hay dos «Hope» en el catálogo: la de RePelisHD (funciona, Mixdrop) y la de **DoramasFlix, que no tiene servidores**. Holy pedía los enlaces a DoramasFlix, recibía una lista vacía y se rendía. Ahora:
+1. Servidores alternos del mismo sitio (como antes).
+2. **Mismo título en otros sitios**: primero copias del catálogo y después la búsqueda de cada sitio compatible (películas: Cuevana, RePelisHD, DoramasFlix; anime: JKAnime, AnimeYT; doramas: DoramasFlix, DoramasMP4, Asia Live Action; series: Cuevana). Título igual (o el mismo título principal antes de «:», solo en películas), año ±1 cuando ambos lo dicen; en episodios, el mismo número (y temporada si ambos la numeran). La cortina dice «Probando en Cuevana 3…».
+3. También cuando todos los servidores de la copia fallan o la página da error.
+Mac: `--item=doramasflix:Hope` → Cuevana, reproduce y avanza.
+
+### Catálogo
+709 títulos (antes 174): páginas de género (Cuevana 15, RePelisHD 16), catálogo de AnimeYT (2 páginas), directorio de DoramasMP4 (2) y «Animes recientes» de JKAnime. Una página de género que repite el listado normal (slug desconocido) se descarta para no etiquetar mal. 24 filas en el inicio. JSON del inicio comprimido (837 KB → gzip).
+
+### Gustos 2
+- Calificar en tres niveles (No es para mí, Me gusta, Me encanta) con el botón verde en cualquier título.
+- «¿Qué te pareció?» una vez tras ver un buen rato; «Ahora no» no vuelve a preguntar.
+- «Gustos»: chips de Géneros, Productoras y estudios, Países (OK me gusta, rojo no).
+- La probabilidad suma productora y país al modelo; el motivo lo dice («Te gusta Acción · MAPPA · de Japón»).
+
+### Pruebas
+`npm test`: 13 + **15 de resistencia** (nuevas: gustos 2, catálogo grande, otro sitio, imágenes permitidas). `validate-holy-sites`: 7/7 y 0 imágenes rechazadas. Mac: 9/9 muestras + fallback de Hope. **TV: 0.4.0 instalada, sin validar todavía.**

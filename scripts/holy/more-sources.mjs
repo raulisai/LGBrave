@@ -1,6 +1,6 @@
 // More of the owner's sites. Same contract as sources.mjs; these also define
 // home()/detail()/search() when the site needs more than one page or a JSON call.
-import { decode, attr, text, absolute, between, genre, item } from './sources.mjs';
+import { decode, attr, text, absolute, between, genre, country, item, genrePages } from './sources.mjs';
 
 const tmdbPath = (path, size) => (/^\/[\w-]+\.(jpg|png|webp)$/.test(path || '') ? `https://image.tmdb.org/t/p/${size}${path}` : '');
 const json = value => { try { return JSON.parse(value); } catch { return null; } };
@@ -107,7 +107,10 @@ export const doramasflix = {
   detailURL: entry => entry.show || entry.url,
   parseDetail(html) {
     const data = flight(html);
-    return { genres: flixGenres(data), overview: decode(/"overview":"((?:[^"\\]|\\.){20,}?)"/.exec(data)?.[1]?.replace(/\\"/g, '"') || ''), poster: tmdbPath(/"poster_path":"([^"]+)"/.exec(data)?.[1], 'w342') };
+    const networks = /"networks":\[((?:\{"name":"[^"]+"[^{}]*\},?)+)\]/.exec(data)?.[1] || '';
+    return { genres: flixGenres(data), overview: decode(/"overview":"((?:[^"\\]|\\.){20,}?)"/.exec(data)?.[1]?.replace(/\\"/g, '"') || ''), poster: tmdbPath(/"poster_path":"([^"]+)"/.exec(data)?.[1], 'w342'),
+      studios: unique([...networks.matchAll(/"name":"([^"]+)"/g)].map(match => decode(match[1]))).slice(0, 3),
+      country: country([...data.matchAll(/"country":"([a-z-]+)"/g)].map(match => match[1]).find(value => value !== 'paises')) };
   },
   async resolve(entry, load) {
     const origin = new URL(entry.url).origin + '/';
@@ -118,7 +121,7 @@ export const doramasflix = {
     if (!id) throw Error('DoramasFlix no indicó el reproductor de este título.');
     const links = await flixAction(origin, entry.url, page + data, movie ? 'getMovieLinks' : 'getEpisodeLinks', movie ? { movie_id: id } : { episode_id: id }, load);
     const urls = rankFlixLinks(links);
-    if (!urls.length) throw Error('Este capítulo todavía no tiene servidores.');
+    if (!urls.length) throw Error(movie ? 'Esta película todavía no tiene servidores en DoramasFlix.' : 'Este capítulo todavía no tiene servidores en DoramasFlix.');
     return { url: urls[0], referrer: entry.url, alternatives: urls.slice(1, 4) };
   },
   async search(query, load) {
@@ -217,13 +220,30 @@ export const animeyt = {
         backdrop: attr(/<img[^>]*>/.exec(block)?.[0], 'src').replace(/&#038;/g, '&') });
     }).filter(Boolean);
   },
+  // The catalogue's first pages: series opened as shows with their episode list.
+  async more(load) {
+    return genrePages(load, [['https://animeyt.cc/tv/', ''], ['https://animeyt.cc/tv/page/2/', '']], html => this.parseCatalog(html));
+  },
+  parseCatalog(html, base = this.site) {
+    return String(html || '').split('<article class="aniyt-anime-card">').slice(1).map(block => {
+      const show = absolute(/<a class="aniyt-anime-poster" href="([^"]+)"/.exec(block)?.[1], base);
+      if (!/^https:\/\/animeyt\.cc\/tv\/[\w-]+\/$/.test(show)) return null;
+      const poster = attr(/<noscript><img[^>]*>/.exec(block)?.[0], 'src') || attr(/<img[^>]*data-src="[^"]*"[^>]*>/.exec(block)?.[0], 'data-src');
+      const score = /aniyt-card-score">★\s*([\d,.]+)/.exec(block)?.[1]?.replace(',', '.');
+      return item({ source: 'animeyt', kind: 'anime', url: show, show, isShow: true, title: text(/<h3><a[^>]*>([\s\S]*?)<\/a><\/h3>/.exec(block)?.[1]),
+        poster: /^https:\/\//.test(poster) ? poster.replace(/&#038;/g, '&') : '', rating: score || '', badge: text(/aniyt-anime-type">([^<]*)/.exec(block)?.[1]),
+        subtitle: text(/<div class="aniyt-anime-body">[\s\S]*?<p>([\s\S]*?)<\/p>/.exec(block)?.[1]) });
+    }).filter(entry => entry?.title);
+  },
   async detail(entry, load) {
-    const page = await load(entry.url);
-    const show = /href="(https:\/\/animeyt\.cc\/tv\/[\w-]+\/)"/.exec(page)?.[1] || '';
+    const page = entry.isShow ? '' : await load(entry.url);
+    const show = entry.isShow ? entry.show : /href="(https:\/\/animeyt\.cc\/tv\/[\w-]+\/)"/.exec(page)?.[1] || '';
     if (!show) return {};
     const html = await load(show);
     const block = between(html, 'Géneros</dt>', '</dd>');
+    const studios = between(html, 'Estudio</dt>', '</dd>');
     return { show, genres: unique([...block.matchAll(/>([^<]+)<\/a>/g)].map(match => genre(match[1]))).filter(Boolean),
+      studios: unique([...studios.matchAll(/>([^<]+)<\/a>/g)].map(match => decode(match[1]))).slice(0, 3), country: 'Japón',
       overview: decode(/og:description" content="([^"]*)"/.exec(html)?.[1] || ''), poster: attr(/<meta property="og:image"[^>]*>/.exec(html)?.[0], 'content') };
   },
   // Mytsumi lists the real servers in its tabs (data-player-url). The direct MP4 file first

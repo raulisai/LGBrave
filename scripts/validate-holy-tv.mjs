@@ -24,7 +24,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const out = 'evidence/holy/tv';
 mkdirSync(out, { recursive: true });
 const report = { capturedAt: new Date().toISOString(), scope: 'LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.', samples: [], errors: [] };
-const reportFile = join(out, process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : 'validation.json');
+const reportFile = join(out, process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
 const save = () => writeFileSync(reportFile, JSON.stringify(report, null, 2));
 const memory = async () => (await ares('ares-device', '-r').catch(() => '')).split('\n').find(line => line.startsWith('memory'))?.trim();
 const libraryFile = '.local/holy-library-tvtest.json';
@@ -52,7 +52,7 @@ try {
   await waitFor(() => cdp.evaluate('document.querySelectorAll(".card").length > 10'), 30000).catch(async () => { throw Error('El inicio no mostró títulos: ' + await cdp.evaluate('location.href + " " + document.body.innerText.slice(0, 120)').catch(e => e.message)); });
   await sleep(2500); await shot('home');
   const alive = () => runtime.bridge === bridge && !runtime.connectionClosed;
-  const pick = (source, kind) => catalog.items.find(item => item.source === source && (!kind || item.kind === kind));
+  const pick = (source, kind) => catalog.items.find(item => item.source === source && !item.isShow && (!kind || item.kind === kind));
   const pickPlayable = source => catalog.items.find(item => item.source === source && !item.isShow);
   const samples = [pick('cuevana', 'movie'), pick('repelishd'), pick('jkanime'), pick('doramasmp4'), pick('cuevana', 'series'), pickPlayable('animeyt'), pickPlayable('doramasflix'), pickPlayable('asialiveaction')].filter(Boolean);
   const watch = async (item, label, holdSeconds) => {
@@ -69,6 +69,8 @@ try {
     sample.frames = bridge.session?.frames;
     sample.servers = bridge.session?.servers || 0;
     sample.finalPlayer = bridge.session?.target?.split('?')[0];
+    sample.site = bridge.session?.site || '';
+    sample.key = bridge.session?.key || entryKey(item);
     if (sample.phase === 'playing') {
       // The bridge records the position on its next one-second pass.
       await waitFor(() => bridge.session?.position, 5000).catch(() => {});
@@ -85,9 +87,9 @@ try {
       await bridge.command({ action: 'back' });
       sample.homeShown = await waitFor(() => cdp.evaluate('location.href.startsWith(' + JSON.stringify(home) + ') && document.querySelectorAll(".row").length > 0'), 20000).then(() => true, () => false);
     }
-    const entry = library.get(entryKey(item));
+    const entry = library.get(sample.key || entryKey(item));
     sample.saved = entry ? { t: entry.t, duration: entry.duration } : null;
-    console.log(JSON.stringify({ label, phase: sample.phase, secondsToPlay: sample.secondsToPlay, advancing: sample.advancing, alive: sample.appAlive, back: sample.homeShown, servers: sample.servers, player: sample.finalPlayer, saved: sample.saved, error: sample.error }));
+    console.log(JSON.stringify({ label, phase: sample.phase, secondsToPlay: sample.secondsToPlay, advancing: sample.advancing, alive: sample.appAlive, back: sample.homeShown, servers: sample.servers, site: sample.site, player: sample.finalPlayer, saved: sample.saved, error: sample.error }));
     save();
     return sample;
   };
@@ -147,6 +149,9 @@ try {
     samples.length = 0;
   }
   const only = process.argv.find(arg => arg.startsWith('--only='))?.slice(7);
+  // --item=source:Title plays exactly that catalogue title (e.g. a copy with no servers, to see the fallback).
+  const wanted = process.argv.find(arg => arg.startsWith('--item='))?.slice(7);
+  if (wanted) { const [source, ...title] = wanted.split(':'); samples.splice(0, samples.length, catalog.items.find(item => item.source === source && item.title.toLowerCase() === title.join(':').toLowerCase())); }
   const hold = Number(process.argv.find(arg => arg.startsWith('--hold='))?.slice(7)) || 0;
   for (const [index, item] of samples.entries()) {
     if (only && item.source !== only) continue;

@@ -36,8 +36,13 @@
   let taste = $state(null);
   let tasteLoading = $state(false);
   let resetArmed = 0;
+  // Rating sheet: green key on any title, or «¿Qué te pareció?» after watching a good while.
+  const RATINGS = [{ value: -1, label: 'No es para mí', icon: 'minus' }, { value: 1, label: 'Me gusta', icon: 'check' }, { value: 2, label: 'Me encanta', icon: 'star' }];
+  let sheet = $state(null);
+  const askedShown = new Set();
+  const cardWidth = layout => ({ landscape: 400, chip: 240 })[layout] || 230;
 
-  const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(withLayout) : section === 'gustos' ? tasteRows.map(row => ({ ...row, layout: 'poster' })) : sectionRows(data, section));
+  const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(withLayout) : section === 'gustos' ? tasteRows.map(row => ({ ...row, layout: row.id.startsWith('pref-') ? 'chip' : 'poster' })) : sectionRows(data, section));
   const profile = $derived(taste || data.taste || null);
   const row = $derived(rows[Math.min(rowIndex, rows.length - 1)]);
   const column = $derived(row ? Math.min(columns[row.id] || 0, row.items.length - 1) : 0);
@@ -76,6 +81,9 @@
       const fresh = await getJSON(apiBase + '/holy-api/home');
       if (!Array.isArray(fresh?.rows)) throw Error('formato');
       data = fresh;
+      // Ask once what the owner thought of something they watched for a good while.
+      const ask = fresh.askRating;
+      if (ask?.key && !askedShown.has(ask.key) && !opening && !sheet && section === 'inicio') { askedShown.add(ask.key); openSheet(ask, true); }
       loadedVersions = fresh.catalogVersion + ':' + fresh.libraryVersion;
       notice = '';
       try { localStorage.setItem('holy-home', JSON.stringify(fresh)); localStorage.setItem('holy-api', apiBase); } catch { /* The Mac keeps the real copy. */ }
@@ -115,28 +123,62 @@
     finally { tasteLoading = false; }
   }
   // OK: «me gusta» (again: quitar). Rojo: «no me gusta». The profile updates at once.
+  const post = payload => getJSON(apiBase + '/holy-api/vote', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload), retries: 0 });
+  const plainItem = item => { const payload = $state.snapshot(item); for (const key of ['match', 'matchReason', 'vote', 'layout', 'score', 'reason', 'percent', 'resume', 'upNext']) delete payload[key]; return payload; };
+  function openSheet(item, prompt = false) {
+    if (!item?.url || item.chip) return;
+    sheet = { item, prompt, index: Math.max(0, RATINGS.findIndex(entry => entry.value === (item.vote || 1))) };
+  }
+  // Marks the new rating on every card of that title, here and in «Gustos».
+  function markVote(item, vote) {
+    const key = item.show || item.url;
+    const mark = row => ({ ...row, items: row.items.map(other => ((other.show || other.url) === key ? { ...other, vote } : other)) });
+    tasteRows = tasteRows.map(mark);
+    data = { ...data, rows: data.rows.map(mark) };
+  }
+  async function chooseRating(value) {
+    const current = sheet;
+    sheet = null;
+    if (!current || !apiBase || value === undefined) return;
+    try {
+      if (value === null) { if (current.prompt) await post({ dismiss: plainItem(current.item) }); return; }
+      const result = await post({ item: plainItem(current.item), vote: value });
+      taste = result.taste;
+      markVote(current.item, value);
+      notice = value ? `Guardado: «${RATINGS.find(entry => entry.value === value)?.label}». Tus porcentajes se actualizan.` : 'Calificación quitada.';
+      load();
+    } catch { notice = 'No se guardó tu calificación. Revisa la conexión con el Mac.'; }
+  }
+  // «Gustos» chips: a genre, producer/studio or country you like (OK) or not (rojo).
+  async function togglePref(chip, value) {
+    const next = chip.value === value ? 0 : value;
+    tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === chip.url ? { ...other, value: next } : other)) }));
+    try {
+      const result = await post({ pref: { type: chip.type, name: chip.name, value: next } });
+      taste = result.taste;
+      load();
+    } catch { notice = 'No se guardó ese gusto. Revisa la conexión con el Mac.'; tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === chip.url ? { ...other, value: chip.value } : other)) })); }
+  }
   async function rate(item, value) {
     if (!item?.url || !apiBase) return;
+    if (item.chip) return togglePref(item, value);
     const vote = item.vote === value ? 0 : value;
-    const mark = row => ({ ...row, items: row.items.map(other => (other.url === item.url ? { ...other, vote } : other)) });
-    tasteRows = tasteRows.map(mark);
+    markVote(item, vote);
     try {
-      const payload = $state.snapshot(item);
-      for (const key of ['match', 'matchReason', 'vote', 'layout', 'score', 'reason', 'percent']) delete payload[key];
-      const result = await getJSON(apiBase + '/holy-api/vote', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ item: payload, vote }), retries: 0 });
+      const result = await post({ item: plainItem(item), vote });
       taste = result.taste;
       load();
       // Fresh percentages for the cards on screen, without reshuffling the rows under the focus.
       const fresh = await getJSON(apiBase + '/holy-api/taste', { retries: 0 }).catch(() => null);
       const matches = new Map((fresh?.rows || []).flatMap(row => row.items).map(entry => [entry.url, entry.match]));
       if (matches.size) tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (matches.has(other.url) ? { ...other, match: matches.get(other.url) } : other)) }));
-    } catch { notice = 'No se guardó tu voto. Revisa la conexión con el Mac.'; tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === item.url ? { ...other, vote: item.vote } : other)) })); }
+    } catch { notice = 'No se guardó tu voto. Revisa la conexión con el Mac.'; markVote(item, item.vote || 0); }
   }
   async function resetTaste() {
     if (Date.now() - resetArmed > 4000) { resetArmed = Date.now(); notice = 'Pulsa el botón amarillo otra vez para borrar tus gustos calibrados.'; return; }
     resetArmed = 0;
     try {
-      await getJSON(apiBase + '/holy-api/vote', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ vote: 'reset' }), retries: 0 });
+      await post({ vote: 'reset' });
       notice = 'Gustos calibrados borrados. Lo que ves sigue contando.';
       await loadTaste(); load();
     } catch { notice = 'No se pudieron borrar. Revisa la conexión con el Mac.'; }
@@ -196,6 +238,7 @@
   }
   function choose(item) {
     if (!item) return;
+    if (item.chip) { togglePref(item, 1); return; }
     if (section === 'gustos' && !episodesView) rate(item, 1);
     else if (item.isShow) openEpisodes(item);
     else play(item);
@@ -226,6 +269,16 @@
     const code = event.keyCode;
     if (navigationError) return;
     const direction = { 37: 'left', 38: 'up', 39: 'right', 40: 'down' }[code];
+    // The rating sheet has the remote while open.
+    if (sheet) {
+      event.preventDefault();
+      const options = RATINGS.length + 1;
+      if (direction === 'left') sheet = { ...sheet, index: Math.max(0, sheet.index - 1) };
+      else if (direction === 'right') sheet = { ...sheet, index: Math.min(options - 1, sheet.index + 1) };
+      else if (code === 13) chooseRating(sheet.index < RATINGS.length ? RATINGS[sheet.index].value : sheet.prompt ? null : 0);
+      else if (code === 461 || code === 27) chooseRating(sheet.prompt ? null : undefined);
+      return;
+    }
     // While typing, letters and left/right belong to the field; Enter submits it.
     if (inSearch && document.activeElement === searchInput) {
       if (direction === 'up' || direction === 'down') { event.preventDefault(); move(direction); }
@@ -240,6 +293,7 @@
       else if (inSearch) focusSearch();
       else choose(focused);
     } else if (code === 403) { event.preventDefault(); if (section === 'gustos' && !inNav) rate(focused, -1); else forget(focused); }
+    else if (code === 404 && !inNav && focused && !focused.chip) { event.preventDefault(); openSheet(focused); }
     else if (code === 405 && section === 'gustos') { event.preventDefault(); resetTaste(); }
     else if (code === 461 || code === 27) {
       if (opening) { event.preventDefault(); opening = null; command('home'); }
@@ -274,7 +328,9 @@
       const holy = detail.holy;
       if (holy?.apiBase && !/^https?:/.test(location.protocol) && apiBase !== holy.apiBase) apiBase = holy.apiBase;
       if (holy && loadedVersions !== holy.catalogVersion + ':' + holy.libraryVersion) { loadedVersions = holy.catalogVersion + ':' + holy.libraryVersion; load(); }
-      if (detail.navigation?.phase === 'error' && opening) { opening = null; navigationError = detail.navigation.error; navigationTarget = detail.navigation.url || ''; }
+      // While the Mac is still trying other servers or sites, a failed page is not the end.
+      const retrying = ['resolving', 'opening'].includes(holy?.session?.phase);
+      if (detail.navigation?.phase === 'error' && opening && !retrying) { opening = null; navigationError = detail.navigation.error; navigationTarget = detail.navigation.url || ''; }
       // The Mac refused a title whose only players close the app on this TV.
       if (holy?.session?.phase === 'failed' && opening) { opening = null; notice = holy.session.error; }
     };
@@ -325,15 +381,17 @@
     <aside class="taste" aria-label="Tu perfil de gustos">
       <h2>Tu perfil</h2>
       {#if profile && profile.signals >= 2}
-        <p class="taste-count">{profile.liked} me gusta · {profile.disliked} no me gusta · {profile.watched} vistos</p>
+        <p class="taste-count">{profile.liked} me gusta ({profile.loved || 0} me encanta) · {profile.disliked} no · {profile.prefs || 0} gustos elegidos · {profile.watched} vistos</p>
         {#each profile.genres.slice(0, 6) as entry}
           <div class="bar"><span class="bar-name">{entry.name}</span><span class="bar-track"><span style:width={entry.value + '%'}></span></span></div>
         {/each}
         {#if profile.avoid.length}<p class="avoid">Evitas: {profile.avoid.map(entry => entry.name).join(', ')}</p>{/if}
+        {#if profile.studios?.length}<p class="taste-line">Productoras: {profile.studios.map(entry => entry.name).join(', ')}</p>{/if}
+        {#if profile.countries?.length}<p class="taste-line">Países: {profile.countries.map(entry => entry.name).join(', ')}</p>{/if}
       {:else}
         <p class="taste-count">Califica al menos dos títulos para que Holy calcule cuánto te puede gustar cada uno.</p>
       {/if}
-      <p class="taste-keys"><span class="key">OK</span>Me gusta <span class="key red-key"></span>No me gusta <span class="key yellow-key"></span>Borrar todo</p>
+      <p class="taste-keys"><span class="key">OK</span>Me gusta <span class="key red-key"></span>No me gusta <span class="key green-key"></span>Me encanta… <span class="key yellow-key"></span>Borrar</p>
     </aside>
   {/if}
 
@@ -362,6 +420,7 @@
             {#if preview.resume && preview.duration}<span class="left">{remaining(preview.t, preview.duration)}</span>{/if}
             {#if row?.id === 'continue' && !inNav}<span class="key red-key"></span>Quitar de la fila{/if}
             {/if}
+            {#if !preview.chip && !inNav}<span class="key green-key"></span>{preview.vote === 2 ? 'Te encanta' : preview.vote === 1 ? 'Te gusta' : preview.vote === -1 ? 'No es para ti' : 'Calificar'}{/if}
           </p>
           {#if preview.matchReason && preview.match != null}<p class="match-reason">{preview.matchReason}</p>{/if}
         </div>
@@ -389,13 +448,21 @@
     {/if}
     <div class="rows" bind:this={rowsEl}>
       {#each rows as shelf, r (section + shelf.id)}
-        <section class="row" class:landscape-row={shelf.layout === 'landscape'} class:active={!inNav && !inSearch && r === rowIndex} class:past={r < rowIndex} aria-label={shelf.title}>
+        <section class="row" class:landscape-row={shelf.layout === 'landscape'} class:chip-row={shelf.layout === 'chip'} class:active={!inNav && !inSearch && r === rowIndex} class:past={r < rowIndex} aria-label={shelf.title}>
           <h2>{shelf.title}</h2>
           <div class="track-clip">
-            <div class="track" style:transform={`translateX(${-(columns[shelf.id] || 0) * ((shelf.layout === 'landscape' ? 400 : 230) + 20)}px)`}>
+            <div class="track" style:transform={`translateX(${-(columns[shelf.id] || 0) * (cardWidth(shelf.layout) + 20)}px)`}>
               <!-- Only rows near the focus get cards: long episode lists stay light on the TV. -->
               {#each Math.abs(r - rowIndex) <= 2 ? shelf.items : [] as item, c (item.url + c)}
                 {@const active = !inNav && !inSearch && r === rowIndex && c === column}
+                {#if item.chip}
+                <button class="card chip" class:focus={active} class:liked={item.value === 1} class:disliked={item.value === -1} aria-label={item.title + (item.value === 1 ? ', te gusta' : item.value === -1 ? ', no te gusta' : '')}
+                  onmouseenter={() => hover(r, c)} onclick={() => { hover(r, c); choose(item); }}>
+                  <span class="chip-art"><strong>{item.title}</strong><small>{item.count} títulos</small>
+                    {#if item.value === 1}<span class="vote like"><Icon name="check" size={22} stroke={3} /></span>{:else if item.value === -1}<span class="vote dislike"><Icon name="minus" size={22} stroke={3} /></span>{/if}
+                  </span>
+                </button>
+                {:else}
                 <button class="card" class:landscape={shelf.layout === 'landscape'} class:focus={active} aria-label={(item.title || '') + (item.subtitle ? ', ' + item.subtitle : '')}
                   onmouseenter={() => hover(r, c)} onclick={() => { hover(r, c); choose(item); }}>
                   <span class="art">
@@ -410,9 +477,10 @@
                     {#if item.percent}<span class="progress"><span style:width={item.percent + '%'}></span></span>{/if}
                     {#if item.upNext}<span class="next">Siguiente</span>{/if}
                     {#if item.match != null && !item.percent}<span class="match-badge {matchTone(item.match)}">{item.match} %</span>{/if}
-                    {#if item.vote === 1}<span class="vote like"><Icon name="check" size={24} stroke={3} /></span>{:else if item.vote === -1}<span class="vote dislike"><Icon name="minus" size={24} stroke={3} /></span>{/if}
+                    {#if item.vote === 2}<span class="vote love"><Icon name="star" size={22} stroke={2.6} /></span>{:else if item.vote === 1}<span class="vote like"><Icon name="check" size={24} stroke={3} /></span>{:else if item.vote === -1}<span class="vote dislike"><Icon name="minus" size={24} stroke={3} /></span>{/if}
                   </span>
                 </button>
+                {/if}
               {/each}
             </div>
           </div>
@@ -432,6 +500,25 @@
       <h1>{opening.title}</h1>
       {#if opening.subtitle}<p>{opening.subtitle}</p>{/if}
       <div class="spin"><span class="ring"></span>{opening.resume ? 'Volviendo a donde te quedaste…' : 'Abriendo…'}</div>
+    </div>
+  </div>
+{/if}
+
+{#if sheet}
+  <div class="sheet-scrim" role="dialog" aria-label={'Calificar ' + (sheet.item.title || '')}>
+    <div class="sheet">
+      <p class="sheet-kicker">{sheet.prompt ? '¿Qué te pareció?' : 'Calificar'}</p>
+      <h2>{sheet.item.title}</h2>
+      {#if sheet.item.subtitle}<p class="sheet-sub">{sheet.item.subtitle}</p>{/if}
+      <div class="sheet-options">
+        {#each RATINGS as option, index}
+          <button class="sheet-option" class:focus={sheet.index === index} class:current={sheet.item.vote === option.value} onclick={() => chooseRating(option.value)}>
+            <span class="sheet-icon {option.value === 2 ? 'love' : option.value === 1 ? 'like' : 'dislike'}"><Icon name={option.icon} size={34} stroke={2.6} /></span>{option.label}
+          </button>
+        {/each}
+        <button class="sheet-option plain" class:focus={sheet.index === RATINGS.length} onclick={() => chooseRating(sheet.prompt ? null : 0)}>{sheet.prompt ? 'Ahora no' : 'Quitar'}</button>
+      </div>
+      <p class="sheet-note">Tu calificación ajusta el % de coincidencia de todo el catálogo.</p>
     </div>
   </div>
 {/if}
@@ -493,6 +580,7 @@
   .track-clip{overflow:hidden;padding:18px 0 24px 96px}
   .track{display:flex;gap:20px;min-height:345px;transition:transform .4s var(--ease);will-change:transform}
   .landscape-row .track{min-height:225px}
+  .chip-row .track{min-height:120px}
   .card{flex:none;width:230px;padding:0;border:0;background:none;border-radius:10px;transition:transform .3s var(--ease)}
   .card.landscape{width:400px}
   .art{position:relative;display:block;width:100%;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#1f1f1f;box-shadow:0 8px 20px rgba(0,0,0,.5)}
@@ -532,6 +620,30 @@
   .taste-keys .key{min-width:44px;height:30px;font-size:15px}
   .taste-keys .red-key,.taste-keys .yellow-key{min-width:28px;width:28px;margin-left:12px}
   .yellow-key{border-radius:50%;background:#f5c518}
+  .green-key{min-width:34px;width:34px;border-radius:50%;background:#2e9e4f;margin-left:18px}
+  .taste-keys .green-key{min-width:28px;width:28px;margin-left:12px}
+  .taste-line{margin:8px 0 0;font-size:19px;color:#cfcfcf}
+  .vote.love{background:#f5c518;color:#111}
+  .card.chip{width:240px}
+  .chip-art{position:relative;display:flex;flex-direction:column;justify-content:center;gap:6px;height:120px;padding:0 20px;border-radius:12px;background:#262626;border:2px solid rgba(255,255,255,.12);text-align:left}
+  .chip-art strong{font-size:23px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chip-art small{font-size:17px;color:#a8a8a8}
+  .chip.liked .chip-art{background:#173d22;border-color:#2e9e4f}
+  .chip.disliked .chip-art{background:#3d1717;border-color:#e31f26}
+  .card.chip.focus .chip-art{box-shadow:0 0 0 4px #fff}
+  .sheet-scrim{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(0,0,0,.72);animation:fade .2s ease-out}
+  .sheet{width:1180px;padding:44px 56px;border-radius:24px;background:#181818;border:1px solid rgba(255,255,255,.14);box-shadow:0 30px 80px rgba(0,0,0,.6);animation:rise .3s var(--ease)}
+  .sheet-kicker{margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#e50914}
+  .sheet h2{margin:0;font-size:46px;line-height:1.1}
+  .sheet-sub{margin:8px 0 0;font-size:24px;color:var(--secondary)}
+  .sheet-options{display:flex;gap:18px;margin-top:34px}
+  .sheet-option{display:flex;align-items:center;gap:14px;height:82px;padding:0 28px;border:0;border-radius:16px;background:#2a2a2a;font-size:25px;font-weight:600;transition:transform .25s var(--spring),background .2s}
+  .sheet-option.current{background:#333;outline:2px solid rgba(255,255,255,.35)}
+  .sheet-option.focus{background:#fff;color:#000;transform:scale(1.06)}
+  .sheet-option.plain{margin-left:auto}
+  .sheet-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;color:#fff}
+  .sheet-icon.love{background:#f5c518;color:#111}.sheet-icon.like{background:#2e9e4f}.sheet-icon.dislike{background:#e31f26}
+  .sheet-note{margin:26px 0 0;font-size:20px;color:#9a9a9a}
   .searchbar{position:absolute;left:96px;top:140px;z-index:4;width:1100px;height:88px;display:flex;align-items:center;gap:20px;padding:0 32px;border-radius:14px;background:rgba(40,40,40,.92);border:3px solid transparent;color:#bbb;transition:border-color .2s,background .2s}
   .searchbar.focus{border-color:#fff;background:rgba(60,60,60,.95);color:#fff}
   .searchbar input{flex:1;min-width:0;height:100%;border:0;outline:none;background:transparent;font-size:34px;color:#fff;font-family:inherit}

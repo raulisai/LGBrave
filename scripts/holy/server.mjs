@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { createHash } from 'node:crypto';
+import { gzipSync } from 'node:zlib';
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import { resolve, extname, join } from 'node:path';
 import { HOME_PATH, PORT } from './config.mjs';
@@ -8,7 +9,8 @@ import { HOME_PATH, PORT } from './config.mjs';
 // image cache. Only devices on the local network may ask, and the image cache
 // only fetches from the sites' own image hosts.
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.json': 'application/json' };
-const IMAGE_HOSTS = /(^|\.)(image\.tmdb\.org|jkdesa\.com|jkanime\.net|wp\.com|repelishd\.blog|cuevana3c\.pro|doramasmp4\.cyou)$/;
+// Every connector's image hosts (test-holy-robust checks the catalogue's images are all covered).
+export const IMAGE_HOSTS = /(^|\.)(image\.tmdb\.org|jkdesa\.com|jkanime\.net|wp\.com|repelishd\.blog|cuevana3c\.pro|doramasmp4\.cyou|animeyt\.cc|asialiveaction\.com|doramasflix\.(io|in)|doramasia\.com|mytsumi\.com)$/;
 const local = ip => /^(127\.|::1$|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(ip || '');
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
@@ -52,6 +54,13 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
     })().finally(() => pending.delete(key)));
     return pending.get(key);
   }
+  // JSON answers are compressed when the TV accepts it (the full catalogue is several hundred KB).
+  const sendJSON = (req, res, value) => {
+    const raw = Buffer.from(JSON.stringify(value));
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    if (raw.length > 2048 && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) { res.setHeader('Content-Encoding', 'gzip'); res.setHeader('Vary', 'Accept-Encoding'); res.end(gzipSync(raw)); }
+    else res.end(raw);
+  };
   const server = http.createServer(async (req, res) => {
     const ip = req.socket.remoteAddress?.replace('::ffff:', '');
     if (!local(ip)) { res.writeHead(403).end(); return; }
@@ -61,9 +70,8 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
     if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type' }).end(); return; }
     try {
       if (url.pathname === '/holy-api/home') {
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
-        res.end(JSON.stringify({ ...catalog.home(library), catalogVersion: catalog.version, libraryVersion: library.version }));
+        sendJSON(req, res, { ...catalog.home(library), catalogVersion: catalog.version, libraryVersion: library.version });
       } else if (url.pathname === '/holy-api/search') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         const source = url.searchParams.get('source') || '';
@@ -77,15 +85,17 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
         const seasons = await catalog.episodes(url.searchParams.get('source') || '', url.searchParams.get('show') || '').catch(error => ({ error: error.message }));
         res.end(JSON.stringify(Array.isArray(seasons) ? { seasons } : { seasons: [], error: seasons.error }));
       } else if (url.pathname === '/holy-api/taste') {
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
-        res.end(JSON.stringify(catalog.calibration(library)));
+        sendJSON(req, res, catalog.calibration(library));
       } else if (url.pathname === '/holy-api/vote' && req.method === 'POST') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
-        const { item, vote } = await body(req);
+        const { item, vote, pref, dismiss } = await body(req);
+        let value = 0;
         if (vote === 'reset') library.clearVotes();
-        else library.vote(item, [1, -1].includes(vote) ? vote : 0);
-        res.end(JSON.stringify({ ok: true, vote: vote === 'reset' ? 0 : library.voteOf(item), taste: library.summary(), libraryVersion: library.version }));
+        else if (pref) value = library.prefer(pref.type, pref.name, [1, -1].includes(pref.value) ? pref.value : 0);
+        else if (dismiss) library.dismissRating(dismiss);
+        else value = library.vote(item, [2, 1, -1].includes(vote) ? vote : 0);
+        res.end(JSON.stringify({ ok: true, vote: value, taste: library.summary(), libraryVersion: library.version }));
       } else if (url.pathname === '/holy-api/health') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
@@ -107,7 +117,7 @@ export function startServer({ catalog, library, port = PORT, root = 'dist', imag
         res.end(readFileSync(path));
       } else res.writeHead(404).end();
     } catch (error) {
-      const code = error.message === 'host' ? 403 : ['json', 'body'].includes(error.message) || /dirección válida/.test(error.message) ? 400 : 404;
+      const code = error.message === 'host' ? 403 : ['json', 'body'].includes(error.message) || /dirección válida|gusto no es válido/.test(error.message) ? 400 : 404;
       if (!res.headersSent) res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }).end(JSON.stringify({ ok: false, error: code === 400 ? error.message : 'no disponible' }));
       else res.end();
     }

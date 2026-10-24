@@ -6,7 +6,7 @@ import { cuevana, repelishd, jkanime, doramasmp4 } from './holy/sources.mjs';
 import { doramasflix, asialiveaction, animeyt, flight, flixHost, rankFlixLinks } from './holy/more-sources.mjs';
 import { CONNECTORS } from './holy/connectors.mjs';
 import { Library } from './holy/library.mjs';
-import { Catalog } from './holy/catalog.mjs';
+import { Catalog, sameTitle, episodeOf } from './holy/catalog.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
 import { startServer } from './holy/server.mjs';
 import { sectionRows, episodeRows } from '../src/holy.js';
@@ -113,6 +113,63 @@ try {
     assert.equal(new Library(join(directory, 'taste.json')).votes.length, 0);
     assert.throws(() => library.vote({ url: 'javascript:1' }, 1));
   });
+  await check('Gustos 2: «me encanta» pesa más, gustos elegidos (género, productora, país) y pregunta al terminar', () => {
+    let now = Date.UTC(2026, 9, 24);
+    const library = new Library(join(directory, 'taste2.json'), () => now);
+    const anime = (title, studios, genres = ['Acción']) => ({ url: 'https://x/' + title, title, kind: 'anime', genres, studios, country: 'Japón' });
+    library.vote(anime('A', ['MAPPA']), 2);
+    library.vote(anime('B', ['Toei']), 1);
+    // «Me encanta» weighs more than «me gusta» (with only two ratings the % stays modest).
+    assert.ok(library.profile().studios.get('MAPPA') > library.profile().studios.get('Toei'));
+    assert.ok(library.match(anime('C', ['MAPPA'])).percent >= library.match(anime('D', ['Toei'])).percent);
+    assert.match(library.match(anime('C', ['MAPPA'])).reason, /MAPPA/);
+    // A chosen dislike of a genre pulls its titles down; a chosen country pulls up.
+    const before = library.match(anime('E', [], ['Terror'])).percent;
+    library.prefer('genre', 'Terror', -1);
+    assert.ok(library.match(anime('E', [], ['Terror'])).percent < before);
+    library.prefer('country', 'Corea del Sur', 1);
+    const korean = library.match({ url: 'https://x/k', title: 'K', kind: 'dorama', genres: ['Drama'], country: 'Corea del Sur' }).percent;
+    const other = library.match({ url: 'https://x/c', title: 'Ch', kind: 'dorama', genres: ['Drama'], country: 'China' }).percent;
+    assert.ok(korean > other, `${korean} > ${other}`);
+    assert.deepEqual(library.summary().countries.map(entry => entry.name), ['Corea del Sur', 'Japón']);
+    assert.equal(library.prefer('studio', 'MAPPA', 0), 0);
+    assert.throws(() => library.prefer('actor', 'X', 1));
+    // Watched a good while and not rated → asked once; answering or «ahora no» stops asking.
+    const movie = { url: 'https://x/peli', title: 'Peli', kind: 'movie', genres: ['Drama'] };
+    library.start(movie); library.progress(movie.url, movie.url, 1000, 6000);
+    assert.equal(library.pendingRating()?.title, 'Peli');
+    library.dismissRating(movie);
+    assert.equal(library.pendingRating(), null);
+    const show = { url: 'https://x/show/3/', show: 'https://x/show/', title: 'Serie', kind: 'anime', genres: [] };
+    library.start(show); library.progress(show.show, show.url, 1300, 1400);
+    assert.equal(library.pendingRating()?.key, 'https://x/show/');
+    library.vote(library.pendingRating(), 1);
+    assert.equal(library.pendingRating(), null);
+    // Ratings and tastes survive a restart; «borrar» clears both.
+    const again = new Library(join(directory, 'taste2.json'), () => now);
+    assert.deepEqual([again.votes.length, again.prefs.length], [3, 2]);
+    again.clearVotes();
+    assert.deepEqual([again.votes.length, again.prefs.length, again.entries.length], [0, 0, 2]);
+  });
+  await check('Catálogo grande: páginas de género sin etiquetas falsas y filas por género', async () => {
+    const { genrePages } = await import('./holy/sources.mjs');
+    const page = urls => urls.map(url => ({ url, title: url }));
+    const lists = { default: page(['a', 'b', 'c']), accion: page(['x', 'y', 'z']), falso: page(['a', 'b', 'c']) };
+    const found = await genrePages(async url => url, [['accion', 'Acción'], ['falso', 'Western']], key => lists[key] || [], 'default');
+    assert.deepEqual(found.map(entry => [entry.url, entry.genres[0]]), [['x', 'Acción'], ['y', 'Acción'], ['z', 'Acción']]);
+    const site = { id: 's', name: 'S', site: 'https://s.example/', parseHome: () => [{ source: 's', kind: 'movie', url: 'https://s.example/1', title: 'Uno', genres: [] }],
+      more: async () => Array.from({ length: 8 }, (_, index) => ({ source: 's', kind: 'movie', url: 'https://s.example/' + (index + 1), title: 'Peli ' + index, genres: ['Acción'] })) };
+    const catalog = new Catalog({ file: join(directory, 'big.json'), detailsFile: join(directory, 'bigd.json'), connectors: [site], fetch: async () => '' });
+    await catalog.refresh();
+    assert.equal(catalog.items.length, 8);
+    assert.deepEqual(catalog.find('https://s.example/1').genres, ['Acción']);
+    const home = catalog.home(new Library(join(directory, 'big-lib.json')));
+    assert.ok(home.rows.some(row => row.id === 'genre-Acción' && row.items.length === 8));
+    const calibration = catalog.calibration(new Library(join(directory, 'big-lib.json')));
+    assert.equal(calibration.rows[0].id, 'pref-genre');
+    assert.deepEqual(calibration.rows[0].items[0], { chip: true, type: 'genre', name: 'Acción', title: 'Acción', count: 8, value: 0, url: 'holy:gusto:genre:Acción' });
+  });
+
   await check('Archivos dañados: se apartan y Holy arranca limpio, sin perderlos', () => {
     const file = join(directory, 'broken.json');
     writeFileSync(file, '{"entries": [ {"key": tro');
@@ -178,13 +235,41 @@ try {
     await bridge.watch();
     assert.equal(calls.filter(call => call.method === 'Page.navigate').at(-1).params.url, 'https://c.example/e/3');
     bridge.contexts.delete(5);
-    // A refused title (only unsafe servers) never navigates.
+    // Every server of this copy failed (or it has none): the same title on another site.
+    catalog.resolve = async item => (item.source === 'otro' ? { url: 'https://otro.example/e/9', referrer: 'https://otro.example/t' } : null);
+    catalog.elsewhere = async () => [{ source: 'otro', kind: 'movie', title: 'T', url: 'https://otro.example/t' }];
+    catalog.connector = id => ({ name: id === 'otro' ? 'Otro sitio' : id });
+    await bridge.command({ action: 'play', value: { url: 'https://site.example/v', title: 'V', kind: 'movie', source: 'x' } });
+    assert.equal(calls.filter(call => call.method === 'Page.navigate').at(-1).params.url, 'https://otro.example/e/9');
+    assert.equal(bridge.statusPayload().holy.session.site, 'Otro sitio');
+    await assert.rejects(bridge.command({ action: 'play', value: { url: 'https://site.example/serie/', title: 'Serie', kind: 'anime', isShow: true } }), /episodio/);
+    // A refused title (only unsafe servers, nowhere else) never navigates.
+    catalog.elsewhere = async () => [];
     const before = calls.filter(call => call.method === 'Page.navigate').length;
     catalog.resolve = async () => { throw Object.assign(Error('solo servidores que cierran la app'), { unsafe: true }); };
     await bridge.command({ action: 'play', value: { url: 'https://site.example/u', title: 'U', kind: 'movie', source: 'x' } });
     assert.equal(calls.filter(call => call.method === 'Page.navigate').length, before);
     assert.equal(bridge.statusPayload().holy.session.phase, 'failed');
     await bridge.stop();
+  });
+
+  await check('Otro sitio: mismo título (o mismo episodio) cuando el propio no tiene reproductor', async () => {
+    assert.ok(sameTitle({ title: 'Hope', kind: 'movie' }, { title: 'HOPE', kind: 'movie', year: '2026' }));
+    assert.ok(sameTitle({ title: 'Hope', kind: 'movie' }, { title: 'Hope: El primer impacto', kind: 'movie' }));
+    assert.ok(!sameTitle({ title: 'Hope', kind: 'movie', year: '2026' }, { title: 'Hope', kind: 'movie', year: '2013' }));
+    assert.ok(!sameTitle({ title: 'Tokyo Revengers: Santen', kind: 'anime' }, { title: 'Tokyo Revengers: Tenjiku', kind: 'anime' }));
+    assert.deepEqual(episodeOf({ url: 'https://doramasflix.io/capitulos/x-2x7' }), { season: 2, episode: 7 });
+    assert.deepEqual(episodeOf({ url: 'https://jkanime.net/one-piece/1180/' }), { season: null, episode: 1180 });
+    const site = (id, results, seasons = []) => ({ id, name: id, site: `https://${id}.example/`, parseHome: () => [], search: async () => results, episodes: async () => seasons });
+    const catalog = new Catalog({ file: join(directory, 'e.json'), detailsFile: join(directory, 'ed.json'), fetch: async () => '',
+      connectors: [site('cuevana', [{ source: 'cuevana', kind: 'movie', title: 'Hope', year: '2019', url: 'https://cuevana.example/hope-2019' }, { source: 'cuevana', kind: 'movie', title: 'Hope', year: '2026', url: 'https://cuevana.example/hope' }]),
+        site('repelishd', []), site('animeyt', [{ source: 'animeyt', kind: 'anime', title: 'One Piece', url: 'https://animeyt.example/tv/op/', show: 'https://animeyt.example/tv/op/', isShow: true }],
+          [{ title: 'Episodios', episodes: [{ url: 'https://animeyt.example/1180/', episode: 1180, label: 'Episodio 1180' }, { url: 'https://animeyt.example/1179/', episode: 1179 }] }]), site('jkanime', [])] });
+    catalog.items = [{ source: 'repelishd', kind: 'movie', title: 'Hope', year: '2026', url: 'https://repelishd.example/hope', genres: [] }];
+    const movie = await catalog.elsewhere({ source: 'doramasflix', kind: 'movie', title: 'Hope', year: '2026', url: 'https://doramasflix.example/hope' }, new Set(['doramasflix']));
+    assert.deepEqual(movie.map(entry => entry.url), ['https://repelishd.example/hope', 'https://cuevana.example/hope']);
+    const episode = await catalog.elsewhere({ source: 'jkanime', kind: 'anime', title: 'One Piece', url: 'https://jkanime.net/one-piece/1180/' }, new Set(['jkanime']));
+    assert.deepEqual(episode.map(entry => [entry.url, entry.isShow]), [['https://animeyt.example/1180/', false]]);
   });
 
   await check('Servidor: rutas con datos malos responden sin caerse', async () => {
@@ -198,17 +283,26 @@ try {
       assert.equal((await vote('{roto')).status, 400);
       assert.equal((await vote(JSON.stringify({ item: { url: 'javascript:1' }, vote: 1 }))).status, 400);
       assert.equal((await vote('x'.repeat(40000))).status, 400);
-      const ok = await (await vote(JSON.stringify({ item: { url: 'https://x/1', title: 'A', kind: 'movie', genres: ['Acción'] }, vote: 1 }))).json();
-      assert.deepEqual([ok.ok, ok.vote, ok.taste.liked], [true, 1, 1]);
+      const ok = await (await vote(JSON.stringify({ item: { url: 'https://x/1', title: 'A', kind: 'movie', genres: ['Acción'] }, vote: 2 }))).json();
+      assert.deepEqual([ok.ok, ok.vote, ok.taste.liked, ok.taste.loved], [true, 2, 1, 1]);
+      const pref = await (await vote(JSON.stringify({ pref: { type: 'studio', name: 'MAPPA', value: 1 } }))).json();
+      assert.deepEqual([pref.vote, pref.taste.prefs], [1, 1]);
+      assert.equal((await vote(JSON.stringify({ pref: { type: 'actor', name: 'X', value: 1 } }))).status, 400);
+      assert.equal((await (await vote(JSON.stringify({ dismiss: { url: 'https://x/2' } }))).json()).ok, true);
       assert.equal((await fetch(base + '/holy-api/vote', { method: 'OPTIONS' })).status, 204);
       assert.deepEqual((await (await fetch(base + '/holy-api/search?source=nada&q=a')).json()).items, []);
       assert.deepEqual((await (await fetch(base + '/holy-api/episodes?source=jkanime&show=javascript:1')).json()).seasons, []);
       assert.equal((await fetch(base + '/holy-api/img?u=' + encodeURIComponent('https://evil.example/x.jpg'))).status, 403);
+      // Every site's own image host is allowed (AnimeYT's were refused on the TV, 2026-10-23).
+      const { IMAGE_HOSTS } = await import('./holy/server.mjs');
+      for (const host of ['image.tmdb.org', 'cdn.jkdesa.com', 'i0.wp.com', 'repelishd.blog', 'cuevana3c.pro', 'doramasmp4.cyou', 'animeyt.cc', 'asialiveaction.com', 'doramasflix.io']) assert.ok(IMAGE_HOSTS.test(host), host);
       assert.equal((await fetch(base + '/holy/..%2F..%2Fetc%2Fpasswd')).status === 200, false);
       const health = await (await fetch(base + '/holy-api/health')).json();
       assert.deepEqual([health.ok, health.library.votes], [true, 1]);
       assert.ok(Array.isArray((await (await fetch(base + '/holy-api/taste')).json()).rows));
       assert.ok((await (await fetch(base + '/holy-api/home')).json()).taste);
+      const gz = await fetch(base + '/holy-api/home', { headers: { 'Accept-Encoding': 'gzip' } });
+      assert.ok(gz.ok && (await gz.json()).rows);
     } finally { server.close(); }
   });
 

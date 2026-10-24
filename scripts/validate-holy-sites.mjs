@@ -35,7 +35,11 @@ for (const connector of CONNECTORS) {
     const result = await timed(() => catalog.episodes(connector.id, show));
     site.checks.episodes = { show, ok: result.ok && result.value.some(season => season.episodes.length), episodes: (result.value || []).reduce((sum, season) => sum + season.episodes.length, 0), ms: result.ms, error: result.error || '' };
   }
-  site.ok = site.titles > 0 && !site.error && site.checks.players.length > 0 && site.checks.players.every(player => player.ok) && site.checks.search.ok !== false && (site.checks.episodes?.ok ?? true);
+  // Images must pass Holy's image cache (its allowed hosts).
+  const { IMAGE_HOSTS } = await import('./holy/server.mjs');
+  const images = items.flatMap(item => [item.poster, item.backdrop]).filter(Boolean);
+  site.checks.images = { total: images.length, refused: images.filter(url => { try { return !IMAGE_HOSTS.test(new URL(url).hostname); } catch { return true; } }).length };
+  site.ok = site.checks.images.refused === 0 && site.titles > 0 && !site.error && site.checks.players.length > 0 && site.checks.players.every(player => player.ok) && site.checks.search.ok !== false && (site.checks.episodes?.ok ?? true);
   console.log(`${site.ok ? 'OK ' : 'MAL'} ${connector.name.padEnd(18)} títulos ${String(site.titles).padStart(3)} · géneros ${site.withGenres} · reproductor ${site.checks.players.map(player => player.ok ? player.host : 'falla').join(', ')} · búsqueda ${site.checks.search.ok === null ? '—' : site.checks.search.results} · episodios ${site.checks.episodes?.episodes ?? '—'}${site.error ? ' · ' + site.error : ''}`);
 }
 mkdirSync('evidence/holy', { recursive: true });

@@ -68,7 +68,7 @@ export class HolyBridge extends BrowserBridge {
     return super.request(params, sessionId);
   }
   statusPayload() {
-    const session = this.session && { phase: this.session.phase, title: this.session.item.title, error: this.session.error || '' };
+    const session = this.session && { phase: this.session.phase, title: this.session.item.title, error: this.session.error || '', site: this.session.site || '' };
     return { ...super.statusPayload(), holy: { apiBase: this.apiBase, catalogVersion: this.catalog?.version || 0, libraryVersion: this.library?.version || 0, refreshing: !!this.catalog?.refreshing, session } };
   }
   async command(command) {
@@ -92,6 +92,8 @@ export class HolyBridge extends BrowserBridge {
   // value: a catalogue item, or a «Continuar viendo» entry (same shape).
   async play(value) {
     if (!value || typeof value !== 'object' || !/^https:\/\//.test(String(value.url || ''))) throw Error('Ese título no tiene una dirección válida.');
+    // A whole series opens its episode list on the TV; only episodes and films are played.
+    if (value.isShow) throw Error('Elige un episodio de la serie.');
     await this.endSession();
     const known = this.catalog?.find(value.url);
     const previous = this.library.get(entryKey(value));
@@ -105,24 +107,66 @@ export class HolyBridge extends BrowserBridge {
       worldName: this.toolbarWorld
     })).identifier;
     await this.status();
+    session.tried = new Set([item.source]);
     let target = null;
     try { target = await this.catalog.resolve(item); } catch (error) { session.resolveError = error; }
     if (this.session !== session) return;
-    if (!target && (session.resolveError?.unsafe || this.catalog.pageFallback?.(item) === false)) {
+    // No player on its own site: the same title on another of the owner's sites.
+    if (!target) target = await this.findElsewhere(session);
+    if (this.session !== session) return;
+    if (!target && !session.resolveError?.unsafe && this.catalog.pageFallback?.(item)) target = { url: item.url };
+    if (!target) {
       // Refuse rather than open a page known to close the app.
       session.phase = 'failed';
-      session.error = session.resolveError?.message || 'No se encontró un reproductor seguro para este título.';
+      session.error = session.resolveError?.message || 'No se encontró un reproductor para este título en tus sitios.';
       await this.dropCurtainScript();
       await this.status();
       return;
     }
-    // Without a resolved player, open the title's page: the autoplay step finds the player there.
-    target ||= { url: item.url };
-    this.library.start(item);
+    await this.openTarget(session, target);
+  }
+  async openTarget(session, target) {
+    this.library.start(session.item);
+    session.key = entryKey(session.item);
+    session.resumeAt = this.library.resumeAt(session.item);
     session.queue = [...(target.alternatives || [])];
     session.referrer = target.referrer;
-    session.servers = 1;
+    session.servers = (session.servers || 0) + 1;
     await this.openServer(session, target.url);
+  }
+  // Next site with the same title that resolves to a player; null when none is left.
+  async findElsewhere(session) {
+    if (!this.catalog.elsewhere) return null;
+    if (!session.candidates) {
+      await this.curtain(`window.__holyCurtain&&__holyCurtain.say('Buscando este título en tus otros sitios…')`);
+      session.candidates = await this.catalog.elsewhere(session.item, session.tried).catch(() => []);
+    }
+    while (session.candidates.length && this.session === session) {
+      const candidate = session.candidates.shift();
+      if (session.tried.has(candidate.source)) continue;
+      session.tried.add(candidate.source);
+      const name = this.catalog.connector?.(candidate.source)?.name || candidate.source;
+      await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify('Probando en ' + name + '…')})`);
+      const target = await this.catalog.resolve(candidate).catch(() => null);
+      if (target) {
+        // Keep the owner's title and artwork; play the other site's copy.
+        session.item = { ...candidate, title: session.item.title || candidate.title, poster: session.item.poster || candidate.poster, backdrop: session.item.backdrop || candidate.backdrop, genres: session.item.genres?.length ? session.item.genres : candidate.genres };
+        session.site = name;
+        return target;
+      }
+    }
+    return null;
+  }
+  // Every server of this copy failed: another site, else give up.
+  async nextSite(session) {
+    if (!this.curtainScript) {
+      const item = session.item;
+      this.curtainScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: curtainSource({ title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Buscando en otro sitio…' }), worldName: this.toolbarWorld }).catch(() => ({})))?.identifier || null;
+    }
+    const target = await this.findElsewhere(session);
+    if (!target || this.session !== session) return false;
+    await this.openTarget(session, target);
+    return true;
   }
   async openServer(session, url) {
     session.phase = 'opening'; session.opened = Date.now(); session.target = url; session.position = null;
@@ -133,6 +177,7 @@ export class HolyBridge extends BrowserBridge {
     const result = await this.cdp.call('Page.navigate', { url, ...(session.referrer ? { referrer: session.referrer } : {}) }).catch(error => ({ errorText: error.message }));
     if (result.errorText && this.session === session) {
       if (session.queue?.length) return this.nextServer(session);
+      if (await this.nextSite(session)) return;
       session.phase = 'failed'; await this.navigationFailed(this.readableError(result.errorText));
     }
   }
@@ -170,6 +215,7 @@ export class HolyBridge extends BrowserBridge {
     if (!session || this.watching || !['opening', 'playing', 'manual'].includes(session.phase)) return;
     if (this.navigation.phase === 'error') {
       if (session.phase === 'opening' && session.queue?.length) { await this.nextServer(session); return; }
+      if (session.phase === 'opening' && await this.nextSite(session)) return;
       await this.endSession(); await this.status(); return;
     }
     if (session.phase === 'opening' && session.queue?.length && Date.now() - session.opened > this.serverTimeout && !session.position) { await this.nextServer(session); return; }
@@ -201,7 +247,9 @@ export class HolyBridge extends BrowserBridge {
         this.library.progress(session.key, session.item.url, best.t, best.d);
       }
       session.position = best ? { t: best.t, d: best.d } : session.position;
-      if (session.phase === 'opening' && Date.now() - session.opened > this.startTimeout) {
+      if (session.phase === 'opening' && Date.now() - session.opened > (session.queue?.length ? this.serverTimeout : this.startTimeout) && !session.position) {
+        if (session.queue?.length) { await this.nextServer(session); return; }
+        if (await this.nextSite(session)) return;
         // Leave the page usable: the owner can pick another server with the remote.
         session.phase = 'manual'; session.error = 'No se pudo iniciar solo';
         await this.curtain(`window.__holyCurtain&&(__holyCurtain.say('No arrancó solo. Elige un servidor con el control.'),setTimeout(()=>__holyCurtain.hide(),2500))`);

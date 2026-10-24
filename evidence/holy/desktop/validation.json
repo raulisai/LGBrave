@@ -1,107 +1,7 @@
 {
-  "capturedAt": "2026-10-23T20:31:10.168Z",
+  "capturedAt": "2026-10-24T01:24:00.181Z",
   "scope": "Chrome de escritorio sin interfaz en el Mac, no la TV. Muestras cortas, el título más nuevo de cada sitio.",
   "samples": [
-    {
-      "label": "1-cuevana",
-      "source": "cuevana",
-      "title": "Street Fighter",
-      "page": "https://cuevana3c.pro/pelicula/street-fighter-2",
-      "player": "https://tungtungsahur.cuevana3c.pro/",
-      "phase": "playing",
-      "secondsToPlay": 4.5,
-      "frames": [
-        {
-          "url": "https://tungtungsahur.cuevana3c.pro/",
-          "top": true,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/uf611mx8ayux",
-          "top": false,
-          "videos": 1,
-          "action": ""
-        }
-      ],
-      "servers": 1,
-      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
-      "navigation": "ok",
-      "position": {
-        "first": {
-          "t": 0.488559,
-          "d": 6629.3
-        },
-        "last": {
-          "t": 29.52073,
-          "d": 6629.3
-        }
-      },
-      "advancing": true,
-      "curtainGone": false,
-      "afterBack": "http://127.0.0.1:43191/holy/",
-      "homeShown": true,
-      "saved": {
-        "t": 31,
-        "duration": 6629
-      }
-    },
-    {
-      "label": "2-repelishd",
-      "source": "repelishd",
-      "title": "Oro sin ley",
-      "page": "https://repelishd.blog/ver-pelicula/25954-oro-sin-ley-online-espanol.html",
-      "player": "https://mxdrop.to/e/4ddr8x8rag7qzd",
-      "phase": "playing",
-      "secondsToPlay": 5.8,
-      "frames": [
-        {
-          "url": "https://mxdrop.click/e/4ddr8x8rag7qzd",
-          "top": true,
-          "videos": 1,
-          "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "https://www.google.com/recaptcha/api2/anchor",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        }
-      ],
-      "servers": 1,
-      "finalPlayer": "https://mxdrop.to/e/4ddr8x8rag7qzd",
-      "navigation": "ok",
-      "position": {
-        "first": {
-          "t": 0.31701,
-          "d": 6809.844656
-        },
-        "last": {
-          "t": 8.326034,
-          "d": 6809.844656
-        }
-      },
-      "advancing": true,
-      "curtainGone": true,
-      "afterBack": "http://127.0.0.1:43191/holy/",
-      "homeShown": true,
-      "saved": {
-        "t": 8,
-        "duration": 6810
-      }
-    },
     {
       "label": "3-jkanime",
       "source": "jkanime",
@@ -109,7 +9,7 @@
       "page": "https://jkanime.net/tokyo-revengers-santen-sensou-hen/4/",
       "player": "https://jkanime.net/jkplayer/um",
       "phase": "playing",
-      "secondsToPlay": 4.7,
+      "secondsToPlay": 9.5,
       "frames": [
         {
           "url": "https://jkanime.net/jkplayer/um",
@@ -120,14 +20,16 @@
       ],
       "servers": 1,
       "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/tokyo-revengers-santen-sensou-hen/",
       "navigation": "ok",
       "position": {
         "first": {
-          "t": 0.917418,
+          "t": 0.917433,
           "d": 1469.0510520000023
         },
         "last": {
-          "t": 8.89758,
+          "t": 8.798651,
           "d": 1469.0510520000023
         }
       },
@@ -139,289 +41,34 @@
         "t": 9,
         "duration": 1469
       }
-    },
-    {
-      "label": "4-doramasmp4",
-      "source": "doramasmp4",
-      "title": "Pls Love",
-      "page": "https://doramasmp4.cyou/cap/pls-love-capitulo-7/",
-      "player": "https://ok.ru/videoembed/17414104222274",
-      "phase": "playing",
-      "secondsToPlay": 19.8,
-      "frames": [
-        {
-          "url": "https://ok.ru/videoembed/17414104222274",
-          "top": true,
-          "videos": 1,
-          "action": ""
-        }
-      ],
-      "servers": 1,
-      "finalPlayer": "https://ok.ru/videoembed/17414104222274",
-      "navigation": "ok",
-      "position": {
-        "first": {
-          "t": 0.868941,
-          "d": 2898.291
-        },
-        "last": {
-          "t": 8.878994,
-          "d": 2898.291
-        }
-      },
-      "advancing": true,
-      "curtainGone": true,
-      "afterBack": "http://127.0.0.1:43191/holy/",
-      "homeShown": true,
-      "saved": {
-        "t": 9,
-        "duration": 2898
-      }
-    },
-    {
-      "label": "5-cuevana",
-      "source": "cuevana",
-      "title": "Shaque: No confíes en nadie",
-      "page": "https://cuevana3c.pro/serie/shaka-trust-no-one/episodio-1x5",
-      "player": "https://tungtungsahur.cuevana3c.pro/",
-      "phase": "playing",
-      "secondsToPlay": 9.8,
-      "frames": [
-        {
-          "url": "https://tungtungsahur.cuevana3c.pro/",
-          "top": true,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/1axfrsky38mx",
-          "top": false,
-          "videos": 1,
-          "action": ""
-        }
-      ],
-      "servers": 1,
-      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
-      "navigation": "ok",
-      "position": {
-        "first": {
-          "t": 0.70738,
-          "d": 2288.583
-        },
-        "last": {
-          "t": 8.719202,
-          "d": 2288.583
-        }
-      },
-      "advancing": true,
-      "curtainGone": false,
-      "afterBack": "http://127.0.0.1:43191/holy/",
-      "homeShown": true,
-      "saved": {
-        "t": 9,
-        "duration": 2289
-      }
-    },
-    {
-      "label": "6-animeyt",
-      "source": "animeyt",
-      "title": "Tokyo Revengers: Santen Sensou-hen",
-      "page": "https://animeyt.cc/118807/anime/tokyo-revengers-santen-sensou-hen-capitulo-4/",
-      "player": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
-      "phase": "playing",
-      "secondsToPlay": 7.7,
-      "frames": [
-        {
-          "url": "https://ia601404.us.archive.org/8/items/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
-          "top": true,
-          "videos": 1,
-          "action": ""
-        }
-      ],
-      "servers": 1,
-      "finalPlayer": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
-      "navigation": "ok",
-      "position": {
-        "first": {
-          "t": 0.423502,
-          "d": 1469.050917
-        },
-        "last": {
-          "t": 8.455201,
-          "d": 1469.050917
-        }
-      },
-      "advancing": true,
-      "curtainGone": true,
-      "afterBack": "http://127.0.0.1:43191/holy/",
-      "homeShown": true,
-      "saved": {
-        "t": 8,
-        "duration": 1469
-      }
-    },
-    {
-      "label": "7-doramasflix",
-      "source": "doramasflix",
-      "title": "Teach Me Touch Me",
-      "page": "https://doramasflix.io/capitulos/teach-me-touch-me-1x2",
-      "player": "https://streamtape.com/e/OdLz2VBp6BIZBjY",
-      "phase": "playing",
-      "secondsToPlay": 6.8,
-      "frames": [
-        {
-          "url": "https://streamtape.com/e/OdLz2VBp6BIZBjY",
-          "top": true,
-          "videos": 1,
-          "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "https://www.google.com/recaptcha/api2/anchor",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        }
-      ],
-      "servers": 1,
-      "finalPlayer": "https://streamtape.com/e/OdLz2VBp6BIZBjY",
-      "navigation": "ok",
-      "position": {
-        "first": {
-          "t": 0.046442,
-          "d": 3311.769002
-        },
-        "last": {
-          "t": 8.05617,
-          "d": 3311.769002
-        }
-      },
-      "advancing": true,
-      "curtainGone": true,
-      "afterBack": "http://127.0.0.1:43191/holy/",
-      "homeShown": true,
-      "saved": {
-        "t": 8,
-        "duration": 3312
-      }
-    },
-    {
-      "label": "8-asialiveaction",
-      "source": "asialiveaction",
-      "title": "Merry Berry Love",
-      "page": "https://asialiveaction.com/e/27/305551t1/0325115/",
-      "player": "https://ok.ru/videoembed/17403982582082",
-      "phase": "playing",
-      "secondsToPlay": 26.8,
-      "frames": [
-        {
-          "url": "https://ok.ru/videoembed/17403982582082",
-          "top": true,
-          "videos": 1,
-          "action": ""
-        }
-      ],
-      "servers": 1,
-      "finalPlayer": "https://ok.ru/videoembed/17403982582082",
-      "navigation": "ok",
-      "position": {
-        "first": {
-          "t": 0.1,
-          "d": 2790.891
-        },
-        "last": {
-          "t": 6.683261,
-          "d": 2790.891
-        }
-      },
-      "advancing": true,
-      "curtainGone": true,
-      "afterBack": "http://127.0.0.1:43191/holy/",
-      "homeShown": true,
-      "saved": {
-        "t": 7,
-        "duration": 2791
-      }
-    },
-    {
-      "label": "resume",
-      "source": "cuevana",
-      "title": "Street Fighter",
-      "page": "https://cuevana3c.pro/pelicula/street-fighter-2",
-      "player": "https://tungtungsahur.cuevana3c.pro/",
-      "phase": "playing",
-      "secondsToPlay": 5.7,
-      "frames": [
-        {
-          "url": "https://tungtungsahur.cuevana3c.pro/",
-          "top": true,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/uf611mx8ayux",
-          "top": false,
-          "videos": 1,
-          "action": ""
-        }
-      ],
-      "servers": 1,
-      "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
-      "navigation": "ok",
-      "position": {
-        "first": {
-          "t": 30.899595,
-          "d": 6629.3
-        },
-        "last": {
-          "t": 34.907991,
-          "d": 6629.3
-        }
-      },
-      "advancing": true,
-      "curtainGone": false,
-      "afterBack": "http://127.0.0.1:43191/holy/",
-      "homeShown": true,
-      "saved": {
-        "t": 35,
-        "duration": 6629
-      },
-      "resumedFrom": 31,
-      "resumeOk": true
     }
   ],
   "errors": [],
   "homeRows": [
-    "Continuar viendo",
-    "Recomendado para ti",
     "Películas recién llegadas",
     "Anime · nuevos episodios",
     "Doramas · nuevos capítulos",
-    "Series · últimos episodios",
-    "Porque te gusta: Drama",
-    "Porque te gusta: Acción"
+    "Acción",
+    "Comedia",
+    "Drama",
+    "Suspenso y thriller",
+    "Terror",
+    "Ciencia ficción",
+    "Romance",
+    "Animación",
+    "Aventura",
+    "Crimen",
+    "Fantasía",
+    "Misterio",
+    "Familia",
+    "Documentales",
+    "Bélicas",
+    "Anime shounen",
+    "Vida cotidiana",
+    "Sobrenatural",
+    "Anime para descubrir",
+    "Doramas para descubrir",
+    "Series · últimos episodios"
   ],
-  "bridgeErrors": [
-    {
-      "phase": "request",
-      "error": "{\"code\":-32602,\"message\":\"Invalid InterceptionId.\"}"
-    }
-  ]
+  "bridgeErrors": []
 }

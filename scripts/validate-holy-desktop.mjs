@@ -55,10 +55,13 @@ try {
   await waitFor(() => cdp.evaluate('document.querySelectorAll(".card").length > 10'), 20000);
   await sleep(1500); await shot('home');
 
-  const pick = (source, kind) => catalog.items.find(item => item.source === source && (!kind || item.kind === kind));
+  const pick = (source, kind) => catalog.items.find(item => item.source === source && !item.isShow && (!kind || item.kind === kind));
   const pickPlayable = source => catalog.items.find(item => item.source === source && !item.isShow);
   const samples = [pick('cuevana', 'movie'), pick('repelishd'), pick('jkanime'), pick('doramasmp4'), pick('cuevana', 'series'), pickPlayable('animeyt'), pickPlayable('doramasflix'), pickPlayable('asialiveaction')].filter(Boolean);
   const only = process.argv.find(arg => arg.startsWith('--only='))?.slice(7);
+  // --item=source:Title plays exactly that catalogue title (e.g. a copy with no servers, to see the fallback).
+  const wanted = process.argv.find(arg => arg.startsWith('--item='))?.slice(7);
+  if (wanted) { const [source, ...title] = wanted.split(':'); samples.splice(0, samples.length, catalog.items.find(item => item.source === source && item.title.toLowerCase() === title.join(':').toLowerCase())); }
   const watch = async (item, label, holdSeconds = 8) => {
     const sample = { label, source: item.source, title: item.title, page: item.url };
     report.samples.push(sample); save();
@@ -71,6 +74,8 @@ try {
     sample.frames = bridge.session?.frames;
     sample.servers = bridge.session?.servers || 0;
     sample.finalPlayer = bridge.session?.target?.split('?')[0];
+    sample.site = bridge.session?.site || '';
+    sample.key = bridge.session?.key || entryKey(item);
     sample.navigation = bridge.navigation.phase === 'error' ? bridge.navigation.error : 'ok';
     if (sample.phase === 'playing') {
       await waitFor(() => bridge.session?.position, 5000).catch(() => {});
@@ -86,15 +91,15 @@ try {
     await waitFor(() => cdp.evaluate('location.href').then(url => url === home), 15000).catch(() => {});
     sample.afterBack = (await cdp.evaluate('location.href').catch(error => 'error: ' + error.message)).split('?')[0];
     sample.homeShown = await waitFor(() => cdp.evaluate('document.querySelectorAll(".row").length > 0'), 10000).then(() => true, () => false);
-    const entry = library.get(entryKey(item));
+    const entry = library.get(sample.key || entryKey(item));
     sample.saved = entry ? { t: entry.t, duration: entry.duration } : null;
-    console.log(JSON.stringify({ label, phase: sample.phase, secondsToPlay: sample.secondsToPlay, advancing: sample.advancing, servers: sample.servers, player: sample.finalPlayer, saved: sample.saved }));
+    console.log(JSON.stringify({ label, phase: sample.phase, secondsToPlay: sample.secondsToPlay, advancing: sample.advancing, servers: sample.servers, site: sample.site, player: sample.finalPlayer, saved: sample.saved }));
     save();
     return sample;
   };
   for (const [index, item] of samples.entries()) {
     if (only && item.source !== only) continue;
-    try { await watch(item, `${index + 1}-${item.source}`, index === 0 ? 30 : 8); }
+    try { await watch(item, `${index + 1}-${item.source}`, index === 0 && !wanted ? 30 : 8); }
     catch (error) { report.errors.push(`${item.source}: ${error.message}`); save(); }
   }
   // Resume: the first title opens again at the saved second.

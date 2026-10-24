@@ -54,7 +54,8 @@ try {
     const items = jkanime.parseHome(jkHome);
     assert.equal(items.length, 1);
     assert.deepEqual([items[0].title, items[0].episode, items[0].show], ['One Piece', 1180, 'https://jkanime.net/one-piece/']);
-    assert.deepEqual(jkanime.parseDetail(jkShow), { genres: ['Acción', 'Shounen'], overview: 'Luffy "Sombrero de paja" quiere ser rey.' });
+    const show = jkanime.parseDetail(jkShow + '<li><span>Studios:</span> <a href="https://jkanime.net/studio/18/">Toei Animation</a> </li>');
+    assert.deepEqual([show.genres, show.overview, show.studios, show.country], [['Acción', 'Shounen'], 'Luffy "Sombrero de paja" quiere ser rey.', ['Toei Animation'], 'Japón']);
     assert.deepEqual(await jkanime.resolve(items[0], async () => jkEpisode), { url: 'https://jkanime.net/jkplayer/um?e=TOKEN&t=1', referrer: 'https://jkanime.net/one-piece/1180/', alternatives: [] });
   });
   await check('RePelisHD: lista, géneros, sinopsis sin repetir; Mixdrop latino directo y nunca servidores que cierran la app', async () => {
