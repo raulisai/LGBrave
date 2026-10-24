@@ -19,7 +19,8 @@ if (process.env.HOLY_TV !== '0') {
   try { release = acquireRuntimeLock('.local/holy-runtime.lock'); }
   catch (error) { console.error(error.message); process.exit(1); }
 }
-const library = new Library();
+// HOLY_LIBRARY: another history file (a preview that must not touch the owner's).
+const library = new Library(process.env.HOLY_LIBRARY || undefined);
 const catalog = new Catalog({ log: console.log }).start(console.log);
 const server = startServer({ catalog, library, status: () => ({ tv: runtime?.state || 'sin TV', playing: runtime?.bridge?.session ? { title: runtime.bridge.session.item.title, phase: runtime.bridge.session.phase } : null }) });
 // HOLY_TV=0 serves the home and catalogue only (desktop preview, or while another session uses the TV).

@@ -451,6 +451,52 @@ try {
     delete globalThis.window; delete globalThis.location; delete globalThis.addEventListener; delete globalThis.document;
   });
 
+  await check('Idioma: versiones del sitio, valor por sitio, vacío si no se sabe y copias en dos idiomas', async () => {
+    const { languageLabel } = await import('./holy/sources.mjs');
+    const { languageTag } = await import('../src/holy.js');
+    assert.equal(languageLabel(['Subtitulado', ' Latino ', 'Servidor Hyper']), 'Latino · Subtitulado');
+    assert.equal(languageLabel('Castellano'), 'Castellano');
+    assert.equal(languageLabel(['Calidad · CAM']), '');
+    assert.equal(languageLabel(undefined), '');
+    assert.equal(languageTag('Latino · Subtitulado'), 'LAT · SUB');
+    assert.equal(languageTag(''), '');
+    const tabs = '<ul class="tabs-video"><li class="tab-video-item"><div><div class="tab-item-name"> Latino <div>Calidad · CAM</div></div></div></li><li class="tab-video-item"><div><div class="tab-item-name"> Subtitulado <div>x</div></div></div></li></ul>';
+    assert.equal(cuevana.parseDetail(tabs, 'https://cuevana3c.pro/').language, 'Latino · Subtitulado');
+    assert.equal(cuevana.parseDetail('<p>nada</p>', 'https://cuevana3c.pro/').language, '');
+    // Per site: its usual version; Cuevana only what its page says; unknown (Asia Live Action) stays empty.
+    const films = [
+      { source: 'cuevana', kind: 'movie', title: 'Hope', url: 'https://c.example/hope', genres: [] },
+      { source: 'repelishd', kind: 'movie', title: 'Hope', url: 'https://r.example/hope', genres: [] },
+      { source: 'asialiveaction', kind: 'dorama', title: 'Raro', url: 'https://a.example/raro', genres: [] },
+      { source: 'jkanime', kind: 'anime', title: 'One Piece', url: 'https://jkanime.net/one-piece/', isShow: true, genres: [] }];
+    const catalog = new Catalog({ file: join(directory, 'lang.json'), detailsFile: join(directory, 'langd.json'), fetch: async () => '', connectors: [
+      { id: 'cuevana', name: 'Cuevana', site: 'https://c.example/', parseHome: () => [films[0]], parseDetail: () => ({ genres: ['Acción'], language: 'Latino · Subtitulado' }) },
+      { id: 'repelishd', name: 'RePelisHD', site: 'https://r.example/', language: 'Latino', parseHome: () => [films[1]], parseDetail: () => ({ genres: ['Acción'] }) },
+      { id: 'asialiveaction', name: 'Asia', site: 'https://a.example/', parseHome: () => [films[2]], parseDetail: () => ({ genres: [] }) },
+      { id: 'jkanime', name: 'JKAnime', site: 'https://jkanime.net/', language: 'Subtitulado', parseHome: () => [films[3]], parseDetail: () => ({ genres: [] }) }] });
+    await catalog.refresh();
+    assert.deepEqual(catalog.items.map(entry => [entry.source, entry.language]), [['cuevana', 'Latino · Subtitulado'], ['repelishd', 'Latino'], ['asialiveaction', ''], ['jkanime', 'Subtitulado']]);
+    // The same film on two sites in different languages is listed twice; the same language once.
+    let data = catalog.home(new Library(join(directory, 'lang-lib.json')));
+    assert.deepEqual(data.rows.find(row => row.id === 'movies').items.map(entry => [entry.source, entry.language]), [['cuevana', 'Latino · Subtitulado'], ['repelishd', 'Latino']]);
+    catalog.items[1].language = 'Latino · Subtitulado';
+    data = catalog.home(new Library(join(directory, 'lang-lib2.json')));
+    assert.equal(data.rows.find(row => row.id === 'movies').items.length, 1);
+    // Search results carry it too, and history remembers it.
+    const lib = new Library(join(directory, 'lang-lib3.json'));
+    assert.equal(lib.start(catalog.items[3]).language, 'Subtitulado');
+    catalog.stop();
+  });
+
+  await check('Botón azul: busca con la voz (código 406) desde cualquier pantalla', async () => {
+    const source = readFileSync(new URL('../src/App.svelte', import.meta.url), 'utf8');
+    assert.match(source, /code === 406\) \{ event\.preventDefault\(\); voiceSearch\(\)/);
+    assert.match(source, /SpeechRecognition/);
+    assert.match(source, /chooseSection\('buscar'\)/);
+    // The key is handled before the search field takes the letters, so it also works while typing.
+    assert.ok(source.indexOf('code === 406') < source.indexOf('While typing, letters'));
+  });
+
   await check('Servidor: rutas con datos malos responden sin caerse', async () => {
     const library = new Library(join(directory, 'server.json'));
     const catalog = new Catalog({ file: join(directory, 'sc.json'), detailsFile: join(directory, 'sd.json'), connectors: [], fetch: async () => '' });

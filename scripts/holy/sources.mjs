@@ -102,10 +102,19 @@ export function hoursAgo(value) {
   const unit = { minuto: 1 / 60, hora: 1, dia: 24, día: 24, semana: 168, mes: 720, año: 8760 }[match[2].toLowerCase()];
   return Number(match[1]) * unit;
 }
+// Audio/subtitle versions as one label («Latino · Subtitulado»); unknown words are ignored, none → ''.
+const VERSIONS = [['Latino', /latino|lat\b/i], ['Castellano', /castellano|espa[ñn]a\b|\bcast\b/i], ['Inglés', /ingl[ée]s|english|\beng\b/i], ['Subtitulado', /subtitulad|\bsub\b|sub\.? ?espa/i]];
+export function languageLabel(words) {
+  const found = new Set();
+  for (const word of [].concat(words || [])) for (const [name, pattern] of VERSIONS) if (pattern.test(String(word))) found.add(name);
+  return VERSIONS.map(([name]) => name).filter(name => found.has(name)).join(' · ');
+}
 export const item = fields => ({ genres: [], overview: '', backdrop: '', year: '', rating: '', badge: '', subtitle: '', ...fields });
 
 export const cuevana = {
   id: 'cuevana', name: 'Cuevana 3', site: 'https://cuevana3c.pro/', pageFallback: true,
+  // The tabs of the player list the versions the site has: Latino, Castellano, Subtitulado.
+  languages: html => languageLabel([...html.matchAll(/class="tab-item-name">\s*([^<]+)/g)].map(match => match[1])),
   parseHome(html, base = this.site) {
     const items = [];
     for (const block of between(html, '<section class="home-movies"', '</section').split('<li class="TPostMv').slice(1)) {
@@ -138,7 +147,8 @@ export const cuevana = {
       genres: [...html.matchAll(/genero=[^"]*" class="jump-link">([^<]*)/g)].map(match => genre(match[1])).filter(Boolean),
       overview: text(/<\/h1>\s*<p>([\s\S]*?)<\/p>/.exec(hero)?.[1]),
       backdrop: tmdb(absolute(attr(/backdrop-image"><figure><img[^>]*>/.exec(html)?.[0], 'src'), base), 'w1280'),
-      players: [...html.matchAll(/data-server="([^"]+)"/g)].map(match => decode(match[1]))
+      players: [...html.matchAll(/data-server="([^"]+)"/g)].map(match => decode(match[1])),
+      language: this.languages(html)
     };
   },
   async more(load) {
@@ -190,7 +200,7 @@ export const cuevana = {
 };
 
 export const jkanime = {
-  id: 'jkanime', name: 'JKAnime', site: 'https://jkanime.net/', pageFallback: true,
+  id: 'jkanime', name: 'JKAnime', site: 'https://jkanime.net/', pageFallback: true, language: 'Subtitulado',
   detailURL: entry => entry.show || entry.url,
   parseHome(html, base = this.site) {
     // Only the «Animes» tab: the page also carries donghua and adult tabs.
@@ -286,7 +296,7 @@ export const jkanime = {
 };
 
 export const repelishd = {
-  id: 'repelishd', name: 'RePelisHD', site: 'https://repelishd.blog/',
+  id: 'repelishd', name: 'RePelisHD', site: 'https://repelishd.blog/', language: 'Latino',
   parseHome(html, base = this.site) {
     const items = [];
     for (const heading of ['Últimas Películas Agregadas', 'Películas en Cines', 'Tendencias de hoy', 'Películas Recomendadas']) {
@@ -367,7 +377,7 @@ export function rankServers(sources) {
 }
 
 export const doramasmp4 = {
-  id: 'doramasmp4', name: 'DoramasMP4', site: 'https://doramasmp4.cyou/',
+  id: 'doramasmp4', name: 'DoramasMP4', site: 'https://doramasmp4.cyou/', language: 'Subtitulado',
   parseHome(html, base = this.site) {
     const items = [];
     for (const block of between(html, 'Últimos Estrenos', 'Más populares').split('<article class="bs"').slice(1)) {

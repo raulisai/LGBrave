@@ -1,6 +1,6 @@
 import { readFileSync, mkdirSync, writeFileSync, renameSync, existsSync, copyFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { fetchText, country } from './sources.mjs';
+import { fetchText, country, languageLabel } from './sources.mjs';
 import { CONNECTORS, connectorFor } from './connectors.mjs';
 import { entryKey, titleKey, nextEpisode } from './library.mjs';
 
@@ -131,7 +131,9 @@ export class Catalog {
     }
     const items = [...byURL.values()];
     // Round-robin across sites so every row gets genres even when the budget runs out.
-    const queues = lists.map(list => list.map(item => this.detailURL(item)).filter(url => url && !this.details.has(url)));
+    // A page read before versions were noted (no `language`) is read again when its site shows them.
+    const stale = (item, url) => !this.details.has(url) || (this.connector(item.source)?.languages && this.details.get(url).language === undefined);
+    const queues = lists.map(list => list.filter(item => stale(item, this.detailURL(item))).map(item => this.detailURL(item)).filter(Boolean));
     const longest = Math.max(0, ...queues.map(queue => queue.length));
     const missing = [...new Set(Array.from({ length: longest }, (_, index) => queues.map(queue => queue[index])).flat().filter(Boolean))].slice(0, DETAILS_PER_REFRESH);
     await pool(missing, 4, async url => {
@@ -140,7 +142,7 @@ export class Catalog {
       const detail = connector.detail ? await connector.detail(item, this.loader(connector)) : connector.parseDetail(await this.fetch(url), url);
       // Player addresses can carry tokens: never cache them, resolve at play time.
       this.details.set(url, { genres: detail?.genres || [], overview: detail?.overview || '', backdrop: detail?.backdrop || '', poster: detail?.poster || '', show: detail?.show || '',
-        studios: Array.isArray(detail?.studios) ? detail.studios : [], country: detail?.country || '' });
+        studios: Array.isArray(detail?.studios) ? detail.studios : [], country: detail?.country || '', language: languageLabel(detail?.language) });
     });
     while (this.details.size > MAX_DETAILS) this.details.delete(this.details.keys().next().value);
     this.items = items.map(item => this.enrich(item)).filter(item => !item.genres.some(name => ADULT.test(name)));
@@ -153,9 +155,11 @@ export class Catalog {
   enrich(item) {
     const detail = this.details.get(this.detailURL(item));
     const genres = Array.isArray(item.genres) ? item.genres : [];
-    if (!detail) return { ...item, genres };
+    // Audio/subtitles: what the title's page says, else its site's usual version; unknown stays empty.
+    const language = detail?.language || item.language || this.connector(item.source)?.language || '';
+    if (!detail) return { ...item, genres, language };
     return { ...item, genres: detail.genres?.length ? detail.genres : genres, overview: item.overview || detail.overview || '', backdrop: item.backdrop || detail.backdrop || '',
-      poster: item.poster || detail.poster || '', show: item.show || detail.show || '', studios: detail.studios?.length ? detail.studios : item.studios || [], country: country(item.country || detail.country || '') };
+      poster: item.poster || detail.poster || '', show: item.show || detail.show || '', studios: detail.studios?.length ? detail.studios : item.studios || [], country: country(item.country || detail.country || ''), language };
   }
   start(log = this.log) {
     const tick = () => this.refresh().catch(error => log('Holy: catálogo: ' + error.message));
@@ -336,7 +340,8 @@ export class Catalog {
     };
     const perSite = kind => interleave(...this.connectors.map(connector => by(kind).filter(item => item.source === connector.id)));
     // One card per title even when two sites carry it.
-    const once = list => { const titles = new Set(); return list.filter(item => !titles.has(titleKey(item)) && titles.add(titleKey(item))); };
+    // One card per title and version: the same film in Latino and Subtitulado (or on two sites with different languages) stays twice.
+    const once = list => { const seen = new Set(); return list.filter(item => { const key = titleKey(item) + '|' + (item.language || ''); return !seen.has(key) && seen.add(key); }); };
     const movies = once(perSite('movie'));
     const profile = library.profile();
     const personal = profile.signals >= 2;

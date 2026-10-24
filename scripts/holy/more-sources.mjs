@@ -199,7 +199,7 @@ export const asialiveaction = {
 // its Mytsumi player. Holy opens that player directly, never AnimeYT's own pages
 // (their hidden Cloudflare widgets are what closed the TV app).
 export const animeyt = {
-  id: 'animeyt', name: 'AnimeYT', site: 'https://animeyt.cc/',
+  id: 'animeyt', name: 'AnimeYT', site: 'https://animeyt.cc/', language: 'Subtitulado',
   async home(load) {
     const data = json(await load('https://animeyt.cc/wp-json/aniyt/v1/home/episodes'));
     if (!data?.html) throw Error('AnimeYT cambió su lista de episodios.');

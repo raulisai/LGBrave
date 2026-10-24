@@ -24,7 +24,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const out = 'evidence/holy/tv';
 mkdirSync(out, { recursive: true });
 const report = { capturedAt: new Date().toISOString(), scope: 'LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.', samples: [], errors: [] };
-const reportFile = join(out, process.argv.includes('--ending') ? 'ending-validation.json' : process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--episodes=')) ? 'episodes-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
+const reportFile = join(out, process.argv.includes('--voice') ? 'voice-validation.json' : process.argv.includes('--ending') ? 'ending-validation.json' : process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--episodes=')) ? 'episodes-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
 const save = () => writeFileSync(reportFile, JSON.stringify(report, null, 2));
 const memory = async () => (await ares('ares-device', '-r').catch(() => '')).split('\n').find(line => line.startsWith('memory'))?.trim();
 const libraryFile = '.local/holy-library-tvtest.json';
@@ -131,6 +131,21 @@ try {
       await bridge.command({ action: 'back' });
       sample.homeShown = await waitFor(() => cdp.evaluate('document.querySelectorAll(".row").length > 0'), 20000).then(() => true, () => false);
     }
+    console.log(JSON.stringify(sample));
+    save();
+    samples.length = 0;
+  }
+  // --voice: the blue key (406) from the home → «Buscar» with voice or the on-screen keyboard.
+  if (process.argv.includes('--voice')) {
+    const sample = { label: 'voice' };
+    report.samples.push(sample);
+    const press = async code => { for (const type of ['rawKeyDown', 'keyUp']) await cdp.call('Input.dispatchKeyEvent', { type, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code }); };
+    sample.speechApi = await cdp.evaluate(`({ standard: typeof window.SpeechRecognition, webkit: typeof window.webkitSpeechRecognition })`);
+    await press(406);
+    await sleep(2500);
+    sample.state = await cdp.evaluate(`({ section: [...document.querySelectorAll('nav button')].find(b => b.className.includes('current'))?.textContent.trim(), focus: document.activeElement?.tagName, placeholder: document.querySelector('.searchbar input')?.placeholder, toast: document.querySelector('.toast')?.textContent || '' })`);
+    await shot('voice');
+    sample.ok = sample.state.section === 'Buscar' && (sample.state.focus === 'INPUT' || /Escuchando/.test(sample.state.placeholder || ''));
     console.log(JSON.stringify(sample));
     save();
     samples.length = 0;

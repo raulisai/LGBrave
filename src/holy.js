@@ -10,6 +10,9 @@ export const SECTIONS = [
 ];
 const KINDS = { movie: 'Película', anime: 'Anime', dorama: 'Dorama', series: 'Serie' };
 export const kindLabel = kind => KINDS[kind] || '';
+// «Latino · Subtitulado» → «LAT · SUB» for the corner of a card; unknown stays empty.
+const SHORT = { Latino: 'LAT', Castellano: 'CAST', 'Inglés': 'ING', Subtitulado: 'SUB' };
+export const languageTag = language => String(language || '').split(' · ').map(name => SHORT[name]).filter(Boolean).join(' · ');
 
 // Episode rows read best as wide stills; films as posters.
 export function withLayout(row) {

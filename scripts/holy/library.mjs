@@ -86,7 +86,7 @@ export class Library {
     const entry = cleanEntry({
       ...(previous || {}), key, url: item.url, source: item.source, kind: item.kind, title: item.title, subtitle: item.subtitle || '',
       poster: item.poster || previous?.poster || '', backdrop: item.backdrop || previous?.backdrop || '', genres: item.genres?.length ? item.genres : previous?.genres || [],
-      studios: item.studios?.length ? item.studios : previous?.studios || [], country: item.country || previous?.country || '',
+      studios: item.studios?.length ? item.studios : previous?.studios || [], country: item.country || previous?.country || '', language: item.language || previous?.language || '',
       show: item.show || '', episode: item.episode || null, overview: item.overview || previous?.overview || '',
       year: item.year || previous?.year || '', rating: item.rating || previous?.rating || '',
       t: sameEpisode ? previous.t : 0, duration: sameEpisode ? previous.duration : 0, finished: sameEpisode ? previous.finished : false,

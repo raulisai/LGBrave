@@ -249,3 +249,11 @@ El iframe del reproductor de Cuevana corre en el mismo proceso en la TV (`player
 
 No probado: el control físico y ver hasta el final real (la prueba salta a los últimos segundos). En la captura del capítulo, el reproductor de JKAnime muestra su propio aviso «¿Deseas continuar donde te quedaste?» (recuerda pruebas anteriores); no impidió el siguiente capítulo.
 
+## Holy 0.6.0 · Idioma y botón azul (2026-10-24 00:15)
+
+**Idioma.** `languageLabel` (sources.mjs) normaliza lo que digan los sitios a «Latino · Castellano · Inglés · Subtitulado». Cuevana lista en su reproductor una pestaña por versión (`tab-item-name`), que `parseDetail` lee; los demás tienen un valor por sitio (`language` del conector). Lo que no se sabe queda vacío. `Catalog.enrich` lo pone en cada título (catálogo, búsqueda y «Continuar viendo»); las páginas de Cuevana leídas antes de esto se vuelven a leer una vez. En `home()`, `once()` deduplica por título **y** idioma: la misma película en Latino (RePelisHD) y Subtitulado (Cuevana) sale dos veces. UI: pastilla en la vista previa, etiqueta LAT/CAST/ING/SUB en la tarjeta.
+
+**Botón azul.** `keyCode 406` se atiende antes que el campo de búsqueda (sirve también escribiendo): `voiceSearch()` va a «Buscar»; con `SpeechRecognition`/`webkitSpeechRecognition` escucha en es-MX y busca lo que oye; sin ello enfoca el campo (teclado en pantalla con micrófono) y avisa. Pruebas en el navegador del Mac: reconocedor simulado «one piece» → «Mejores resultados» + episodios; sin reconocedor → aviso y campo enfocado. **No se sabe aún qué ofrece la TV**: `validate-holy-tv.mjs --voice` lo registra (`voice-validation.json`).
+
+Aparte: `HOLY_LIBRARY=<archivo>` hace que `npm run holy` use otro historial (la vista previa del navegador usa una copia; el real no se toca).
+

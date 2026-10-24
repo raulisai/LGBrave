@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte';
   import Icon from './Icon.svelte';
   import NavigationFeedback from './NavigationFeedback.svelte';
-  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, clock, remaining, matchTone, getJSON, bestResults, searchScore } from './holy.js';
+  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, languageTag, clock, remaining, matchTone, getJSON, bestResults, searchScore } from './holy.js';
 
   let apiBase = $state(/^https?:/.test(location.protocol) ? location.origin : '');
   let data = $state({ rows: [], items: [], sources: [], hero: null, updatedAt: 0 });
@@ -212,6 +212,32 @@
     // Focusing the field opens the TV's on-screen keyboard.
     tick().then(() => searchInput?.focus());
   }
+  // Blue key: straight to «Buscar» and voice. With the browser's speech recognition the TV listens
+  // and searches what it hears; without it the field opens its on-screen keyboard (its microphone,
+  // or the remote's, dictates into the field). The text stays editable afterwards.
+  let listening = $state(false);
+  let recognizer = null;
+  function voiceSearch() {
+    if (sheet || opening) return;
+    recognizer?.abort?.();
+    chooseSection('buscar');
+    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Speech) { notice = 'Di lo que buscas con el micrófono del teclado o el de tu control.'; return; }
+    try {
+      const heard = new Speech();
+      recognizer = heard;
+      heard.lang = 'es-MX'; heard.interimResults = false; heard.maxAlternatives = 1;
+      listening = true; notice = 'Escuchando… di el nombre de lo que buscas.';
+      heard.onresult = event => {
+        const text = String(event.results?.[0]?.[0]?.transcript || '').trim();
+        if (text) { query = text; notice = ''; search(); }
+      };
+      heard.onerror = () => { notice = 'No se pudo usar la voz. Escribe con el teclado o con su micrófono.'; searchInput?.focus(); };
+      heard.onend = () => { listening = false; if (recognizer === heard) recognizer = null; tick().then(() => searchInput?.focus()); };
+      searchInput?.blur();
+      heard.start();
+    } catch { listening = false; notice = 'No se pudo usar la voz. Escribe con el teclado o con su micrófono.'; searchInput?.focus(); }
+  }
   function leaveSearch(direction) {
     inSearch = false; searchInput?.blur();
     if (direction === 'up') { inNav = true; navIndex = SECTIONS.findIndex(entry => entry.id === 'buscar'); }
@@ -308,6 +334,7 @@
   function remote(event) {
     const code = event.keyCode;
     if (navigationError) return;
+    if (code === 406) { event.preventDefault(); voiceSearch(); return; }
     const direction = { 37: 'left', 38: 'up', 39: 'right', 40: 'down' }[code];
     // The rating sheet has the remote while open.
     if (sheet) {
@@ -416,7 +443,7 @@
   {#if section === 'buscar' && !episodesView}
     <form class="searchbar" class:focus={inSearch} onsubmit={event => { event.preventDefault(); search(); }}>
       <Icon name="search" size={34} stroke={2.4} />
-      <input bind:this={searchInput} bind:value={query} oninput={typed} onfocus={() => { inSearch = true; inNav = false; }} placeholder="Película, anime o dorama…" autocomplete="off" spellcheck="false" aria-label="Buscar en todos los sitios" />
+      <input bind:this={searchInput} bind:value={query} oninput={typed} onfocus={() => { inSearch = true; inNav = false; }} placeholder={listening ? 'Escuchando… di lo que buscas' : 'Película, anime o dorama…'} autocomplete="off" spellcheck="false" aria-label="Buscar en todos los sitios" />
     </form>
     {#if searchStatus.length}
       <p class="sources-status">
@@ -455,6 +482,7 @@
             {#if preview.match != null}<span class="match {matchTone(preview.match)}">{preview.match} % para ti</span>{/if}
             {#if preview.upNext}<span class="pill red">Siguiente</span>{/if}
             {#if preview.subtitle}<span class="strong">{preview.subtitle}</span>{/if}
+            {#if preview.language}<span class="pill lang">{preview.language}</span>{/if}
             {#if preview.year}<span>{preview.year}</span>{/if}
             {#if Number(preview.rating) > 0}<span>★ {preview.rating}</span>{/if}
             {#if preview.badge && !preview.subtitle?.includes(preview.badge.replace(/\D/g, '') || '§')}<span class="pill">{preview.badge}</span>{/if}
@@ -471,6 +499,7 @@
             {#if row?.id === 'continue' && !inNav}<span class="key red-key"></span>Quitar de la fila (2 veces){/if}
             {/if}
             {#if !preview.chip && !inNav}<span class="key green-key"></span>{preview.vote === 2 ? 'Te encanta' : preview.vote === 1 ? 'Te gusta' : preview.vote === -1 ? 'No es para ti' : 'Calificar'}{/if}
+            <span class="key blue-key"></span>Buscar con la voz
           </p>
           {#if preview.matchReason && preview.match != null}<p class="match-reason">{preview.matchReason}</p>{/if}
         </div>
@@ -489,7 +518,7 @@
           <p>Holy usa el catálogo de tus sitios. Vuelve cuando termine de leerlos.</p>
         {:else if section === 'buscar'}
           <h2>{searchStatus.length && searchStatus.every(entry => entry.state !== 'loading') ? 'Sin resultados para «' + query.trim() + '»' : searchStatus.length ? 'Buscando en todos tus sitios…' : 'Busca en todos tus sitios a la vez'}</h2>
-          <p>{data.sources.filter(source => source.search).map(source => source.name).join(', ') || 'Todos tus sitios'}. Los que respondan primero aparecen primero.</p>
+          <p>{data.sources.filter(source => source.search).map(source => source.name).join(', ') || 'Todos tus sitios'}. Los que respondan primero aparecen primero. Botón azul del control: buscar con la voz.</p>
         {:else}
           <h2>{notice || (apiBase ? 'Preparando tu catálogo…' : 'Conectando con el Mac…')}</h2>
           <p>Holy toma los estrenos de tus sitios favoritos y los ordena según lo que ves.</p>
@@ -521,6 +550,7 @@
                       <img src={img(shelf.layout === 'landscape' ? item.backdrop || item.poster : item.poster || item.backdrop)} alt="" loading={c < 8 ? 'eager' : 'lazy'} onerror={event => event.currentTarget.remove()} />
                     {/if}
                     {#if item.badge && shelf.layout !== 'landscape'}<span class="badge">{item.badge}</span>{/if}
+                    {#if languageTag(item.language)}<span class="lang-tag">{languageTag(item.language)}</span>{/if}
                     {#if shelf.layout === 'landscape'}
                       <span class="caption"><strong>{item.title}</strong>{#if item.subtitle}<small>{item.subtitle}</small>{/if}</span>
                     {/if}
@@ -654,6 +684,9 @@
   .match.high{color:#46d369}.match.mid{color:#f5c518}.match.low{color:#a3a3a3}
   .match-reason{margin:10px 0 0;font-size:20px;color:#b9e8c4}
   .match-badge{position:absolute;left:10px;bottom:12px;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.78);font-size:17px;font-weight:800}
+  .lang-tag{position:absolute;right:10px;bottom:12px;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.78);font-size:16px;font-weight:800;letter-spacing:.5px;color:#fff}
+  .landscape .lang-tag{bottom:auto;top:46px}
+  .pill.lang{background:rgba(255,255,255,.16);color:#fff}
   .match-badge.high{color:#46d369}.match-badge.mid{color:#f5c518}.match-badge.low{color:#bdbdbd}
   .landscape .match-badge{left:auto;right:10px;bottom:auto;top:10px}
   .vote{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.5)}
@@ -670,6 +703,7 @@
   .taste-keys .key{min-width:44px;height:30px;font-size:15px}
   .taste-keys .red-key,.taste-keys .yellow-key{min-width:28px;width:28px;margin-left:12px}
   .yellow-key{border-radius:50%;background:#f5c518}
+  .blue-key{min-width:34px;width:34px;border-radius:50%;background:#1f78e3;margin-left:18px}
   .green-key{min-width:34px;width:34px;border-radius:50%;background:#2e9e4f;margin-left:18px}
   .taste-keys .green-key{min-width:28px;width:28px;margin-left:12px}
   .taste-line{margin:8px 0 0;font-size:19px;color:#cfcfcf}
