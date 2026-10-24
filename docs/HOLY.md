@@ -215,5 +215,13 @@ El iframe del reproductor de Cuevana corre en el mismo proceso en la TV (`player
 | `catalog.mjs` `post` | Sesión de JKAnime reutilizada 5 min: lista de One Piece 5,6 → 4,0 s |
 | `catalog.mjs` `searchLocal` | «onepiece» encuentra «One Piece» |
 
-**Pruebas:** `npm test` (13 + 17; nueva comprobación «One Piece…»). En el navegador del Mac (Holy en el puerto 43191 sin TV, y el inicio del proceso que corre en 43190): «one piece» → «Mejores resultados» con One Piece de JKAnime primero y debajo 1180, 1179, 1178…; abrir la serie → 24 bloques empezando por 1131–1180. **Sin probar en la TV**: estaba reproduciendo un anime; no se reinició el proceso del Mac ni se reinstaló el IPK.
+**Pruebas:** `npm test` (13 + 17; nueva comprobación «One Piece…»). En el navegador del Mac (Holy en el puerto 43191 sin TV, y el inicio del proceso que corre en 43190): «one piece» → «Mejores resultados» con One Piece de JKAnime primero y debajo 1180, 1179, 1178…; abrir la serie → 24 bloques empezando por 1131–1180. Primero no se tocó la TV (estaba reproduciendo un anime).
+
+**TV (21:50, con permiso del usuario; `evidence/holy/tv/search-validation.json`)**: IPK 0.4.2 instalado. El primer intento tras instalar encontró la conexión cerrada (fallo conocido); el segundo:
+
+| Prueba | Resultado |
+| --- | --- |
+| Buscar «one piece» con las teclas del control | Sitios en 0,1–7,9 s; filas: «Mejores resultados», «One Piece · Episodios 1131–1180», En tu catálogo, Cuevana, JKAnime…; primer resultado «One Piece · Último episodio: 1180 · En emisión · Anime · JKAnime» |
+| OK en la serie | 24 bloques, el primero 1131–1180, foco en el 1180 → reproduce en 13,4 s, avanza, Atrás vuelve |
+| Cuevana «One Piece» 15x642 (serie) | Va a JKAnime 642, reproduce en 13,4 s, avanza |
 
