@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-23T20:32:21.244Z",
+  "capturedAt": "2026-10-24T01:47:02.044Z",
   "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
   "samples": [
     {
@@ -11,7 +11,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 14,
+      "secondsToPlay": 16.3,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -28,13 +28,15 @@
       ],
       "servers": 1,
       "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
+      "site": "",
+      "key": "https://cuevana3c.pro/pelicula/street-fighter-2",
       "position": {
         "first": {
-          "t": 85,
+          "t": 0.116666,
           "d": 6629.3
         },
         "last": {
-          "t": 107.866666,
+          "t": 131.766666,
           "d": 6629.3
         }
       },
@@ -42,7 +44,7 @@
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 108,
+        "t": 132,
         "duration": 6629
       }
     },
@@ -55,7 +57,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 13.4,
+      "secondsToPlay": 23.7,
       "frames": [
         {
           "url": "https://mxdrop.click/e/4ddr8x8rag7qzd",
@@ -74,17 +76,25 @@
           "top": false,
           "videos": 0,
           "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
+          "action": ""
         }
       ],
       "servers": 1,
       "finalPlayer": "https://mxdrop.to/e/4ddr8x8rag7qzd",
+      "site": "",
+      "key": "https://repelishd.blog/ver-pelicula/25954-oro-sin-ley-online-espanol.html",
       "position": {
         "first": {
-          "t": 0.322,
+          "t": 0.194,
           "d": 6809.845
         },
         "last": {
-          "t": 10.173,
+          "t": 10.238,
           "d": 6809.845
         }
       },
@@ -105,7 +115,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 10.1,
+      "secondsToPlay": 12.9,
       "frames": [
         {
           "url": "https://jkanime.net/jkplayer/um",
@@ -116,13 +126,15 @@
       ],
       "servers": 1,
       "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/tokyo-revengers-santen-sensou-hen/",
       "position": {
         "first": {
-          "t": 1.189167,
+          "t": 0.8555,
           "d": 1469.0510520000023
         },
         "last": {
-          "t": 11.199167,
+          "t": 10.8655,
           "d": 1469.0510520000023
         }
       },
@@ -143,7 +155,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 20.2,
+      "secondsToPlay": 15,
       "frames": [
         {
           "url": "https://ok.ru/videoembed/17414104222274",
@@ -154,17 +166,19 @@
       ],
       "servers": 1,
       "finalPlayer": "https://ok.ru/videoembed/17414104222274",
+      "site": "",
+      "key": "https://doramasmp4.cyou/cap/pls-love-capitulo-7/",
       "position": {
         "first": {
-          "t": 0.84,
+          "t": 11,
           "d": 2898.291
         },
         "last": {
-          "t": 10.6,
+          "t": 11,
           "d": 2898.291
         }
       },
-      "advancing": true,
+      "advancing": false,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
@@ -181,7 +195,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 9.6,
+      "secondsToPlay": 12.1,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -198,13 +212,15 @@
       ],
       "servers": 1,
       "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
+      "site": "",
+      "key": "https://cuevana3c.pro/serie/shaka-trust-no-one",
       "position": {
         "first": {
-          "t": 30,
+          "t": 40,
           "d": 2288.583
         },
         "last": {
-          "t": 39.75,
+          "t": 49,
           "d": 2288.583
         }
       },
@@ -212,7 +228,7 @@
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 40,
+        "t": 49,
         "duration": 2289
       }
     },
@@ -225,10 +241,10 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 6.6,
+      "secondsToPlay": 6,
       "frames": [
         {
-          "url": "https://ia801404.us.archive.org/8/items/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+          "url": "https://ia601404.us.archive.org/8/items/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
           "top": true,
           "videos": 1,
           "action": ""
@@ -236,13 +252,15 @@
       ],
       "servers": 1,
       "finalPlayer": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+      "site": "",
+      "key": "https://animeyt.cc/tv/one-piece-arco-de-elbaph/",
       "position": {
         "first": {
-          "t": 0.593,
+          "t": 0.415,
           "d": 1469.051
         },
         "last": {
-          "t": 10.634,
+          "t": 9.447,
           "d": 1469.051
         }
       },
@@ -250,46 +268,66 @@
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 11,
+        "t": 10,
         "duration": 1469
       }
     },
     {
       "label": "7-doramasflix",
       "source": "doramasflix",
-      "title": "Teach Me Touch Me",
-      "page": "https://doramasflix.io/capitulos/teach-me-touch-me-1x2",
-      "player": "https://voe.sx/e/s0ifvttbegby",
+      "title": "Fool in Love",
+      "page": "https://doramasflix.io/capitulos/fool-in-love-1x5",
+      "player": "https://streamtape.com/e/MPp9PRdKbqfmR1y",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 12.4,
+      "secondsToPlay": 12.3,
       "frames": [
         {
-          "url": "https://derricknationtop.com/e/s0ifvttbegby",
+          "url": "https://streamtape.com/e/MPp9PRdKbqfmR1y",
           "top": true,
           "videos": 1,
+          "action": ""
+        },
+        {
+          "url": "https://www.google.com/recaptcha/api2/anchor",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
+          "action": ""
+        },
+        {
+          "url": "about:blank",
+          "top": false,
+          "videos": 0,
           "action": ""
         }
       ],
       "servers": 1,
-      "finalPlayer": "https://voe.sx/e/s0ifvttbegby",
+      "finalPlayer": "https://streamtape.com/e/MPp9PRdKbqfmR1y",
+      "site": "",
+      "key": "https://doramasflix.io/doramas/fool-in-love",
       "position": {
         "first": {
-          "t": 0.13,
-          "d": 3311.792
+          "t": 0.157,
+          "d": 2762.686
         },
         "last": {
-          "t": 0.88,
-          "d": 3311.792
+          "t": 10.201,
+          "d": 2762.686
         }
       },
-      "advancing": false,
+      "advancing": true,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 1,
-        "duration": 3312
+        "t": 10,
+        "duration": 2763
       }
     },
     {
@@ -301,7 +339,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 23,
+      "secondsToPlay": 12.1,
       "frames": [
         {
           "url": "https://ok.ru/videoembed/17403982582082",
@@ -312,17 +350,19 @@
       ],
       "servers": 1,
       "finalPlayer": "https://ok.ru/videoembed/17403982582082",
+      "site": "",
+      "key": "https://asialiveaction.com/tv/305551t1-merry-berry-love-sub-espanol/",
       "position": {
         "first": {
-          "t": 1.113,
+          "t": 10,
           "d": 2790.891
         },
         "last": {
-          "t": 9.743,
+          "t": 10,
           "d": 2790.891
         }
       },
-      "advancing": true,
+      "advancing": false,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
@@ -339,7 +379,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 10.1,
+      "secondsToPlay": 12.2,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -356,13 +396,15 @@
       ],
       "servers": 1,
       "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
+      "site": "",
+      "key": "https://cuevana3c.pro/pelicula/street-fighter-2",
       "position": {
         "first": {
-          "t": 110.116666,
+          "t": 130,
           "d": 6629.3
         },
         "last": {
-          "t": 114.7,
+          "t": 133.4,
           "d": 6629.3
         }
       },
@@ -370,28 +412,21 @@
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 115,
+        "t": 133,
         "duration": 6629
       },
-      "resumedFrom": 108,
+      "resumedFrom": 132,
       "resumeOk": true
     }
   ],
   "errors": [],
   "before": {
-    "running": [
-      "com.lgapp.holy"
-    ],
-    "targets": [
-      {
-        "app": "com.lgapp.holy",
-        "url": "http://192.168.1.148:43190/holy/"
-      }
-    ],
-    "memory": "memory  1252016  945996  82844   64452   223176      184588"
+    "running": [],
+    "targets": [],
+    "memory": "memory  1252016  977560  39012   49196   235444      167352"
   },
   "after": {
-    "memory": "memory  1252016  831092  204536  47276   216388      315004"
+    "memory": "memory  1252016  836516  182568  48288   232932      308596"
   },
   "bridgeErrors": []
 }

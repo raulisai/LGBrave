@@ -1,31 +1,36 @@
 {
-  "capturedAt": "2026-10-23T20:38:46.888Z",
+  "capturedAt": "2026-10-24T01:54:34.030Z",
   "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
   "samples": [
     {
       "label": "taste",
+      "prompt": "¿Qué te pareció? · Street Fighter",
+      "promptVote": 2,
       "rows": [
+        "Géneros",
+        "Productoras y estudios",
+        "Países",
+        "Ya calificados",
         "Drama",
-        "Romance",
         "Comedia",
         "Acción",
+        "Romance",
         "Fantasía",
-        "Aventura",
         "Suspenso",
+        "Aventura",
         "Misterio",
-        "Shounen"
+        "Ciencia ficción",
+        "Terror"
       ],
-      "panel": "Tu perfil\n\n2 me gusta · 1 no me gusta · 0 vistos\n\nTerror\nRomance\nFantasía\nFamilia\n\nEvitas: Shoujo, Comedia\n\nOK\nMe gusta\nNo me gusta\nBorrar todo",
-      "marks": 3,
-      "badges": [
-        "52 %",
-        "49 %",
-        "54 %",
-        "52 %",
-        "54 %",
-        "53 %"
+      "prefs": [
+        "studio:J.C.Staff:1",
+        "genre:Comedia:-1",
+        "genre:Drama:1"
       ],
-      "votes": 3,
+      "sheet": "Calificar",
+      "loved": 2,
+      "panel": "Tu perfil\n\n2 me gusta (2 me encanta) · 0 no · 3 gustos elegidos · 1 vistos\n\nDrama\nAcción\nFantasía\n\nEvitas: Comedia\n\nProductoras: J.C.Staff\n\nOK\nMe gusta\nNo me gusta\nMe encanta…\nBorrar",
+      "marks": 2,
       "ok": true
     }
   ],
@@ -40,10 +45,10 @@
         "url": "http://192.168.1.148:43190/holy/"
       }
     ],
-    "memory": "memory  1252016  821152  174104  43212   256760      329780"
+    "memory": "memory  1252016  832856  179608  42692   239552      318396"
   },
   "after": {
-    "memory": "memory  1252016  893952  165144  41096   192920      259080"
+    "memory": "memory  1252016  882536  181416  40356   188064      270848"
   },
   "bridgeErrors": []
 }

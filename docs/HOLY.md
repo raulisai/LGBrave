@@ -151,3 +151,15 @@ Mac: `--item=doramasflix:Hope` → Cuevana, reproduce y avanza.
 
 ### Pruebas
 `npm test`: 13 + **15 de resistencia** (nuevas: gustos 2, catálogo grande, otro sitio, imágenes permitidas). `validate-holy-sites`: 7/7 y 0 imágenes rechazadas. Mac: 9/9 muestras + fallback de Hope. **TV: 0.4.0 instalada, sin validar todavía.**
+
+### Validación en la TV de 0.4.0 (2026-10-23 19:55–20:10)
+
+| Prueba | Resultado |
+| --- | --- |
+| 7 sitios + reanudar (`validation.json`) | 9/9 arrancan solas (Cuevana 16,3 s, RePelisHD 23,7, JKAnime 12,9, DoramasMP4 15, Cuevana ep. 12,1, AnimeYT 6, DoramasFlix 12,3, Asia Live Action 12,1, reanudar 12,2); la app nunca se cerró; Atrás siempre volvió; memoria libre 39 → 183 MB |
+| ok.ru sostenido 40 s (`okru-hold-validation.json`) | 10 → 50 s: avanza. Empezó en el segundo que ok.ru recordaba de pruebas anteriores y tardó en cargar desde ahí |
+| «Hope» de DoramasFlix (`fallback-validation.json`) | Sin servidores en DoramasFlix → «Probando en Cuevana 3…» → reproduce en 16,1 s, 0,8 → 15,9 s |
+| Gustos (`taste-validation.json`) | «¿Qué te pareció? · Street Fighter» → Me encanta; chips Drama ✓, Comedia ✗, J.C.Staff ✓; botón verde «Calificar» → Me encanta; panel «Evitas: Comedia · Productoras: J.C.Staff» |
+| Buscar (`search-validation.json`) | 7 sitios responden en 0,1–4,4 s (Asia Live Action sin buscador: 0); One Piece → 24 bloques → ep. 1180 en 10 s, avanza; Atrás |
+
+Hallazgo: el historial del usuario perdió «Identification» a las 19:02 (guardado desde la TV; la única vía es el botón rojo «Quitar de la fila», que actuaba con una pulsación). Ahora pide dos pulsaciones en 4 s.

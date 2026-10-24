@@ -102,8 +102,17 @@
     clearTimeout(openingTimer);
     openingTimer = setTimeout(() => { if (opening === item) { opening = null; notice = 'El sitio no respondió. Intenta de nuevo u otro título.'; } }, 40000);
   }
+  // Removing from «Continuar viendo» needs a second press of the red key, so one stray press loses nothing.
+  let forgetArmed = { key: '', at: 0 };
   function forget(item) {
     if (row?.id !== 'continue' || !item?.key) return;
+    if (forgetArmed.key !== item.key || Date.now() - forgetArmed.at > 4000) {
+      forgetArmed = { key: item.key, at: Date.now() };
+      notice = `Pulsa el botón rojo otra vez para quitar «${item.title}» de «Continuar viendo».`;
+      return;
+    }
+    forgetArmed = { key: '', at: 0 };
+    notice = `«${item.title}» se quitó de «Continuar viendo».`;
     command('forget', item.key);
     data.rows = data.rows.map(entry => entry.id === 'continue' ? { ...entry, items: entry.items.filter(other => other.key !== item.key) } : entry);
   }
@@ -418,7 +427,7 @@
             {:else}
             <span class="key">OK</span>{preview.isShow ? 'Ver episodios' : preview.resume ? 'Continuar desde ' + clock(preview.t) : preview.upNext ? 'Ver ' + (preview.subtitle || 'siguiente') : 'Reproducir'}
             {#if preview.resume && preview.duration}<span class="left">{remaining(preview.t, preview.duration)}</span>{/if}
-            {#if row?.id === 'continue' && !inNav}<span class="key red-key"></span>Quitar de la fila{/if}
+            {#if row?.id === 'continue' && !inNav}<span class="key red-key"></span>Quitar de la fila (2 veces){/if}
             {/if}
             {#if !preview.chip && !inNav}<span class="key green-key"></span>{preview.vote === 2 ? 'Te encanta' : preview.vote === 1 ? 'Te gusta' : preview.vote === -1 ? 'No es para ti' : 'Calificar'}{/if}
           </p>

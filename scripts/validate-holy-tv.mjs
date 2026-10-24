@@ -98,7 +98,9 @@ try {
     const keys = codes => cdp.evaluate(`(async()=>{for(const code of ${JSON.stringify(codes)}){window.dispatchEvent(new KeyboardEvent('keydown',{keyCode:code,bubbles:true}));await new Promise(r=>setTimeout(r,150))}})()`);
     const sample = { label: 'search', query: 'one piece' };
     report.samples.push(sample);
-    await keys([38, 39, 39, 39, 39, 39, 13]);
+    // To «Buscar» by its place in the menu (all the way left, then right).
+    const { SECTIONS } = await import('../src/holy.js');
+    await keys([38, ...Array(SECTIONS.length + 1).fill(37), ...Array(SECTIONS.findIndex(entry => entry.id === 'buscar')).fill(39), 13]);
     await sleep(500);
     const started = Date.now();
     await cdp.evaluate(`(()=>{const input=document.querySelector('.searchbar input');input.value='one piece';input.dispatchEvent(new Event('input',{bubbles:true}))})()`);
@@ -132,17 +134,34 @@ try {
     const keys = codes => cdp.evaluate(`(async()=>{for(const code of ${JSON.stringify(codes)}){window.dispatchEvent(new KeyboardEvent('keydown',{keyCode:code,bubbles:true}));await new Promise(r=>setTimeout(r,250))}})()`);
     const sample = { label: 'taste' };
     report.samples.push(sample);
-    await keys([38, 39, 39, 39, 39, 39, 13]);
+    // 1. «¿Qué te pareció?» after watching: a test title watched to 80 % (test profile only).
+    const watched = pick('cuevana', 'movie');
+    library.start(watched); library.progress(watched.url, watched.url, 2000, 2500);
+    await bridge.command({ action: 'home' });
+    sample.prompt = await waitFor(() => cdp.evaluate(`document.querySelector('.sheet-kicker')?.textContent + ' · ' + document.querySelector('.sheet h2')?.textContent`).then(text => (/Qué te pareció/.test(text) ? text : null)), 20000).catch(() => null);
+    await keys([39, 13]);
+    await sleep(2500);
+    sample.promptVote = library.voteOf(watched);
+    // 2. «Gustos»: chips (genre like, genre dislike, producer like), then a title: OK and green → «Me encanta».
+    const { SECTIONS } = await import('../src/holy.js');
+    await keys([38, ...Array(SECTIONS.length + 1).fill(37), ...Array(SECTIONS.findIndex(entry => entry.id === 'gustos')).fill(39), 13]);
     await waitFor(() => cdp.evaluate('document.querySelectorAll(".row .card").length > 5'), 20000).catch(() => {});
     sample.rows = await cdp.evaluate(`[...document.querySelectorAll('.row h2')].map(h=>h.textContent)`);
-    await keys([40, 13, 39, 13, 39, 403]);
-    await sleep(3000);
+    await keys([13, 39, 403, 40, 13]);
+    await sleep(2000);
+    sample.prefs = library.prefs.map(pref => `${pref.type}:${pref.name}:${pref.value}`);
+    const titleRow = sample.rows.findIndex(title => !['Géneros', 'Productoras y estudios', 'Países', 'Ya calificados'].includes(title));
+    const down = Math.max(0, titleRow - 1);
+    await keys([...Array(down).fill(40), 404]);
+    await sleep(800);
+    sample.sheet = await cdp.evaluate(`document.querySelector('.sheet-kicker')?.textContent`);
+    await keys([39, 13]);
+    await sleep(2500);
+    sample.loved = library.votes.filter(vote => vote.vote === 2).length;
     sample.panel = await cdp.evaluate(`document.querySelector('.taste')?.innerText`);
     sample.marks = await cdp.evaluate(`document.querySelectorAll('.vote').length`);
-    sample.badges = await cdp.evaluate(`[...document.querySelectorAll('.match-badge')].slice(0,6).map(b=>b.textContent)`);
-    sample.votes = library.votes.length;
     await shot('taste');
-    sample.ok = sample.votes === 3 && sample.marks >= 3 && /me gusta/.test(sample.panel || '');
+    sample.ok = /Qué te pareció/.test(sample.prompt || '') && sample.promptVote === 2 && sample.prefs.length === 3 && /Calificar/.test(sample.sheet || '') && sample.loved >= 2 && /gustos elegidos/.test(sample.panel || '');
     console.log(JSON.stringify(sample));
     library.clearVotes();
     save();

@@ -1,32 +1,38 @@
 {
-  "capturedAt": "2026-10-23T19:20:08.057Z",
+  "capturedAt": "2026-10-24T01:55:40.968Z",
   "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
   "samples": [
     {
       "label": "search",
       "query": "one piece",
-      "seconds": 2.063,
+      "seconds": 5.125,
       "status": [
-        "Tu catálogo · 0 · 0,2 s",
-        "Cuevana 3 · 23 · 0,4 s",
-        "RePelisHD · 16 · 0,7 s",
-        "JKAnime · 22 · 0,8 s",
-        "DoramasMP4 · 1 · 1,2 s"
+        "Tu catálogo · 3 · 0,1 s",
+        "Cuevana 3 · 23 · 0,7 s",
+        "RePelisHD · 16 · 1,4 s",
+        "JKAnime · 22 · 1,0 s",
+        "AnimeYT · 7 · 1,8 s",
+        "DoramasFlix · 10 · 4,4 s",
+        "DoramasMP4 · 1 · 1,5 s",
+        "Asia Live Action · 0 · 0,8 s"
       ],
       "rows": [
+        "En tu catálogo",
         "Cuevana 3 · 23",
-        "RePelisHD · 16",
         "JKAnime · 22",
-        "DoramasMP4 · 1"
+        "RePelisHD · 16",
+        "DoramasMP4 · 1",
+        "AnimeYT · 7",
+        "DoramasFlix · 10"
       ],
       "episodes": 24,
       "focus": "One Piece, Episodio 1180",
       "phase": "playing",
-      "secondsToPlay": 10.324,
+      "secondsToPlay": 10.039,
       "appAlive": true,
       "player": "https://jkanime.net/jkplayer/um",
       "position": {
-        "t": 8.237878,
+        "t": 8.321289,
         "d": 1415.6647179999986
       },
       "homeShown": true
@@ -35,18 +41,18 @@
   "errors": [],
   "before": {
     "running": [
-      "com.lgapp.lab"
+      "com.lgapp.holy"
     ],
     "targets": [
       {
-        "app": "com.lgapp.lab",
-        "url": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html"
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.148:43190/holy/"
       }
     ],
-    "memory": "memory  1252016  933556  62164   45980   256296      213300"
+    "memory": "memory  1252016  815724  242444  38672   193848      339476"
   },
   "after": {
-    "memory": "memory  1252016  856264  145812  44120   249940      292192"
+    "memory": "memory  1252016  825492  189420  51204   237104      316856"
   },
   "bridgeErrors": []
 }
