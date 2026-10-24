@@ -490,9 +490,15 @@ try {
 
   await check('Botón azul: busca con la voz (código 406) desde cualquier pantalla', async () => {
     const source = readFileSync(new URL('../src/App.svelte', import.meta.url), 'utf8');
-    assert.match(source, /code === 406\) \{ event\.preventDefault\(\); voiceSearch\(\)/);
+    assert.match(source, /code === 406\) \{ event\.preventDefault\(\); voiceRetry = 0; voiceSearch\(\)/);
     assert.match(source, /SpeechRecognition/);
-    assert.match(source, /chooseSection\('buscar'\)/);
+    // Voice never opens the on-screen keyboard first (it would hold the microphone), and a second press cancels.
+    const voice = source.slice(source.indexOf('function voiceSearch'), source.indexOf('function leaveSearch'));
+    assert.ok(voice.includes("section = 'buscar'") && !voice.includes("chooseSection('buscar')"));
+    assert.ok(voice.indexOf('focusSearch()') > voice.indexOf('if (!Speech)') && voice.split('focusSearch()').length === 2);
+    assert.match(voice, /if \(listening && !retrying\)/);
+    assert.match(voice, /El procesador de audio es inestable\. Vuelve a intentar\./);
+    assert.match(voice, /voiceRetry < 2/);
     // The key is handled before the search field takes the letters, so it also works while typing.
     assert.ok(source.indexOf('code === 406') < source.indexOf('While typing, letters'));
   });

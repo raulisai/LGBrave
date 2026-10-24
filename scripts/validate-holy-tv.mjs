@@ -141,14 +141,26 @@ try {
     report.samples.push(sample);
     const press = async code => { for (const type of ['rawKeyDown', 'keyUp']) await cdp.call('Input.dispatchKeyEvent', { type, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code }); };
     sample.speechApi = await cdp.evaluate(`({ standard: typeof window.SpeechRecognition, webkit: typeof window.webkitSpeechRecognition })`);
+    // Log what the recogniser does (events and errors) to tell «never listened» from «ended at once».
+    await cdp.evaluate(`(()=>{const Real=window.webkitSpeechRecognition;window.__voiceLog=[];const t0=Date.now();const at=()=>Date.now()-t0;
+      window.webkitSpeechRecognition=function(){const r=new Real();for(const n of ['start','audiostart','soundstart','speechstart','speechend','soundend','audioend','result','nomatch','error','end'])r.addEventListener(n,e=>window.__voiceLog.push(at()+' '+n+(e.error?':'+e.error+' '+(e.message||''):'')));const a=r.abort.bind(r);r.abort=()=>{window.__voiceLog.push(at()+' abort()');a()};const s=r.start.bind(r);r.start=()=>{window.__voiceLog.push(at()+' start()');s()};return r};})()`);
     await press(406);
     await sleep(2500);
     sample.state = await cdp.evaluate(`({ section: [...document.querySelectorAll('nav button')].find(b => b.className.includes('current'))?.textContent.trim(), focus: document.activeElement?.tagName, placeholder: document.querySelector('.searchbar input')?.placeholder, toast: document.querySelector('.toast')?.textContent || '' })`);
     await shot('voice');
-    // Does the recogniser really listen? (An error ends it at once with a notice; silence ends it after a few seconds.)
-    await sleep(9000);
-    sample.later = await cdp.evaluate(`({ placeholder: document.querySelector('.searchbar input')?.placeholder, toast: document.querySelector('.toast')?.textContent || '' })`);
-    sample.ok = sample.state.section === 'Buscar' && (sample.state.focus === 'INPUT' || /Escuchando/.test(sample.state.placeholder || ''));
+    // This TV often cuts a request off at once: Holy tries again twice by itself, then says the audio is unstable.
+    // A press while it listens cancels; the keyboard never opens.
+    const look = () => cdp.evaluate(`({ placeholder: document.querySelector('.searchbar input')?.placeholder, focus: document.activeElement?.tagName, toast: document.querySelector('.toast')?.textContent || '' })`);
+    sample.steps = [];
+    await sleep(5500);
+    sample.steps.push({ after: '7 s', ...(await look()) });
+    sample.log = await cdp.evaluate('window.__voiceLog');
+    await press(406); await sleep(1500);
+    const again = await look();
+    await press(406); await sleep(1500);
+    sample.steps.push({ after: 'cancelar', ...again }, { after: 'otra vez', ...(await look()) });
+    sample.ok = sample.state.section === 'Buscar' && sample.steps.every(step => step.focus !== 'INPUT') &&
+      (/Escuchando/.test(sample.steps[0].placeholder) || /audio es inestable|No te escuch/.test(sample.steps[0].toast));
     console.log(JSON.stringify(sample));
     save();
     samples.length = 0;
