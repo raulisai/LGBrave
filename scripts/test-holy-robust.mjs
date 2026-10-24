@@ -501,6 +501,13 @@ try {
     assert.match(voice, /voiceRetry < 2/);
     // The key is handled before the search field takes the letters, so it also works while typing.
     assert.ok(source.indexOf('code === 406') < source.indexOf('While typing, letters'));
+    // Magic Remote pointer: resting on a card lights it up without scrolling anything (scrolling
+    // slid the next card under the pointer, again and again); only a real move counts.
+    const hover = source.slice(source.indexOf('function hover('), source.indexOf('function unhover'));
+    assert.ok(!/columns|rowIndex/.test(hover) && /realPointer\(\)/.test(hover) && /setTimeout/.test(hover));
+    assert.match(source, /onmouseenter=\{\(\) => hover\(r, c\)\} onmouseleave=\{unhover\} onclick=\{\(\) => pick\(r, c, item\)\}/);
+    assert.match(source, /class="page-arrow right"/);
+    assert.match(source, /onwheel=\{wheel\}/);
     // The TV only says whether it reaches the Mac; the Doctor lives in the Mac's menu bar.
     assert.ok(!/doctor/i.test(source));
     assert.match(source, /Conectado al Mac/);

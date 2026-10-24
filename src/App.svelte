@@ -75,7 +75,25 @@
   const profile = $derived(taste || data.taste || null);
   const row = $derived(rows[Math.min(rowIndex, rows.length - 1)]);
   const column = $derived(row ? Math.min(columns[row.id] || 0, row.items.length - 1) : 0);
-  const focused = $derived(row?.items[column] || null);
+  // Magic Remote pointer: a card lights up when the pointer rests on it, but nothing scrolls
+  // under the pointer (scrolling made the next card slide beneath it, again and again).
+  // The arrows at a row's edges and the wheel move with the pointer; any key returns to
+  // the usual focus, starting from the card the pointer was on.
+  let pointing = $state(false);
+  let pointer = $state(null);
+  let pointerTimer;
+  let wheelAt = 0;
+  // Only a pointer that really moved counts: when rows slide under a still pointer the
+  // browser reports it «entering» other cards, which must not steal the focus from the keys.
+  let lastMove = { x: -1, y: -1, at: 0 };
+  let keyAt = 0;
+  function moved(event) {
+    if (Math.abs(event.clientX - lastMove.x) + Math.abs(event.clientY - lastMove.y) < 3) return;
+    lastMove = { x: event.clientX, y: event.clientY, at: Date.now() };
+  }
+  const realPointer = () => Date.now() - lastMove.at < 400 && Date.now() - keyAt > 500;
+  const pointed = $derived(pointing && pointer ? rows[pointer.r]?.items[pointer.c] || null : null);
+  const focused = $derived(pointed || row?.items[column] || null);
   let preview = $state(null);
   const sourceName = id => data.sources.find(source => source.id === id)?.name || '';
   const img = url => !url ? '' : apiBase ? `${apiBase}/holy-api/img?u=${encodeURIComponent(url)}` : url;
@@ -92,7 +110,7 @@
     const next = focused || episodesView?.show || (section === 'buscar' || section === 'gustos' ? null : data.hero);
     clearTimeout(previewTimer);
     if (!preview) { preview = next; return; }
-    previewTimer = setTimeout(() => { preview = next; }, 160);
+    previewTimer = setTimeout(() => { preview = next; }, pointing ? 260 : 160);
   });
   // Resting on a card for a moment gets it ready: the Mac finds the player (so OK starts
   // sooner) or, for a series, its episode list. Nothing is opened or shown.
@@ -397,6 +415,9 @@
     if (navigationError) return;
     if (code === 406) { event.preventDefault(); voiceRetry = 0; voiceSearch(); return; }
     const direction = { 37: 'left', 38: 'up', 39: 'right', 40: 'down' }[code];
+    keyAt = Date.now();
+    // First arrow after using the pointer only brings the focus back (on that card).
+    if (!sheet && leavePointer() && direction) { event.preventDefault(); return; }
     // The rating sheet has the remote while open.
     if (sheet) {
       event.preventDefault();
@@ -448,8 +469,40 @@
   }
   // Pointer (Magic Remote): hovering focuses, clicking plays.
   function hover(r, c) {
-    inNav = false; inSearch = false; rowIndex = r;
-    columns = { ...columns, [rows[r].id]: c };
+    if (!realPointer()) return;
+    pointing = true;
+    clearTimeout(pointerTimer);
+    // A short rest before lighting up: passing over cards does not flicker the preview.
+    pointerTimer = setTimeout(() => { pointer = { r, c }; inNav = false; }, 110);
+  }
+  function unhover() { clearTimeout(pointerTimer); }
+  function pick(r, c, item) { clearTimeout(pointerTimer); pointing = true; pointer = { r, c }; inNav = false; inSearch = false; choose(item); }
+  // Back to the keys: focus starts where the pointer was.
+  function leavePointer() {
+    if (!pointing) return false;
+    clearTimeout(pointerTimer);
+    if (pointer && rows[pointer.r]) {
+      const id = rows[pointer.r].id;
+      rowIndex = pointer.r;
+      columns = { ...columns, [id]: pointer.c };
+    }
+    pointing = false; pointer = null;
+    return true;
+  }
+  // Row edge arrows: a gentle page of five cards.
+  function page(shelf, step) {
+    const at = columns[shelf.id] || 0;
+    columns = { ...columns, [shelf.id]: Math.max(0, Math.min(Math.max(0, shelf.items.length - 5), at + step * 5)) };
+    pointer = null;
+  }
+  // The wheel moves between rows, one per notch.
+  function wheel(event) {
+    keyAt = 0;
+    if (!rows.length || Date.now() - wheelAt < 380 || Math.abs(event.deltaY) < 4) return;
+    wheelAt = Date.now();
+    event.preventDefault();
+    pointing = true; pointer = null; inNav = false; inSearch = false;
+    rowIndex = Math.max(0, Math.min(rows.length - 1, rowIndex + (event.deltaY > 0 ? 1 : -1)));
   }
 
   onMount(() => {
@@ -458,6 +511,9 @@
       if (cached?.rows) data = cached;
       if (!apiBase) apiBase = localStorage.getItem('holy-api') || '';
     } catch { /* No cache yet. */ }
+    // webOS says when the Magic Remote pointer hides (after a key): back to the keys' focus.
+    const cursor = event => { if (event.detail?.visibility === false) leavePointer(); };
+    document.addEventListener('cursorStateChange', cursor);
     load(); checkMac();
     const macTimer = setInterval(checkMac, 20000);
     const update = event => {
@@ -476,11 +532,11 @@
     const heartbeat = setInterval(() => { if (connected && Date.now() - lastHeartbeat > 6500) connected = false; }, 2000);
     window.addEventListener('lg-lab-status', update);
     window.__lumaReady = true;
-    return () => { window.removeEventListener('lg-lab-status', update); clearInterval(heartbeat); clearInterval(macTimer); clearTimeout(previewTimer); clearTimeout(openingTimer); };
+    return () => { window.removeEventListener('lg-lab-status', update); clearInterval(heartbeat); clearInterval(macTimer); document.removeEventListener('cursorStateChange', cursor); clearTimeout(previewTimer); clearTimeout(openingTimer); };
   });
 </script>
 
-<svelte:window onkeydown={remote} />
+<svelte:window onkeydown={remote} onmousemove={moved} />
 
 <div class="app">
   <div class="backdrop" aria-hidden="true">
@@ -569,7 +625,7 @@
     </section>
   {/if}
 
-  <main class="shelves" class:nav-focus={inNav}>
+  <main class="shelves" class:nav-focus={inNav} class:pointing onwheel={wheel}>
     {#if !rows.length}
       <div class="empty">
         {#if episodesView}
@@ -598,22 +654,26 @@
         <section class="row" class:landscape-row={shelf.layout === 'landscape'} class:chip-row={shelf.layout === 'chip'} class:active={!inNav && !inSearch && r === rowIndex} class:past={r < rowIndex} aria-label={shelf.title}>
           <h2>{shelf.title}</h2>
           <div class="track-clip">
+            {#if pointing && Math.abs(r - rowIndex) <= 2}
+              {#if (columns[shelf.id] || 0) > 0}<button class="page-arrow left" aria-label="Anteriores" onclick={() => page(shelf, -1)}>‹</button>{/if}
+              {#if (columns[shelf.id] || 0) < shelf.items.length - 5}<button class="page-arrow right" aria-label="Siguientes" onclick={() => page(shelf, 1)}>›</button>{/if}
+            {/if}
             <div class="track" style:transform={`translateX(${-(columns[shelf.id] || 0) * (cardWidth(shelf.layout) + 20)}px)`}>
               <!-- Only rows near the focus get cards: long episode lists stay light on the TV. -->
               {#each Math.abs(r - rowIndex) <= 2 ? shelf.items : [] as item, c (item.url + c)}
-                {@const active = !inNav && !inSearch && r === rowIndex && c === column}
+                {@const active = pointing ? pointer?.r === r && pointer?.c === c : !inNav && !inSearch && r === rowIndex && c === column}
                 {#if !near(shelf, c)}
                 <span class="card ghost" class:landscape={shelf.layout === 'landscape'} class:chip={item.chip} aria-hidden="true"></span>
                 {:else if item.chip}
                 <button class="card chip" class:focus={active} class:liked={item.value === 1} class:disliked={item.value === -1} aria-label={item.title + (item.value === 1 ? ', te gusta' : item.value === -1 ? ', no te gusta' : '')}
-                  onmouseenter={() => hover(r, c)} onclick={() => { hover(r, c); choose(item); }}>
+                  onmouseenter={() => hover(r, c)} onmouseleave={unhover} onclick={() => pick(r, c, item)}>
                   <span class="chip-art"><strong>{item.title}</strong><small>{item.count} títulos</small>
                     {#if item.value === 1}<span class="vote like"><Icon name="check" size={22} stroke={3} /></span>{:else if item.value === -1}<span class="vote dislike"><Icon name="minus" size={22} stroke={3} /></span>{/if}
                   </span>
                 </button>
                 {:else}
                 <button class="card" class:landscape={shelf.layout === 'landscape'} class:focus={active} aria-label={(item.title || '') + (item.subtitle ? ', ' + item.subtitle : '')}
-                  onmouseenter={() => hover(r, c)} onclick={() => { hover(r, c); choose(item); }}>
+                  onmouseenter={() => hover(r, c)} onmouseleave={unhover} onclick={() => pick(r, c, item)}>
                   <span class="art">
                     <span class="fallback">{item.title || ''}</span>
                     {#if shelf.layout === 'landscape' ? item.backdrop || item.poster : item.poster || item.backdrop}
@@ -737,7 +797,13 @@
   .row.past{opacity:0}
   .row h2{margin:0 0 4px 96px;font-size:30px;font-weight:700;color:#e5e5e5;letter-spacing:-.2px}
   .row.active h2{color:#fff}
-  .track-clip{overflow:hidden;padding:18px 0 24px 96px}
+  .track-clip{position:relative;overflow:hidden;padding:18px 0 24px 96px}
+  .page-arrow{position:absolute;top:18px;bottom:24px;z-index:4;width:84px;border:0;padding:0;font-size:84px;line-height:1;color:#fff;opacity:.55;transition:opacity .25s,background .25s}
+  .page-arrow.left{left:0;background:linear-gradient(90deg,rgba(0,0,0,.85),transparent)}
+  .page-arrow.right{right:0;background:linear-gradient(270deg,rgba(0,0,0,.85),transparent)}
+  .page-arrow:hover{opacity:1;background-color:rgba(0,0,0,.35)}
+  .shelves.pointing .track{transition:transform .7s cubic-bezier(.22,.61,.36,1)}
+  .shelves.pointing .card{transition:transform .35s cubic-bezier(.22,.61,.36,1)}
   .track{display:flex;gap:20px;min-height:345px;transition:transform .4s var(--ease);will-change:transform}
   .landscape-row .track{min-height:225px}
   .chip-row .track{min-height:120px}

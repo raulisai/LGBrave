@@ -277,3 +277,11 @@ Aparte: `HOLY_LIBRARY=<archivo>` hace que `npm run holy` use otro historial (la 
 
 **Pruebas.** `npm test`: 21 de resistencia (nuevas: inicio empaquetado ida y vuelta, ruta `?v=2` y plana; caché del reproductor, preparar una sola vez y nunca durante la reproducción, rescate con el mismo segundo y sin rescate si está en pausa; la TV sin Doctor). Navegador del Mac: 24 tarjetas reales y 57 cajas vacías, ~4 ms por pulsación. **TV pendiente**: `validate-holy-tv.mjs --speed` mide apertura, foco y arranque frío contra preparado.
 
+## Holy 0.7.1 · Puntero del Magic Remote (2026-10-24 02:40)
+
+**Problema del usuario:** con el puntero del control, al pasar por las películas «se mueve muy rápido y no me deja seleccionar». Causa: `onmouseenter` hacía lo mismo que una flecha (`rowIndex` y `columns`), y la fila se desplaza para dejar la tarjeta enfocada a la izquierda; con el puntero quieto, otra tarjeta quedaba debajo, el navegador avisaba «entró» y se repetía.
+
+**Cambio (`src/App.svelte`):** modo puntero separado del foco de teclas. `hover` solo guarda `pointer` tras 110 ms de reposo (sin tocar filas ni columnas); `focused` y la tarjeta iluminada salen de `pointer` mientras se usa el puntero; vista previa a 260 ms. Desplazamiento con puntero: botones «‹ ›» por fila (5 tarjetas, transición 0,7 s) y rueda (una fila por muesca, 380 ms entre muescas). Solo cuenta un movimiento real (`mousemove` con ≥ 3 px; nada en los 500 ms tras una tecla). Primera flecha tras el puntero: devuelve el foco a esa tarjeta; OK abre la tarjeta del puntero; `cursorStateChange` de webOS al ocultarse el puntero.
+
+**Pruebas:** navegador del Mac con ratón real a 1920×1080: pasar por 3 tarjetas no mueve la fila (`translateX(0px)`), se ilumina la del puntero y la vista previa cambia; «›» desplaza 5; la rueda baja una fila; con el ratón quieto, ↓ ↓ → mueven el foco por teclas sin que el puntero lo robe. `npm test` (comprobación de que `hover` no desplaza nada). **TV con el control: pendiente.**
+
