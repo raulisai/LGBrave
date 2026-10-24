@@ -182,7 +182,7 @@ Además, cualquier navegación de la página principal al inicio cierra la sesi�
 
 ### Pruebas en la TV (`evidence/holy/tv/`)
 
-Atrás se envió desde el Mac como la tecla 461 que webOS entrega a la app con `disableBackHistoryAPI`; el botón físico no se puede pulsar sin emparejar un control (pide permiso en la TV): lo confirma el usuario.
+Atrás se envió desde el Mac como la tecla 461 que webOS entrega a la app con `disableBackHistoryAPI`; el botón físico no se puede pulsar sin emparejar un control (pide permiso en la TV). **El usuario lo confirmó con el control físico** (2026-10-23): viendo una película, Atrás lo regresa al inicio de Holy.
 
 | Prueba | Resultado |
 | --- | --- |
