@@ -24,7 +24,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const out = 'evidence/holy/tv';
 mkdirSync(out, { recursive: true });
 const report = { capturedAt: new Date().toISOString(), scope: 'LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.', samples: [], errors: [] };
-const reportFile = join(out, process.argv.includes('--speed') ? 'speed-validation.json' : process.argv.includes('--voice') ? 'voice-validation.json' : process.argv.includes('--ending') ? 'ending-validation.json' : process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--episodes=')) ? 'episodes-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
+const reportFile = join(out, process.argv.includes('--series') ? 'series-validation.json' : process.argv.includes('--speed') ? 'speed-validation.json' : process.argv.includes('--voice') ? 'voice-validation.json' : process.argv.includes('--ending') ? 'ending-validation.json' : process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--episodes=')) ? 'episodes-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
 const save = () => writeFileSync(reportFile, JSON.stringify(report, null, 2));
 const memory = async () => (await ares('ares-device', '-r').catch(() => '')).split('\n').find(line => line.startsWith('memory'))?.trim();
 const libraryFile = '.local/holy-library-tvtest.json';
@@ -131,6 +131,37 @@ try {
       await bridge.command({ action: 'back' });
       sample.homeShown = await waitFor(() => cdp.evaluate('document.querySelectorAll(".row").length > 0'), 20000).then(() => true, () => false);
     }
+    console.log(JSON.stringify(sample));
+    save();
+    samples.length = 0;
+  }
+  // --series: pause an episode → panel (↑ → → OK = next episode); Back → that series' episode
+  // list on the episode; Back again → home. Keys sent like the remote's (Input.dispatchKeyEvent).
+  if (process.argv.includes('--series')) {
+    const sample = { label: 'series' };
+    report.samples.push(sample);
+    const key = async code => { for (const type of ['rawKeyDown', 'keyUp']) await cdp.call('Input.dispatchKeyEvent', { type, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code }); await sleep(500); };
+    const show = 'https://jkanime.net/one-piece/';
+    await bridge.command({ action: 'play', value: { source: 'jkanime', kind: 'anime', title: 'One Piece', show, url: show + '1177/', episode: 1177, subtitle: 'Episodio 1177', genres: [] } });
+    sample.started = await waitFor(() => bridge.session?.phase === 'playing', 90000).then(() => true, () => false);
+    await sleep(5000);
+    const pause = `(()=>{const deep=(r,o=[])=>{o.push(...r.querySelectorAll('video'));for(const n of r.querySelectorAll('*'))if(n.shadowRoot)deep(n.shadowRoot,o);return o};const v=deep(document).filter(v=>v.duration>60)[0];if(!v)return false;v.pause();return true})()`;
+    for (const { id, sessionId } of await bridge.playerContexts()) if (await bridge.evaluateWithGesture(pause, id, sessionId).catch(() => false) === true) { sample.paused = true; break; }
+    sample.panel = await waitFor(async () => bridge.session?.card?.kind === 'pause' && await cdp.evaluate(`!!document.querySelector('holy-end')`), 20000).then(() => true, () => false);
+    sample.options = bridge.session?.card?.options.map(option => option.action + (option.item ? ' ' + option.item.episode : ''));
+    await shot('series-pause').catch(() => {});
+    await key(38); await key(39); await key(39);
+    sample.focus = bridge.session?.card?.focus;
+    await key(13);
+    sample.next = await waitFor(() => bridge.session?.item?.episode === 1178 && bridge.session.phase === 'playing', 90000).then(() => true, () => false);
+    await sleep(4000);
+    await key(461);
+    sample.list = await waitFor(() => cdp.evaluate(`(document.querySelector('.row h2')?.textContent || '').startsWith('Episodios') && (document.querySelector('.card.focus')?.getAttribute('aria-label') || '')`), 30000).catch(() => '');
+    sample.address = await cdp.evaluate('location.href').catch(() => '');
+    await shot('series-episodes').catch(() => {});
+    await key(461);
+    sample.home = await waitFor(() => cdp.evaluate(`!(document.querySelector('.row h2')?.textContent || '').startsWith('Episodios') && document.querySelectorAll('.row').length > 3`), 10000).then(() => true, () => false);
+    sample.ok = sample.started && sample.panel && sample.focus === 2 && sample.next && /Episodio 1178/.test(sample.list || '') && sample.home && !/#episodes/.test(sample.address);
     console.log(JSON.stringify(sample));
     save();
     samples.length = 0;

@@ -11,6 +11,9 @@ const START_TIMEOUT = 45000;
 // A server that shows nothing playable this long is swapped for the title's next one.
 const SERVER_TIMEOUT = 28000;
 const SAVE_EVERY = 10000;
+// An episode paused this long shows the pause panel.
+const PAUSE_DELAY = 1200;
+const episodic = item => !!item && item.kind !== 'movie' && !!item.show;
 // A server that does not even show a video player is given up sooner than one that is loading.
 const EMPTY_TIMEOUT = 15000;
 // After this many failed servers of one site, the same title on another site comes first.
@@ -38,6 +41,7 @@ export class HolyBridge extends BrowserBridge {
     this.startTimeout = options.startTimeout || START_TIMEOUT;
     this.stallTimeout = options.stallTimeout || 20000;
     this.nextDelay = options.nextDelay || NEXT_DELAY;
+    this.pauseDelay = options.pauseDelay || PAUSE_DELAY;
     this.endStall = options.endStall || END_STALL;
     this.midStall = options.midStall || MID_STALL;
     this.remoteContexts = new Set();
@@ -127,11 +131,13 @@ export class HolyBridge extends BrowserBridge {
     if (action === 'prepare') { this.prepare(value); return; }
     if (action === 'refresh-catalog') { this.catalog.refresh().then(() => this.status()).catch(() => {}); return this.status(); }
     if (action === 'forget') { this.library.remove(String(value ?? '')); return this.status(); }
-    // Holy has no tabs or page history: Back from any player goes home, and on the home it does nothing.
+    // Holy has no tabs or page history: Back from an episode goes to its series' episode list,
+    // from anything else home; on the home it does nothing.
     if (action === 'back' || action === 'forward') {
       const current = this.frames.get(this.mainFrame) || '';
       const onHome = current.startsWith(home) || current === packagedHome;
       if (action === 'forward' || (onHome && !this.session)) return;
+      if (this.session && episodic(this.session.item)) return this.toEpisodes(this.session.item);
       command = { action: 'home' };
     }
     if (command.action === 'home') {
@@ -139,6 +145,16 @@ export class HolyBridge extends BrowserBridge {
       return super.command({ action: 'home' });
     }
     return super.command(command);
+  }
+  // Home, opening the series' episode list on that episode (the home reads it from the address).
+  async toEpisodes(item) {
+    await this.endSession();
+    const show = { source: item.source, kind: item.kind, title: item.title, show: item.show, url: item.show, isShow: true,
+      poster: item.poster || '', backdrop: item.backdrop || '', genres: (item.genres || []).slice(0, 4), episode: item.episode || null, at: item.url };
+    const url = home + '#episodes=' + encodeURIComponent(JSON.stringify(show));
+    this.showSettings = false;
+    this.beginNavigation(url); await this.status();
+    await this.cdp.call('Page.navigate', { url });
   }
   // The owner rests on a card: find its player now (JKAnime copy first for anime), so OK
   // opens it at once. Runs in the background, one at a time, never for the same title twice
@@ -350,9 +366,19 @@ export class HolyBridge extends BrowserBridge {
         if (!tail) session.endStall = null;
         else if (!session.endStall || best.t > session.endStall.t + 0.5) session.endStall = { t: best.t, since: Date.now() };
         const ended = best.ended || best.t >= best.d - END_MARGIN || (tail && Date.now() - session.endStall.since > this.endStall);
-        if (ended && !session.card) await this.showEndCard(session);
+        if (ended && session.card?.kind !== 'end') await this.showEndCard(session);
         // Rewound from the card: back to watching.
-        else if (session.card && !ended && best.t < best.d - 15) await this.hideEndCard(session);
+        else if (session.card?.kind === 'end' && !ended && best.t < best.d - 15) await this.hideEndCard(session);
+        // An episode paused for a moment (not at its end): the pause panel; playing again hides it.
+        if (!ended && episodic(session.item)) {
+          if (best.paused && best.t > 1) {
+            session.pausedSince ||= Date.now();
+            if (!session.card && Date.now() - session.pausedSince > this.pauseDelay) await this.showPauseCard(session);
+          } else {
+            session.pausedSince = 0;
+            if (session.card?.kind === 'pause') await this.hideEndCard(session);
+          }
+        }
       }
       // In the middle of the video, a server that stops advancing (and was not paused) is
       // swapped for the next one or another site, resuming at the same second.
@@ -429,7 +455,7 @@ export class HolyBridge extends BrowserBridge {
   // The end of a title: an episode offers the next one and plays it after a countdown
   // unless the owner moves away; a film offers «Volver al inicio» and similar films.
   async showEndCard(session) {
-    const card = session.card = { focus: 0, options: [{ action: 'home' }], timer: null };
+    const card = session.card = { kind: 'end', focus: 0, options: [{ action: 'home' }], timer: null };
     const item = session.item;
     let data;
     if (item.kind !== 'movie' && (item.show || item.episode)) {
@@ -438,10 +464,10 @@ export class HolyBridge extends BrowserBridge {
       if (this.session !== session || session.card !== card) return;
       if (next?.url) {
         const nextItem = { ...item, url: next.url, episode: next.episode || null, subtitle: next.label, backdrop: next.still || item.backdrop || '', isShow: false };
-        card.options = [{ action: 'play', item: nextItem }, { action: 'home' }];
+        card.options = [{ action: 'play', item: nextItem }, { action: 'episodes' }];
         card.timer = setTimeout(() => this.chooseCard(session, 0).catch(error => this.errors.push({ phase: 'next', error: error.message })), this.nextDelay);
         data = { mode: 'next', title: item.title, next: next.label, image: next.still || item.backdrop || item.poster || '', seconds: Math.round(this.nextDelay / 1000) };
-      } else data = { mode: 'last', title: item.title };
+      } else { card.options = [{ action: 'episodes' }]; data = { mode: 'last', title: item.title }; }
     } else {
       const similar = this.catalog.similar?.(item, this.library, 4) || [];
       card.options.push(...similar.map(other => ({ action: 'play', item: other })));
@@ -449,6 +475,29 @@ export class HolyBridge extends BrowserBridge {
     }
     await this.curtain(endCardSource(data));
     await this.curtain(cardFlagSource(true));
+  }
+  // Paused episode: a panel at the top with «Seguir viendo», the previous and next episodes
+  // and the episode list. It goes away when the video plays again.
+  async showPauseCard(session) {
+    const card = session.card = { kind: 'pause', focus: -1, options: [{ action: 'resume' }], timer: null };
+    const item = session.item;
+    const [previous, next] = await Promise.all([
+      this.catalog.previous ? this.catalog.previous(item).catch(() => null) : null,
+      Promise.resolve(session.next || (this.catalog.next ? this.catalog.next(item) : null)).catch(() => null)
+    ]);
+    if (this.session !== session || session.card !== card) return;
+    const episode = (other, entry) => ({ ...item, url: entry.url, episode: entry.episode || null, subtitle: entry.label, backdrop: entry.still || item.backdrop || '', isShow: false });
+    const buttons = [{ label: 'Seguir viendo', icon: 'play' }];
+    if (previous?.url) { card.options.push({ action: 'play', item: episode(item, previous) }); buttons.push({ label: 'Anterior', detail: previous.label, icon: 'previous' }); }
+    if (next?.url) { card.options.push({ action: 'play', item: episode(item, next) }); buttons.push({ label: 'Siguiente', detail: next.label, icon: 'next' }); }
+    card.options.push({ action: 'episodes' }); buttons.push({ label: 'Capítulos', icon: 'list' });
+    await this.curtain(endCardSource({ mode: 'pause', title: item.title, next: item.subtitle || (item.episode ? 'Episodio ' + item.episode : ''), buttons }));
+    await this.curtain(cardFlagSource('menu'));
+  }
+  async resumeVideo(session) {
+    await this.hideEndCard(session);
+    const play = `(()=>{const deep=(r,o=[])=>{o.push(...r.querySelectorAll('video'));for(const n of r.querySelectorAll('*'))if(n.shadowRoot)deep(n.shadowRoot,o);return o};const v=deep(document).filter(v=>Number.isFinite(v.duration)&&v.duration>60).sort((a,b)=>b.duration-a.duration)[0];if(!v)return false;const p=v.play();if(p&&p.catch)p.catch(()=>{});return true})()`;
+    for (const { id, sessionId } of await this.playerContexts()) if (await this.evaluateWithGesture(play, id, sessionId).catch(() => false) === true) break;
   }
   async hideEndCard(session) {
     clearTimeout(session.card?.timer);
@@ -461,6 +510,13 @@ export class HolyBridge extends BrowserBridge {
     const card = session?.card;
     if (!card) return;
     if (Number.isInteger(command.choose)) return this.chooseCard(session, command.choose);
+    // The pause panel starts unfocused (OK and the arrows stay with the player): ↑ enters it,
+    // ↓ leaves it; inside, ← → move and OK chooses.
+    if (card.kind === 'pause') {
+      if (card.focus < 0) { if (command.key === 38) { card.focus = 0; await this.curtain(cardFlagSource(true)); await this.curtain('window.__holyEnd&&__holyEnd.focus(0,true)'); } return; }
+      if (command.key === 40) { card.focus = -1; await this.curtain(cardFlagSource('menu')); await this.curtain('window.__holyEnd&&__holyEnd.focus(-1,true)'); return; }
+      if (command.key === 38) return;
+    }
     if (command.key === 13) return this.chooseCard(session, card.focus);
     const step = { 37: -1, 38: -1, 39: 1, 40: 1 }[command.key];
     if (!step) return;
@@ -477,6 +533,8 @@ export class HolyBridge extends BrowserBridge {
     session.card = null;
     await this.curtain(cardFlagSource(false));
     if (option.action === 'play') return this.play(option.item);
+    if (option.action === 'resume') return this.resumeVideo(session);
+    if (option.action === 'episodes' && session.item?.show) return this.toEpisodes(session.item);
     return this.command({ action: 'home' });
   }
   // Saves the last position before leaving the player.

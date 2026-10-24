@@ -71,8 +71,10 @@ export function holyRemote(homes = [], home = '', world = '') {
   });
   addEventListener('keydown', event => {
     const root = document.documentElement;
-    // While Holy's end card is up, OK and the arrows belong to it (not to the player).
-    const card = root?.dataset.holyCard === '1' && [13, 37, 38, 39, 40].includes(event.keyCode);
+    // While Holy's end card is up, OK and the arrows belong to it (not to the player). The pause
+    // panel («menu») only takes ↑ until the owner enters it.
+    const flag = root?.dataset.holyCard;
+    const card = (flag === '1' && [13, 37, 38, 39, 40].includes(event.keyCode)) || (flag === 'menu' && event.keyCode === 38);
     if (event.keyCode !== 461 && event.keyCode !== 27 && !card) return;
     const [owner, at] = String(root?.dataset.holyBridge || '').split('|');
     const live = Date.now() - Number(at || 0) < 6000;
@@ -126,9 +128,17 @@ export function holyEndCard(data) {
     .home{width:230px;height:412px;flex:none;border-radius:10px;border:4px solid transparent;background:rgba(109,109,110,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-size:26px;font-weight:700;cursor:pointer;text-align:center;transition:transform .15s}
     .home .i{font-size:64px;line-height:1}
     .home.f{background:#fff;color:#000;transform:scale(1.06)}
+    .shade.top{background:linear-gradient(180deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.55) 30%,transparent 55%)}
+    .p.top{top:70px;bottom:auto}
+    h1.small{font-size:46px}
+    .p.top .row{align-items:stretch}
+    .p.top .b{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;height:96px;min-width:230px}
+    .p.top .b small{position:relative;font-size:20px;font-weight:600;opacity:.75}
+    .hint{margin:18px 0 0;font-size:21px;color:#bdbdbd}
     @keyframes in{from{opacity:0}to{opacity:1}}`;
   const wrap = make('div', 'w');
   const panel = make('div', 'p');
+  const shade = make('div', 'shade');
   const send = index => { try { window.__lgLabCommand?.(JSON.stringify({ action: 'card', choose: index })); } catch { /* Remote keys still work. */ } };
   const options = [];
   const option = (node, index) => { node.addEventListener('click', () => send(index)); options[index] = node; return node; };
@@ -143,16 +153,30 @@ export function holyEndCard(data) {
     const actions = make('div', 'row');
     actions.style.flexDirection = 'column'; actions.style.alignItems = 'flex-start';
     actions.append(play, option(make('button', 'b'), 1));
-    options[1].append(make('span', '', 'Volver al inicio'));
+    options[1].append(make('span', '', 'Ver capítulos'));
     next.append(image(make('div', 'thumb'), data.image), actions);
     panel.append(next);
     // The bar fills in the time the Mac waits before playing the next episode.
     requestAnimationFrame(() => { fill.style.transition = `width ${left}s linear`; fill.style.width = '100%'; });
     timer = setInterval(() => { left = Math.max(0, left - 1); label.textContent = `▶  Ver ahora · ${left}`; if (!left) clearInterval(timer); }, 1000);
+  } else if (data.mode === 'pause') {
+    // At the top, over the paused video: the player's own controls stay free at the bottom.
+    shade.className = 'shade top';
+    panel.className = 'p top';
+    panel.append(make('div', 'k', 'EN PAUSA'), make('h1', 'small', data.title || ''), make('p', 'sub', data.next || ''));
+    const row = make('div', 'row');
+    const glyph = { play: '▶', previous: '⏮', next: '⏭', list: '☰' };
+    (data.buttons || []).forEach((entry, index) => {
+      const button = option(make('button', 'b'), index);
+      button.append(make('span', '', `${glyph[entry.icon] || ''}  ${entry.label}`));
+      if (entry.detail) button.append(make('small', '', entry.detail));
+      row.append(button);
+    });
+    panel.append(row, make('p', 'hint', '↑ para elegir · ↓ para volver al vídeo'));
   } else if (data.mode === 'last') {
     panel.append(make('div', 'k', 'TERMINASTE'), make('h1', '', data.title || ''), make('p', 'sub', 'Es el último capítulo disponible por ahora.'));
-    const home = option(make('button', 'b'), 0); home.append(make('span', '', 'Volver al inicio'));
-    panel.append(home);
+    const back = option(make('button', 'b'), 0); back.append(make('span', '', data.episodes === false ? 'Volver al inicio' : 'Ver capítulos'));
+    panel.append(back);
   } else {
     panel.append(make('div', 'k', 'TERMINASTE'), make('h1', '', data.title || ''), make('p', 'sub', (data.options || []).length ? '¿Vuelves al inicio o ves algo parecido?' : ''));
     const row = make('div', 'row');
@@ -168,10 +192,11 @@ export function holyEndCard(data) {
   }
   const focus = (index, stopped) => {
     options.forEach((node, at) => node.classList.toggle('f', at === index));
+    if (data.mode === 'pause') return;
     if (stopped && fill) { clearInterval(timer); fill.style.transition = 'none'; fill.style.width = '0'; label.textContent = '▶  Ver ahora'; }
   };
-  focus(0, false);
-  wrap.append(make('div', 'shade'), panel); root.append(style, wrap);
+  focus(data.mode === 'pause' ? -1 : 0, false);
+  wrap.append(shade, panel); root.append(style, wrap);
   document.documentElement.append(host);
   window.__holyEnd = { focus, remove() { clearInterval(timer); host.remove(); } };
   return true;
@@ -274,5 +299,6 @@ export const autoplaySource = options => `(${holyAutoplay.toString()})(${JSON.st
 export const theaterSource = `(${holyTheater.toString()})()`;
 export const endCardSource = data => `(${holyEndCard.toString()})(${JSON.stringify(data)})`;
 // Marks every frame while the end card is up, so OK and the arrows reach it from the player's iframe.
-export const cardFlagSource = on => (on ? "document.documentElement&&(document.documentElement.dataset.holyCard='1')"
+// true: the card takes OK and the arrows; 'menu': only ↑ (pause panel not entered); false: gone.
+export const cardFlagSource = value => (value ? `document.documentElement&&(document.documentElement.dataset.holyCard=${JSON.stringify(value === 'menu' ? 'menu' : '1')})`
   : 'document.documentElement&&delete document.documentElement.dataset.holyCard,window.top===window&&window.__holyEnd&&window.__holyEnd.remove()');

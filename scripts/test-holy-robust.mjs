@@ -372,12 +372,12 @@ try {
     // An episode ends: «Siguiente capítulo» and, after the countdown, the next one plays.
     await playTo({ source: 'jkanime', kind: 'anime', title: 'One Piece', show, url: show + '1178/', episode: 1178 }, { t: 1397 });
     assert.ok(drawn.some(expression => expression.includes('holyEndCard') && expression.includes('"mode":"next"') && expression.includes('Episodio 1179')));
-    assert.ok(drawn.some(expression => expression.includes("holyCard='1'")));
+    assert.ok(drawn.some(expression => expression.includes('holyCard="1"')));
     await new Promise(resolve => setTimeout(resolve, 120));
     assert.equal(navigated(), 'https://p.example/play?u=' + encodeURIComponent(show + '1179/'));
     assert.equal(bridge.session.item.episode, 1179);
     assert.equal(library.get(show)?.url, show + '1179/');
-    // The owner moves to «Volver al inicio»: no countdown; OK goes home.
+    // The owner moves to «Ver capítulos»: no countdown; OK goes to the series' episode list.
     await playTo(bridge.session.item, { ended: true, t: 1400, paused: true });
     await bridge.event({ method: 'Runtime.bindingCalled', params: { name: '__lgLabCommand', executionContextId: 9, payload: JSON.stringify({ action: 'card', key: 39 }) } });
     assert.ok(drawn.at(-1).includes('__holyEnd.focus(1,true)'));
@@ -385,7 +385,7 @@ try {
     assert.equal(bridge.session.item.episode, 1179);
     await bridge.event({ method: 'Runtime.bindingCalled', params: { name: '__lgLabCommand', executionContextId: 9, payload: JSON.stringify({ action: 'card', key: 13 }) } });
     assert.equal(bridge.session, null);
-    assert.ok(navigated().endsWith('/holy/'));
+    assert.ok(navigated().startsWith(home + '#episodes=') && JSON.parse(decodeURIComponent(navigated().split('#episodes=')[1])).show === show);
     // The last episode available: no countdown, only home.
     await playTo({ source: 'jkanime', kind: 'anime', title: 'One Piece', show, url: show + '1180/', episode: 1180 }, { t: 1399 });
     assert.ok(drawn.some(expression => expression.includes('"mode":"last"')));
@@ -620,6 +620,101 @@ try {
     await fail();
     assert.equal(opened().length, 4);
     await bridge.stop();
+  });
+
+  await check('Serie: Atrás vuelve a sus capítulos; en pausa, panel con seguir, anterior, siguiente y capítulos', async () => {
+    const calls = [], drawn = [];
+    let video = { t: 100, d: 1400, paused: false, ready: 4, area: 1, ended: false };
+    const cdp = {
+      async call(method, params = {}) {
+        calls.push({ method, params });
+        if (method === 'Page.getFrameTree') return { frameTree: { frame: { id: 'main', url: 'https://example.com/' } } };
+        if (method === 'Page.addScriptToEvaluateOnNewDocument') return { identifier: String(calls.length) };
+        if (method === 'Runtime.evaluate') return { result: { value: params.expression.includes('v.play()') ? true : { url: 'https://p.example/', top: true, videos: [video], action: '' } } };
+        return {};
+      },
+      async evaluate(expression) { drawn.push(expression); return 'https://example.com/'; },
+      onEvent() { return () => {}; }
+    };
+    const show = 'https://jkanime.net/one-piece/';
+    const entry = n => ({ url: show + n + '/', episode: n, label: 'Episodio ' + n, still: '' });
+    const catalog = { version: 1, find: () => null, pageFallback: () => false, resolve: async item => ({ url: 'https://p.example/play?u=' + encodeURIComponent(item.url) }),
+      next: async item => (item.episode < 1180 ? entry(item.episode + 1) : null), previous: async item => (item.episode > 1 ? entry(item.episode - 1) : null), similar: () => [] };
+    const library = new Library(join(directory, 'pause.json'));
+    const bridge = await new HolyBridge(cdp, { preferencesFile: join(directory, 'pause-settings.json'), catalog, library, recorder: false, pauseDelay: 20 }).start();
+    clearInterval(bridge.watchTimer);
+    bridge.contexts.set(5, { id: 5, auxData: { isDefault: true, frameId: 'main' } });
+    bridge.remoteContexts.add(9);
+    const navigated = () => calls.filter(call => call.method === 'Page.navigate').at(-1)?.params.url;
+    const key = code => bridge.event({ method: 'Runtime.bindingCalled', params: { name: '__lgLabCommand', executionContextId: 9, payload: JSON.stringify({ action: 'card', key: code }) } });
+    const start = async item => {
+      await bridge.command({ action: 'play', value: item });
+      bridge.frames.set(bridge.mainFrame, 'https://p.example/'); bridge.navigation.phase = 'complete';
+      video = { ...video, t: 100, paused: false };
+      await new Promise(resolve => setTimeout(resolve, 60));
+      await bridge.watch();
+      assert.equal(bridge.session.phase, 'playing');
+    };
+    await start({ source: 'jkanime', kind: 'anime', title: 'One Piece', show, url: show + '1178/', episode: 1178 });
+    // Paused a moment: the panel, unfocused (OK and arrows stay with the player; only ↑ enters).
+    video = { ...video, t: 600, paused: true };
+    await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 40)); await bridge.watch();
+    assert.equal(bridge.session.card.kind, 'pause');
+    assert.deepEqual(bridge.session.card.options.map(option => option.action + (option.item ? ' ' + option.item.episode : '')), ['resume', 'play 1177', 'play 1179', 'episodes']);
+    const panel = drawn.find(expression => expression.includes('"mode":"pause"'));
+    assert.ok(panel.includes('Anterior') && panel.includes('Episodio 1177') && panel.includes('Siguiente') && panel.includes('Capítulos'));
+    assert.ok(drawn.at(-1).includes('holyCard="menu"'));
+    await key(39); assert.equal(bridge.session.card.focus, -1);
+    await key(38); assert.equal(bridge.session.card.focus, 0); assert.ok(drawn.some(expression => expression.includes('holyCard="1"')));
+    await key(39); await key(39); assert.equal(bridge.session.card.focus, 2);
+    await key(40); assert.equal(bridge.session.card.focus, -1);
+    // «Seguir viendo» plays the video again; playing hides the panel.
+    await key(38); await key(13);
+    assert.ok(calls.some(call => call.method === 'Runtime.evaluate' && call.params.expression.includes('v.play()')));
+    video = { ...video, paused: false, t: 601 }; await bridge.watch();
+    assert.equal(bridge.session.card, null);
+    // Paused again → «Siguiente» plays 1179.
+    video = { ...video, paused: true }; await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 40)); await bridge.watch();
+    await key(38); await key(39); await key(39); await key(13);
+    assert.equal(bridge.session.item.episode, 1179);
+    // Back from an episode: its series' episode list on that episode (the home reads it from the address).
+    bridge.frames.set(bridge.mainFrame, 'https://p.example/');
+    await bridge.command({ action: 'back' });
+    const back = navigated();
+    assert.ok(back.startsWith(home + '#episodes='));
+    const view = JSON.parse(decodeURIComponent(back.split('#episodes=')[1]));
+    assert.deepEqual([view.show, view.at, view.isShow, view.source], [show, show + '1179/', true, 'jkanime']);
+    assert.equal(bridge.session, null);
+    // A film: Back goes home and a pause shows nothing.
+    await start({ source: 'cuevana', kind: 'movie', title: 'F', url: 'https://c.example/f' });
+    video = { ...video, t: 600, paused: true }; await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 40)); await bridge.watch();
+    assert.ok(!bridge.session.card);
+    bridge.frames.set(bridge.mainFrame, 'https://p.example/');
+    await bridge.command({ action: 'back' });
+    assert.equal(navigated(), home);
+    await bridge.stop();
+    // Catalogue: the previous episode by number; none before the first.
+    const real = new Catalog({ file: join(directory, 'prev.json'), detailsFile: join(directory, 'prevd.json'), fetch: async () => '', connectors: [
+      { id: 'jkanime', name: 'JKAnime', site: 'https://jkanime.net/', parseHome: () => [], episodes: async () => [{ title: 'x', episodes: [3, 2, 1].map(entry) }] }] });
+    assert.equal((await real.previous({ source: 'jkanime', show, url: show + '3/', episode: 3 })).url, show + '2/');
+    assert.equal(await real.previous({ source: 'jkanime', show, url: show + '1/', episode: 1 }), null);
+    real.stop();
+    // In the player, the unentered panel only takes ↑.
+    const { holyRemote } = await import('./holy/page-scripts.mjs');
+    const sent = [], listeners = [];
+    const root = { dataset: { holyBridge: 'w|' + Date.now(), holyCard: 'menu' } };
+    globalThis.window = { addEventListener: (type, fn) => type === 'keydown' && listeners.push(fn), location: { href: 'https://player.example/' }, __lgLabCommand: payload => sent.push(payload) };
+    window.top = window; globalThis.location = window.location; globalThis.addEventListener = window.addEventListener; globalThis.document = { documentElement: root };
+    holyRemote([], 'http://mac/holy/', 'w');
+    const press = code => { const event = { keyCode: code, timeStamp: Math.random(), preventDefault() { this.prevented = true; }, stopImmediatePropagation() {} }; listeners.forEach(fn => fn(event)); return event; };
+    assert.equal(press(13).prevented, undefined);
+    assert.equal(press(39).prevented, undefined);
+    assert.equal(press(38).prevented, true);
+    assert.deepEqual(sent, ['{"action":"card","key":38}']);
+    delete globalThis.window; delete globalThis.location; delete globalThis.addEventListener; delete globalThis.document;
+    // The home opens the list from the address.
+    const source = readFileSync(new URL('../src/App.svelte', import.meta.url), 'utf8');
+    assert.match(source, /location\.hash\.startsWith\('#episodes='\)/);
   });
 
   await check('Servidor: rutas con datos malos responden sin caerse', async () => {

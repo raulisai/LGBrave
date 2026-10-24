@@ -398,17 +398,35 @@
     searchTimer = setTimeout(search, 700);
   }
   let episodesToken = 0;
-  async function openEpisodes(show) {
+  // at: the episode to focus (coming back from watching it).
+  async function openEpisodes(show, at = '') {
     // $state stores a proxy, so the pending request is matched by token, not identity.
     const token = ++episodesToken;
     const view = { token, show: $state.snapshot(show), seasons: [], loading: true, error: '', from: { rowIndex } };
-    episodesView = view; rowIndex = 0; inSearch = false; searchInput?.blur();
+    episodesView = view; rowIndex = 0; inSearch = false; inNav = false; searchInput?.blur();
     try {
       const result = await getJSON(`${apiBase}/holy-api/episodes?source=${encodeURIComponent(show.source)}&show=${encodeURIComponent(show.show)}`, { timeout: 30000 });
       if (episodesView?.token !== token) return;
       const seasons = Array.isArray(result?.seasons) ? result.seasons : [];
       episodesView = { ...view, seasons, loading: false, error: result?.error || (seasons.length ? '' : 'No se encontraron episodios.') };
+      // Back from an episode: its block and position, so the next one is a press away.
+      const number = Number(show.episode) || 0;
+      seasons.some((season, s) => season.episodes.some((entry, e) => {
+        if (entry.url !== at && !(number && entry.episode === number)) return false;
+        rowIndex = s; columns = { ...columns, ['season-' + s]: e };
+        return true;
+      }));
     } catch { if (episodesView?.token === token) episodesView = { ...view, loading: false, error: 'No se pudo leer la lista de episodios.' }; }
+  }
+  // Coming back from an episode, the address carries its series (#episodes=…): open its list.
+  function episodesFromAddress() {
+    if (!location.hash.startsWith('#episodes=')) return;
+    let show = null;
+    try { show = JSON.parse(decodeURIComponent(location.hash.slice('#episodes='.length))); } catch { /* Not ours. */ }
+    history.replaceState(null, '', location.pathname + location.search);
+    if (!show?.show || !/^https:\/\//.test(show.show) || !show.source) return;
+    section = 'inicio';
+    openEpisodes(show, show.at || '');
   }
   function closeEpisodes() {
     const from = episodesView?.from;
@@ -549,6 +567,8 @@
     const cursor = event => { if (event.detail?.visibility === false) leavePointer(); };
     document.addEventListener('cursorStateChange', cursor);
     load(); checkMac();
+    episodesFromAddress();
+    window.addEventListener('hashchange', episodesFromAddress);
     const macTimer = setInterval(checkMac, 20000);
     const update = event => {
       const detail = event.detail || {};
@@ -566,7 +586,7 @@
     const heartbeat = setInterval(() => { if (connected && Date.now() - lastHeartbeat > 6500) connected = false; }, 2000);
     window.addEventListener('lg-lab-status', update);
     window.__lumaReady = true;
-    return () => { window.removeEventListener('lg-lab-status', update); clearInterval(heartbeat); clearInterval(macTimer); document.removeEventListener('cursorStateChange', cursor); clearTimeout(previewTimer); clearTimeout(openingTimer); };
+    return () => { window.removeEventListener('lg-lab-status', update); clearInterval(heartbeat); clearInterval(macTimer); document.removeEventListener('cursorStateChange', cursor); window.removeEventListener('hashchange', episodesFromAddress); clearTimeout(previewTimer); clearTimeout(openingTimer); };
   });
 </script>
 

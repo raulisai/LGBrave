@@ -258,18 +258,26 @@ export class Catalog {
   // The same title on the owner's other sites, for when its own site cannot play it:
   // copies already in the catalogue first, then each compatible site's search. For an
   // episode, the same episode number (and season when both sites number seasons).
-  // The episode after this one, by number (JKAnime lists newest first): from the show's
-  // list when the site has one (none after the last), else from the address pattern.
-  async next(item) {
+  // The episode after (step 1) or before (step -1) this one, by number (JKAnime lists newest
+  // first): from the show's list when the site has one (none past either end), else from the
+  // address pattern (next only) or the site's own address per number (JKAnime).
+  async next(item) { return this.neighbour(item, 1); }
+  async previous(item) { return this.neighbour(item, -1); }
+  async neighbour(item, step) {
     const current = episodeOf(item);
     if (!current.episode) return null;
     const order = entry => (entry.season || 0) * 1e5 + (entry.episode || 0);
     const position = order({ season: current.season, episode: current.episode });
-    const seasons = item.show && this.connector(item.source)?.episodes ? await this.episodes(item.source, item.show).catch(() => []) : [];
+    const connector = this.connector(item.source);
+    const seasons = item.show && connector?.episodes ? await this.episodes(item.source, item.show).catch(() => []) : [];
     const list = seasons.flatMap(season => season.episodes).map(entry => ({ ...entry, ...episodeOf(entry), season: entry.season ?? episodeOf(entry).season }));
     if (list.length) {
-      const after = list.filter(entry => entry.episode && order(entry) > position).sort((a, b) => order(a) - order(b))[0];
-      return after ? { url: after.url, episode: after.episode, label: after.label || 'Episodio ' + after.episode, still: after.still || '' } : null;
+      const side = list.filter(entry => entry.episode && (step > 0 ? order(entry) > position : order(entry) < position)).sort((a, b) => (order(a) - order(b)) * step)[0];
+      return side ? { url: side.url, episode: side.episode, label: side.label || 'Episodio ' + side.episode, still: side.still || '' } : null;
+    }
+    if (step < 0) {
+      const number = current.episode - 1;
+      return number >= 1 && item.show && connector?.episodeURL && !current.season ? { url: connector.episodeURL(item.show, number), episode: number, label: 'Episodio ' + number, still: '' } : null;
     }
     const guess = nextEpisode(item);
     return guess ? { ...guess, episode: guess.episode || null, still: '' } : null;
