@@ -1,22 +1,36 @@
 <script>
-  let { loading = false, error = '', target = '', onretry, onhome } = $props();
+  import Icon from './Icon.svelte';
+  let { error = '', target = '', onretry, onhome } = $props();
+  const autofocus = node => { requestAnimationFrame(() => node.focus()); };
 </script>
 
-{#if loading || error}
-  <div class="feedback" class:failed={!!error} role="status" aria-live="polite" aria-busy={loading}>
+{#if error}
+  <div class="feedback" role="alert">
     <div class="sheet">
-      {#if loading}<span class="spinner" aria-hidden="true"></span>{:else}<span class="error-mark" aria-hidden="true">!</span>{/if}
-      <h2>{error ? 'No pudimos abrir esta página' : 'Abriendo tu página'}</h2>
-      <p>{error || 'Estamos preparando el contenido para ti.'}</p>
+      <div class="mark"><Icon name="alert" size={46} /></div>
+      <h2>No se puede abrir la página</h2>
+      <p>{error}</p>
       {#if target}<div class="target">{target}</div>{/if}
-      {#if loading}<div class="track"><span></span></div>{/if}
       <div class="actions">
-        {#if error}<button onclick={onretry}>Reintentar</button><button onclick={onhome}>Volver al inicio</button>{/if}
+        <button class="primary" use:autofocus onclick={onretry}>Reintentar</button>
+        <button onclick={onhome}>Ir a Inicio</button>
       </div>
     </div>
   </div>
 {/if}
 
 <style>
-  .feedback{position:fixed;inset:143px 0 0;z-index:1000;display:grid;place-items:center;background:#edf2f8f7;animation:appear .2s ease-out}.sheet{text-align:center;max-width:900px;padding:55px 65px;border-radius:28px;background:#ffffffc9;box-shadow:0 15px 60px #536b8112}.sheet h2{font-size:32px;font-weight:500;margin:28px 0 14px;color:#334b60}.sheet p{font-size:22px;color:#6a7d8e}.target{font-size:17px;color:#77899b;max-width:730px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:20px auto}.spinner{display:inline-block;width:44px;height:44px;border:3px solid #dbe5ef;border-top-color:#678fb0;border-radius:50%;animation:spin .85s linear infinite}.error-mark{display:inline-grid;place-items:center;width:50px;height:50px;border:2px solid #c58b72;color:#a56850;border-radius:50%;font:32px Arial}.track{height:3px;max-width:420px;margin:30px auto;overflow:hidden;background:#e3eaf2;border-radius:3px}.track span{display:block;width:40%;height:100%;background:#7199ba;animation:travel 1.4s ease-in-out infinite}.actions{display:flex;justify-content:center;gap:16px;margin-top:28px}.actions button{padding:13px 22px;border:1px solid #c7d5e2;border-radius:12px;background:#f8fbff;color:#486581;font-size:20px;transition:background .15s,transform .15s}.actions button:active{transform:scale(.97)}@keyframes appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes travel{from{transform:translateX(-120%)}to{transform:translateX(370%)}}@media(prefers-reduced-motion:reduce){.feedback,.spinner,.track span{animation:none}.actions button{transition:none}}
+  .feedback{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 97%,transparent);animation:fade .25s ease-out}
+  .sheet{max-width:900px;padding:0 48px;text-align:center;animation:rise .5s var(--ease)}
+  .mark{width:92px;height:92px;margin:0 auto 30px;border-radius:26px;display:grid;place-items:center;background:var(--surface);color:var(--orange);box-shadow:var(--shadow)}
+  h2{font-size:42px;font-weight:600;letter-spacing:-.6px;margin:0 0 14px}
+  p{font-size:23px;line-height:1.45;color:var(--secondary);margin:0}
+  .target{margin:18px auto 0;max-width:760px;font-size:18px;color:var(--tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .actions{display:flex;justify-content:center;gap:18px;margin-top:40px}
+  .actions button{height:60px;padding:0 32px;border:0;border-radius:16px;background:var(--fill);color:var(--text);font-size:21px;font-weight:600;transition:transform .4s var(--spring),box-shadow .25s,background .2s}
+  .actions .primary{background:var(--blue);color:#fff}
+  .actions button:focus,.actions button:hover{outline:none;transform:scale(1.07);box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--blue),0 12px 26px rgba(0,0,0,.16)}
+  .actions button:active{transform:scale(.95)}
+  @keyframes fade{from{opacity:0}}
+  @keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}}
 </style>

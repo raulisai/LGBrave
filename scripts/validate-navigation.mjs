@@ -68,11 +68,12 @@ try {
   await new Promise(resolve => setTimeout(resolve, 300));
   await capture('loading');
   const loading = await waitFor(() => toolbar('window.__lumaToolbarSnapshot()'));
-  assert.equal(loading.phase, 'loading'); assert.equal(loading.overlay, true);
-  assert.equal(loading.toolbarHeight, 76);
-  assert.equal(loading.spinnerAnimation, 'spin');
+  // Like Safari, the page stays visible while it loads; progress lives in the address pill.
+  assert.equal(loading.phase, 'loading'); assert.equal(loading.overlay, false); assert.equal(loading.visible, true);
+  assert.equal(loading.toolbarHeight, 72);
+  assert.equal(loading.loadingAnimation, 'luma-shimmer');
   await cdp.call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
-  assert.equal((await toolbar('window.__lumaToolbarSnapshot()')).spinnerAnimation, 'none');
+  assert.equal((await toolbar('window.__lumaToolbarSnapshot()')).loadingAnimation, 'none');
   await cdp.call('Emulation.setEmulatedMedia', { features: [] });
   await slow; await settle();
   assert.equal(bridge.navigation.phase, 'complete');

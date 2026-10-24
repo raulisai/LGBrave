@@ -1,0 +1,18 @@
+{
+  "capturedAt": "2026-10-21T11:39:41.218Z",
+  "blocked": 7,
+  "legitimate": 8,
+  "adsDelivered": [],
+  "page": {
+    "good": true,
+    "exception": 1,
+    "earlyScriptlet": "injected",
+    "visibleIds": [
+      {
+        "id": "generic-lab-ad",
+        "cls": ""
+      }
+    ],
+    "ads": 1
+  }
+}

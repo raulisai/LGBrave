@@ -1,0 +1,483 @@
+{
+  "capturedAt": "2026-10-23T07:17:22.038Z",
+  "frames": [
+    {
+      "src": "https://jkanime.net/jkplayer/um",
+      "style": null,
+      "text": "  \n 00:00 / 23:35\n  \nmejorar imagen\nVelocidad\nRepetir\n \n00:00"
+    },
+    {
+      "src": "",
+      "style": "width: 100% !important; height: 100% !important; margin: 0px; padding: 0px; border: none; outline: none; box-sizing: border-box; position: fixed; color-scheme: none; inset: 0px; overflow: hidden; z-index: 2147483646; display: block !important; opacity: 0.85;",
+      "stack": "Error: iframe-created\n    at Document.createElement (<anonymous>:5:88)\n    at A (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:16257)\n    at $ (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:15686)\n    at b (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:11960)\n    at $ (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:15528)\n    at b (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:11960)\n    at $ (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:15528)\n    at b (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:11960)\n    at $ (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:15528)\n    at H (https://db.unboltsecole.com/r5K9akItvISYz1J/128512:1:17767)",
+      "text": "\u00d7\nConfirm you're not a robot\nScan the qr-code with your phone"
+    }
+  ],
+  "network": [
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery-3.3.1.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 35,
+        "columnNumber": 82
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.cookie.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 498,
+        "columnNumber": 98
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.base64.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 499,
+        "columnNumber": 98
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/video_min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 500,
+        "columnNumber": 94
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.simplemodal.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1483,
+        "columnNumber": 80
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/basic.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 502,
+        "columnNumber": 90
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/ua-parser.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1428,
+        "columnNumber": 72
+      }
+    },
+    {
+      "url": "https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1475,
+        "columnNumber": 80
+      }
+    },
+    {
+      "url": "https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/2.2.4/echo.iife.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1476,
+        "columnNumber": 89
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/bootstrap.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1477,
+        "columnNumber": 75
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/player.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1478,
+        "columnNumber": 68
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.nice-select.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1479,
+        "columnNumber": 84
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/mixitup.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1480,
+        "columnNumber": 73
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.slicknav.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1481,
+        "columnNumber": 77
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/owl.carousel.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1482,
+        "columnNumber": 78
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery.toast.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1484,
+        "columnNumber": 74
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/jquery-confirm.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1485,
+        "columnNumber": 76
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/bot-detector.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/history.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/notify.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/main.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtag/js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1717,
+        "columnNumber": 77
+      }
+    },
+    {
+      "url": "https://cvt-s2.agl003.com/o/s/114ceb8fd4b175d08f041c62576b2f82.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1729,
+        "columnNumber": 86
+      }
+    },
+    {
+      "url": "http://stats.jkdesa.com/js/pa-lKuCEqYJhM-34XTHbzbfQ.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1743,
+        "columnNumber": 75
+      }
+    },
+    {
+      "url": "https://db.unboltsecole.com/r5K9akItvISYz1J/128512",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/one-piece/1180",
+        "lineNumber": 1750,
+        "columnNumber": 109
+      }
+    },
+    {
+      "url": "https://cvt-s2.agl003.com/o",
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "161",
+              "url": "https://jkanime.net/one-piece/1180",
+              "lineNumber": 982,
+              "columnNumber": 17
+            }
+          ]
+        }
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/filters-save.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/jkplayer/um",
+        "lineNumber": 19,
+        "columnNumber": 77
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/dplayer-1.27.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/jkplayer/um",
+        "lineNumber": 21,
+        "columnNumber": 71
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/p2p-media-loader-core.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/jkplayer/um",
+        "lineNumber": 24,
+        "columnNumber": 77
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets/p2p-media-loader-hlsjs.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/jkplayer/um",
+        "lineNumber": 25,
+        "columnNumber": 78
+      }
+    },
+    {
+      "url": "https://cdn.jkdesa.com/assets3/js/hls.min.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/jkplayer/um",
+        "lineNumber": 27,
+        "columnNumber": 63
+      }
+    },
+    {
+      "url": "https://stats.jkdesa.com/js/script.manual.js",
+      "initiator": {
+        "type": "parser",
+        "url": "https://jkanime.net/jkplayer/um",
+        "lineNumber": 472,
+        "columnNumber": 5
+      }
+    },
+    {
+      "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "value",
+              "scriptId": "105",
+              "url": "https://cdn.jkdesa.com/assets/dplayer-1.27.js",
+              "lineNumber": 5174,
+              "columnNumber": 65
+            },
+            {
+              "functionName": "value",
+              "scriptId": "105",
+              "url": "https://cdn.jkdesa.com/assets/dplayer-1.27.js",
+              "lineNumber": 5198,
+              "columnNumber": 67
+            },
+            {
+              "functionName": "n",
+              "scriptId": "105",
+              "url": "https://cdn.jkdesa.com/assets/dplayer-1.27.js",
+              "lineNumber": 4834,
+              "columnNumber": 37
+            },
+            {
+              "functionName": "n",
+              "scriptId": "105",
+              "url": "https://cdn.jkdesa.com/assets/dplayer-1.27.js",
+              "lineNumber": 6007,
+              "columnNumber": 51
+            },
+            {
+              "functionName": "",
+              "scriptId": "196",
+              "url": "https://jkanime.net/jkplayer/um",
+              "lineNumber": 236,
+              "columnNumber": 24
+            }
+          ]
+        }
+      }
+    },
+    {
+      "url": "https://www.gstatic.com/cast/sdk/libs/sender/1.0/cast_framework.js",
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "E",
+              "scriptId": "200",
+              "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+              "lineNumber": 9,
+              "columnNumber": 261
+            },
+            {
+              "functionName": "K",
+              "scriptId": "200",
+              "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+              "lineNumber": 10,
+              "columnNumber": 97
+            },
+            {
+              "functionName": "",
+              "scriptId": "200",
+              "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+              "lineNumber": 10,
+              "columnNumber": 648
+            },
+            {
+              "functionName": "",
+              "scriptId": "200",
+              "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+              "lineNumber": 11,
+              "columnNumber": 165
+            }
+          ]
+        }
+      }
+    },
+    {
+      "url": "https://www.gstatic.com/eureka/clank/120/cast_sender.js",
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "E",
+              "scriptId": "200",
+              "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+              "lineNumber": 9,
+              "columnNumber": 261
+            },
+            {
+              "functionName": "F",
+              "scriptId": "200",
+              "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+              "lineNumber": 6,
+              "columnNumber": 988
+            },
+            {
+              "functionName": "",
+              "scriptId": "200",
+              "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+              "lineNumber": 11,
+              "columnNumber": 136
+            },
+            {
+              "functionName": "",
+              "scriptId": "200",
+              "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+              "lineNumber": 11,
+              "columnNumber": 165
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "blocked": [
+    {
+      "url": "https://www.googletagmanager.com/gtag/js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||googletagmanager.com^",
+      "exception": null,
+      "redirect": true
+    },
+    {
+      "url": "https://cvt-s2.agl003.com/o/s/114ceb8fd4b175d08f041c62576b2f82.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||agl003.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "http://stats.jkdesa.com/js/pa-lKuCEqYJhM-34XTHbzbfQ.js",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||stats.jkdesa.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://cvt-s2.agl003.com/o",
+      "source": "https://jkanime.net/one-piece/1180",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||agl003.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://stats.jkdesa.com/js/script.manual.js",
+      "source": "https://jkanime.net/jkplayer/um",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||stats.jkdesa.com^",
+      "exception": null,
+      "redirect": false
+    }
+  ],
+  "errors": []
+}

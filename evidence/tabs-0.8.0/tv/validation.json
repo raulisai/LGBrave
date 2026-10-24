@@ -1,0 +1,25 @@
+{
+  "capturedAt": "2026-10-23T07:43:49.342Z",
+  "environment": "LG 75UR8750PSA, webOS TV",
+  "checks": [
+    "Paquete 0.8.0 instalado: Inicio con una pestaña y sin diagnóstico",
+    "Botón + abre una segunda pestaña",
+    "Página controlada: ambas pestañas arriba, diagnóstico oculto",
+    "Control remoto: Arriba selecciona pestañas y Abajo vuelve a dirección",
+    "Cambiar pestaña con puntero y volver conserva la dirección",
+    "Historial de la segunda pestaña: Atrás/Adelante sin mezclar la primera",
+    "Depuración explícita muestra diagnóstico y se vuelve a ocultar",
+    "Cerrar activa elige la vecina; cerrar la última deja Inicio"
+  ],
+  "installed": {
+    "id": "com.lgapp.lab",
+    "version": "0.8.0",
+    "packagedHome": true
+  },
+  "success": true,
+  "restored": {
+    "sameURL": true,
+    "searchEngine": "google",
+    "debug": false
+  }
+}

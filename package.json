@@ -1,6 +1,6 @@
 {
   "name": "lg-tv-lab",
-  "version": "0.5.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,10 @@
     "verify:tv": "node scripts/verify-browser-ui.mjs",
     "lab:server": "node scripts/fixture-server.mjs",
     "lab:bridge": "node scripts/browser-bridge.mjs",
-    "lab": "node scripts/start-lab.mjs",
+    "lab": "node scripts/lab-supervisor.mjs",
+    "test": "node scripts/test-navigation.mjs && node scripts/test-shields.mjs && node scripts/test-brave-sync.mjs && node scripts/test-ad-cleaner.mjs && node scripts/test-navigation-shield.mjs && node scripts/test-player-assist.mjs && node scripts/test-turnstile-defer.mjs && node scripts/test-devtools-quiet.mjs && node scripts/test-crash-memory.mjs && node scripts/test-bridge.mjs && node scripts/test-browser-tabs.mjs && node scripts/test-lab-runtime.mjs && node scripts/test-crash-guard.mjs && node scripts/validate-engine.mjs > /dev/null && echo 'Pruebas locales correctas.'",
+    "lists:update": "node scripts/update-lists.mjs",
+    "lists:rollback": "node scripts/update-lists.mjs --rollback",
     "validate:engine": "node scripts/validate-engine.mjs",
     "validate:native": "node scripts/validate-native.mjs",
     "validate:browser": "node scripts/validate-browser.mjs",

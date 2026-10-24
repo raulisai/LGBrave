@@ -1,0 +1,603 @@
+{
+  "capturedAt": "2026-10-23T07:19:39.186Z",
+  "scope": "Three short TV playback samples; not entire episodes, all servers or universal ad coverage.",
+  "samples": [
+    {
+      "path": "/one-piece/1180",
+      "afterDelay": [
+        {
+          "id": 29,
+          "url": "https://jkanime.net/one-piece/1180",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 38,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 0,
+              "duration": 1415.6647179999986,
+              "paused": true,
+              "ready": 4,
+              "error": null,
+              "decoded": 144
+            }
+          ]
+        }
+      ],
+      "fallback": {
+        "adRemoved": true,
+        "loginPreserved": true,
+        "guard": {
+          "blockedPopups": 0,
+          "blockedOverlays": 0,
+          "blockedQrOverlays": 1
+        }
+      },
+      "before": [
+        {
+          "id": 29,
+          "url": "https://jkanime.net/one-piece/1180",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 1
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 38,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 5.234878,
+              "duration": 1415.6647179999986,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 266
+            }
+          ]
+        }
+      ],
+      "after": [
+        {
+          "id": 29,
+          "url": "https://jkanime.net/one-piece/1180",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 1
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 38,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 10.239878,
+              "duration": 1415.6647179999986,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 389
+            }
+          ]
+        }
+      ],
+      "playbackPass": true,
+      "seek": [
+        {
+          "id": 29,
+          "url": "https://jkanime.net/one-piece/1180",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 1
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 38,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 62.166756,
+              "duration": 1415.6647179999986,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 524
+            }
+          ]
+        }
+      ],
+      "seekPass": true,
+      "blocked": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://jkanime.net/one-piece/1180",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://cvt-s2.agl003.com/o/s/114ceb8fd4b175d08f041c62576b2f82.js",
+          "source": "https://jkanime.net/one-piece/1180",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||agl003.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "http://stats.jkdesa.com/js/pa-lKuCEqYJhM-34XTHbzbfQ.js",
+          "source": "https://jkanime.net/one-piece/1180",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||stats.jkdesa.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://db.unboltsecole.com/r5K9akItvISYz1J/128512",
+          "source": "https://jkanime.net/one-piece/1180",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||unboltsecole.com^$script,domain=jkanime.net",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cvt-s2.agl003.com/o",
+          "source": "https://jkanime.net/one-piece/1180",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||agl003.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://stats.jkdesa.com/js/script.manual.js",
+          "source": "https://jkanime.net/jkplayer/um",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||stats.jkdesa.com^",
+          "exception": null,
+          "redirect": false
+        }
+      ],
+      "qrAbsent": true
+    },
+    {
+      "path": "/one-piece/1179",
+      "afterDelay": [
+        {
+          "id": 47,
+          "url": "https://jkanime.net/one-piece/1179",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 62,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 0,
+              "duration": 1415.7480459999997,
+              "paused": true,
+              "ready": 4,
+              "error": null,
+              "decoded": 144
+            }
+          ]
+        }
+      ],
+      "before": [
+        {
+          "id": 47,
+          "url": "https://jkanime.net/one-piece/1179",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 62,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 5.236766,
+              "duration": 1415.7480459999997,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 269
+            }
+          ]
+        }
+      ],
+      "after": [
+        {
+          "id": 47,
+          "url": "https://jkanime.net/one-piece/1179",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 62,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 10.283477,
+              "duration": 1415.7480459999997,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 385
+            }
+          ]
+        }
+      ],
+      "playbackPass": true,
+      "seek": [
+        {
+          "id": 47,
+          "url": "https://jkanime.net/one-piece/1179",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 62,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 62.252055,
+              "duration": 1415.7480459999997,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 526
+            }
+          ]
+        }
+      ],
+      "seekPass": true,
+      "blocked": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://jkanime.net/one-piece/1179",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://cvt-s2.agl003.com/o/s/114ceb8fd4b175d08f041c62576b2f82.js",
+          "source": "https://jkanime.net/one-piece/1179",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||agl003.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "http://stats.jkdesa.com/js/pa-lKuCEqYJhM-34XTHbzbfQ.js",
+          "source": "https://jkanime.net/one-piece/1179",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||stats.jkdesa.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://db.unboltsecole.com/r5K9akItvISYz1J/128512",
+          "source": "https://jkanime.net/one-piece/1179",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||unboltsecole.com^$script,domain=jkanime.net",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cvt-s2.agl003.com/o",
+          "source": "https://jkanime.net/one-piece/1179",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||agl003.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://stats.jkdesa.com/js/script.manual.js",
+          "source": "https://jkanime.net/jkplayer/um",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||stats.jkdesa.com^",
+          "exception": null,
+          "redirect": false
+        }
+      ],
+      "qrAbsent": true
+    },
+    {
+      "path": "/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+      "afterDelay": [
+        {
+          "id": 65,
+          "url": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 79,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 0,
+              "duration": 1454.9538949999999,
+              "paused": true,
+              "ready": 4,
+              "error": null,
+              "decoded": 144
+            }
+          ]
+        }
+      ],
+      "before": [
+        {
+          "id": 65,
+          "url": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 79,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 5.193167,
+              "duration": 1454.9538949999999,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 265
+            }
+          ]
+        }
+      ],
+      "after": [
+        {
+          "id": 65,
+          "url": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 79,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 10.198167,
+              "duration": 1454.9538949999999,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 387
+            }
+          ]
+        }
+      ],
+      "playbackPass": true,
+      "seek": [
+        {
+          "id": 65,
+          "url": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": []
+        },
+        {
+          "id": 79,
+          "url": "https://jkanime.net/jkplayer/um",
+          "guard": {
+            "blockedPopups": 0,
+            "blockedOverlays": 0,
+            "blockedQrOverlays": 0
+          },
+          "qrAds": 0,
+          "video": [
+            {
+              "time": 62.417,
+              "duration": 1454.9538949999999,
+              "paused": false,
+              "ready": 4,
+              "error": null,
+              "decoded": 554
+            }
+          ]
+        }
+      ],
+      "seekPass": true,
+      "blocked": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js",
+          "source": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||googletagmanager.com^",
+          "exception": null,
+          "redirect": true
+        },
+        {
+          "url": "https://cvt-s2.agl003.com/o/s/114ceb8fd4b175d08f041c62576b2f82.js",
+          "source": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||agl003.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "http://stats.jkdesa.com/js/pa-lKuCEqYJhM-34XTHbzbfQ.js",
+          "source": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||stats.jkdesa.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://db.unboltsecole.com/r5K9akItvISYz1J/128512",
+          "source": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||unboltsecole.com^$script,domain=jkanime.net",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://cvt-s2.agl003.com/o",
+          "source": "https://jkanime.net/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii/3/",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||agl003.com^",
+          "exception": null,
+          "redirect": false
+        },
+        {
+          "url": "https://stats.jkdesa.com/js/script.manual.js",
+          "source": "https://jkanime.net/jkplayer/um",
+          "type": "Script",
+          "blocked": true,
+          "rule": "||stats.jkdesa.com^",
+          "exception": null,
+          "redirect": false
+        }
+      ],
+      "qrAbsent": true
+    }
+  ],
+  "errors": [],
+  "restored": {
+    "url": "http://192.168.1.148:43187/luma-home/",
+    "searchEngine": "google"
+  },
+  "bridgeErrors": []
+}

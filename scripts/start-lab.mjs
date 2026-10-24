@@ -1,57 +1,39 @@
-import { spawn } from 'node:child_process';
-import { connectTV } from './cdp.mjs';
-import { BrowserBridge, packagedHome } from './browser-bridge.mjs';
+import {setTimeout as delay} from 'node:timers/promises';
+import {mkdirSync, writeFileSync} from 'node:fs';
+import {LabRuntime} from './lab-runtime.mjs';
+import {acquireRuntimeLock} from './runtime-lock.mjs';
+import {FilterUpdates} from './filter-updates.mjs';
+import {installCrashGuard} from './crash-guard.mjs';
 
-let stopping = false;
-let inspector;
-let cdp;
-let bridge;
-let tick;
-const directory = process.cwd();
-process.on('SIGINT', finish); process.on('SIGTERM', finish);
-async function finish() {
-  stopping = true; clearInterval(tick);
-  await bridge?.stop().catch(() => {});
-  cdp?.close(); inspector?.kill('SIGTERM');
-  process.exit(0);
+// `npm run lab` runs this under lab-supervisor.mjs, which restarts it if it stops.
+installCrashGuard();
+let release;
+try { release = acquireRuntimeLock(); }
+catch (error) { console.error(error.message); process.exit(2); }
+const runtime = new LabRuntime();
+const updates = new FilterUpdates().start();
+const abort = new AbortController();
+// Read by scripts/luma-control.mjs (menu-bar app): connected | waiting | offline | starting | stopped.
+const writeStatus = state => { try { mkdirSync('.local', {recursive:true}); writeFileSync('.local/lab-status.json', JSON.stringify({pid:process.pid, state:state ?? runtime.state ?? 'starting', updated:Date.now()})); } catch { /* Status is informational. */ } };
+const statusTimer = setInterval(() => writeStatus(), 2000); statusTimer.unref();
+writeStatus();
+let finishing;
+function finish() {
+  if (finishing) return finishing;
+  abort.abort();
+  clearInterval(statusTimer); writeStatus('stopped');
+  updates.stop();
+  finishing = runtime.close();
+  return finishing;
 }
-function inspect() {
-  return new Promise((resolve, reject) => {
-    inspector = spawn(process.execPath, ['node_modules/@webos-tools/cli/bin/ares-inspect.js', '--device', 'lg-lab', 'com.lgapp.lab'], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe'] });
-    let settled = false;
-    inspector.stdout.on('data', bytes => {
-      const output = bytes.toString();
-      const match = /Application Debugging - (http:\/\/localhost:\d+)/.exec(output);
-      if (match && !settled) { settled = true; resolve(match[1]); }
-    });
-    inspector.stderr.on('data', bytes => console.error(bytes.toString().trim()));
-    inspector.once('exit', () => { if (!settled) reject(Error('El inspector terminó antes de conectar.')); });
-    inspector.once('error', reject);
-  });
-}
-console.log('Servidor de fixtures requerido: npm run lab:server');
-while (!stopping) {
-  try {
-    const endpoint = await inspect();
-    cdp = await connectTV(endpoint);
-    bridge = await new BrowserBridge(cdp, { fixtures: true }).start();
-    if (await cdp.evaluate('location.href') === packagedHome) await bridge.command({ action: 'home' });
-    else await bridge.status();
-    console.log('Luma conectado: ' + endpoint + '. Navegación y filtros listos.');
-    let checking = false;
-    tick = setInterval(async () => {
-      if (checking) return;
-      checking = true;
-      try {
-        const targets = await (await fetch(`${endpoint}/json`, { signal: AbortSignal.timeout(3000) })).json();
-        const target = targets.find(t => t.description === 'com.lgapp.lab' || t.url?.includes('/com.lgapp.lab/'));
-        if (!target || target.id !== cdp.target.id) { cdp.close(); return; }
-        await bridge.status();
-      } catch { cdp.close(); }
-      finally { checking = false; }
-    }, 1500);
-    await cdp.closed;
-  } catch (error) { if (!stopping) console.error(error.message); }
-  clearInterval(tick); cdp?.close(); inspector?.kill('SIGTERM');
-  if (!stopping) { console.log('Reconectando con la TV…'); await new Promise(resolve => setTimeout(resolve, 2000)); }
+process.once('SIGINT', finish); process.once('SIGTERM', finish);
+console.log('Laboratorio pasivo: solo conecta con Luma cuando ya está abierta. Servidor: npm run lab:server');
+try {
+  while (!runtime.stopping) {
+    await runtime.step();
+    if (runtime.stopping) break;
+    await delay(runtime.state === 'offline' ? 5000 : 1500, undefined, {signal:abort.signal}).catch(() => {});
+  }
+} finally {
+  await finish(); release();
 }

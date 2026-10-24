@@ -1,0 +1,172 @@
+{
+  "capturedAt": "2026-10-21T10:12:45.563Z",
+  "scope": "Una TV, una red, pocas muestras: orientativo, no un promedio de Internet.",
+  "runs": [
+    {
+      "cache": false,
+      "visit": 1,
+      "url": "https://es.wikipedia.org/wiki/Televisor",
+      "phase": "complete",
+      "visibleMs": 3956,
+      "domContentLoaded": 3287,
+      "load": 3662,
+      "resources": 18,
+      "networkKB": 208,
+      "cachedResources": 0,
+      "blocked": 0
+    },
+    {
+      "cache": false,
+      "visit": 2,
+      "url": "https://es.wikipedia.org/wiki/Televisor",
+      "phase": "complete",
+      "visibleMs": 1668,
+      "domContentLoaded": 1126,
+      "load": 1419,
+      "resources": 18,
+      "networkKB": 208,
+      "cachedResources": 0,
+      "blocked": 0
+    },
+    {
+      "cache": false,
+      "visit": 1,
+      "url": "https://developer.mozilla.org/es/",
+      "phase": "complete",
+      "visibleMs": 3805,
+      "domContentLoaded": 1999,
+      "load": 3055,
+      "resources": 63,
+      "networkKB": 403,
+      "cachedResources": 0,
+      "blocked": 1
+    },
+    {
+      "cache": false,
+      "visit": 2,
+      "url": "https://developer.mozilla.org/es/",
+      "phase": "complete",
+      "visibleMs": 2356,
+      "domContentLoaded": 1061,
+      "load": 2192,
+      "resources": 63,
+      "networkKB": 403,
+      "cachedResources": 0,
+      "blocked": 1
+    },
+    {
+      "cache": false,
+      "visit": 1,
+      "url": "https://www.bbc.com/mundo",
+      "phase": "complete",
+      "visibleMs": 7003,
+      "domContentLoaded": 4034,
+      "load": 8345,
+      "resources": 79,
+      "networkKB": 1033,
+      "cachedResources": 0,
+      "blocked": 4
+    },
+    {
+      "cache": false,
+      "visit": 2,
+      "url": "https://www.bbc.com/mundo",
+      "phase": "complete",
+      "visibleMs": 6689,
+      "domContentLoaded": 3834,
+      "load": 3982,
+      "resources": 76,
+      "networkKB": 1239,
+      "cachedResources": 0,
+      "blocked": 7
+    },
+    {
+      "cache": true,
+      "visit": 1,
+      "url": "https://es.wikipedia.org/wiki/Televisor",
+      "phase": "complete",
+      "visibleMs": 3483,
+      "domContentLoaded": 2371,
+      "load": 2496,
+      "resources": 18,
+      "networkKB": 165,
+      "cachedResources": 2,
+      "blocked": 6
+    },
+    {
+      "cache": true,
+      "visit": 2,
+      "url": "https://es.wikipedia.org/wiki/Televisor",
+      "phase": "complete",
+      "visibleMs": 1078,
+      "domContentLoaded": 711,
+      "load": 964,
+      "resources": 18,
+      "networkKB": 86,
+      "cachedResources": 13,
+      "blocked": 0
+    },
+    {
+      "cache": true,
+      "visit": 1,
+      "url": "https://developer.mozilla.org/es/",
+      "phase": "complete",
+      "visibleMs": 3916,
+      "domContentLoaded": 3023,
+      "load": 3217,
+      "resources": 63,
+      "networkKB": 372,
+      "cachedResources": 1,
+      "blocked": 0
+    },
+    {
+      "cache": true,
+      "visit": 2,
+      "url": "https://developer.mozilla.org/es/",
+      "phase": "complete",
+      "visibleMs": 2599,
+      "domContentLoaded": 1177,
+      "load": 1329,
+      "resources": 139,
+      "networkKB": 15,
+      "cachedResources": 137,
+      "blocked": 2
+    },
+    {
+      "cache": true,
+      "visit": 1,
+      "url": "https://www.bbc.com/mundo",
+      "phase": "complete",
+      "visibleMs": 7552,
+      "domContentLoaded": 4862,
+      "load": 9716,
+      "resources": 93,
+      "networkKB": 884,
+      "cachedResources": 6,
+      "blocked": 17
+    },
+    {
+      "cache": true,
+      "visit": 2,
+      "url": "https://www.bbc.com/mundo",
+      "phase": "complete",
+      "visibleMs": 5420,
+      "domContentLoaded": 2539,
+      "load": 2774,
+      "resources": 71,
+      "networkKB": 89,
+      "cachedResources": 60,
+      "blocked": 3
+    }
+  ],
+  "summary": {
+    "withoutCache": {
+      "repeatVisitLoadMs": 2192,
+      "repeatVisitNetworkKB": 403
+    },
+    "withCache": {
+      "repeatVisitLoadMs": 1329,
+      "repeatVisitNetworkKB": 86
+    }
+  }
+}

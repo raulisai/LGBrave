@@ -8,3 +8,7 @@ artifacts/
 evidence/private/
 wasm-engine/target/
 .local/
+
+# Local worktrees and regenerated filter snapshots (hundreds of MB)
+.claude/worktrees/
+research/lists/generations/

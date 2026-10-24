@@ -1,0 +1,36 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "home",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "holy-preview",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/djoker/code/lgApp/.claude/worktrees/holy && exec env HOLY_TV=0 HOLY_PORT=43191 LAB_ORIGIN=http://127.0.0.1:43191 HOLY_LIBRARY=.local/holy-library-preview.json node scripts/holy.mjs"
+      ],
+      "port": 43191
+    },
+    {
+      "name": "holy-server-only",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/djoker/code/lgApp/.claude/worktrees/holy && exec env HOLY_TV=0 HOLY_LIBRARY=.local/holy-library-preview.json node scripts/holy.mjs"
+      ],
+      "port": 43190
+    }
+  ]
+}

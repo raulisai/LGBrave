@@ -1,0 +1,398 @@
+{
+  "records": [
+    {
+      "url": "https://tungtungsahur.cuevana3c.pro/",
+      "source": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+      "source": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cloudflareinsights.com^$third-party",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://tungtungsahur.cuevana3c.pro/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js",
+      "source": "file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://latgw.fun/js/humanitarian-five.js",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||latgw.fun^$domain=cuevana3c.pro",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Document",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/js/jquery.min.js",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/css/main.css",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Stylesheet",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/js/jquery.cookie.js",
+      "source": "https://tungtungsahur.cuevana3c.pro/",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/js/xupload.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/jwplayer.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||cloudflareinsights.com^$third-party",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/js/localstorage-slim.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/ad",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://pixibay.cc/sfzn4uy9e1z6_xt.jpg",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/assets/jquery/ev-player.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtag/js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||googletagmanager.com^",
+      "exception": null,
+      "redirect": true
+    },
+    {
+      "url": "https://mc.yandex.ru/metrika/tag.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||mc.yandex.ru^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/vast.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/jwplayer.core.controls.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/translations/es.json",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/provider.hlsjs.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://llvpn.com/tag.min.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||llvpn.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/dl",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/player/jw8/provider.cast.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/master.m3u8",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://pixibay.cc/sfzn4uy9e1z60000.jpg",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Image",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/cast/sdk/libs/sender/1.0/cast_framework.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://www.gstatic.com/eureka/clank/120/cast_sender.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/index-f2-v1-a1.m3u8",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-1-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-2-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-3-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-4-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-5-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-6-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://test.earnvids.com/p.gif",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Image",
+      "blocked": true,
+      "rule": "||earnvids.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://imasdk.googleapis.com/js/sdkloader/ima3.js",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "Script",
+      "blocked": true,
+      "rule": "||imasdk.googleapis.com^",
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-7-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/dl",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-8-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-9-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    },
+    {
+      "url": "https://o5czhgnohwluyzcb.acek-cdn.com/hls2/01/08724/sfzn4uy9e1z6_,l,n,.urlset/seg-10-f2-v1-a1.ts",
+      "source": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/sfzn4uy9e1z6",
+      "type": "XHR",
+      "blocked": false,
+      "rule": null,
+      "exception": null,
+      "redirect": false
+    }
+  ],
+  "errors": [],
+  "navigation": {
+    "phase": "complete",
+    "progress": 100,
+    "url": "https://tungtungsahur.cuevana3c.pro/?token=1ElJPCARBGlxIA0kP&pops=false",
+    "error": ""
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "scope": "Isolated fixture rules, matching original regression; active lists separately respect generichide on private IPs.",
+  "capturedAt": "2026-10-21T11:40:40.627Z",
+  "blocked": 7,
+  "legitimate": 8,
+  "adsDelivered": [],
+  "page": {
+    "good": true,
+    "exception": 1,
+    "earlyScriptlet": "injected",
+    "visibleIds": [],
+    "ads": 0
+  }
+}

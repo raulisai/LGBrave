@@ -1,0 +1,12 @@
+{
+  "environment": "Chrome escritorio, no TV",
+  "checks": [
+    "Inicio: diagnóstico oculto y primera pestaña visible",
+    "Nueva pestaña con clic en +",
+    "Navegación: barra de pestañas y diagnóstico oculto",
+    "Control remoto: Arriba llega a pestañas; Abajo regresa a dirección",
+    "Seleccionar otra pestaña con el puntero conserva la página previa",
+    "Depuración explícita muestra el chip y vuelve a ocultarlo",
+    "Cerrar activa elige la vecina; cerrar última deja Inicio"
+  ]
+}

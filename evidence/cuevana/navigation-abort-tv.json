@@ -1,0 +1,16 @@
+{
+  "capturedAt": "2026-10-21T11:37:58.468Z",
+  "url": "http://192.168.1.148:43187/simple",
+  "blockedNavigations": 1,
+  "blocked": [
+    {
+      "url": "https://luma-navigation-block.invalid/ad",
+      "source": "http://192.168.1.148:43187/simple",
+      "type": "Document",
+      "blocked": true,
+      "rule": "||luma-navigation-block.invalid^$document",
+      "exception": null,
+      "redirect": false
+    }
+  ]
+}

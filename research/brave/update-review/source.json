@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/brave/brave-core",
+  "commit": "096355228351b467e6c5735e0f841c7c9ff886d7",
+  "files": [
+    "ad_block_component_installer.cc",
+    "ad_block_component_filters_provider.cc",
+    "ad_block_component_service_manager.cc",
+    "ad_block_filter_list_catalog_provider.cc",
+    "ad_block_filters_provider_manager.cc"
+  ]
+}

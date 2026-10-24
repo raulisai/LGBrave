@@ -57,5 +57,37 @@
       "bytes": 1968766,
       "sha256": "ec5e58f5fec1e15960731f6ed43f09f73864fb2af259ad23e91809eb8e6e43df"
     }
-  ]
+  ],
+  "resourcesExtension": {
+    "capturedAt": "2026-10-21T11:37:53.106860+00:00",
+    "commit": "1c0740d27d531a2389c808212a8702592bb74138",
+    "source": "https://github.com/brave/adblock-rust/blob/1c0740d27d531a2389c808212a8702592bb74138/data/brave/brave-resources.json",
+    "resources": 211,
+    "files": [
+      {
+        "path": "research/brave/full/UBLOCK-LICENSE.txt",
+        "sha256": "e73d33841f942fa73aa5a63d4a6399cc39a29564db1dbca0915485842fcb236d"
+      },
+      {
+        "path": "research/brave/full/LICENSE",
+        "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+      },
+      {
+        "path": "research/brave/full/ad_block_service_helper.cc",
+        "sha256": "b0f0c3043c2897cbda20d5cfce257abd9ba7207bc35ab0f35a31884ca7040ac5"
+      },
+      {
+        "path": "research/brave/full/resources.json",
+        "sha256": "f7ce26ede6b3bb90a0a9e20819e1d7f6b6dd71ee3ec8ae88f882ec7fcb232ebb"
+      },
+      {
+        "path": "research/brave/full/README.md",
+        "sha256": "402e9ada7bd6cb4793b9295eef89006ff291aed3001cdd20e497ad73521593f5"
+      },
+      {
+        "path": "research/brave/full/ad_block_default_resource_provider.cc",
+        "sha256": "11d281e97635f9b7fc9591a67b2401549e197ae8c5341271f0ef10c8f7b04659"
+      }
+    ]
+  }
 }
