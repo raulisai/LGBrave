@@ -1,0 +1,41 @@
+{
+  "capturedAt": "2026-10-24T06:17:16.405Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "voice",
+      "speechApi": {
+        "standard": "undefined",
+        "webkit": "function"
+      },
+      "state": {
+        "section": "Buscar",
+        "focus": "INPUT",
+        "placeholder": "Escuchando… di lo que buscas",
+        "toast": ""
+      },
+      "later": {
+        "placeholder": "Película, anime o dorama…",
+        "toast": ""
+      },
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "file:///media/developer/apps/usr/palm/applications/com.lgapp.holy/index.html"
+      }
+    ],
+    "memory": "memory  1252016  885716  136168  55060   230132      252888"
+  },
+  "after": {
+    "memory": "memory  1252016  877008  134784  30388   240224      286416"
+  },
+  "bridgeErrors": []
+}

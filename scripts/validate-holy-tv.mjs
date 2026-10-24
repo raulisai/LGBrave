@@ -145,6 +145,9 @@ try {
     await sleep(2500);
     sample.state = await cdp.evaluate(`({ section: [...document.querySelectorAll('nav button')].find(b => b.className.includes('current'))?.textContent.trim(), focus: document.activeElement?.tagName, placeholder: document.querySelector('.searchbar input')?.placeholder, toast: document.querySelector('.toast')?.textContent || '' })`);
     await shot('voice');
+    // Does the recogniser really listen? (An error ends it at once with a notice; silence ends it after a few seconds.)
+    await sleep(9000);
+    sample.later = await cdp.evaluate(`({ placeholder: document.querySelector('.searchbar input')?.placeholder, toast: document.querySelector('.toast')?.textContent || '' })`);
     sample.ok = sample.state.section === 'Buscar' && (sample.state.focus === 'INPUT' || /Escuchando/.test(sample.state.placeholder || ''));
     console.log(JSON.stringify(sample));
     save();
