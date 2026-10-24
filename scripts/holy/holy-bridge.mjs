@@ -1,7 +1,8 @@
 import { BrowserBridge, home, packagedHome } from '../browser-bridge.mjs';
 import { origin } from './config.mjs';
 import { entryKey } from './library.mjs';
-import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource } from './page-scripts.mjs';
+import { PREFERRED } from './catalog.mjs';
+import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, heartbeatSource } from './page-scripts.mjs';
 
 // Luma's engine (filters, guards, navigation) plus Holy's playback: a title is
 // opened at the player its site would show, started automatically behind a
@@ -28,14 +29,44 @@ export class HolyBridge extends BrowserBridge {
   }
   async start() {
     await super.start();
-    this.remoteScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: remoteSource([home, packagedHome]), worldName: this.toolbarWorld })).identifier;
+    this.remoteScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: remoteSource([home, packagedHome], home, this.toolbarWorld), worldName: this.toolbarWorld })).identifier;
+    // The page already open (e.g. a film when the Mac reconnects) gets the Back handler too.
+    await this.armCurrentPage().catch(() => {});
     this.watchTimer = setInterval(() => this.watch().catch(error => this.errors.push({ phase: 'watch', error: error.message })), 1000);
+    this.heartbeatTimer = setInterval(() => this.heartbeat(), 2000);
+    this.heartbeatTimer.unref?.();
+    this.heartbeat();
     this.watchTimer.unref?.();
     return this;
   }
+  async armCurrentPage() {
+    const { frameTree } = await this.cdp.call('Page.getFrameTree');
+    const frames = [];
+    const walk = node => { frames.push(node.frame); for (const child of node.childFrames || []) walk(child); };
+    walk(frameTree);
+    for (const frame of frames.slice(0, 20)) {
+      if (!/^https?:/.test(frame.url) || frame.url.startsWith(home)) continue;
+      const world = await this.cdp.call('Page.createIsolatedWorld', { frameId: frame.id, worldName: this.toolbarWorld }).catch(() => null);
+      if (!world?.executionContextId) continue;
+      this.remoteContexts.add(world.executionContextId);
+      await this.cdp.evaluate(remoteSource([home, packagedHome], home, this.toolbarWorld) + ';' + heartbeatSource(this.toolbarWorld), world.executionContextId).catch(() => {});
+    }
+  }
+  // Tells each page's Back handler that this connection is alive.
+  heartbeat() {
+    for (const id of this.remoteContexts) this.cdp.evaluate(heartbeatSource(this.toolbarWorld), id).catch(() => this.remoteContexts.delete(id));
+  }
   async event(message) {
     const { method, params, sessionId } = message;
-    if (method === 'Runtime.executionContextCreated' && !sessionId && params.context.name === this.toolbarWorld) this.remoteContexts.add(params.context.id);
+    if (method === 'Runtime.executionContextCreated' && !sessionId && params.context.name === this.toolbarWorld) {
+      this.remoteContexts.add(params.context.id);
+      this.cdp.evaluate(heartbeatSource(this.toolbarWorld), params.context.id).catch(() => {});
+    }
+    // Back on a page may also reach the home on its own: close the playback session there.
+    if (method === 'Page.frameNavigated' && !sessionId && !params.frame.parentId && this.session && this.session.phase !== 'resolving' &&
+        (params.frame.url.startsWith(home) || params.frame.url.startsWith(packagedHome))) {
+      await this.endSession().catch(() => {});
+    }
     if (method === 'Runtime.executionContextDestroyed') this.remoteContexts.delete(params.executionContextId);
     if (method === 'Runtime.executionContextsCleared' && !sessionId) this.remoteContexts.clear();
     if (method === 'Target.attachedToTarget' && ['iframe', 'page'].includes(params.targetInfo?.type)) this.childSessions.set(params.sessionId, { enabled: false, contexts: new Set() });
@@ -109,7 +140,25 @@ export class HolyBridge extends BrowserBridge {
     await this.status();
     session.tried = new Set([item.source]);
     let target = null;
-    try { target = await this.catalog.resolve(item); } catch (error) { session.resolveError = error; }
+    // Anime: the same episode on JKAnime first (the owner's choice); the picked site stays as the next option.
+    const preferred = PREFERRED[item.kind];
+    if (preferred && item.source !== preferred && this.catalog.elsewhere) {
+      session.tried = new Set([preferred]);
+      session.candidates = [];
+      await this.curtain(`window.__holyCurtain&&__holyCurtain.say('Buscando en JKAnime…')`);
+      const copies = await this.catalog.elsewhere(item, new Set([item.source]), { only: preferred }).catch(() => []);
+      for (const copy of copies.slice(0, 2)) {
+        target = await this.catalog.resolve(copy).catch(() => null);
+        if (target) { session.item = { ...copy, title: item.title, poster: item.poster || copy.poster, backdrop: item.backdrop || copy.backdrop, genres: item.genres?.length ? item.genres : copy.genres }; session.site = this.catalog.connector?.(preferred)?.name || preferred; break; }
+      }
+      if (this.session !== session) return;
+      // The picked copy is the next choice if JKAnime fails, then the other sites.
+      session.candidates = [item];
+    }
+    if (!target) {
+      if (preferred && item.source !== preferred) { session.candidates = []; session.tried.add(item.source); }
+      try { target = await this.catalog.resolve(item); } catch (error) { session.resolveError = error; }
+    }
     if (this.session !== session) return;
     // No player on its own site: the same title on another of the owner's sites.
     if (!target) target = await this.findElsewhere(session);
@@ -137,11 +186,14 @@ export class HolyBridge extends BrowserBridge {
   // Next site with the same title that resolves to a player; null when none is left.
   async findElsewhere(session) {
     if (!this.catalog.elsewhere) return null;
-    if (!session.candidates) {
+    const more = async () => {
+      session.searched = true;
       await this.curtain(`window.__holyCurtain&&__holyCurtain.say('Buscando este título en tus otros sitios…')`);
-      session.candidates = await this.catalog.elsewhere(session.item, session.tried).catch(() => []);
-    }
-    while (session.candidates.length && this.session === session) {
+      session.candidates = [...(session.candidates || []), ...await this.catalog.elsewhere(session.item, session.tried).catch(() => [])];
+    };
+    if (!session.candidates?.length && !session.searched) await more();
+    while (this.session === session) {
+      if (!session.candidates.length) { if (session.searched) break; await more(); continue; }
       const candidate = session.candidates.shift();
       if (session.tried.has(candidate.source)) continue;
       session.tried.add(candidate.source);
@@ -286,6 +338,7 @@ export class HolyBridge extends BrowserBridge {
   }
   async stop() {
     clearInterval(this.watchTimer);
+    clearInterval(this.heartbeatTimer);
     await this.endSession().catch(() => {});
     if (this.remoteScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.remoteScript }).catch(() => {});
     await super.stop();

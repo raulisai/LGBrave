@@ -1,0 +1,423 @@
+{
+  "capturedAt": "2026-10-24T03:01:57.820Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "1-animeyt-4",
+      "source": "animeyt",
+      "title": "Kusuriya no Hitorigoto",
+      "page": "https://animeyt.cc/118862/anime/kusuriya-no-hitorigoto-temporada-3-capitulo-4/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 13.6,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "JKAnime",
+      "key": "https://jkanime.net/kusuriya-no-hitorigoto/",
+      "position": {
+        "first": {
+          "t": 0.1,
+          "d": 1370.0771490000004
+        },
+        "last": {
+          "t": 10.158344,
+          "d": 1370.0771490000004
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 10,
+        "duration": 1370
+      }
+    },
+    {
+      "label": "2-jkanime-1180",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/1180/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 11.8,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.189167,
+          "d": 1415.6647179999986
+        },
+        "last": {
+          "t": 7.528834,
+          "d": 1415.6647179999986
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 8,
+        "duration": 1416
+      }
+    },
+    {
+      "label": "3-jkanime-1179",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/1179/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 11.9,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.191055,
+          "d": 1415.7480459999997
+        },
+        "last": {
+          "t": 11.242766,
+          "d": 1415.7480459999997
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1416
+      }
+    },
+    {
+      "label": "4-jkanime-1150",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/1150/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 10.9,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 0.688667,
+          "d": 1415.748143
+        },
+        "last": {
+          "t": 10.698667,
+          "d": 1415.748143
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1416
+      }
+    },
+    {
+      "label": "5-jkanime-1100",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/1100/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 11.2,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.1574,
+          "d": 1430.8884320000002
+        },
+        "last": {
+          "t": 11.1674,
+          "d": 1430.8884320000002
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1431
+      }
+    },
+    {
+      "label": "6-jkanime-1000",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/1000/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 10.1,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.199111,
+          "d": 1430.7215409999992
+        },
+        "last": {
+          "t": 11.209111,
+          "d": 1430.7215409999992
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1431
+      }
+    },
+    {
+      "label": "7-jkanime-800",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/800/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 9.2,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.209544,
+          "d": 1435.184068000002
+        },
+        "last": {
+          "t": 11.219544,
+          "d": 1435.184068000002
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1435
+      }
+    },
+    {
+      "label": "8-jkanime-500",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/500/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 12,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.167833,
+          "d": 1388.8460619999998
+        },
+        "last": {
+          "t": 11.219544,
+          "d": 1388.8460619999998
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1389
+      }
+    },
+    {
+      "label": "9-jkanime-100",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/100/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 11,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.000622,
+          "d": 1385.741013
+        },
+        "last": {
+          "t": 10.798411,
+          "d": 1385.741013
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1386
+      }
+    },
+    {
+      "label": "10-jkanime-1",
+      "source": "jkanime",
+      "title": "One Piece",
+      "page": "https://jkanime.net/one-piece/1/",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 11,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.209544,
+          "d": 1446.7369750000003
+        },
+        "last": {
+          "t": 11.219544,
+          "d": 1446.7369750000003
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1447
+      }
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.148:43190/holy/"
+      }
+    ],
+    "memory": "memory  1252016  881584  123516  53784   246916      259128"
+  },
+  "after": {
+    "memory": "memory  1252016  868496  144288  49564   239232      274756"
+  },
+  "bridgeErrors": []
+}

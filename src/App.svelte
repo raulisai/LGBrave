@@ -305,12 +305,22 @@
     else if (code === 404 && !inNav && focused && !focused.chip) { event.preventDefault(); openSheet(focused); }
     else if (code === 405 && section === 'gustos') { event.preventDefault(); resetTaste(); }
     else if (code === 461 || code === 27) {
-      if (opening) { event.preventDefault(); opening = null; command('home'); }
-      else if (episodesView) { event.preventDefault(); closeEpisodes(); }
-      else if (inNav) { event.preventDefault(); inNav = false; }
-      else if (rowIndex > 0) { event.preventDefault(); rowIndex = 0; }
-      else if (section !== 'inicio') { event.preventDefault(); chooseSection('inicio'); }
+      event.preventDefault();
+      if (opening) { opening = null; command('home'); }
+      else if (episodesView) closeEpisodes();
+      else if (inNav) inNav = false;
+      else if (rowIndex > 0) rowIndex = 0;
+      else if (section !== 'inicio') chooseSection('inicio');
+      else leaveApp();
     }
+  }
+  // Holy handles Back itself (appinfo disableBackHistoryAPI): at the top of the home, twice exits.
+  let exitArmed = 0;
+  function leaveApp() {
+    if (Date.now() - exitArmed > 3000) { exitArmed = Date.now(); notice = 'Pulsa Atrás otra vez para salir de Holy.'; return; }
+    const system = window.webOSSystem || window.PalmSystem;
+    try { if (system?.platformBack) { system.platformBack(); return; } } catch { /* Try closing below. */ }
+    window.close();
   }
   function refresh() {
     notice = 'Buscando estrenos en tus sitios…';

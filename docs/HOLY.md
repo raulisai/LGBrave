@@ -163,3 +163,37 @@ Mac: `--item=doramasflix:Hope` → Cuevana, reproduce y avanza.
 | Buscar (`search-validation.json`) | 7 sitios responden en 0,1–4,4 s (Asia Live Action sin buscador: 0); One Piece → 24 bloques → ep. 1180 en 10 s, avanza; Atrás |
 
 Hallazgo: el historial del usuario perdió «Identification» a las 19:02 (guardado desde la TV; la única vía es el botón rojo «Quitar de la fila», que actuaba con una pulsación). Ahora pide dos pulsaciones en 4 s.
+
+## Holy 0.4.1 · Atrás siempre vuelve y anime en JKAnime primero (2026-10-23 21:10)
+
+### La pantalla negra al volver
+
+El usuario veía una película, pulsaba Atrás (o salía y volvía) y la app quedaba bloqueada o en negro. Tres causas:
+
+1. **webOS hacía «historia atrás»** con el botón físico: el reproductor volvía a la página empaquetada de la app (`file://…/index.html`) o se quedaba sin página. Ahora `appinfo.json` lleva `disableBackHistoryAPI: true`: la app recibe la tecla 461 y decide.
+2. **Tras reconectar el Mac** quedaban dos manejadores de Atrás en la página (el de la conexión vieja y el de la nueva); el viejo respondía primero, hablaba con una conexión muerta y cortaba la tecla. Ahora cada conexión sella la página (`data-holy-bridge="<mundo>|<hora>"` cada 2 s, visible para todos los mundos aislados) y solo responde el manejador de la conexión viva; los viejos se apartan.
+3. **Sin Mac**, el manejador del iframe del reproductor (donde está el foco: `IFRAME https://…lol/v/…` en Cuevana) intentaba `top.location.assign`, que un iframe de otro origen no puede usar. Ahora pide a la página de arriba (que tiene el mismo manejador) que vaya al inicio por `postMessage` y además prueba `top.location.href`.
+
+Además, cualquier navegación de la página principal al inicio cierra la sesión de reproducción en el Mac (guarda la posición), y el Mac arma el manejador también en la página que ya estaba abierta cuando se conecta. En el inicio, Atrás sale de la lista de episodios, el menú, las filas y las secciones; en Inicio avisa «Pulsa Atrás otra vez para salir de Holy» y una segunda pulsación en 3 s sale de la app (la salida en sí no se probó en la TV).
+
+### Anime en JKAnime primero
+
+`PREFERRED = { anime: 'jkanime' }` (`catalog.mjs`): al abrir un episodio de anime de otro sitio, Holy busca el mismo episodio en JKAnime (`catalog.elsewhere(…, { only })`) y lo abre ahí; el sitio elegido queda como siguiente opción y después los demás. La coincidencia de títulos es más estricta con arcos: una serie solo coincide si una de las dos es el título principal sin subtítulo. Mac: AnimeYT → JKAnime en 8/8 episodios recientes.
+
+### Pruebas en la TV (`evidence/holy/tv/`)
+
+Atrás se envió desde el Mac como la tecla 461 que webOS entrega a la app con `disableBackHistoryAPI`; el botón físico no se puede pulsar sin emparejar un control (pide permiso en la TV): lo confirma el usuario.
+
+| Prueba | Resultado |
+| --- | --- |
+| Recién abierta → película → Atrás | Inicio en 24 s (incluye arrancar la película), misma app, sesión cerrada |
+| Desde el inicio → película → Atrás | Inicio, 19 s |
+| Mac se reconecta viendo la película → Atrás | Inicio, 23 s (antes: se quedaba en el reproductor) |
+| Mac desconectado viendo la película → Atrás | **La página va sola al inicio** (antes: se quedaba) |
+| Salir a Ajustes y volver → Atrás | Volvió a la película (misma app) y Atrás llevó al inicio |
+| Atrás en Inicio | Avisa «Pulsa Atrás otra vez…», sigue abierta (`back-home-validation.json`) |
+| One Piece en JKAnime (`episodes-validation.json`) | 1180, 1179, 1150, 1100, 1000, 800, 500, 100 y 1: 9/9 reproducen solos en 9,2–12 s, avanzan, Atrás vuelve, posición guardada; app sin cierres |
+| AnimeYT «Kusuriya no Hitorigoto» ep. 4 | Abre en JKAnime, 13,6 s, avanza |
+
+El iframe del reproductor de Cuevana corre en el mismo proceso en la TV (`playerTargets: 0`); los iframes con proceso propio (OOPIF) seguirían sin el manejador, hoy no se ven en WAM.
+

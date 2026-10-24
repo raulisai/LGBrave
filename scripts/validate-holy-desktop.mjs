@@ -62,6 +62,14 @@ try {
   // --item=source:Title plays exactly that catalogue title (e.g. a copy with no servers, to see the fallback).
   const wanted = process.argv.find(arg => arg.startsWith('--item='))?.slice(7);
   if (wanted) { const [source, ...title] = wanted.split(':'); samples.splice(0, samples.length, catalog.items.find(item => item.source === source && item.title.toLowerCase() === title.join(':').toLowerCase())); }
+  // --episodes=source|show URL|title|1180,1100,1 plays those episodes of a show (e.g. One Piece on JKAnime).
+  const episodesArg = process.argv.find(arg => arg.startsWith('--episodes='))?.slice(11);
+  if (episodesArg) {
+    const [source, show, title, numbers] = episodesArg.split('|');
+    const list = (await catalog.episodes(source, show)).flatMap(season => season.episodes);
+    const picked = numbers.split(',').map(Number).map(number => list.find(entry => entry.episode === number)).filter(Boolean);
+    samples.splice(0, samples.length, ...picked.map(entry => ({ source, kind: 'anime', title, show, url: entry.url, episode: entry.episode, subtitle: entry.label, genres: [] })));
+  }
   const watch = async (item, label, holdSeconds = 8) => {
     const sample = { label, source: item.source, title: item.title, page: item.url };
     report.samples.push(sample); save();
@@ -99,11 +107,11 @@ try {
   };
   for (const [index, item] of samples.entries()) {
     if (only && item.source !== only) continue;
-    try { await watch(item, `${index + 1}-${item.source}`, index === 0 && !wanted ? 30 : 8); }
+    try { await watch(item, `${index + 1}-${item.source}${item.episode ? '-' + item.episode : ''}`, index === 0 && !wanted && !episodesArg ? 30 : 8); }
     catch (error) { report.errors.push(`${item.source}: ${error.message}`); save(); }
   }
   // Resume: the first title opens again at the saved second.
-  const first = samples.find(item => !only || item.source === only);
+  const first = episodesArg ? null : samples.find(item => !only || item.source === only);
   const saved = first && library.get(entryKey(first));
   if (saved?.t > 20) {
     const sample = await watch(first, 'resume', 4);

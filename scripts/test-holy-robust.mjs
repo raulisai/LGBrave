@@ -8,6 +8,7 @@ import { CONNECTORS } from './holy/connectors.mjs';
 import { Library } from './holy/library.mjs';
 import { Catalog, sameTitle, episodeOf } from './holy/catalog.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
+import { home } from './browser-bridge.mjs';
 import { startServer } from './holy/server.mjs';
 import { sectionRows, episodeRows } from '../src/holy.js';
 
@@ -243,6 +244,18 @@ try {
     assert.equal(calls.filter(call => call.method === 'Page.navigate').at(-1).params.url, 'https://otro.example/e/9');
     assert.equal(bridge.statusPayload().holy.session.site, 'Otro sitio');
     await assert.rejects(bridge.command({ action: 'play', value: { url: 'https://site.example/serie/', title: 'Serie', kind: 'anime', isShow: true } }), /episodio/);
+    // Anime goes to JKAnime first; the picked site is the next choice.
+    const asked = [];
+    catalog.resolve = async item => { asked.push(item.source); return item.source === 'jkanime' ? { url: 'https://jkanime.net/jkplayer/um?e=1', referrer: item.url } : { url: 'https://animeyt.example/mp4' }; };
+    catalog.elsewhere = async (item, tried, options = {}) => (options.only === 'jkanime' ? [{ source: 'jkanime', kind: 'anime', title: 'One Piece', url: 'https://jkanime.net/one-piece/1180/', show: 'https://jkanime.net/one-piece/' }] : []);
+    catalog.connector = id => ({ name: id === 'jkanime' ? 'JKAnime' : id });
+    await bridge.command({ action: 'play', value: { url: 'https://animeyt.cc/1/anime/one-piece-capitulo-1180/', title: 'One Piece: Arco de Elbaph', kind: 'anime', source: 'animeyt', episode: 1180 } });
+    assert.equal(calls.filter(call => call.method === 'Page.navigate').at(-1).params.url, 'https://jkanime.net/jkplayer/um?e=1');
+    assert.deepEqual([asked, bridge.session.site, bridge.session.candidates.map(entry => entry.source)], [['jkanime'], 'JKAnime', ['animeyt']]);
+    catalog.connector = id => ({ name: id === 'otro' ? 'Otro sitio' : id });
+    // Back reaching the home by itself (no Mac answer) ends the playback session.
+    await bridge.event({ method: 'Page.frameNavigated', params: { frame: { id: 'main', url: home } } });
+    assert.equal(bridge.session, null);
     // A refused title (only unsafe servers, nowhere else) never navigates.
     catalog.elsewhere = async () => [];
     const before = calls.filter(call => call.method === 'Page.navigate').length;
@@ -258,6 +271,8 @@ try {
     assert.ok(sameTitle({ title: 'Hope', kind: 'movie' }, { title: 'Hope: El primer impacto', kind: 'movie' }));
     assert.ok(!sameTitle({ title: 'Hope', kind: 'movie', year: '2026' }, { title: 'Hope', kind: 'movie', year: '2013' }));
     assert.ok(!sameTitle({ title: 'Tokyo Revengers: Santen', kind: 'anime' }, { title: 'Tokyo Revengers: Tenjiku', kind: 'anime' }));
+    assert.ok(sameTitle({ title: 'One Piece: Arco de Elbaph', kind: 'anime' }, { title: 'One Piece', kind: 'anime' }));
+    assert.ok(sameTitle({ title: 'One Piece', kind: 'anime' }, { title: 'One Piece: Arco de Elbaph', kind: 'anime' }));
     assert.deepEqual(episodeOf({ url: 'https://doramasflix.io/capitulos/x-2x7' }), { season: 2, episode: 7 });
     assert.deepEqual(episodeOf({ url: 'https://jkanime.net/one-piece/1180/' }), { season: null, episode: 1180 });
     const site = (id, results, seasons = []) => ({ id, name: id, site: `https://${id}.example/`, parseHome: () => [], search: async () => results, episodes: async () => seasons });
@@ -304,6 +319,39 @@ try {
       const gz = await fetch(base + '/holy-api/home', { headers: { 'Accept-Encoding': 'gzip' } });
       assert.ok(gz.ok && (await gz.json()).rows);
     } finally { server.close(); }
+  });
+
+  await check('Atrás: la conexión viva pide el inicio; una vieja se aparta; sin conexión va al inicio sola', async () => {
+    const { holyRemote, heartbeatSource } = await import('./holy/page-scripts.mjs');
+    let assigned = '';
+    const sent = [];
+    const root = { dataset: {} };
+    const worlds = name => {
+      // Each isolated world has its own window but shares the page's DOM.
+      const listeners = [];
+      const win = { addEventListener: (type, fn) => type === 'keydown' && listeners.push(fn), location: { get href() { return 'https://player.example/'; }, set href(url) { assigned = url; } } };
+      win.top = win;
+      globalThis.window = win; globalThis.location = win.location; globalThis.addEventListener = win.addEventListener; globalThis.document = { documentElement: root };
+      holyRemote(['http://mac/holy/'], 'http://mac/holy/', name);
+      return { win, listeners };
+    };
+    const old = worlds('w1'), current = worlds('w2');
+    let stamp = 0;
+    const press = () => { const event = { keyCode: 461, timeStamp: ++stamp, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, stopImmediatePropagation() { this.stopped = true; } };
+      for (const fn of [...old.listeners, ...current.listeners]) { if (event.stopped) break; fn(event); } return event; };
+    current.win.__lgLabCommand = payload => sent.push('w2 ' + payload);
+    old.win.__lgLabCommand = payload => sent.push('w1 ' + payload);
+    // The newer connection (w2) is live: the old world steps aside, w2 asks the Mac.
+    eval(heartbeatSource('w2').replace('document.documentElement', 'root').replace('document.documentElement', 'root'));
+    press();
+    assert.deepEqual([sent, assigned], [['w2 {"action":"back"}'], '']);
+    // No live connection (stamp too old): the page goes home itself, once.
+    root.dataset.holyBridge = 'w2|' + (Date.now() - 20000);
+    const event = press();
+    assert.deepEqual([assigned, event.defaultPrevented, sent.length], ['http://mac/holy/', true, 1]);
+    delete globalThis.window; delete globalThis.location; delete globalThis.addEventListener; delete globalThis.document;
+    const manifest = JSON.parse(readFileSync(new URL('../public/appinfo.json', import.meta.url), 'utf8'));
+    assert.equal(manifest.disableBackHistoryAPI, true);
   });
 
   await check('Proceso del Mac: sobrevive al corte de conexión con la TV; otros errores salen para reiniciarse', async () => {

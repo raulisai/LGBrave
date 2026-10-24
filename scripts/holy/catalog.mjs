@@ -41,6 +41,8 @@ const GENRE_ROWS = [['Acción', 'Acción'], ['Comedia', 'Comedia'], ['Drama', 'D
   ['Documental', 'Documentales'], ['Bélica', 'Bélicas'], ['Shounen', 'Anime shounen'], ['Vida cotidiana', 'Vida cotidiana'], ['Sobrenatural', 'Sobrenatural']];
 // What the TV needs of each title: long synopses are cut so the home stays light.
 const slim = item => (item.overview && item.overview.length > 280 ? { ...item, overview: item.overview.slice(0, 277).trimEnd() + '…' } : item);
+// The owner's first choice per kind: anime goes to JKAnime first, wherever it was picked.
+export const PREFERRED = { anime: 'jkanime' };
 // Which of the owner's sites carry each kind of title (for finding a title elsewhere).
 const KIND_SITES = { movie: ['cuevana', 'repelishd', 'doramasflix'], series: ['cuevana'], anime: ['jkanime', 'animeyt'], dorama: ['doramasflix', 'doramasmp4', 'asialiveaction'] };
 const plain = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, ' y ').replace(/[^a-z0-9]+/g, ' ').trim();
@@ -50,8 +52,13 @@ export function sameTitle(a, b) {
   if (!x || !y) return false;
   const main = value => plain(String(value).split(/[:(]/)[0]);
   const close = !(Number(a?.year) > 1900 && Number(b?.year) > 1900) || Math.abs(Number(a.year) - Number(b.year)) <= 1;
-  // Shows split into arcs share their main title («Tokyo Revengers: …»): only films match on it.
-  return close && (x === y || (a?.kind === 'movie' && b?.kind === 'movie' && main(a.title).length >= 4 && main(a.title) === main(b.title)));
+  // Films match on their main title. Shows split into arcs share it too («Tokyo Revengers: A» ≠ «: B»),
+  // so a show only matches when one side is the bare main title («One Piece» = «One Piece: Arco de Elbaph»);
+  // the episode number then decides.
+  if (x === y) return close;
+  if (main(a.title).length < 4 || main(a.title) !== main(b.title)) return false;
+  if (a?.kind === 'movie' && b?.kind === 'movie') return close;
+  return close && (x === main(a.title) || y === main(b.title));
 }
 const sameKind = (a, b) => a.kind === b.kind || (['series', 'dorama'].includes(a.kind) && ['series', 'dorama'].includes(b.kind));
 // Season and episode from the fields or the address patterns the sites use.
@@ -219,14 +226,15 @@ export class Catalog {
   // The same title on the owner's other sites, for when its own site cannot play it:
   // copies already in the catalogue first, then each compatible site's search. For an
   // episode, the same episode number (and season when both sites number seasons).
-  async elsewhere(item, tried = new Set()) {
+  async elsewhere(item, tried = new Set(), { only } = {}) {
     const found = [];
+    const allowed = id => !only || id === only;
     const add = candidate => { if (candidate && !tried.has(candidate.source) && candidate.url !== item.url && !found.some(other => other.url === candidate.url)) found.push(candidate); };
     const wanted = episodeOf(item);
-    for (const other of this.items) if (!other.isShow && sameTitle(item, other) && sameKind(item, other) && (item.kind === 'movie' || sameEpisode(wanted, episodeOf(other)))) add(other);
+    for (const other of this.items) if (allowed(other.source) && !other.isShow && sameTitle(item, other) && sameKind(item, other) && (item.kind === 'movie' || sameEpisode(wanted, episodeOf(other)))) add(other);
     const query = String(item.title || '').split(/[:(]/)[0].trim().slice(0, 40);
     for (const id of KIND_SITES[item.kind] || []) {
-      if (tried.has(id) || query.length < 2) continue;
+      if (tried.has(id) || !allowed(id) || query.length < 2) continue;
       const results = await this.search(id, query).catch(() => []);
       for (const result of results.filter(result => sameTitle(item, result)).slice(0, 2)) {
         if (!result.isShow) { if (item.kind === 'movie' || sameEpisode(wanted, episodeOf(result))) add(result); continue; }

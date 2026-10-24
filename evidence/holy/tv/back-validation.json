@@ -1,0 +1,71 @@
+{
+  "capturedAt": "2026-10-24T02:57:02.919Z",
+  "scope": "TV real. Atrás enviado como keydown 461 (lo que webOS entrega con disableBackHistoryAPI). El botón físico lo confirma el usuario.",
+  "cases": [
+    {
+      "name": "Recién abierta: reproducir desde la primera pantalla y Atrás",
+      "firstPage": true,
+      "player": {
+        "focus": "IFRAME https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/uf611mx8ayux",
+        "playerTargets": 0
+      },
+      "reachedHome": true,
+      "seconds": 24.1,
+      "sameApp": true,
+      "sessionEnded": true,
+      "url": "http://192.168.1.148:43190/holy/",
+      "ok": true
+    },
+    {
+      "name": "Reproducir desde el inicio y Atrás",
+      "player": {
+        "focus": "IFRAME https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/uf611mx8ayux",
+        "playerTargets": 0
+      },
+      "reachedHome": true,
+      "seconds": 19.2,
+      "sameApp": true,
+      "sessionEnded": true,
+      "url": "http://192.168.1.148:43190/holy/",
+      "ok": true
+    },
+    {
+      "name": "El Mac se reconecta mientras se ve una película; luego Atrás",
+      "reconnected": true,
+      "reachedHome": true,
+      "seconds": 22.8,
+      "sameApp": true,
+      "sessionEnded": true,
+      "url": "http://192.168.1.148:43190/holy/",
+      "ok": true
+    },
+    {
+      "name": "El Mac se desconecta mientras se ve una película; luego Atrás",
+      "stillOnPlayer": true,
+      "homeWithoutMac": true,
+      "reachedHome": true,
+      "seconds": 29.5,
+      "sameApp": true,
+      "sessionEnded": true,
+      "url": "http://192.168.1.148:43190/holy/",
+      "ok": true
+    },
+    {
+      "name": "Salir a otra app durante una película y volver; luego Atrás",
+      "returnedTo": "https://tungtungsahur.cuevana3c.pro/",
+      "reachedHome": true,
+      "seconds": 28.8,
+      "sameApp": true,
+      "sessionEnded": true,
+      "url": "http://192.168.1.148:43190/holy/",
+      "ok": true
+    },
+    {
+      "name": "Atrás en el inicio: una pulsación solo avisa",
+      "toast": "",
+      "stillOpen": true,
+      "ok": false
+    }
+  ],
+  "errors": []
+}

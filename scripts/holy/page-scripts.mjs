@@ -49,15 +49,39 @@ export function holyCurtain(data) {
 
 // Back on the remote returns to Holy from any frame of a player page, even when
 // focus sits inside the player's iframe. Runs in the bridge's isolated world.
-export function holyRemote(homes = []) {
+// Each Mac connection stamps the page (data-holy-bridge="<its world>|<time>", visible to
+// every world): only the handler of the live connection asks the Mac; handlers left by
+// an older connection step aside; with no live connection at all, the first handler
+// takes the page to Holy's home itself. Back never does nothing.
+// A player iframe may not navigate the top page (cross-origin Location, sandbox), so
+// it asks the top page's own handler to leave and also tries directly.
+export function holyRemote(homes = [], home = '', world = '') {
   // Holy's own home handles its keys itself.
-  if (window.__holyRemote || homes.some(home => location.href.startsWith(home))) return;
+  if (window.__holyRemote || homes.some(entry => location.href.startsWith(entry))) return;
   Object.defineProperty(window, '__holyRemote', { value: true });
+  const leave = () => {
+    if (!home) return;
+    if (window.top !== window) try { window.top.postMessage({ holyHome: home }, '*'); } catch { /* Try directly below. */ }
+    try { window.top.location.href = home; } catch { /* The top page leaves on the message. */ }
+  };
+  addEventListener('message', event => {
+    if (window.top !== window || event.data?.holyHome !== home || window.__holyLeaving) return;
+    window.__holyLeaving = true;
+    location.href = home;
+  });
   addEventListener('keydown', event => {
     if (event.keyCode !== 461 && event.keyCode !== 27) return;
-    if (typeof window.__lgLabCommand !== 'function') return;
+    const root = document.documentElement;
+    const [owner, at] = String(root?.dataset.holyBridge || '').split('|');
+    const live = Date.now() - Number(at || 0) < 6000;
+    if (live && owner !== world) return; // A newer connection's handler answers.
+    if (root?.dataset.holyBack === String(event.timeStamp)) return;
+    if (root) root.dataset.holyBack = String(event.timeStamp);
     event.preventDefault(); event.stopImmediatePropagation();
-    try { window.__lgLabCommand(JSON.stringify({ action: 'back' })); } catch { /* Bridge reconnecting. */ }
+    if (live && typeof window.__lgLabCommand === 'function') {
+      try { window.__lgLabCommand(JSON.stringify({ action: 'back' })); return; } catch { /* Go home directly below. */ }
+    }
+    leave();
   }, true);
 }
 
@@ -151,6 +175,8 @@ export function holySeek(seconds) {
 
 export const seekSource = seconds => `(${holySeek.toString()})(${Number(seconds) || 0})`;
 export const curtainSource = data => `(${holyCurtain.toString()})(${JSON.stringify(data)});`;
-export const remoteSource = homes => `(${holyRemote.toString()})(${JSON.stringify(homes)});`;
+export const remoteSource = (homes, home = '', world = '') => `(${holyRemote.toString()})(${JSON.stringify(homes)},${JSON.stringify(home)},${JSON.stringify(world)});`;
+// The live connection stamps each page every couple of seconds.
+export const heartbeatSource = world => `document.documentElement&&(document.documentElement.dataset.holyBridge=${JSON.stringify(world)}+'|'+Date.now())`;
 export const autoplaySource = options => `(${holyAutoplay.toString()})(${JSON.stringify(options || {})})`;
 export const theaterSource = `(${holyTheater.toString()})()`;
