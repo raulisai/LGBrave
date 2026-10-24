@@ -11,6 +11,10 @@ const START_TIMEOUT = 45000;
 // A server that shows nothing playable this long is swapped for the title's next one.
 const SERVER_TIMEOUT = 28000;
 const SAVE_EVERY = 10000;
+// A server that does not even show a video player is given up sooner than one that is loading.
+const EMPTY_TIMEOUT = 15000;
+// After this many failed servers of one site, the same title on another site comes first.
+const SITE_TRIES = 2;
 // A video that stops advancing this long in the middle (not paused by the owner) is moved to
 // another server or site, at the same second; at most MAX_RESCUES times per title.
 const MID_STALL = 25000;
@@ -30,6 +34,7 @@ export class HolyBridge extends BrowserBridge {
     this.apiBase = options.apiBase || origin();
     this.mute = options.mute === true;
     this.serverTimeout = options.serverTimeout || SERVER_TIMEOUT;
+    this.emptyTimeout = options.emptyTimeout || EMPTY_TIMEOUT;
     this.startTimeout = options.startTimeout || START_TIMEOUT;
     this.stallTimeout = options.stallTimeout || 20000;
     this.nextDelay = options.nextDelay || NEXT_DELAY;
@@ -219,6 +224,7 @@ export class HolyBridge extends BrowserBridge {
     session.queue = [...(target.alternatives || [])];
     session.referrer = target.referrer;
     session.servers = (session.servers || 0) + 1;
+    session.siteServers = 1; session.sawVideo = false;
     await this.openServer(session, target.url);
   }
   // Next site with the same title that resolves to a player; null when none is left.
@@ -266,8 +272,7 @@ export class HolyBridge extends BrowserBridge {
     await this.status();
     const result = await this.cdp.call('Page.navigate', { url, ...(session.referrer ? { referrer: session.referrer } : {}) }).catch(error => ({ errorText: error.message }));
     if (result.errorText && this.session === session) {
-      if (session.queue?.length) return this.nextServer(session);
-      if (await this.nextSite(session)) return;
+      if (await this.serverFailed(session)) return;
       session.phase = 'failed'; await this.navigationFailed(this.readableError(result.errorText));
     }
   }
@@ -277,6 +282,7 @@ export class HolyBridge extends BrowserBridge {
     if (session.item?.url) this.catalog.forgetPlayer?.(session.item.url);
     const url = session.queue.shift();
     session.servers++;
+    session.siteServers = (session.siteServers || 0) + 1; session.sawVideo = false;
     // After a start the curtain script was dropped: cover the next server's page again.
     if (!this.curtainScript) {
       const item = session.item;
@@ -306,11 +312,10 @@ export class HolyBridge extends BrowserBridge {
     const session = this.session;
     if (!session || this.watching || !['opening', 'playing', 'manual'].includes(session.phase)) return;
     if (this.navigation.phase === 'error') {
-      if (session.phase === 'opening' && session.queue?.length) { await this.nextServer(session); return; }
-      if (session.phase === 'opening' && await this.nextSite(session)) return;
+      if (session.phase === 'opening' && await this.serverFailed(session)) return;
       await this.endSession(); await this.status(); return;
     }
-    if (session.phase === 'opening' && session.queue?.length && Date.now() - session.opened > this.serverTimeout && !session.position) { await this.nextServer(session); return; }
+    if (session.phase === 'opening' && session.queue?.length && Date.now() - session.opened > this.serverTimeout && !session.position) { await this.serverFailed(session); return; }
     if (this.navigation.phase === 'loading' && session.phase === 'opening' && Date.now() - session.opened < 4000) return;
     const page = this.frames.get(this.mainFrame) || '';
     if (!/^https?:/.test(page) || page.startsWith(home)) return;
@@ -322,6 +327,7 @@ export class HolyBridge extends BrowserBridge {
         new Promise(resolve => setTimeout(resolve, 2500, null))
       ])))).filter(Boolean);
       if (this.session !== session) return;
+      if (results.some(frame => frame.videos.length)) session.sawVideo = true;
       session.frames = results.map(frame => ({ url: frame.url.split('?')[0], top: frame.top, videos: frame.videos.length, action: frame.action })).slice(0, 12);
       const videos = results.flatMap(frame => frame.videos).filter(video => video.d > 60);
       const playing = videos.filter(video => !video.paused && video.t > 0).sort((a, b) => b.d - a.d)[0];
@@ -331,7 +337,7 @@ export class HolyBridge extends BrowserBridge {
       if (playing && session.queue?.length && playing.t < 15) {
         const stall = session.stall;
         if (!stall || playing.t > stall.t + 0.5) session.stall = { t: playing.t, since: Date.now() };
-        else if (Date.now() - stall.since > this.stallTimeout) { session.stall = null; await this.nextServer(session); return; }
+        else if (Date.now() - stall.since > this.stallTimeout) { session.stall = null; await this.serverFailed(session); return; }
       }
       const best = playing || (session.phase === 'playing' ? videos.sort((a, b) => b.d - a.d)[0] : null);
       if (best && Date.now() - session.lastSave > SAVE_EVERY) {
@@ -355,9 +361,9 @@ export class HolyBridge extends BrowserBridge {
         if (best.paused || !mid || best.t > mid.t + 0.5) session.midStall = { t: best.t, since: Date.now() };
         else if (Date.now() - mid.since > this.midStall && (session.rescues || 0) < MAX_RESCUES) { await this.rescue(session, best.t); return; }
       }
-      if (session.phase === 'opening' && Date.now() - session.opened > (session.queue?.length ? this.serverTimeout : this.startTimeout) && !session.position) {
-        if (session.queue?.length) { await this.nextServer(session); return; }
-        if (await this.nextSite(session)) return;
+      const limit = session.queue?.length || session.leftover?.queue?.length ? (session.sawVideo ? this.serverTimeout : this.emptyTimeout) : this.startTimeout;
+      if (session.phase === 'opening' && Date.now() - session.opened > limit && !session.position) {
+        if (await this.serverFailed(session)) return;
         // Leave the page usable: the owner can pick another server with the remote.
         session.phase = 'manual'; session.error = 'No se pudo iniciar solo';
         await this.curtain(`window.__holyCurtain&&(__holyCurtain.say('No arrancó solo. Elige un servidor con el control.'),setTimeout(()=>__holyCurtain.hide(),2500))`);
@@ -365,6 +371,28 @@ export class HolyBridge extends BrowserBridge {
         await this.status();
       }
     } finally { this.watching = false; }
+  }
+  // This server did not start. Order: two servers of a site, then the same title on another
+  // site, then the first site's remaining servers. False when nothing is left.
+  async serverFailed(session) {
+    if (session.queue?.length && session.siteServers >= SITE_TRIES && !session.leftover && this.catalog.elsewhere) {
+      const leftover = { queue: session.queue, referrer: session.referrer, item: session.item, site: session.site, key: session.key };
+      session.queue = [];
+      if (await this.nextSite(session)) { session.leftover = leftover; return true; }
+      if (this.session !== session) return true;
+      session.queue = leftover.queue;
+    }
+    if (session.queue?.length) { await this.nextServer(session); return true; }
+    if (await this.nextSite(session)) return true;
+    if (this.session !== session) return true;
+    if (session.leftover?.queue?.length) {
+      const back = session.leftover;
+      session.leftover = { queue: [] };
+      Object.assign(session, { queue: back.queue, referrer: back.referrer, item: back.item, site: back.site, key: back.key });
+      await this.nextServer(session);
+      return true;
+    }
+    return false;
   }
   async rescue(session, at) {
     session.rescues = (session.rescues || 0) + 1;

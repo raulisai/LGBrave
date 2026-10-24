@@ -68,8 +68,28 @@
   let sheet = $state(null);
   const askedShown = new Set();
   const cardWidth = layout => ({ landscape: 400, chip: 240 })[layout] || 230;
-  // Only cards around a row's position are drawn; the rest keep their place as empty boxes.
-  const near = (shelf, c) => { const at = columns[shelf.id] || 0; return c >= at - 3 && c <= at + 9; };
+  // Only a slice of cards around a row's position is drawn (an empty block keeps the place of
+  // those before it), and only for the row above (hidden, ready for ↑), this one and two below.
+  // Changing row then builds about a dozen cards instead of every title of the row.
+  const sliceStart = shelf => Math.max(0, (columns[shelf.id] || 0) - 2);
+  // Rows further down are built ahead while the TV is idle (one at a time) and then stay, so
+  // ↓ and ↑ only slide rows that already exist instead of building a dozen cards per press.
+  let warmUntil = $state(2);
+  let warmFor = '';
+  const drawn = (shelf, r) => (r >= Math.min(rowIndex - 1, 0) && r <= Math.max(rowIndex + 2, warmUntil) ? shelf.items.slice(sliceStart(shelf), sliceStart(shelf) + 11) : []);
+  $effect(() => {
+    const key = section + '|' + (episodesView?.token || '');
+    if (key !== warmFor) { warmFor = key; warmUntil = 2; }
+  });
+  $effect(() => {
+    const limit = rows.length - 1;
+    const next = Math.max(warmUntil, rowIndex + 2) + 1;
+    if (next > limit) return;
+    const idle = window.requestIdleCallback || (fn => setTimeout(fn, 150));
+    const stop = window.cancelIdleCallback || clearTimeout;
+    const handle = idle(() => { warmUntil = next; }, { timeout: 700 });
+    return () => stop(handle);
+  });
 
   const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(row => (row.layout ? row : withLayout(row))) : section === 'gustos' ? tasteRows.map(row => ({ ...row, layout: row.id.startsWith('pref-') ? 'chip' : 'poster' })) : sectionRows(data, section));
   const profile = $derived(taste || data.taste || null);
@@ -134,6 +154,20 @@
     });
   });
 
+  // The lit card is marked directly (one class moved from card to card), so a key press costs
+  // the same whether the page holds 30 cards or 300.
+  let litCard = null;
+  const litKey = $derived(pointing ? (pointer ? pointer.r + ':' + pointer.c : '') : !inNav && !inSearch && rows.length ? rowIndex + ':' + column : '');
+  $effect(() => {
+    const key = litKey;
+    rows; warmUntil; columns;
+    tick().then(() => {
+      const next = key && rowsEl ? rowsEl.querySelector(`[data-rc="${key}"]`) : null;
+      if (litCard && litCard !== next) litCard.classList.remove('focus');
+      if (next) next.classList.add('focus');
+      litCard = next;
+    });
+  });
   async function load() {
     if (!apiBase) return;
     try {
@@ -542,7 +576,7 @@
   <div class="backdrop" aria-hidden="true">
     {#key preview?.url}
       {#if preview?.backdrop || preview?.poster}
-        <img class:poster-art={!preview.backdrop} src={img(preview.backdrop || preview.poster)} alt="" />
+        <img class:poster-art={!preview.backdrop} src={img(preview.backdrop || preview.poster)} alt="" decoding="async" />
       {/if}
     {/key}
   </div>
@@ -659,20 +693,18 @@
               {#if (columns[shelf.id] || 0) < shelf.items.length - 5}<button class="page-arrow right" aria-label="Siguientes" onclick={() => page(shelf, 1)}>›</button>{/if}
             {/if}
             <div class="track" style:transform={`translateX(${-(columns[shelf.id] || 0) * (cardWidth(shelf.layout) + 20)}px)`}>
-              <!-- Only rows near the focus get cards: long episode lists stay light on the TV. -->
-              {#each Math.abs(r - rowIndex) <= 2 ? shelf.items : [] as item, c (item.url + c)}
-                {@const active = pointing ? pointer?.r === r && pointer?.c === c : !inNav && !inSearch && r === rowIndex && c === column}
-                {#if !near(shelf, c)}
-                <span class="card ghost" class:landscape={shelf.layout === 'landscape'} class:chip={item.chip} aria-hidden="true"></span>
-                {:else if item.chip}
-                <button class="card chip" class:focus={active} class:liked={item.value === 1} class:disliked={item.value === -1} aria-label={item.title + (item.value === 1 ? ', te gusta' : item.value === -1 ? ', no te gusta' : '')}
+              {#if sliceStart(shelf) > 0 && drawn(shelf, r).length}<span class="spacer" style:width={`${sliceStart(shelf) * (cardWidth(shelf.layout) + 20) - 20}px`}></span>{/if}
+              {#each drawn(shelf, r) as item, i (item.url + '|' + (sliceStart(shelf) + i))}
+                {@const c = sliceStart(shelf) + i}
+                {#if item.chip}
+                <button class="card chip" data-rc={r + ':' + c} class:liked={item.value === 1} class:disliked={item.value === -1} aria-label={item.title + (item.value === 1 ? ', te gusta' : item.value === -1 ? ', no te gusta' : '')}
                   onmouseenter={() => hover(r, c)} onmouseleave={unhover} onclick={() => pick(r, c, item)}>
                   <span class="chip-art"><strong>{item.title}</strong><small>{item.count} títulos</small>
                     {#if item.value === 1}<span class="vote like"><Icon name="check" size={22} stroke={3} /></span>{:else if item.value === -1}<span class="vote dislike"><Icon name="minus" size={22} stroke={3} /></span>{/if}
                   </span>
                 </button>
                 {:else}
-                <button class="card" class:landscape={shelf.layout === 'landscape'} class:focus={active} aria-label={(item.title || '') + (item.subtitle ? ', ' + item.subtitle : '')}
+                <button class="card" data-rc={r + ':' + c} class:landscape={shelf.layout === 'landscape'} aria-label={(item.title || '') + (item.subtitle ? ', ' + item.subtitle : '')}
                   onmouseenter={() => hover(r, c)} onmouseleave={unhover} onclick={() => pick(r, c, item)}>
                   <span class="art">
                     <span class="fallback">{item.title || ''}</span>
@@ -793,7 +825,8 @@
   .shelves{position:absolute;left:0;right:0;top:612px;bottom:0;overflow:hidden;z-index:3;transition:opacity .3s}
   .shelves.nav-focus{opacity:.55}
   .rows{transition:transform .45s var(--ease);will-change:transform}
-  .row{padding:0 0 26px;transition:opacity .35s;animation:fade .3s ease-out}
+  /* Rows off screen are not painted (built rows stay in the page, ready to slide in). */
+  .row{padding:0 0 26px;transition:opacity .35s;animation:fade .3s ease-out;content-visibility:auto;contain-intrinsic-size:auto 420px}
   .row.past{opacity:0}
   .row h2{margin:0 0 4px 96px;font-size:30px;font-weight:700;color:#e5e5e5;letter-spacing:-.2px}
   .row.active h2{color:#fff}
@@ -813,7 +846,7 @@
   .landscape .art{aspect-ratio:16/9}
   .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s ease-out}
   .art img:global(.ready){opacity:1}
-  .card.ghost{display:block;height:1px}
+  .spacer{flex:none;height:1px}
   .fallback{position:absolute;inset:0;display:flex;align-items:flex-end;padding:16px;font-size:22px;font-weight:700;text-align:left;color:#bbb;background:linear-gradient(160deg,#2a2a2a,#121212)}
   .badge{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.72);font-size:16px;font-weight:700;letter-spacing:.4px}
   .caption{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:2px;padding:44px 16px 14px;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.92))}
@@ -823,8 +856,8 @@
   .progress span{display:block;height:100%;border-radius:3px;background:var(--red)}
   .landscape .progress{bottom:6px}
   .next{position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:6px;background:var(--red);font-size:16px;font-weight:800}
-  .card.focus{transform:scale(1.1);z-index:2}
-  .card.focus .art{box-shadow:0 0 0 4px #fff,0 18px 40px rgba(0,0,0,.7)}
+  .card:global(.focus){transform:scale(1.1);z-index:2}
+  .card:global(.focus) .art{box-shadow:0 0 0 4px #fff,0 18px 40px rgba(0,0,0,.7)}
   .card:focus{outline:none}
 
   .empty{position:absolute;left:96px;top:40px;max-width:1100px}
@@ -872,7 +905,7 @@
   .chip-art small{font-size:17px;color:#a8a8a8}
   .chip.liked .chip-art{background:#173d22;border-color:#2e9e4f}
   .chip.disliked .chip-art{background:#3d1717;border-color:#e31f26}
-  .card.chip.focus .chip-art{box-shadow:0 0 0 4px #fff}
+  .card.chip:global(.focus) .chip-art{box-shadow:0 0 0 4px #fff}
   .sheet-scrim{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(0,0,0,.72);animation:fade .2s ease-out}
   .sheet{width:1180px;padding:44px 56px;border-radius:24px;background:#181818;border:1px solid rgba(255,255,255,.14);box-shadow:0 30px 80px rgba(0,0,0,.6);animation:rise .3s var(--ease)}
   .sheet-kicker{margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#e50914}

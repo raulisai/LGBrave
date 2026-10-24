@@ -585,6 +585,43 @@ try {
     assert.match(source, /command\('prepare', plainItem\(item\)\)/);
   });
 
+  await check('Arranque que falla: servidor vacío se deja antes; tras 2 servidores, otro sitio; si falla, los que quedaban', async () => {
+    const calls = [];
+    let videos = [];
+    const cdp = {
+      async call(method, params = {}) {
+        calls.push({ method, params });
+        if (method === 'Page.getFrameTree') return { frameTree: { frame: { id: 'main', url: 'https://example.com/' } } };
+        if (method === 'Page.addScriptToEvaluateOnNewDocument') return { identifier: String(calls.length) };
+        if (method === 'Runtime.evaluate') return { result: { value: { url: 'https://p.example/', top: true, videos, action: '' } } };
+        return {};
+      },
+      async evaluate() { return 'https://example.com/'; },
+      onEvent() { return () => {}; }
+    };
+    let otherSite = true;
+    const catalog = { version: 1, find: () => null, pageFallback: () => false, connector: id => ({ name: id }),
+      resolve: async item => (item.source === 'a' ? { url: 'https://a.example/1', referrer: 'https://a.example/t', alternatives: ['https://a.example/2', 'https://a.example/3', 'https://a.example/4'] } : { url: 'https://b.example/1', referrer: 'https://b.example/t' }),
+      elsewhere: async () => (otherSite ? [{ source: 'b', kind: 'movie', title: 'K', url: 'https://b.example/k' }] : []) };
+    const library = new Library(join(directory, 'order.json'));
+    const bridge = await new HolyBridge(cdp, { preferencesFile: join(directory, 'order-settings.json'), catalog, library, recorder: false, emptyTimeout: 30, serverTimeout: 5000, startTimeout: 5000 }).start();
+    clearInterval(bridge.watchTimer);
+    bridge.contexts.set(5, { id: 5, auxData: { isDefault: true, frameId: 'main' } });
+    const opened = () => calls.filter(call => call.method === 'Page.navigate').map(call => call.params.url);
+    const fail = async () => { bridge.frames.set(bridge.mainFrame, 'https://p.example/'); bridge.navigation.phase = 'complete'; await new Promise(resolve => setTimeout(resolve, 60)); await bridge.watch(); };
+    await bridge.command({ action: 'play', value: { source: 'a', kind: 'movie', title: 'K', url: 'https://a.example/k' } });
+    await fail();                         // a1 shows no player: dropped after 30 ms (not 5 s)
+    await fail();                         // a2 too: two servers of «a» → «b» before a3 and a4
+    await fail();                         // b1 fails, «b» has nothing else → back to a3
+    assert.deepEqual(opened(), ['https://a.example/1', 'https://a.example/2', 'https://b.example/1', 'https://a.example/3']);
+    assert.equal(bridge.session.item.source, 'a');
+    // A server with a player that is still loading gets the full time.
+    videos = [{ t: 0, d: 3000, paused: true, ready: 1, area: 1 }];
+    await fail();
+    assert.equal(opened().length, 4);
+    await bridge.stop();
+  });
+
   await check('Servidor: rutas con datos malos responden sin caerse', async () => {
     const library = new Library(join(directory, 'server.json'));
     const catalog = new Catalog({ file: join(directory, 'sc.json'), detailsFile: join(directory, 'sd.json'), connectors: [], fetch: async () => '' });

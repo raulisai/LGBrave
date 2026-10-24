@@ -148,8 +148,8 @@ try {
     const live = runtime.bridge || bridge;
     const page = runtime.cdp || cdp;
     sample.firstCardsSeconds = await waitFor(() => page.evaluate('document.querySelectorAll(".card:not(.ghost)").length > 5'), 30000).then(() => (Date.now() - opened) / 1000, () => null);
-    // Moving: 24 presses, each timed inside the TV until its frame is laid out.
-    await sleep(3000);
+    // Moving: 24 presses, each timed inside the TV until its frame is laid out (after the idle pre-build).
+    await sleep(10000);
     sample.moves = await page.evaluate(`(async () => {
       const key = code => window.dispatchEvent(new KeyboardEvent('keydown', { keyCode: code, bubbles: true }));
       if (document.querySelector('.sheet')) { key(461); await new Promise(r => setTimeout(r, 400)); }
@@ -176,7 +176,7 @@ try {
     };
     sample.cold = films[0] && await start(films[0], false);
     sample.prepared = films[1] && await start(films[1], true);
-    await shot('speed');
+    await writeFileSync(join(out, 'speed.jpg'), Buffer.from((await page.call('Page.captureScreenshot', { format: 'jpeg', quality: 70 })).data, 'base64'));
     console.log(JSON.stringify(sample));
     save();
     samples.length = 0;

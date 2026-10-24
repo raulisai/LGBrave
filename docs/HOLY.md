@@ -285,3 +285,21 @@ Aparte: `HOLY_LIBRARY=<archivo>` hace que `npm run holy` use otro historial (la 
 
 **Pruebas:** navegador del Mac con ratón real a 1920×1080: pasar por 3 tarjetas no mueve la fila (`translateX(0px)`), se ilumina la del puntero y la vista previa cambia; «›» desplaza 5; la rueda baja una fila; con el ratón quieto, ↓ ↓ → mueven el foco por teclas sin que el puntero lo robe. `npm test` (comprobación de que `hover` no desplaza nada). **TV con el control: pendiente.**
 
+## Holy 0.7.2–0.7.3 · Fluidez medida en la TV y orden de rescate (2026-10-24 02:55)
+
+**Velocidad (`validate-holy-tv.mjs --speed`, TV real).**
+
+| Medida | 0.7.1 | 0.7.2 | 0.7.3 |
+| --- | --- | --- | --- |
+| Abrir hasta ver títulos | 2,9 s | 3,5 s | 6,4 s (primera tras instalar) |
+| Pulsación (mediana) | 104 ms | 72 ms | **58 ms** |
+| Pulsación más lenta | 2,4 s | 1,0 s | **259 ms** |
+| Título sin preparar | 12,2 s | 15,2 s | (falló el sitio, ver abajo) |
+| Título preparado al detenerse | 10,4 s | 11,5 s | 11,2 s |
+
+Medición fina en la página de la TV (lógica + diseño por pulsación): ↑↓ 90–120 ms → ~11 ms; ← → ~17 → ~16 ms con 10× más tarjetas listas. Lo que costaba: al cambiar de fila se construían las tarjetas de la fila nueva (≈ 4,6 ms por tarjeta en la TV) y cada tarjeta recalculaba si tenía el foco; luego, con todo construido, pintar el bloque de filas (89 ms) → `content-visibility:auto` (48 ms). Sombras, transiciones y `will-change` apenas influían.
+
+**Orden de rescate.** En la prueba de 0.7.3, «Klara y el sol» de Cuevana no arrancó en 90 s: 5 servidores (dos espejos `.lol`, vsembed/stellarconductor, vidlink) de ~27 s cada uno, cuando el título también está en RePelisHD. Ahora: servidor sin reproductor → 15 s; tras 2 servidores de un sitio → otro sitio; si ese falla → los servidores restantes del primero. Prueba: `npm test` («Arranque que falla…»).
+
+**7 sitios en la TV (`validation.json`)**: 9/9 arrancan solas (8,3 / 13,2 / 8,8 / 17,2 / 9,3 / 7 / 39,4 / 16,4 / 10,3 s), la app nunca se cerró, Atrás siempre volvió, memoria libre estable. Asia Live Action (ok.ru empezando en el segundo 54 que recordaba) y «reanudar» (5 s de observación) aún no avanzaban al medir; ya se había visto ese comportamiento de ok.ru antes.
+

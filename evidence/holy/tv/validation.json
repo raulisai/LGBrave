@@ -1,17 +1,17 @@
 {
-  "capturedAt": "2026-10-24T01:47:02.044Z",
+  "capturedAt": "2026-10-24T07:30:10.728Z",
   "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
   "samples": [
     {
       "label": "1-cuevana",
       "source": "cuevana",
-      "title": "Street Fighter",
-      "page": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "title": "Papi Ricky: La Película",
+      "page": "https://cuevana3c.pro/pelicula/papi-ricky-la-pelicula",
       "player": "https://tungtungsahur.cuevana3c.pro/",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 16.3,
+      "secondsToPlay": 8.3,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -20,7 +20,7 @@
           "action": ""
         },
         {
-          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/uf611mx8ayux",
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/m79j931j9c24",
           "top": false,
           "videos": 1,
           "action": ""
@@ -29,38 +29,38 @@
       "servers": 1,
       "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "site": "",
-      "key": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "key": "https://cuevana3c.pro/pelicula/papi-ricky-la-pelicula",
       "position": {
         "first": {
-          "t": 0.116666,
-          "d": 6629.3
+          "t": 5,
+          "d": 5986.958
         },
         "last": {
-          "t": 131.766666,
-          "d": 6629.3
+          "t": 29.791666,
+          "d": 5986.958
         }
       },
       "advancing": true,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 132,
-        "duration": 6629
+        "t": 30,
+        "duration": 5987
       }
     },
     {
       "label": "2-repelishd",
       "source": "repelishd",
-      "title": "Oro sin ley",
-      "page": "https://repelishd.blog/ver-pelicula/25954-oro-sin-ley-online-espanol.html",
-      "player": "https://mxdrop.to/e/4ddr8x8rag7qzd",
+      "title": "Klara y el Sol",
+      "page": "https://repelishd.blog/ver-pelicula/25963-klara-y-el-sol-online-espanol.html",
+      "player": "https://mxdrop.to/e/033pgjw6fkvdqd",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 23.7,
+      "secondsToPlay": 13.2,
       "frames": [
         {
-          "url": "https://mxdrop.click/e/4ddr8x8rag7qzd",
+          "url": "https://mxdrop.click/e/033pgjw6fkvdqd",
           "top": true,
           "videos": 1,
           "action": ""
@@ -76,26 +76,20 @@
           "top": false,
           "videos": 0,
           "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
         }
       ],
       "servers": 1,
-      "finalPlayer": "https://mxdrop.to/e/4ddr8x8rag7qzd",
+      "finalPlayer": "https://mxdrop.to/e/033pgjw6fkvdqd",
       "site": "",
-      "key": "https://repelishd.blog/ver-pelicula/25954-oro-sin-ley-online-espanol.html",
+      "key": "https://repelishd.blog/ver-pelicula/25963-klara-y-el-sol-online-espanol.html",
       "position": {
         "first": {
-          "t": 0.194,
-          "d": 6809.845
+          "t": 0.231,
+          "d": 6568.167
         },
         "last": {
-          "t": 10.238,
-          "d": 6809.845
+          "t": 10.274,
+          "d": 6568.167
         }
       },
       "advancing": true,
@@ -103,11 +97,11 @@
       "homeShown": true,
       "saved": {
         "t": 10,
-        "duration": 6810
+        "duration": 6568
       }
     },
     {
-      "label": "3-jkanime",
+      "label": "3-jkanime-4",
       "source": "jkanime",
       "title": "Tokyo Revengers: Santen Sensou-hen",
       "page": "https://jkanime.net/tokyo-revengers-santen-sensou-hen/4/",
@@ -115,7 +109,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 12.9,
+      "secondsToPlay": 8.8,
       "frames": [
         {
           "url": "https://jkanime.net/jkplayer/um",
@@ -130,11 +124,11 @@
       "key": "https://jkanime.net/tokyo-revengers-santen-sensou-hen/",
       "position": {
         "first": {
-          "t": 0.8555,
+          "t": 1.189167,
           "d": 1469.0510520000023
         },
         "last": {
-          "t": 10.8655,
+          "t": 11.240878,
           "d": 1469.0510520000023
         }
       },
@@ -149,53 +143,53 @@
     {
       "label": "4-doramasmp4",
       "source": "doramasmp4",
-      "title": "Pls Love",
-      "page": "https://doramasmp4.cyou/cap/pls-love-capitulo-7/",
-      "player": "https://ok.ru/videoembed/17414104222274",
+      "title": "Oops! Mysterious Sounds",
+      "page": "https://doramasmp4.cyou/cap/oops-mysterious-sounds-capitulo-6/",
+      "player": "https://ok.ru/videoembed/17415799310914",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 15,
+      "secondsToPlay": 17.2,
       "frames": [
         {
-          "url": "https://ok.ru/videoembed/17414104222274",
+          "url": "https://ok.ru/videoembed/17415799310914",
           "top": true,
           "videos": 1,
           "action": ""
         }
       ],
       "servers": 1,
-      "finalPlayer": "https://ok.ru/videoembed/17414104222274",
+      "finalPlayer": "https://ok.ru/videoembed/17415799310914",
       "site": "",
-      "key": "https://doramasmp4.cyou/cap/pls-love-capitulo-7/",
+      "key": "https://doramasmp4.cyou/cap/oops-mysterious-sounds-capitulo-6/",
       "position": {
         "first": {
-          "t": 11,
-          "d": 2898.291
+          "t": 0.52,
+          "d": 3039.978
         },
         "last": {
-          "t": 11,
-          "d": 2898.291
+          "t": 10.52,
+          "d": 3039.978
         }
       },
-      "advancing": false,
+      "advancing": true,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
         "t": 11,
-        "duration": 2898
+        "duration": 3040
       }
     },
     {
       "label": "5-cuevana",
       "source": "cuevana",
-      "title": "Shaque: No confíes en nadie",
-      "page": "https://cuevana3c.pro/serie/shaka-trust-no-one/episodio-1x5",
+      "title": "Timbiriche",
+      "page": "https://cuevana3c.pro/serie/timbiriche/episodio-1x4",
       "player": "https://tungtungsahur.cuevana3c.pro/",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 12.1,
+      "secondsToPlay": 9.3,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -204,7 +198,7 @@
           "action": ""
         },
         {
-          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/1axfrsky38mx",
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/rytanulk34ep",
           "top": false,
           "videos": 1,
           "action": ""
@@ -213,125 +207,107 @@
       "servers": 1,
       "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "site": "",
-      "key": "https://cuevana3c.pro/serie/shaka-trust-no-one",
+      "key": "https://cuevana3c.pro/serie/timbiriche",
       "position": {
         "first": {
-          "t": 40,
-          "d": 2288.583
+          "t": 0.72,
+          "d": 2824.28
         },
         "last": {
-          "t": 49,
-          "d": 2288.583
+          "t": 10.72,
+          "d": 2824.28
         }
       },
       "advancing": true,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 49,
-        "duration": 2289
+        "t": 11,
+        "duration": 2824
       }
     },
     {
-      "label": "6-animeyt",
+      "label": "6-animeyt-8",
       "source": "animeyt",
-      "title": "Tokyo Revengers: Santen Sensou-hen",
-      "page": "https://animeyt.cc/118807/anime/tokyo-revengers-santen-sensou-hen-capitulo-4/",
-      "player": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+      "title": "Ghost Meets Gal!",
+      "page": "https://animeyt.cc/118913/anime/ghost-meets-gal-capitulo-8/",
+      "player": "https://archive.org/download/gc7bjxyubf-bmze8mbh/cqkmbxj9zx2a.mp4",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 6,
+      "secondsToPlay": 7,
       "frames": [
         {
-          "url": "https://ia601404.us.archive.org/8/items/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+          "url": "https://ia801006.us.archive.org/30/items/gc7bjxyubf-bmze8mbh/cqkmbxj9zx2a.mp4",
           "top": true,
           "videos": 1,
           "action": ""
         }
       ],
       "servers": 1,
-      "finalPlayer": "https://archive.org/download/cmnv8m7qmx-gyp25hrg/ggwf4cp4babt.mp4",
+      "finalPlayer": "https://archive.org/download/gc7bjxyubf-bmze8mbh/cqkmbxj9zx2a.mp4",
       "site": "",
-      "key": "https://animeyt.cc/tv/one-piece-arco-de-elbaph/",
+      "key": "https://animeyt.cc/tv/tsuihou-sareta-cheat-fuyo-majutsushi-wa-kimama-na-second-life-wo-ouka-suru-ore-wa-buki-dake-ja-naku-arayuru-mono-ni-kyouka-point-wo-fuyo-dekiru-shi-ore-no-ishi-de-itsudemo-kouka-wo-kaijo-dekiru/",
       "position": {
         "first": {
-          "t": 0.415,
-          "d": 1469.051
+          "t": 0.511,
+          "d": 120.128
         },
         "last": {
-          "t": 9.447,
-          "d": 1469.051
+          "t": 10.551,
+          "d": 120.128
         }
       },
       "advancing": true,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 10,
-        "duration": 1469
+        "t": 11,
+        "duration": 120
       }
     },
     {
-      "label": "7-doramasflix",
+      "label": "7-doramasflix-2",
       "source": "doramasflix",
-      "title": "Fool in Love",
-      "page": "https://doramasflix.io/capitulos/fool-in-love-1x5",
-      "player": "https://streamtape.com/e/MPp9PRdKbqfmR1y",
+      "title": "Love on Hire",
+      "page": "https://doramasflix.io/capitulos/love-on-hire-1x2",
+      "player": "https://flaswish.com/e/rsllptmbd7ga",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 12.3,
+      "secondsToPlay": 39.4,
       "frames": [
         {
-          "url": "https://streamtape.com/e/MPp9PRdKbqfmR1y",
+          "url": "https://derricknationtop.com/e/pdchfc2grmqy",
           "top": true,
           "videos": 1,
           "action": ""
-        },
-        {
-          "url": "https://www.google.com/recaptcha/api2/anchor",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
-        },
-        {
-          "url": "about:blank",
-          "top": false,
-          "videos": 0,
-          "action": ""
         }
       ],
-      "servers": 1,
-      "finalPlayer": "https://streamtape.com/e/MPp9PRdKbqfmR1y",
+      "servers": 2,
+      "finalPlayer": "https://voe.sx/e/pdchfc2grmqy",
       "site": "",
-      "key": "https://doramasflix.io/doramas/fool-in-love",
+      "key": "https://doramasflix.io/doramas/love-on-hire",
       "position": {
         "first": {
-          "t": 0.157,
-          "d": 2762.686
+          "t": 0.155,
+          "d": 3543.234
         },
         "last": {
-          "t": 10.201,
-          "d": 2762.686
+          "t": 9.33,
+          "d": 3543.234
         }
       },
       "advancing": true,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 10,
-        "duration": 2763
+        "t": 9,
+        "duration": 3543
       }
     },
     {
-      "label": "8-asialiveaction",
+      "label": "8-asialiveaction-3",
       "source": "asialiveaction",
       "title": "Merry Berry Love",
       "page": "https://asialiveaction.com/e/27/305551t1/0325115/",
@@ -339,7 +315,7 @@
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 12.1,
+      "secondsToPlay": 16.4,
       "frames": [
         {
           "url": "https://ok.ru/videoembed/17403982582082",
@@ -354,11 +330,11 @@
       "key": "https://asialiveaction.com/tv/305551t1-merry-berry-love-sub-espanol/",
       "position": {
         "first": {
-          "t": 10,
+          "t": 50,
           "d": 2790.891
         },
         "last": {
-          "t": 10,
+          "t": 54.454,
           "d": 2790.891
         }
       },
@@ -366,20 +342,20 @@
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 10,
+        "t": 54,
         "duration": 2791
       }
     },
     {
       "label": "resume",
       "source": "cuevana",
-      "title": "Street Fighter",
-      "page": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "title": "Papi Ricky: La Película",
+      "page": "https://cuevana3c.pro/pelicula/papi-ricky-la-pelicula",
       "player": "https://tungtungsahur.cuevana3c.pro/",
       "appAlive": true,
       "phase": "playing",
       "error": "",
-      "secondsToPlay": 12.2,
+      "secondsToPlay": 10.3,
       "frames": [
         {
           "url": "https://tungtungsahur.cuevana3c.pro/",
@@ -388,7 +364,7 @@
           "action": ""
         },
         {
-          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/uf611mx8ayux",
+          "url": "https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/m79j931j9c24",
           "top": false,
           "videos": 1,
           "action": ""
@@ -397,36 +373,68 @@
       "servers": 1,
       "finalPlayer": "https://tungtungsahur.cuevana3c.pro/",
       "site": "",
-      "key": "https://cuevana3c.pro/pelicula/street-fighter-2",
+      "key": "https://cuevana3c.pro/pelicula/papi-ricky-la-pelicula",
       "position": {
         "first": {
-          "t": 130,
-          "d": 6629.3
+          "t": 30,
+          "d": 5986.958
         },
         "last": {
-          "t": 133.4,
-          "d": 6629.3
+          "t": 30.5,
+          "d": 5986.958
         }
       },
-      "advancing": true,
+      "advancing": false,
       "curtainGone": true,
       "homeShown": true,
       "saved": {
-        "t": 133,
-        "duration": 6629
+        "t": 31,
+        "duration": 5987
       },
-      "resumedFrom": 132,
+      "resumedFrom": 30,
       "resumeOk": true
     }
   ],
   "errors": [],
   "before": {
-    "running": [],
-    "targets": [],
-    "memory": "memory  1252016  977560  39012   49196   235444      167352"
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.102:43190/holy/"
+      }
+    ],
+    "memory": "memory  1252016  862052  159580  57076   230384      275392"
   },
   "after": {
-    "memory": "memory  1252016  836516  182568  48288   232932      308596"
+    "memory": "memory  1252016  881340  138968  48888   231708      264312"
   },
-  "bridgeErrors": []
+  "bridgeErrors": [
+    {
+      "phase": "request",
+      "error": "{\"code\":-32602,\"message\":\"Invalid InterceptionId.\"}"
+    },
+    {
+      "phase": "request",
+      "error": "{\"code\":-32602,\"message\":\"Invalid InterceptionId.\"}"
+    },
+    {
+      "phase": "request",
+      "error": "{\"code\":-32602,\"message\":\"Invalid InterceptionId.\"}"
+    },
+    {
+      "phase": "request",
+      "error": "{\"code\":-32602,\"message\":\"Invalid InterceptionId.\"}"
+    },
+    {
+      "phase": "request",
+      "error": "{\"code\":-32602,\"message\":\"Invalid InterceptionId.\"}"
+    },
+    {
+      "phase": "request",
+      "error": "{\"code\":-32602,\"message\":\"Invalid InterceptionId.\"}"
+    }
+  ]
 }
