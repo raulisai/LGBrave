@@ -197,3 +197,23 @@ Atrás se envió desde el Mac como la tecla 461 que webOS entrega a la app con `
 
 El iframe del reproductor de Cuevana corre en el mismo proceso en la TV (`playerTargets: 0`); los iframes con proceso propio (OOPIF) seguirían sin el manejador, hoy no se ven en WAM.
 
+## Holy 0.4.2 · One Piece en la búsqueda, con sus episodios (2026-10-23 21:40)
+
+**Qué veía el usuario:** al buscar One Piece en Holy no salía la serie (o lo mandaba a otra). Del historial y del registro de la TV:
+
+- La búsqueda pintaba una fila por sitio en el orden en que respondían. Las primeras eran «En tu catálogo» (One Piece: Heroines, One Piece: Heroínas, LEGO ONE PIECE) y RePelisHD (películas); la serie de JKAnime (episodios hasta el 1180) quedaba en la 4.ª o 5.ª fila. El historial tiene LEGO ONE PIECE 1x1 visto entero.
+- En la fila de Cuevana sí estaba «One Piece» (el anime), pero como **serie** y solo hasta el 642. A las 20:06 abrió el 15x642: Holy probó sus 5 servidores (Vidhide, vsembed, stellarconductor, vidlink, videasy) durante ~2 min, ninguno arrancó, y «JKAnime primero» no aplicaba porque no era «anime».
+
+**Cambios**
+
+| Dónde | Qué |
+| --- | --- |
+| `src/holy.js` `bestResults`, `searchScore`; `App.svelte` | Fila **«Mejores resultados»** arriba: título exacto (sin espacios/acentos/puntuación), luego los que empiezan igual; sitio preferido del tipo primero (anime → JKAnime), series antes que películas. Si el primero es una serie, fila **«One Piece · Episodios 1131–1180»** con los más nuevos. El inicio usa JKAnime como preferido aunque el proceso del Mac sea anterior |
+| `catalog.mjs` `preference`, `genresOf`, `elsewhere({ kind })` | Serie con género «Anime» (Cuevana One Piece) → mismo episodio en JKAnime primero; LEGO ONE PIECE («Animación») no. JKAnime: episodio por dirección (`episodeURL`), sin descargar la lista (10,8 → 4,5 s) |
+| `catalog.mjs` `sameEpisode` | Una temporada > 1 contra un sitio sin temporadas solo coincide con numeración absoluta (> 30): 15x642 = 642, 2x5 ≠ 5 |
+| `sources.mjs` `jkanime.parseAiring/more` | Horario de JKAnime: 75 series en emisión con su último episodio → fila **«Anime en emisión»** (Inicio y Anime; primero lo que ves, luego el % y las series largas). One Piece queda 4.º para el perfil actual |
+| `catalog.mjs` `post` | Sesión de JKAnime reutilizada 5 min: lista de One Piece 5,6 → 4,0 s |
+| `catalog.mjs` `searchLocal` | «onepiece» encuentra «One Piece» |
+
+**Pruebas:** `npm test` (13 + 17; nueva comprobación «One Piece…»). En el navegador del Mac (Holy en el puerto 43191 sin TV, y el inicio del proceso que corre en 43190): «one piece» → «Mejores resultados» con One Piece de JKAnime primero y debajo 1180, 1179, 1178…; abrir la serie → 24 bloques empezando por 1131–1180. **Sin probar en la TV**: estaba reproduciendo un anime; no se reinició el proceso del Mac ni se reinstaló el IPK.
+

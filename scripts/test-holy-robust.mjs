@@ -6,11 +6,11 @@ import { cuevana, repelishd, jkanime, doramasmp4 } from './holy/sources.mjs';
 import { doramasflix, asialiveaction, animeyt, flight, flixHost, rankFlixLinks } from './holy/more-sources.mjs';
 import { CONNECTORS } from './holy/connectors.mjs';
 import { Library } from './holy/library.mjs';
-import { Catalog, sameTitle, episodeOf } from './holy/catalog.mjs';
+import { Catalog, sameTitle, episodeOf, sameEpisode } from './holy/catalog.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
 import { home } from './browser-bridge.mjs';
 import { startServer } from './holy/server.mjs';
-import { sectionRows, episodeRows } from '../src/holy.js';
+import { sectionRows, episodeRows, bestResults, searchScore } from '../src/holy.js';
 
 // Holy must not break: new sites, the taste engine, server failover, HTTP edge
 // cases, damaged files and random input to every parser. No TV, no Internet.
@@ -285,6 +285,53 @@ try {
     assert.deepEqual(movie.map(entry => entry.url), ['https://repelishd.example/hope', 'https://cuevana.example/hope']);
     const episode = await catalog.elsewhere({ source: 'jkanime', kind: 'anime', title: 'One Piece', url: 'https://jkanime.net/one-piece/1180/' }, new Set(['jkanime']));
     assert.deepEqual(episode.map(entry => [entry.url, entry.isShow]), [['https://animeyt.example/1180/', false]]);
+  });
+
+  await check('One Piece: la serie primero al buscar, «Anime en emisión» y el anime que Cuevana llama serie va a JKAnime', async () => {
+    // Search: the series named exactly that first (JKAnime for anime); LEGO ONE PIECE only «contains» it.
+    const groups = [
+      { items: [{ title: 'One Piece: Heroines', url: 'https://c.example/heroines', kind: 'movie', source: 'cuevana' }, { title: 'LEGO ONE PIECE', url: 'https://c.example/lego', kind: 'series', source: 'cuevana', isShow: true }] },
+      { items: [{ title: 'ONE PIECE', url: 'https://c.example/op2', kind: 'series', source: 'cuevana', isShow: true }] },
+      { items: [{ title: 'One Piece Film Z', url: 'https://jk.example/z/', kind: 'anime', source: 'jkanime', isShow: true }, { title: 'One Piece', url: 'https://jk.example/op/', kind: 'anime', source: 'jkanime', isShow: true }] }];
+    assert.deepEqual(bestResults(groups, 'onepiece', { anime: 'jkanime' }).map(item => item.url), ['https://jk.example/op/', 'https://c.example/op2', 'https://jk.example/z/', 'https://c.example/heroines']);
+    assert.deepEqual([searchScore({ title: 'One Piece' }, 'ONE  piece!'), searchScore({ title: 'LEGO ONE PIECE' }, 'one piece'), searchScore({ title: 'x' }, '')], [3, 1, 0]);
+    // JKAnime's schedule: airing shows with their latest episode.
+    const schedule = `<div title="One Piece" class='box img'><div class="boxx"><a href="https://jkanime.net/one-piece/"><img title="One Piece" src="https://cdn.jkdesa.com/op.jpg"></a></div><a class="shadowTitle" href="https://jkanime.net/one-piece/"><h3>One Piece</h3></a><div class="last"><a href="https://jkanime.net/one-piece/"><span>Último capítulo: 1180 </span><time>hace 3 semanas </time></a></div></div>
+<div title="Psyren" class='box img'><div class="boxx"><a href="https://jkanime.net/psyren/"><img title="Psyren" src="https://cdn.jkdesa.com/p.jpg"></a></div><h3>Psyren</h3><span>Último capítulo: 3 </span><time>hace 11 horas </time></div>`;
+    const airing = jkanime.parseAiring(schedule);
+    assert.deepEqual(airing.map(item => [item.title, item.latest, item.ago, item.isShow, item.airing, item.poster]), [['One Piece', 1180, 504, true, true, 'https://cdn.jkdesa.com/op.jpg'], ['Psyren', 3, 11, true, true, 'https://cdn.jkdesa.com/p.jpg']]);
+    // The same show in «Animes recientes» and the schedule keeps «en emisión»; the row puts what you watch first, then long runs.
+    const recent = { source: 'jkanime', kind: 'anime', title: 'One Piece', url: 'https://jkanime.net/one-piece/', show: 'https://jkanime.net/one-piece/', isShow: true, genres: [], badge: 'Serie' };
+    const episode = { source: 'jkanime', kind: 'anime', title: 'Psyren', url: 'https://jkanime.net/psyren/3/', show: 'https://jkanime.net/psyren/', episode: 3, genres: [] };
+    const fake = { id: 'jkanime', name: 'JKAnime', site: 'https://jkanime.net/', parseHome: () => [recent, episode], more: async () => airing, parseDetail: () => ({ genres: [] }), episodeURL: jkanime.episodeURL,
+      search: async () => [{ source: 'jkanime', kind: 'anime', title: 'One Piece', url: 'https://jkanime.net/one-piece/', show: 'https://jkanime.net/one-piece/', isShow: true }],
+      episodes: async () => { throw Error('no hace falta la lista'); } };
+    const cuevanaFake = { id: 'cuevana', name: 'Cuevana 3', site: 'https://cuevana.example/', parseHome: () => [{ source: 'cuevana', kind: 'movie', title: 'Film', url: 'https://cuevana.example/f', genres: [] }], parseDetail: () => ({ genres: [] }),
+      detail: async item => ({ genres: item.url.includes('lego') ? ['Comedia', 'Animación'] : ['Acción', 'Animación', 'Anime'] }) };
+    const catalog = new Catalog({ file: join(directory, 'op.json'), detailsFile: join(directory, 'opd.json'), fetch: async () => '', connectors: [cuevanaFake, fake] });
+    await catalog.refresh();
+    const library = new Library(join(directory, 'op-library.json'));
+    let data = catalog.home(library);
+    const row = id => data.rows.find(entry => entry.id === id)?.items.map(item => item.title) || [];
+    assert.deepEqual([row('anime-airing'), row('anime-shows'), data.preferred], [['One Piece', 'Psyren'], [], { anime: 'jkanime' }]);
+    library.start(episode); library.progress('https://jkanime.net/psyren/', episode.url, 600, 1400);
+    data = catalog.home(library);
+    assert.deepEqual(row('anime-airing'), ['Psyren', 'One Piece']);
+    const anime = sectionRows(data, 'anime');
+    assert.deepEqual(anime.map(entry => entry.id).slice(0, 3), ['continue', 'anime-airing', 'source-jkanime']);
+    assert.ok(!anime.find(entry => entry.id === 'source-jkanime').items.some(item => item.airing));
+    assert.deepEqual(catalog.searchLocal('onepiece').map(item => item.title), ['One Piece']);
+    // Cuevana files the One Piece anime as a series (genre «Anime»): JKAnime first, its episode by address, no list needed.
+    const cuevanaOP = { source: 'cuevana', kind: 'series', title: 'One Piece', show: 'https://cuevana.example/serie/one-piece', url: 'https://cuevana.example/serie/one-piece/episodio-15x642', episode: 642, genres: [] };
+    const preference = await catalog.preference(cuevanaOP);
+    assert.deepEqual(preference, { site: 'jkanime', kind: 'anime' });
+    assert.equal(await catalog.preference({ ...cuevanaOP, title: 'LEGO ONE PIECE', show: 'https://cuevana.example/serie/lego-one-piece', url: 'https://cuevana.example/serie/lego-one-piece/episodio-1x1' }), null);
+    const copies = await catalog.elsewhere(cuevanaOP, new Set(['cuevana']), { only: 'jkanime', kind: preference.kind });
+    assert.deepEqual(copies.map(copy => [copy.url, copy.isShow]), [['https://jkanime.net/one-piece/642/', false]]);
+    // «2x5» is no one's episode 5; absolute numbering (15x642) and first seasons match a site without seasons.
+    assert.deepEqual([sameEpisode({ season: 2, episode: 5 }, { season: null, episode: 5 }), sameEpisode({ season: 15, episode: 642 }, { season: null, episode: 642 }), sameEpisode({ season: 1, episode: 3 }, { season: null, episode: 3 }), sameEpisode({ season: 2, episode: 5 }, { season: 2, episode: 5 })], [false, true, true, true]);
+    assert.deepEqual(await catalog.elsewhere({ ...cuevanaOP, url: 'https://cuevana.example/serie/one-piece/episodio-2x5', episode: 5 }, new Set(['cuevana']), { only: 'jkanime', kind: 'anime' }), []);
+    catalog.stop();
   });
 
   await check('Servidor: rutas con datos malos responden sin caerse', async () => {

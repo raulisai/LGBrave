@@ -70,7 +70,10 @@ export function episodeOf(item) {
   if ((match = /^https:\/\/jkanime\.net\/[^/]+\/(\d+)\/$/.exec(url))) return { season: null, episode: +match[1] };
   return { season: null, episode: Number(item?.episode) || null };
 }
-const sameEpisode = (a, b) => !!a.episode && a.episode === b.episode && (!a.season || !b.season || a.season === b.season);
+// A later season against a site without seasons only matches absolute numbering
+// (Cuevana's One Piece 15x642 is JKAnime's 642; «2x5» is not anyone's episode 5).
+export const sameEpisode = (a, b) => !!a.episode && a.episode === b.episode &&
+  (a.season && b.season ? a.season === b.season : (a.season || b.season || 1) <= 1 || a.episode > 30);
 
 export class Catalog {
   constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {} } = {}) {
@@ -119,7 +122,11 @@ export class Catalog {
     const byURL = new Map();
     for (const item of lists.flat().filter(valid)) {
       const previous = byURL.get(item.url);
-      if (previous) previous.genres = [...new Set([...(previous.genres || []), ...(item.genres || [])])];
+      if (previous) {
+        previous.genres = [...new Set([...(previous.genres || []), ...(item.genres || [])])];
+        // What one listing knows and the other doesn't (e.g. «en emisión» and its latest episode).
+        for (const [key, value] of Object.entries(item)) if (previous[key] === undefined || previous[key] === '') previous[key] = value;
+      }
       else byURL.set(item.url, { ...item, genres: [...(item.genres || [])] });
     }
     const items = [...byURL.values()];
@@ -185,7 +192,9 @@ export class Catalog {
     const fold = value => String(value || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     const words = fold(query).split(/\s+/).filter(Boolean);
     if (!words.length) return [];
-    return this.items.filter(item => words.every(word => fold(item.title).includes(word))).slice(0, 30);
+    // «onepiece» finds «One Piece» too.
+    const joined = fold(query).replace(/[^a-z0-9]+/g, '');
+    return this.items.filter(item => words.every(word => fold(item.title).includes(word)) || (joined.length >= 4 && fold(item.title).replace(/[^a-z0-9]+/g, '').includes(joined))).slice(0, 30);
   }
   async episodes(sourceId, show) {
     const connector = this.connector(sourceId);
@@ -197,13 +206,21 @@ export class Catalog {
     });
   }
   // Same-site form POST (JKAnime's episode list needs its session cookie and token).
-  async post(url, referrer) {
+  // The page's session (cookie and token) is reused for a few minutes: one list is several POSTs.
+  async post(url, referrer, fresh = false) {
     const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
-    const page = await fetch(referrer, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) });
-    const html = await page.text();
-    const token = /csrf-token" content="([^"]+)"/.exec(html)?.[1] || '';
-    const cookie = page.headers.getSetCookie().map(value => value.split(';')[0]).join('; ');
-    const response = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(10000), headers: { 'User-Agent': UA, Referer: referrer, Cookie: cookie, 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body: '_token=' + encodeURIComponent(token) });
+    this.sessions ||= new Map();
+    let session = this.sessions.get(referrer);
+    if (fresh || !session || Date.now() - session.at > 5 * 60000) {
+      const page = await fetch(referrer, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) });
+      const html = await page.text();
+      session = { at: Date.now(), token: /csrf-token" content="([^"]+)"/.exec(html)?.[1] || '', cookie: page.headers.getSetCookie().map(value => value.split(';')[0]).join('; ') };
+      this.sessions.set(referrer, session);
+      if (this.sessions.size > 50) this.sessions.delete(this.sessions.keys().next().value);
+    }
+    const response = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(10000), headers: { 'User-Agent': UA, Referer: referrer, Cookie: session.cookie, 'X-CSRF-TOKEN': session.token, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body: '_token=' + encodeURIComponent(session.token) });
+    // An expired session (419 and the like) is renewed once.
+    if (!response.ok && !fresh && [401, 403, 419].includes(response.status)) return this.post(url, referrer, true);
     if (!response.ok) throw Error(new URL(url).hostname + ' respondió ' + response.status);
     return response.text();
   }
@@ -226,7 +243,32 @@ export class Catalog {
   // The same title on the owner's other sites, for when its own site cannot play it:
   // copies already in the catalogue first, then each compatible site's search. For an
   // episode, the same episode number (and season when both sites number seasons).
-  async elsewhere(item, tried = new Set(), { only } = {}) {
+  // Where to look first: anime on JKAnime, also anime that a site files as a series
+  // (Cuevana's One Piece carries the genre «Anime»; LEGO ONE PIECE only «Animación»).
+  async preference(item) {
+    let kind = item.kind;
+    if (kind === 'series') {
+      const genres = item.genres?.length ? item.genres : await this.genresOf(item).catch(() => []);
+      if (genres.includes('Anime')) kind = 'anime';
+    }
+    return PREFERRED[kind] ? { site: PREFERRED[kind], kind } : null;
+  }
+  // Genres of a title not in the catalogue (e.g. a search result), read once from its page.
+  async genresOf(item) {
+    const url = item.show || this.detailURL(item);
+    if (!/^https:\/\//.test(String(url || ''))) return [];
+    const known = this.details.get(url);
+    if (known) return known.genres || [];
+    const connector = this.connector(item.source);
+    if (!connector) return [];
+    return this.cached('genres\n' + url, 6 * 3600000, async () => {
+      const detail = await deadline(connector.detail ? connector.detail({ ...item, url }, this.loader(connector)) : this.fetch(url).then(html => connector.parseDetail(html, url)), 6000, 'la ficha tardó demasiado');
+      return detail?.genres || [];
+    });
+  }
+  // kind: look for it as this kind (an anime filed as a series is searched on the anime sites).
+  async elsewhere(item, tried = new Set(), { only, kind } = {}) {
+    if (kind) item = { ...item, kind };
     const found = [];
     const allowed = id => !only || id === only;
     const add = candidate => { if (candidate && !tried.has(candidate.source) && candidate.url !== item.url && !found.some(other => other.url === candidate.url)) found.push(candidate); };
@@ -239,6 +281,12 @@ export class Catalog {
       for (const result of results.filter(result => sameTitle(item, result)).slice(0, 2)) {
         if (!result.isShow) { if (item.kind === 'movie' || sameEpisode(wanted, episodeOf(result))) add(result); continue; }
         if (item.kind === 'movie' || !wanted.episode) continue;
+        // Sites with one address per episode number (JKAnime) need no episode list.
+        const direct = this.connector(id)?.episodeURL;
+        if (direct && sameEpisode(wanted, { season: null, episode: wanted.episode })) {
+          add({ ...result, url: direct(result.show, wanted.episode), episode: wanted.episode, subtitle: 'Episodio ' + wanted.episode, isShow: false });
+          continue;
+        }
         const seasons = await this.episodes(id, result.show).catch(() => []);
         const match = seasons.flatMap(season => season.episodes).find(entry => sameEpisode(wanted, { season: entry.season, episode: entry.episode }));
         if (match) add({ ...result, url: match.url, episode: match.episode, subtitle: match.label, isShow: false });
@@ -270,12 +318,17 @@ export class Catalog {
     const continuing = library.continueWatching();
     const playable = list => list.filter(item => !item.isShow);
     const shows = list => list.filter(item => item.isShow);
+    // Airing anime (JKAnime's schedule): the shows being watched first, then the best match, long runs before short ones.
+    const watching = new Set(continuing.map(entry => entry.show).filter(Boolean));
+    const airing = best(by('anime').filter(item => item.airing).sort((a, b) => (b.latest || 0) - (a.latest || 0)))
+      .sort((a, b) => watching.has(b.show) - watching.has(a.show));
     const forYou = library.recommend(once(interleave(movies, perSite('anime'), perSite('dorama'), by('series'))), 30);
     const rows = [
       { id: 'continue', title: 'Continuar viendo', items: score(continuing) },
       { id: 'foryou', title: 'Recomendado para ti', items: forYou.map(item => ({ ...item, vote: library.voteOf(item) })) },
       { id: 'movies', title: 'Películas recién llegadas', items: score(movies.slice(0, 40)) },
       { id: 'anime', title: 'Anime · nuevos episodios', items: score(once(playable(perSite('anime'))).slice(0, 40)) },
+      { id: 'anime-airing', title: 'Anime en emisión', items: airing.slice(0, 40) },
       { id: 'doramas', title: 'Doramas · nuevos capítulos', items: score(once(playable(perSite('dorama'))).slice(0, 40)) }
     ];
     // Genre rows over everything (films, series, anime, doramas), the owner's favourite genres first.
@@ -286,7 +339,7 @@ export class Catalog {
     }).filter(row => row.items.length >= 6).sort((a, b) => (personal ? b.affinity - a.affinity : 0) || a.order - b.order);
     rows.push(...genreRows.map(({ affinity, order, ...row }) => row));
     rows.push(
-      { id: 'anime-shows', title: 'Anime para descubrir', items: best(once(shows(perSite('anime')))).slice(0, 30) },
+      { id: 'anime-shows', title: 'Anime para descubrir', items: best(once(shows(perSite('anime')).filter(item => !item.airing))).slice(0, 30) },
       { id: 'dorama-shows', title: 'Doramas para descubrir', items: best(once(shows(perSite('dorama')))).slice(0, 30) },
       { id: 'series', title: 'Series · últimos episodios', items: score(by('series').slice(0, 24)) }
     );
@@ -294,7 +347,7 @@ export class Catalog {
     return {
       updatedAt: this.updatedAt, refreshing: !!this.refreshing, hero: hero && score([hero])[0],
       rows: rows.filter(row => row.items.length).map(row => ({ ...row, items: row.items.map(slim) })), items: score(this.items).map(slim), taste: library.summary(),
-      askRating: library.pendingRating?.() || null,
+      askRating: library.pendingRating?.() || null, preferred: PREFERRED,
       sources: this.sources()
     };
   }

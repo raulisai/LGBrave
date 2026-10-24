@@ -25,8 +25,9 @@ export function sectionRows(data, section) {
   const pick = id => rows.find(row => row.id === id)?.items.filter(item => item.kind === section) || [];
   if (pick('continue').length) out.push({ id: 'continue', title: 'Continuar viendo', items: pick('continue') });
   if (pick('foryou').length) out.push({ id: 'foryou', title: 'Recomendado para ti', items: pick('foryou') });
+  if (pick('anime-airing').length) out.push({ id: 'anime-airing', title: 'Anime en emisión', items: pick('anime-airing') });
   for (const source of data?.sources || []) {
-    const list = items.filter(item => item.source === source.id);
+    const list = items.filter(item => item.source === source.id && !item.airing);
     if (list.length) out.push({ id: 'source-' + source.id, title: 'Lo nuevo en ' + source.name, items: list });
   }
   const counts = new Map();
@@ -35,6 +36,30 @@ export function sectionRows(data, section) {
     out.push({ id: 'genre-' + name, title: name, items: items.filter(item => item.genres?.includes(name)) });
   }
   return out.map(withLayout);
+}
+
+// How well a title answers what was typed: 3 exactly it, 2 starts with it, 1 contains it
+// (spaces, accents and punctuation ignored: «onepiece» is «One Piece»).
+const compact = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+export function searchScore(item, query) {
+  const [title, wanted] = [compact(item?.title), compact(query)];
+  if (!title || wanted.length < 2) return 0;
+  return title === wanted ? 3 : title.startsWith(wanted) ? 2 : title.includes(wanted) ? 1 : 0;
+}
+
+// «Mejores resultados» over every site that answered: the title named exactly what was
+// typed first, then those starting with it; for each kind the owner's site first
+// (anime: JKAnime), whole series before single films, then whoever answered first.
+export function bestResults(groups, query, preferred = {}) {
+  const seen = new Set();
+  const found = [];
+  groups.forEach((group, order) => (group.items || []).forEach((item, index) => {
+    const score = searchScore(item, query);
+    if (score >= 2 && item.url && !seen.has(item.url) && seen.add(item.url)) found.push({ item, score, order, index });
+  }));
+  const own = item => (preferred[item.kind] === item.source ? 1 : 0);
+  return found.sort((a, b) => b.score - a.score || own(b.item) - own(a.item) || !!b.item.isShow - !!a.item.isShow || a.order - b.order || a.index - b.index)
+    .slice(0, 12).map(entry => entry.item);
 }
 
 // A show's seasons (or blocks of episodes) as wide rows of playable episodes.

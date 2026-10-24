@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte';
   import Icon from './Icon.svelte';
   import NavigationFeedback from './NavigationFeedback.svelte';
-  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, clock, remaining, matchTone, getJSON } from './holy.js';
+  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, clock, remaining, matchTone, getJSON, bestResults, searchScore } from './holy.js';
 
   let apiBase = $state(/^https?:/.test(location.protocol) ? location.origin : '');
   let data = $state({ rows: [], items: [], sources: [], hero: null, updatedAt: 0 });
@@ -21,9 +21,24 @@
   let previewTimer;
   let openingTimer;
   let rowsEl = $state();
-  // Search: every site is asked at once; each row appears as soon as its site answers.
+  // Search: every site is asked at once; each row appears as soon as its site answers,
+  // under «Mejores resultados» (what was typed, from any site) and, when that is a whole
+  // series, its newest episodes.
   let query = $state('');
-  let searchRows = $state([]);
+  let searchGroups = $state([]);
+  let searchedFor = $state('');
+  let bestEpisodes = $state(null);
+  let bestEpisodesFor = '';
+  // The owner's site per kind (the Mac sends it; this covers an older Mac process).
+  const PREFERRED = { anime: 'jkanime' };
+  const searchRows = $derived.by(() => {
+    const best = bestResults(searchGroups, searchedFor, data.preferred || PREFERRED);
+    return [
+      ...(best.length ? [{ id: 's-best', title: 'Mejores resultados', items: best }] : []),
+      ...(bestEpisodes && bestEpisodes.show === best[0]?.url ? [bestEpisodes.row] : []),
+      ...searchGroups
+    ];
+  });
   let searchStatus = $state([]);
   let inSearch = $state(false);
   let searchInput = $state();
@@ -42,7 +57,7 @@
   const askedShown = new Set();
   const cardWidth = layout => ({ landscape: 400, chip: 240 })[layout] || 230;
 
-  const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(withLayout) : section === 'gustos' ? tasteRows.map(row => ({ ...row, layout: row.id.startsWith('pref-') ? 'chip' : 'poster' })) : sectionRows(data, section));
+  const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(row => (row.layout ? row : withLayout(row))) : section === 'gustos' ? tasteRows.map(row => ({ ...row, layout: row.id.startsWith('pref-') ? 'chip' : 'poster' })) : sectionRows(data, section));
   const profile = $derived(taste || data.taste || null);
   const row = $derived(rows[Math.min(rowIndex, rows.length - 1)]);
   const column = $derived(row ? Math.min(columns[row.id] || 0, row.items.length - 1) : 0);
@@ -206,7 +221,7 @@
     const words = query.trim();
     if (words.length < 2 || !apiBase) return;
     const token = ++searchToken;
-    searchRows = []; rowIndex = 0;
+    searchGroups = []; searchedFor = words; bestEpisodes = null; bestEpisodesFor = ''; rowIndex = 0;
     columns = Object.fromEntries(Object.entries(columns).filter(([id]) => !id.startsWith('s-')));
     const sources = [{ id: 'local', name: 'Tu catálogo' }, ...data.sources];
     searchStatus = sources.map(source => ({ id: source.id, name: source.name, state: 'loading' }));
@@ -218,10 +233,26 @@
           if (token !== searchToken) return;
           const seconds = ((Date.now() - started) / 1000).toFixed(1).replace('.', ',');
           searchStatus = searchStatus.map(entry => entry.id === source.id ? { ...entry, state: result.error ? 'error' : 'done', count: result.items.length, seconds } : entry);
-          if (result.items.length) searchRows = [...searchRows, { id: 's-' + source.id, title: source.id === 'local' ? 'En tu catálogo' : `${source.name} · ${result.items.length}`, items: result.items }];
+          if (!result.items.length) return;
+          searchGroups = [...searchGroups, { id: 's-' + source.id, title: source.id === 'local' ? 'En tu catálogo' : `${source.name} · ${result.items.length}`, items: result.items }];
+          showBestEpisodes(token);
         })
         .catch(() => { if (token === searchToken) searchStatus = searchStatus.map(entry => entry.id === source.id ? { ...entry, state: 'error' } : entry); });
     }
+  }
+  // The best match is a whole series (One Piece): its newest episodes go right under it.
+  function showBestEpisodes(token) {
+    const top = $state.snapshot(bestResults(searchGroups, searchedFor, data.preferred || PREFERRED)[0]);
+    if (!top?.isShow || !top.show || searchScore(top, searchedFor) < 3 || bestEpisodesFor === top.url) return;
+    bestEpisodesFor = top.url;
+    getJSON(`${apiBase}/holy-api/episodes?source=${encodeURIComponent(top.source)}&show=${encodeURIComponent(top.show)}`, { timeout: 30000, retries: 0 })
+      .then(result => {
+        const season = Array.isArray(result?.seasons) ? result.seasons[0] : null;
+        if (token !== searchToken || !season?.episodes?.length) return;
+        const [row] = episodeRows(top, [season]);
+        bestEpisodes = { show: top.url, row: { ...row, id: 's-best-episodes', title: `${top.title} · ${season.title}` } };
+      })
+      .catch(() => {});
   }
   function typed() {
     clearTimeout(searchTimer);

@@ -95,6 +95,13 @@ export async function genrePages(load, pages, parse, defaultURL) {
   }
   return out;
 }
+// «hace 11 horas», «hace 2 días»… → hours (unknown → far away).
+export function hoursAgo(value) {
+  const match = /(\d+)\s*(minuto|hora|d[ií]a|semana|mes|año)/i.exec(String(value || ''));
+  if (!match) return 1e6;
+  const unit = { minuto: 1 / 60, hora: 1, dia: 24, día: 24, semana: 168, mes: 720, año: 8760 }[match[2].toLowerCase()];
+  return Number(match[1]) * unit;
+}
 export const item = fields => ({ genres: [], overview: '', backdrop: '', year: '', rating: '', badge: '', subtitle: '', ...fields });
 
 export const cuevana = {
@@ -210,6 +217,21 @@ export const jkanime = {
     }
     return items;
   },
+  // «Horario»: the anime airing now (One Piece and the like), each with its latest episode.
+  parseAiring(html, base = this.site) {
+    const items = [];
+    for (const block of html.split("class='box img'").slice(1)) {
+      const show = absolute(/<a href="([^"]+)"/.exec(block)?.[1], base);
+      if (!/^https:\/\/jkanime\.net\/[^/]+\/$/.test(show)) continue;
+      const image = /<img[^>]*>/.exec(block)?.[0];
+      const latest = Number(/Último capítulo:\s*(\d+)/.exec(block)?.[1]) || 0;
+      items.push(item({ source: 'jkanime', kind: 'anime', url: show, show, isShow: true, airing: true, latest, ago: hoursAgo(/<time>([^<]*)<\/time>/.exec(block)?.[1]),
+        title: text(/<h3>([\s\S]*?)<\/h3>/.exec(block)?.[1]) || attr(image, 'title'), poster: absolute(attr(image, 'src'), base),
+        badge: 'En emisión', subtitle: latest ? 'Último episodio: ' + latest : 'En emisión' }));
+    }
+    return items;
+  },
+  more(load) { return load('https://jkanime.net/horario/').then(html => this.parseAiring(html)); },
   parseDetail(html) {
     return {
       genres: [...new Set([...html.matchAll(/\/genero\/[^"]*\/?">([^<]+)</g)].map(match => genre(match[1])))].filter(Boolean),
@@ -257,6 +279,7 @@ export const jkanime = {
     }
     return blocks;
   },
+  episodeURL: (show, episode) => show + episode + '/',
   next(entry) {
     return entry.show && entry.episode ? { ...entry, url: entry.show + (entry.episode + 1) + '/', episode: entry.episode + 1, subtitle: 'Episodio ' + (entry.episode + 1), badge: 'Ep ' + (entry.episode + 1) } : null;
   }

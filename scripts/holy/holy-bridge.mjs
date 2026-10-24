@@ -140,13 +140,16 @@ export class HolyBridge extends BrowserBridge {
     await this.status();
     session.tried = new Set([item.source]);
     let target = null;
-    // Anime: the same episode on JKAnime first (the owner's choice); the picked site stays as the next option.
-    const preferred = PREFERRED[item.kind];
+    // Anime: the same episode on JKAnime first (the owner's choice), also anime a site lists as a series;
+    // the picked site stays as the next option.
+    const preference = this.catalog.preference ? await this.catalog.preference(item).catch(() => null) : PREFERRED[item.kind] ? { site: PREFERRED[item.kind], kind: item.kind } : null;
+    const preferred = preference?.site;
+    if (this.session !== session) return;
     if (preferred && item.source !== preferred && this.catalog.elsewhere) {
       session.tried = new Set([preferred]);
       session.candidates = [];
       await this.curtain(`window.__holyCurtain&&__holyCurtain.say('Buscando en JKAnime…')`);
-      const copies = await this.catalog.elsewhere(item, new Set([item.source]), { only: preferred }).catch(() => []);
+      const copies = await this.catalog.elsewhere(item, new Set([item.source]), { only: preferred, kind: preference.kind }).catch(() => []);
       for (const copy of copies.slice(0, 2)) {
         target = await this.catalog.resolve(copy).catch(() => null);
         if (target) { session.item = { ...copy, title: item.title, poster: item.poster || copy.poster, backdrop: item.backdrop || copy.backdrop, genres: item.genres?.length ? item.genres : copy.genres }; session.site = this.catalog.connector?.(preferred)?.name || preferred; break; }
