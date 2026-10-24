@@ -42,6 +42,8 @@ const GENRE_ROWS = [['Acción', 'Acción'], ['Comedia', 'Comedia'], ['Drama', 'D
 // What the TV needs of each title: long synopses are cut so the home stays light.
 const slim = item => (item.overview && item.overview.length > 280 ? { ...item, overview: item.overview.slice(0, 277).trimEnd() + '…' } : item);
 // The owner's first choice per kind: anime goes to JKAnime first, wherever it was picked.
+// How long a player found for a title is reused (tokens in player addresses expire).
+const RESOLVE_TTL = 150000;
 export const PREFERRED = { anime: 'jkanime' };
 // Which of the owner's sites carry each kind of title (for finding a title elsewhere).
 const KIND_SITES = { movie: ['cuevana', 'repelishd', 'doramasflix'], series: ['cuevana'], anime: ['jkanime', 'animeyt'], dorama: ['doramasflix', 'doramasmp4', 'asialiveaction'] };
@@ -171,10 +173,13 @@ export class Catalog {
   stop() { clearInterval(this.timer); }
   find(url) { return this.items.find(item => item.url === url) || null; }
   cached(key, ttl, work) {
+    // Failed lookups (null) are not kept: the next try asks the site again.
+    const keepNull = !key.startsWith('resolve\n');
     this.cache ||= new Map();
     const hit = this.cache.get(key);
     if (hit && Date.now() - hit.at < ttl) return hit.value;
-    const value = Promise.resolve().then(work).catch(error => { this.cache.delete(key); throw error; });
+    const value = Promise.resolve().then(work).then(result => { if (result == null && !keepNull && this.cache.get(key)?.value === value) this.cache.delete(key); return result; })
+      .catch(error => { if (this.cache.get(key)?.value === value) this.cache.delete(key); throw error; });
     this.cache.set(key, { at: Date.now(), value });
     if (this.cache.size > 200) this.cache.delete(this.cache.keys().next().value);
     return value;
@@ -232,9 +237,15 @@ export class Catalog {
   // others could lead to players that close the TV app.
   pageFallback(item) { return this.connector(item.source)?.pageFallback === true; }
   // The player page the site itself would open for this title, resolved fresh.
+  // A player found a moment ago (e.g. while the owner looked at the card) is reused for a
+  // couple of minutes; one that failed to start is forgotten (`forgetPlayer`).
   async resolve(item) {
     const connector = this.connector(item.source);
-    if (!connector) return null;
+    if (!connector || !/^https:\/\//.test(String(item?.url || ''))) return null;
+    return this.cached('resolve\n' + item.url, RESOLVE_TTL, () => this.resolveNow(item, connector));
+  }
+  forgetPlayer(url) { this.cache?.delete('resolve\n' + url); }
+  async resolveNow(item, connector) {
     const work = async () => {
       if (connector.resolve) return connector.resolve(item, this.loader(connector));
       const detail = connector.parseDetail(await this.fetch(item.url, { referrer: connector.site }), item.url);

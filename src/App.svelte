@@ -2,10 +2,12 @@
   import { onMount, tick } from 'svelte';
   import Icon from './Icon.svelte';
   import NavigationFeedback from './NavigationFeedback.svelte';
-  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, languageTag, clock, remaining, matchTone, getJSON, bestResults, searchScore } from './holy.js';
+  import { SECTIONS, sectionRows, withLayout, episodeRows, kindLabel, languageTag, clock, remaining, matchTone, getJSON, bestResults, searchScore, unpackHome } from './holy.js';
 
   let apiBase = $state(/^https?:/.test(location.protocol) ? location.origin : '');
-  let data = $state({ rows: [], items: [], sources: [], hero: null, updatedAt: 0 });
+  // The home is always replaced whole, never edited in place: no deep reactivity over ~800 titles.
+  let data = $state.raw({ rows: [], items: [], sources: [], hero: null, updatedAt: 0 });
+  let cacheTimer;
   let section = $state('inicio');
   let rowIndex = $state(0);
   let columns = $state({});
@@ -66,6 +68,8 @@
   let sheet = $state(null);
   const askedShown = new Set();
   const cardWidth = layout => ({ landscape: 400, chip: 240 })[layout] || 230;
+  // Only cards around a row's position are drawn; the rest keep their place as empty boxes.
+  const near = (shelf, c) => { const at = columns[shelf.id] || 0; return c >= at - 3 && c <= at + 9; };
 
   const rows = $derived(episodesView ? episodeRows(episodesView.show, episodesView.seasons) : section === 'buscar' ? searchRows.map(row => (row.layout ? row : withLayout(row))) : section === 'gustos' ? tasteRows.map(row => ({ ...row, layout: row.id.startsWith('pref-') ? 'chip' : 'poster' })) : sectionRows(data, section));
   const profile = $derived(taste || data.taste || null);
@@ -90,6 +94,18 @@
     if (!preview) { preview = next; return; }
     previewTimer = setTimeout(() => { preview = next; }, 160);
   });
+  // Resting on a card for a moment gets it ready: the Mac finds the player (so OK starts
+  // sooner) or, for a series, its episode list. Nothing is opened or shown.
+  let prepareTimer;
+  $effect(() => {
+    const item = focused;
+    clearTimeout(prepareTimer);
+    if (!item || item.chip || inNav || inSearch || !apiBase) return;
+    prepareTimer = setTimeout(() => {
+      if (item.isShow) { if (item.show) fetch(`${apiBase}/holy-api/episodes?source=${encodeURIComponent(item.source)}&show=${encodeURIComponent(item.show)}`).catch(() => {}); }
+      else command('prepare', plainItem(item));
+    }, 1200);
+  });
   // Keep the focused row at the top of the shelf area and the focused card at the left.
   $effect(() => {
     const index = rowIndex;
@@ -103,7 +119,8 @@
   async function load() {
     if (!apiBase) return;
     try {
-      const fresh = await getJSON(apiBase + '/holy-api/home');
+      const packed = await getJSON(apiBase + '/holy-api/home?v=2');
+      const fresh = unpackHome(packed);
       if (!Array.isArray(fresh?.rows)) throw Error('formato');
       data = fresh;
       // Ask once what the owner thought of something they watched for a good while.
@@ -111,7 +128,9 @@
       if (ask?.key && !askedShown.has(ask.key) && !opening && !sheet && section === 'inicio') { askedShown.add(ask.key); openSheet(ask, true); }
       loadedVersions = fresh.catalogVersion + ':' + fresh.libraryVersion;
       notice = '';
-      try { localStorage.setItem('holy-home', JSON.stringify(fresh)); localStorage.setItem('holy-api', apiBase); } catch { /* The Mac keeps the real copy. */ }
+      // The local copy (for an instant first screen next time) is written when the TV is idle.
+      clearTimeout(cacheTimer);
+      cacheTimer = setTimeout(() => { try { localStorage.setItem('holy-home', JSON.stringify(packed)); localStorage.setItem('holy-api', apiBase); } catch { /* The Mac keeps the real copy. */ } }, 2500);
     } catch { if (!data.rows.length) notice = 'No se pudo leer el catálogo del Mac. Revisa que «npm run holy» siga abierto.'; }
   }
   function command(action, value) {
@@ -139,7 +158,7 @@
     forgetArmed = { key: '', at: 0 };
     notice = `«${item.title}» se quitó de «Continuar viendo».`;
     command('forget', item.key);
-    data.rows = data.rows.map(entry => entry.id === 'continue' ? { ...entry, items: entry.items.filter(other => other.key !== item.key) } : entry);
+    data = { ...data, rows: data.rows.map(entry => entry.id === 'continue' ? { ...entry, items: entry.items.filter(other => other.key !== item.key) } : entry) };
   }
   function chooseSection(id) {
     section = id; rowIndex = 0; inNav = false; episodesView = null;
@@ -435,7 +454,7 @@
 
   onMount(() => {
     try {
-      const cached = JSON.parse(localStorage.getItem('holy-home') || 'null');
+      const cached = unpackHome(JSON.parse(localStorage.getItem('holy-home') || 'null'));
       if (cached?.rows) data = cached;
       if (!apiBase) apiBase = localStorage.getItem('holy-api') || '';
     } catch { /* No cache yet. */ }
@@ -562,9 +581,15 @@
         {:else if section === 'buscar'}
           <h2>{searchStatus.length && searchStatus.every(entry => entry.state !== 'loading') ? 'Sin resultados para «' + query.trim() + '»' : searchStatus.length ? 'Buscando en todos tus sitios…' : 'Busca en todos tus sitios a la vez'}</h2>
           <p>{data.sources.filter(source => source.search).map(source => source.name).join(', ') || 'Todos tus sitios'}. Los que respondan primero aparecen primero. Botón azul del control: buscar con la voz.</p>
-        {:else}
-          <h2>{notice || (apiBase ? 'Preparando tu catálogo…' : 'Conectando con el Mac…')}</h2>
+        {:else if notice || !apiBase}
+          <h2>{notice || 'Conectando con el Mac…'}</h2>
           <p>Holy toma los estrenos de tus sitios favoritos y los ordena según lo que ves.</p>
+        {/if}
+        {#if (episodesView?.loading || (section === 'gustos' && tasteLoading) || (!episodesView && section !== 'buscar' && section !== 'gustos' && !notice && apiBase))}
+          <!-- Waiting looks like the rows that are coming. -->
+          <div class="skeleton" aria-hidden="true">
+            {#each [0, 1] as line}<div class="skeleton-row"><span class="skeleton-title"></span><div>{#each Array(8) as _, index}<span class="skeleton-card" class:wide={episodesView} style:animation-delay={`${(line * 8 + index) * 60}ms`}></span>{/each}</div></div>{/each}
+          </div>
         {/if}
       </div>
     {/if}
@@ -577,7 +602,9 @@
               <!-- Only rows near the focus get cards: long episode lists stay light on the TV. -->
               {#each Math.abs(r - rowIndex) <= 2 ? shelf.items : [] as item, c (item.url + c)}
                 {@const active = !inNav && !inSearch && r === rowIndex && c === column}
-                {#if item.chip}
+                {#if !near(shelf, c)}
+                <span class="card ghost" class:landscape={shelf.layout === 'landscape'} class:chip={item.chip} aria-hidden="true"></span>
+                {:else if item.chip}
                 <button class="card chip" class:focus={active} class:liked={item.value === 1} class:disliked={item.value === -1} aria-label={item.title + (item.value === 1 ? ', te gusta' : item.value === -1 ? ', no te gusta' : '')}
                   onmouseenter={() => hover(r, c)} onclick={() => { hover(r, c); choose(item); }}>
                   <span class="chip-art"><strong>{item.title}</strong><small>{item.count} títulos</small>
@@ -590,7 +617,7 @@
                   <span class="art">
                     <span class="fallback">{item.title || ''}</span>
                     {#if shelf.layout === 'landscape' ? item.backdrop || item.poster : item.poster || item.backdrop}
-                      <img src={img(shelf.layout === 'landscape' ? item.backdrop || item.poster : item.poster || item.backdrop)} alt="" loading={c < 8 ? 'eager' : 'lazy'} onerror={event => event.currentTarget.remove()} />
+                      <img src={img(shelf.layout === 'landscape' ? item.backdrop || item.poster : item.poster || item.backdrop)} alt="" loading={c < 8 ? 'eager' : 'lazy'} decoding="async" onload={event => event.currentTarget.classList.add('ready')} onerror={event => event.currentTarget.remove()} />
                     {/if}
                     {#if item.badge && shelf.layout !== 'landscape'}<span class="badge">{item.badge}</span>{/if}
                     {#if languageTag(item.language)}<span class="lang-tag">{languageTag(item.language)}</span>{/if}
@@ -706,7 +733,7 @@
   .shelves{position:absolute;left:0;right:0;top:612px;bottom:0;overflow:hidden;z-index:3;transition:opacity .3s}
   .shelves.nav-focus{opacity:.55}
   .rows{transition:transform .45s var(--ease);will-change:transform}
-  .row{padding:0 0 26px;transition:opacity .35s}
+  .row{padding:0 0 26px;transition:opacity .35s;animation:fade .3s ease-out}
   .row.past{opacity:0}
   .row h2{margin:0 0 4px 96px;font-size:30px;font-weight:700;color:#e5e5e5;letter-spacing:-.2px}
   .row.active h2{color:#fff}
@@ -718,7 +745,9 @@
   .card.landscape{width:400px}
   .art{position:relative;display:block;width:100%;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#1f1f1f;box-shadow:0 8px 20px rgba(0,0,0,.5)}
   .landscape .art{aspect-ratio:16/9}
-  .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s ease-out}
+  .art img:global(.ready){opacity:1}
+  .card.ghost{display:block;height:1px}
   .fallback{position:absolute;inset:0;display:flex;align-items:flex-end;padding:16px;font-size:22px;font-weight:700;text-align:left;color:#bbb;background:linear-gradient(160deg,#2a2a2a,#121212)}
   .badge{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.72);font-size:16px;font-weight:700;letter-spacing:.4px}
   .caption{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:2px;padding:44px 16px 14px;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.92))}
@@ -804,6 +833,12 @@
   .preview.lower .overview{-webkit-line-clamp:2}
   nav button :global(svg){margin-right:8px;vertical-align:-4px}
   .empty h2{font-size:38px;margin:0 0 10px}
+  .skeleton{margin-top:6px;display:grid;gap:34px}
+  .skeleton-row>div{display:flex;gap:20px}
+  .skeleton-title{display:block;width:280px;height:28px;margin-bottom:16px;border-radius:8px;background:#1d1d1d}
+  .skeleton-card{flex:none;width:230px;height:345px;border-radius:10px;background:linear-gradient(100deg,#1a1a1a 30%,#2a2a2a 50%,#1a1a1a 70%);background-size:300% 100%;animation:shimmer 1.4s ease-in-out infinite}
+  .skeleton-card.wide{width:400px;height:225px}
+  @keyframes shimmer{from{background-position:100% 0}to{background-position:0 0}}
   .empty p{font-size:24px;color:var(--secondary);margin:0}
   .toast{position:absolute;right:96px;top:130px;z-index:6;max-width:640px;padding:16px 24px;border-radius:12px;background:rgba(30,30,30,.92);font-size:21px;animation:rise .35s var(--ease)}
 

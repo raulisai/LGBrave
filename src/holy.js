@@ -1,3 +1,31 @@
+// The home travels packed: every title once (empty fields left out) and rows that point
+// at them by position; only cards that differ from the catalogue copy (Continuar viendo,
+// Para ti…) go inline. About a fifth of the plain JSON, and the TV parses it faster.
+const empty = value => value === '' || value === null || value === undefined || (Array.isArray(value) && !value.length);
+const trimmed = item => Object.fromEntries(Object.entries(item || {}).filter(([, value]) => !empty(value)));
+const same = (a, b) => {
+  const keys = Object.keys(a);
+  if (keys.length !== Object.keys(b).length) return false;
+  return keys.every(key => (Array.isArray(a[key]) && Array.isArray(b[key]) ? a[key].join('\u0001') === b[key].join('\u0001') : a[key] === b[key]));
+};
+export function packHome(home) {
+  const items = (home.items || []).map(trimmed);
+  const index = new Map(items.map((item, at) => [item.url, at]));
+  const rows = (home.rows || []).map(({ items: list, ...row }) => ({ ...row, refs: (list || []).map(item => {
+    const small = trimmed(item);
+    const at = index.get(small.url);
+    return at !== undefined && same(small, items[at]) ? at : small;
+  }) }));
+  return { ...home, v: 2, items, rows };
+}
+const filled = item => ({ genres: [], ...item });
+export function unpackHome(packed) {
+  if (packed?.v !== 2) return packed;
+  const items = (packed.items || []).map(filled);
+  const rows = (packed.rows || []).map(({ refs, ...row }) => ({ ...row, items: (refs || []).map(ref => (typeof ref === 'number' ? items[ref] : filled(ref))).filter(Boolean) }));
+  return { ...packed, items, rows };
+}
+
 // Shelves for each section of Holy's home, built from the Mac's catalogue.
 export const SECTIONS = [
   { id: 'inicio', name: 'Inicio' },

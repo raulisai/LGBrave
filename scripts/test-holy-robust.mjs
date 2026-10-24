@@ -506,6 +506,78 @@ try {
     assert.match(source, /Conectado al Mac/);
   });
 
+  await check('Rapidez y rescate: reproductor preparado al detenerse en la tarjeta; servidor atascado a mitad → otro, mismo segundo', async () => {
+    // Catalogue: a found player is reused for a while; a failed lookup is not; forgetPlayer drops it.
+    let asked = 0, answer = { url: 'https://p.example/1' };
+    const site = { id: 'x', name: 'X', site: 'https://x.example/', parseHome: () => [], resolve: async () => { asked++; return answer; } };
+    const catalog = new Catalog({ file: join(directory, 'r.json'), detailsFile: join(directory, 'rd.json'), fetch: async () => '', connectors: [site] });
+    const film = { source: 'x', kind: 'movie', title: 'F', url: 'https://x.example/f' };
+    await catalog.resolve(film); await catalog.resolve(film);
+    assert.equal(asked, 1);
+    catalog.forgetPlayer(film.url); await catalog.resolve(film);
+    assert.equal(asked, 2);
+    answer = null; const other = { ...film, url: 'https://x.example/g' };
+    assert.equal(await catalog.resolve(other), null); answer = { url: 'https://p.example/2' };
+    assert.equal((await catalog.resolve(other)).url, 'https://p.example/2');
+    catalog.stop();
+
+    // Bridge: «prepare» warms the JKAnime copy (anime) once; never twice in a minute nor during playback.
+    const calls = [];
+    let video = { t: 100, d: 3000, paused: false, ready: 4, area: 1, ended: false };
+    const cdp = {
+      async call(method, params = {}) {
+        calls.push({ method, params });
+        if (method === 'Page.getFrameTree') return { frameTree: { frame: { id: 'main', url: 'https://example.com/' } } };
+        if (method === 'Page.addScriptToEvaluateOnNewDocument') return { identifier: String(calls.length) };
+        if (method === 'Runtime.evaluate') return { result: { value: params.expression.includes('holySeek') ? true : { url: 'https://p.example/', top: true, videos: [video], action: '' } } };
+        return {};
+      },
+      async evaluate() { return 'https://example.com/'; },
+      onEvent() { return () => {}; }
+    };
+    const resolved = [];
+    const fake = { version: 1, find: () => null, pageFallback: () => false, forgetPlayer: url => resolved.push('olvida ' + url),
+      preference: async item => (item.kind === 'anime' ? { site: 'jkanime', kind: 'anime' } : null),
+      elsewhere: async () => [{ source: 'jkanime', kind: 'anime', title: 'A', url: 'https://jkanime.net/a/3/' }],
+      resolve: async item => { resolved.push(item.url); return { url: 'https://p.example/play?' + item.url, alternatives: ['https://p.example/second'] }; } };
+    const library = new Library(join(directory, 'rescue.json'));
+    const bridge = await new HolyBridge(cdp, { preferencesFile: join(directory, 'rescue-settings.json'), catalog: fake, library, recorder: false, midStall: 30 }).start();
+    clearInterval(bridge.watchTimer);
+    await bridge.command({ action: 'prepare', value: { source: 'animeyt', kind: 'anime', title: 'A', url: 'https://animeyt.example/a-3/', episode: 3 } });
+    await bridge.preparing;
+    assert.deepEqual(resolved, ['https://jkanime.net/a/3/']);
+    await bridge.command({ action: 'prepare', value: { source: 'animeyt', kind: 'anime', title: 'A', url: 'https://animeyt.example/a-3/', episode: 3 } });
+    assert.equal(bridge.preparing, null);
+    await bridge.command({ action: 'prepare', value: { url: 'https://x.example/serie', isShow: true } });
+    assert.equal(bridge.preparing, null);
+    // Playing a film, then its server stops advancing at 1500 s (not paused).
+    bridge.contexts.set(5, { id: 5, auxData: { isDefault: true, frameId: 'main' } });
+    await bridge.command({ action: 'play', value: { source: 'x', kind: 'movie', title: 'F', url: 'https://x.example/f' } });
+    bridge.frames.set(bridge.mainFrame, 'https://p.example/'); bridge.navigation.phase = 'complete';
+    await new Promise(resolve => setTimeout(resolve, 60));
+    await bridge.watch();
+    assert.equal(bridge.session.phase, 'playing');
+    resolved.length = 0;
+    await bridge.command({ action: 'prepare', value: { source: 'x', kind: 'movie', title: 'G', url: 'https://x.example/g' } });
+    assert.deepEqual(resolved, []);
+    video = { ...video, t: 1500 };
+    await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 60));
+    video = { ...video, t: 1500 }; await bridge.watch();
+    const last = calls.filter(call => call.method === 'Page.navigate').at(-1).params.url;
+    assert.equal(last, 'https://p.example/second');
+    assert.deepEqual([bridge.session.rescues, bridge.session.forceResume, bridge.session.resumeAt], [1, 1495, 1495]);
+    assert.ok(resolved.includes('olvida https://x.example/f'));
+    // A pause by the owner is never «stuck».
+    bridge.session.phase = 'playing'; bridge.session.midStall = null;
+    video = { ...video, t: 1600, paused: true };
+    await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 60)); await bridge.watch();
+    assert.equal(bridge.session.rescues, 1);
+    await bridge.stop();
+    // The screen asks for it after resting on a card.
+    const source = readFileSync(new URL('../src/App.svelte', import.meta.url), 'utf8');
+    assert.match(source, /command\('prepare', plainItem\(item\)\)/);
+  });
+
   await check('Servidor: rutas con datos malos responden sin caerse', async () => {
     const library = new Library(join(directory, 'server.json'));
     const catalog = new Catalog({ file: join(directory, 'sc.json'), detailsFile: join(directory, 'sd.json'), connectors: [], fetch: async () => '' });
@@ -537,6 +609,19 @@ try {
       assert.ok((await (await fetch(base + '/holy-api/home')).json()).taste);
       const gz = await fetch(base + '/holy-api/home', { headers: { 'Accept-Encoding': 'gzip' } });
       assert.ok(gz.ok && (await gz.json()).rows);
+      // Packed home (?v=2): same rows once unpacked; built once per version; older screens keep the plain one.
+      const { unpackHome, packHome } = await import('../src/holy.js');
+      const packed = await (await fetch(base + '/holy-api/home?v=2')).json();
+      assert.equal(packed.v, 2);
+      const plain = await (await fetch(base + '/holy-api/home')).json();
+      assert.equal(plain.v, undefined);
+      assert.deepEqual(unpackHome(packed).rows.map(row => row.items.map(item => item.url)), plain.rows.map(row => row.items.map(item => item.url)));
+      const sample = { items: [{ url: 'https://a/1', title: 'A', genres: ['Drama'], overview: '' }, { url: 'https://a/2', title: 'B', genres: [] }],
+        rows: [{ id: 'x', items: [{ url: 'https://a/2', title: 'B', genres: [] }, { url: 'https://a/1', title: 'A', genres: ['Drama'], resume: true }] }] };
+      const small = packHome(sample);
+      assert.deepEqual(small.rows[0].refs, [1, { url: 'https://a/1', title: 'A', genres: ['Drama'], resume: true }]);
+      assert.equal('overview' in small.items[0], false);
+      assert.deepEqual(unpackHome(small).rows[0].items.map(item => [item.title, item.genres.length, !!item.resume]), [['B', 0, false], ['A', 1, true]]);
     } finally { server.close(); }
   });
 

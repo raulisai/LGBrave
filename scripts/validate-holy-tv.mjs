@@ -24,7 +24,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const out = 'evidence/holy/tv';
 mkdirSync(out, { recursive: true });
 const report = { capturedAt: new Date().toISOString(), scope: 'LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.', samples: [], errors: [] };
-const reportFile = join(out, process.argv.includes('--voice') ? 'voice-validation.json' : process.argv.includes('--ending') ? 'ending-validation.json' : process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--episodes=')) ? 'episodes-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
+const reportFile = join(out, process.argv.includes('--speed') ? 'speed-validation.json' : process.argv.includes('--voice') ? 'voice-validation.json' : process.argv.includes('--ending') ? 'ending-validation.json' : process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--episodes=')) ? 'episodes-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
 const save = () => writeFileSync(reportFile, JSON.stringify(report, null, 2));
 const memory = async () => (await ares('ares-device', '-r').catch(() => '')).split('\n').find(line => line.startsWith('memory'))?.trim();
 const libraryFile = '.local/holy-library-tvtest.json';
@@ -131,6 +131,52 @@ try {
       await bridge.command({ action: 'back' });
       sample.homeShown = await waitFor(() => cdp.evaluate('document.querySelectorAll(".row").length > 0'), 20000).then(() => true, () => false);
     }
+    console.log(JSON.stringify(sample));
+    save();
+    samples.length = 0;
+  }
+  // --speed: how fast Holy opens, moves and starts a title (cold vs prepared on the card).
+  if (process.argv.includes('--speed')) {
+    const sample = { label: 'speed' };
+    report.samples.push(sample);
+    // Opening: close and open the app, time until cards are drawn (local copy) and until fresh rows.
+    await ares('ares-launch', '--close', APP_ID).catch(() => {});
+    await sleep(2500);
+    const opened = Date.now();
+    await ares('ares-launch', APP_ID);
+    await waitFor(() => runtime.bridge?.mainFrame && runtime.bridge !== bridge, 40000).catch(() => {});
+    const live = runtime.bridge || bridge;
+    const page = runtime.cdp || cdp;
+    sample.firstCardsSeconds = await waitFor(() => page.evaluate('document.querySelectorAll(".card:not(.ghost)").length > 5'), 30000).then(() => (Date.now() - opened) / 1000, () => null);
+    // Moving: 24 presses, each timed inside the TV until its frame is laid out.
+    await sleep(3000);
+    sample.moves = await page.evaluate(`(async () => {
+      const key = code => window.dispatchEvent(new KeyboardEvent('keydown', { keyCode: code, bubbles: true }));
+      if (document.querySelector('.sheet')) { key(461); await new Promise(r => setTimeout(r, 400)); }
+      const times = [];
+      for (const code of [40, 39, 39, 39, 39, 39, 39, 39, 40, 39, 39, 39, 40, 40, 37, 37, 38, 38, 39, 39, 40, 40, 40, 38]) {
+        const t = performance.now(); key(code); await new Promise(r => setTimeout(r, 0)); document.body.offsetHeight; times.push(performance.now() - t);
+        await new Promise(r => setTimeout(r, 120));
+      }
+      times.sort((a, b) => a - b);
+      return { median: Math.round(times[12]), worst: Math.round(times[times.length - 1]), cards: document.querySelectorAll('.card:not(.ghost)').length, ghosts: document.querySelectorAll('.card.ghost').length };
+    })()`);
+    // Starting a title: one cold, one prepared like after resting on its card.
+    const films = catalog.items.filter(item => item.source === 'cuevana' && item.kind === 'movie' && !item.isShow).slice(2, 4);
+    const start = async (item, prepared) => {
+      if (prepared) { await live.command({ action: 'prepare', value: item }); await live.preparing; }
+      const t = Date.now();
+      await live.command({ action: 'play', value: item });
+      const ok = await waitFor(() => live.session?.phase === 'playing', 90000).then(() => true, () => false);
+      const seconds = (Date.now() - t) / 1000;
+      await live.command({ action: 'back' });
+      await waitFor(() => page.evaluate('document.querySelectorAll(".row").length > 0'), 20000).catch(() => {});
+      await sleep(2000);
+      return { title: item.title, prepared, ok, seconds };
+    };
+    sample.cold = films[0] && await start(films[0], false);
+    sample.prepared = films[1] && await start(films[1], true);
+    await shot('speed');
     console.log(JSON.stringify(sample));
     save();
     samples.length = 0;

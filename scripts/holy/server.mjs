@@ -4,6 +4,7 @@ import { gzipSync } from 'node:zlib';
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import { resolve, extname, join } from 'node:path';
 import { HOME_PATH, PORT } from './config.mjs';
+import { packHome } from '../../src/holy.js';
 
 // Holy's server on the Mac: the home page (dist/), the rows it shows and a small
 // image cache. Only devices on the local network may ask, and the image cache
@@ -55,6 +56,18 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
     return pending.get(key);
   }
   // JSON answers are compressed when the TV accepts it (the full catalogue is several hundred KB).
+  // The packed home is built once per catalogue/history version and kept compressed.
+  let homeCache = { key: '', raw: null, gz: null };
+  const sendHome = (req, res) => {
+    const key = catalog.version + ':' + library.version + ':' + !!catalog.refreshing;
+    if (homeCache.key !== key) {
+      const raw = Buffer.from(JSON.stringify(packHome({ ...catalog.home(library), catalogVersion: catalog.version, libraryVersion: library.version })));
+      homeCache = { key, raw, gz: gzipSync(raw) };
+    }
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    if (/\bgzip\b/.test(req.headers['accept-encoding'] || '')) { res.setHeader('Content-Encoding', 'gzip'); res.setHeader('Vary', 'Accept-Encoding'); res.end(homeCache.gz); }
+    else res.end(homeCache.raw);
+  };
   const sendJSON = (req, res, value) => {
     const raw = Buffer.from(JSON.stringify(value));
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -71,7 +84,9 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
     try {
       if (url.pathname === '/holy-api/home') {
         res.setHeader('Cache-Control', 'no-store');
-        sendJSON(req, res, { ...catalog.home(library), catalogVersion: catalog.version, libraryVersion: library.version });
+        // ?v=2: packed (current screens); without it, the plain rows older installed screens expect.
+        if (url.searchParams.get('v') === '2') sendHome(req, res);
+        else sendJSON(req, res, { ...catalog.home(library), catalogVersion: catalog.version, libraryVersion: library.version });
       } else if (url.pathname === '/holy-api/search') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         const source = url.searchParams.get('source') || '';

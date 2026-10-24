@@ -11,6 +11,10 @@ const START_TIMEOUT = 45000;
 // A server that shows nothing playable this long is swapped for the title's next one.
 const SERVER_TIMEOUT = 28000;
 const SAVE_EVERY = 10000;
+// A video that stops advancing this long in the middle (not paused by the owner) is moved to
+// another server or site, at the same second; at most MAX_RESCUES times per title.
+const MID_STALL = 25000;
+const MAX_RESCUES = 3;
 // The end card appears this close to the end; the next episode starts after NEXT_DELAY.
 const END_MARGIN = 4;
 // A stream whose last piece never loads stops just short of the end: stuck this long within
@@ -30,6 +34,7 @@ export class HolyBridge extends BrowserBridge {
     this.stallTimeout = options.stallTimeout || 20000;
     this.nextDelay = options.nextDelay || NEXT_DELAY;
     this.endStall = options.endStall || END_STALL;
+    this.midStall = options.midStall || MID_STALL;
     this.remoteContexts = new Set();
     // Cross-origin player iframes may run as their own targets (sessions).
     this.childSessions = new Map();
@@ -114,6 +119,7 @@ export class HolyBridge extends BrowserBridge {
   async command(command) {
     const { action, value } = command;
     if (action === 'play') return this.play(value);
+    if (action === 'prepare') { this.prepare(value); return; }
     if (action === 'refresh-catalog') { this.catalog.refresh().then(() => this.status()).catch(() => {}); return this.status(); }
     if (action === 'forget') { this.library.remove(String(value ?? '')); return this.status(); }
     // Holy has no tabs or page history: Back from any player goes home, and on the home it does nothing.
@@ -128,6 +134,25 @@ export class HolyBridge extends BrowserBridge {
       return super.command({ action: 'home' });
     }
     return super.command(command);
+  }
+  // The owner rests on a card: find its player now (JKAnime copy first for anime), so OK
+  // opens it at once. Runs in the background, one at a time, never for the same title twice
+  // in a minute, and never during playback.
+  prepare(value) {
+    if (!value || typeof value !== 'object' || value.isShow || !/^https:\/\//.test(String(value.url || '')) || !this.catalog?.resolve) return;
+    if (this.session || this.preparing) return;
+    this.prepared ||= new Map();
+    if (Date.now() - (this.prepared.get(value.url) || 0) < 60000) return;
+    this.prepared.set(value.url, Date.now());
+    if (this.prepared.size > 50) this.prepared.delete(this.prepared.keys().next().value);
+    this.preparing = (async () => {
+      const preference = this.catalog.preference ? await this.catalog.preference(value).catch(() => null) : null;
+      if (preference?.site && value.source !== preference.site && this.catalog.elsewhere) {
+        const copies = await this.catalog.elsewhere(value, new Set([value.source]), { only: preference.site, kind: preference.kind }).catch(() => []);
+        if (copies[0] && await this.catalog.resolve(copies[0]).catch(() => null)) return;
+      }
+      await this.catalog.resolve(value).catch(() => null);
+    })().finally(() => { this.preparing = null; });
   }
   // value: a catalogue item, or a «Continuar viendo» entry (same shape).
   async play(value) {
@@ -189,7 +214,8 @@ export class HolyBridge extends BrowserBridge {
   async openTarget(session, target) {
     this.library.start(session.item);
     session.key = entryKey(session.item);
-    session.resumeAt = this.library.resumeAt(session.item);
+    // After a rescue the second comes from the stalled server, whatever site plays next.
+    session.resumeAt = session.forceResume || this.library.resumeAt(session.item);
     session.queue = [...(target.alternatives || [])];
     session.referrer = target.referrer;
     session.servers = (session.servers || 0) + 1;
@@ -247,6 +273,8 @@ export class HolyBridge extends BrowserBridge {
   }
   // The title's next server, behind the same curtain.
   async nextServer(session) {
+    // That player failed: the next time this title is opened, ask its site again.
+    if (session.item?.url) this.catalog.forgetPlayer?.(session.item.url);
     const url = session.queue.shift();
     session.servers++;
     // After a start the curtain script was dropped: cover the next server's page again.
@@ -320,6 +348,13 @@ export class HolyBridge extends BrowserBridge {
         // Rewound from the card: back to watching.
         else if (session.card && !ended && best.t < best.d - 15) await this.hideEndCard(session);
       }
+      // In the middle of the video, a server that stops advancing (and was not paused) is
+      // swapped for the next one or another site, resuming at the same second.
+      if (session.phase === 'playing' && best && !session.card && best.t >= 15 && best.d - best.t > 30) {
+        const mid = session.midStall;
+        if (best.paused || !mid || best.t > mid.t + 0.5) session.midStall = { t: best.t, since: Date.now() };
+        else if (Date.now() - mid.since > this.midStall && (session.rescues || 0) < MAX_RESCUES) { await this.rescue(session, best.t); return; }
+      }
       if (session.phase === 'opening' && Date.now() - session.opened > (session.queue?.length ? this.serverTimeout : this.startTimeout) && !session.position) {
         if (session.queue?.length) { await this.nextServer(session); return; }
         if (await this.nextSite(session)) return;
@@ -331,6 +366,17 @@ export class HolyBridge extends BrowserBridge {
       }
     } finally { this.watching = false; }
   }
+  async rescue(session, at) {
+    session.rescues = (session.rescues || 0) + 1;
+    session.midStall = null;
+    session.forceResume = session.resumeAt = Math.max(0, at - 5);
+    this.library.progress(session.key, session.item.url, at, session.position?.d || 0);
+    this.errors.push({ phase: 'rescue', error: `atascado en ${Math.round(at)} s` });
+    if (session.queue?.length) { await this.nextServer(session); return; }
+    if (await this.nextSite(session)) return;
+    // Nothing else to try: stay on this page (it may still recover) and do not ask again.
+    session.rescues = MAX_RESCUES;
+  }
   async started(session) {
     session.phase = 'playing'; session.playingAt = Date.now();
     // The next episode is looked up now, so the end card has it at once.
@@ -340,6 +386,7 @@ export class HolyBridge extends BrowserBridge {
     if (session.resumeAt > 20) {
       for (const { id, sessionId } of await this.playerContexts()) if (await this.evaluateWithGesture(seekSource(session.resumeAt), id, sessionId).catch(() => false) === true) break;
     }
+    session.forceResume = 0;
     await this.curtain('window.__holyCurtain&&__holyCurtain.hide()');
     await this.status();
   }

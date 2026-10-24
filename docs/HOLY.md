@@ -257,3 +257,23 @@ No probado: el control físico y ver hasta el final real (la prueba salta a los 
 
 Aparte: `HOLY_LIBRARY=<archivo>` hace que `npm run holy` use otro historial (la vista previa del navegador usa una copia; el real no se toca).
 
+## Holy 0.7.0 · Rapidez, menú del Mac y resistencia (2026-10-24 02:10)
+
+**Menú «● LG» del Mac.** Mostraba solo Luma («LG encendida: abre Luma»). Ahora (`mac/LumaMenu.swift`, `mac/build.sh`, `scripts/holy-control.mjs`) el punto es el semáforo de Holy y el menú lista TV, Mac, lo que falta y «Doctor: revisar y arreglar»; enciende/reinicia/apaga Holy en el Mac y abre Holy en la TV; Luma queda en un submenú. **El Doctor ya no está en la TV** (pedido del usuario): la pantalla solo dice si está conectada al Mac. El arranque automático es una nota (el usuario no lo quiere todavía) y el Doctor no lo instala.
+
+**Revisión de rapidez (medido antes de cambiar).**
+
+| Hallazgo | Cambio |
+| --- | --- |
+| El inicio pesaba 1,18 MB de JSON (255 KB comprimido): cada título dos veces, con campos vacíos; se pedía al abrir, al volver de un vídeo y tras cada voto, y se recalculaba y comprimía en cada petición | Formato empaquetado `?v=2` (574 KB / 137 KB); construido una vez por versión y guardado comprimido. Las pantallas instaladas antes siguen recibiendo el formato plano |
+| La TV guardaba esos 1,18 MB en su almacenamiento local en cada carga (bloquea) | Se guarda la versión empaquetada, 2,5 s después, en reposo |
+| Svelte observaba en profundidad ~1.600 objetos del inicio | `$state.raw` (se reemplaza entero) |
+| Cada fila cercana dibujaba todas sus tarjetas (hasta 40 con imagen) | Solo de 3 antes a 9 después de la posición de la fila; el resto, cajas vacías del mismo ancho (24 tarjetas reales en vez de ~80) |
+| Imágenes que aparecían de golpe y se decodificaban en el hilo principal | `decoding=async` y fundido al cargar |
+| Texto «Preparando tu catálogo…» al esperar | Esqueletos animados con forma de filas (también al cargar episodios y «Gustos») |
+| El reproductor se buscaba solo después de pulsar OK | Al detenerse 1,2 s en una tarjeta, el Mac lo busca en segundo plano (JKAnime primero en anime) y lo guarda 150 s; si ese reproductor falla se olvida. En series, se carga la lista de episodios |
+
+**Resistencia.** Ya existían: servidor que no arranca en 28 s o se atasca al principio → siguiente; sin servidores → mismo título en otro sitio; final atascado → tarjeta de final. Nuevo: **atasco a mitad del vídeo** (25 s sin avanzar, sin pausa, a más de 30 s del final) → siguiente servidor o sitio, retomando 5 s antes del punto; máximo 3 rescates por título.
+
+**Pruebas.** `npm test`: 21 de resistencia (nuevas: inicio empaquetado ida y vuelta, ruta `?v=2` y plana; caché del reproductor, preparar una sola vez y nunca durante la reproducción, rescate con el mismo segundo y sin rescate si está en pausa; la TV sin Doctor). Navegador del Mac: 24 tarjetas reales y 57 cajas vacías, ~4 ms por pulsación. **TV pendiente**: `validate-holy-tv.mjs --speed` mide apertura, foco y arranque frío contra preparado.
+
