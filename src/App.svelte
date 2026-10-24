@@ -243,6 +243,8 @@
   let listening = $state(false);
   let recognizer = null;
   let voiceRetry = 0;
+  // Between a cut-off and its automatic retry the microphone stays on screen.
+  let voiceRetrying = $state(false);
   let voiceWatchdog;
   function stopListening() {
     clearTimeout(voiceWatchdog);
@@ -278,15 +280,15 @@
         // This TV's audio service often cuts a request off at once («aborted»): it is tried again by itself
         // (the service needs a moment), and only after that the owner is told.
         if (!answered && !['no-speech', 'not-allowed', 'service-not-allowed'].includes(kind) && voiceRetry < 2) {
-          voiceRetry++; answered = true; recognizer = null; listening = false; clearTimeout(voiceWatchdog);
-          setTimeout(() => { if (!listening && section === 'buscar') voiceSearch(true); }, 1800);
+          voiceRetry++; answered = true; recognizer = null; listening = false; voiceRetrying = true; clearTimeout(voiceWatchdog);
+          setTimeout(() => { voiceRetrying = false; if (!listening && section === 'buscar') voiceSearch(true); }, 1800);
           return;
         }
         recognizer = null; listening = false; clearTimeout(voiceWatchdog);
         notice = kind === 'no-speech' ? 'No te escuché. Pulsa el botón azul para intentarlo otra vez.' : 'El procesador de audio es inestable. Vuelve a intentar.';
       };
       heard.onend = () => { if (recognizer === heard) { recognizer = null; listening = false; clearTimeout(voiceWatchdog); } };
-      listening = true; notice = 'Escuchando… di el nombre de lo que buscas.';
+      listening = true; notice = '';
       heard.start();
       // If the service never ends the request, give up after a while so the next press starts clean.
       voiceWatchdog = setTimeout(() => { if (recognizer === heard) { stopListening(); notice = 'El procesador de audio es inestable. Vuelve a intentar.'; } }, 12000);
@@ -676,6 +678,15 @@
   </div>
 {/if}
 
+{#if listening || voiceRetrying}
+  <div class="listening" role="status" aria-live="assertive">
+    <div class="mic"><span class="wave"></span><span class="wave late"></span><span class="mic-icon"><Icon name="mic" size={84} stroke={2} /></span></div>
+    <h2>Escuchando…</h2>
+    <p>Di el nombre de lo que buscas</p>
+    <p class="listening-key"><span class="key blue-key"></span>Pulsa otra vez para cancelar</p>
+  </div>
+{/if}
+
 {#if sheet}
   <div class="sheet-scrim" role="dialog" aria-label={'Calificar ' + (sheet.item.title || '')}>
     <div class="sheet">
@@ -789,6 +800,16 @@
   .match.high{color:#46d369}.match.mid{color:#f5c518}.match.low{color:#a3a3a3}
   .match-reason{margin:10px 0 0;font-size:20px;color:#b9e8c4}
   .match-badge{position:absolute;left:10px;bottom:12px;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.78);font-size:17px;font-weight:800}
+  .listening{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,.78);animation:rise .3s var(--ease);pointer-events:none}
+  .listening h2{margin:28px 0 0;font-size:54px;font-weight:800}
+  .listening p{margin:0;font-size:28px;color:#cfcfcf}
+  .listening-key{margin-top:26px!important;display:flex;align-items:center;font-size:22px!important}
+  .listening-key .blue-key{margin:0 12px 0 0}
+  .mic{position:relative;width:200px;height:200px;display:grid;place-items:center}
+  .mic-icon{position:relative;z-index:1;width:160px;height:160px;border-radius:50%;background:#1f78e3;display:grid;place-items:center;color:#fff;box-shadow:0 10px 40px rgba(31,120,227,.55)}
+  .wave{position:absolute;inset:0;border-radius:50%;border:4px solid #1f78e3;opacity:0;animation:pulse 1.8s ease-out infinite}
+  .wave.late{animation-delay:.9s}
+  @keyframes pulse{0%{transform:scale(.8);opacity:.9}100%{transform:scale(1.9);opacity:0}}
   .lang-tag{position:absolute;right:10px;bottom:12px;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.78);font-size:16px;font-weight:800;letter-spacing:.5px;color:#fff}
   .landscape .lang-tag{bottom:auto;top:46px}
   .pill.lang{background:rgba(255,255,255,.16);color:#fff}

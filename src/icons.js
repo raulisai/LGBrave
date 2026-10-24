@@ -1,6 +1,7 @@
 // SVG paths on a 24 × 24 grid, drawn with stroke="currentColor".
 // Shared by the home (Svelte) and the page toolbar (injected into the TV).
 export const ICONS = {
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21M8.5 21h7"/>',
   back: '<path d="M15 4.5 7.5 12l7.5 7.5"/>',
   forward: '<path d="M9 4.5 16.5 12 9 19.5"/>',
   reload: '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.8 4.2v4.6h-4.6"/>',
