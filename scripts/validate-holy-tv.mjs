@@ -108,11 +108,17 @@ try {
     sample.seconds = (Date.now() - started) / 1000;
     sample.status = await cdp.evaluate(`[...document.querySelectorAll('.sources-status span')].map(s=>s.textContent)`);
     sample.rows = await cdp.evaluate(`[...document.querySelectorAll('.row h2')].map(h=>h.textContent)`);
+    // «Mejores resultados» on top, the series first (JKAnime for anime), and its newest episodes under it.
+    sample.bestRow = await waitFor(() => cdp.evaluate(`[...document.querySelectorAll('.row h2')].findIndex(h=>/· Episodios/.test(h.textContent))>=0 && [...document.querySelectorAll('.row h2')].map(h=>h.textContent)`), 25000).catch(() => null);
+    sample.rows = await cdp.evaluate(`[...document.querySelectorAll('.row h2')].map(h=>h.textContent)`);
     await shot('search');
     await keys([40]);
-    for (let i = 0; i < 5 && !(await cdp.evaluate(`document.querySelector('.row.active h2')?.textContent.startsWith('JKAnime')`)); i++) await keys([40]);
+    await sleep(600);
+    sample.firstResult = await cdp.evaluate(`document.querySelector('.card.focus')?.getAttribute('aria-label') + ' · ' + (document.querySelector('.preview .meta')?.textContent || '').replace(/\\s+/g,' ').trim()`);
+    sample.bestOk = sample.rows?.[0] === 'Mejores resultados' && /^One Piece\b/.test(sample.firstResult || '') && /JKAnime/.test(sample.firstResult || '') && /^One Piece · Episodios 1\d{3}–1\d{3}$/.test(sample.rows?.[1] || '');
     await keys([13]);
     sample.episodes = await waitFor(() => cdp.evaluate(`document.querySelectorAll('.row').length && document.querySelector('.row h2').textContent.startsWith('Episodios') ? [...document.querySelectorAll('.row h2')].length : 0`), 20000).catch(() => 0);
+    sample.firstBlock = await cdp.evaluate(`document.querySelector('.row h2')?.textContent`);
     sample.focus = await cdp.evaluate(`document.querySelector('.card.focus')?.getAttribute('aria-label')`);
     await shot('episodes');
     const playStarted = Date.now();
@@ -171,14 +177,15 @@ try {
   // --item=source:Title plays exactly that catalogue title (e.g. a copy with no servers, to see the fallback).
   const wanted = process.argv.find(arg => arg.startsWith('--item='))?.slice(7);
   if (wanted) { const [source, ...title] = wanted.split(':'); samples.splice(0, samples.length, catalog.items.find(item => item.source === source && !item.isShow && item.title.toLowerCase() === title.join(':').toLowerCase())); }
-  // --episodes=source|show URL|title|1180,1100,1 plays those episodes of a show (e.g. One Piece on JKAnime).
+  // --episodes=source|show URL|title|1180,1100,1[|kind] plays those episodes of a show (e.g. One Piece on JKAnime;
+  // Cuevana's One Piece is listed as a series: «|series»).
   const episodesArg = process.argv.find(arg => arg.startsWith('--episodes='))?.slice(11);
   if (episodesArg) {
-    const [source, show, title, numbers] = episodesArg.split('|');
+    const [source, show, title, numbers, kind = 'anime'] = episodesArg.split('|');
     const list = (await catalog.episodes(source, show)).flatMap(season => season.episodes);
     const picked = numbers.split(',').map(Number).map(number => list.find(entry => entry.episode === number)).filter(Boolean);
     // With --item too, that title plays first (e.g. an AnimeYT episode that should open on JKAnime).
-    samples.splice(0, samples.length, ...(wanted ? samples.slice(0, 1) : []), ...picked.map(entry => ({ source, kind: 'anime', title, show, url: entry.url, episode: entry.episode, subtitle: entry.label, genres: [] })));
+    samples.splice(0, samples.length, ...(wanted ? samples.slice(0, 1) : []), ...picked.map(entry => ({ source, kind, title, show, url: entry.url, episode: entry.episode, subtitle: entry.label, genres: [] })));
   }
   const hold = Number(process.argv.find(arg => arg.startsWith('--hold='))?.slice(7)) || 0;
   for (const [index, item] of samples.entries()) {

@@ -1,41 +1,97 @@
 {
-  "capturedAt": "2026-10-24T01:55:40.968Z",
+  "capturedAt": "2026-10-24T03:34:56.829Z",
   "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
   "samples": [
     {
       "label": "search",
       "query": "one piece",
-      "seconds": 5.125,
+      "seconds": 8.697,
       "status": [
-        "Tu catálogo · 3 · 0,1 s",
-        "Cuevana 3 · 23 · 0,7 s",
-        "RePelisHD · 16 · 1,4 s",
-        "JKAnime · 22 · 1,0 s",
-        "AnimeYT · 7 · 1,8 s",
-        "DoramasFlix · 10 · 4,4 s",
-        "DoramasMP4 · 1 · 1,5 s",
-        "Asia Live Action · 0 · 0,8 s"
+        "Tu catálogo · 4 · 0,1 s",
+        "Cuevana 3 · 23 · 1,2 s",
+        "RePelisHD · 16 · 1,8 s",
+        "JKAnime · 22 · 1,5 s",
+        "AnimeYT · 7 · 1,7 s",
+        "DoramasFlix · 10 · 7,9 s",
+        "DoramasMP4 · 1 · 2,3 s",
+        "Asia Live Action · 0 · 1,4 s"
       ],
       "rows": [
+        "Mejores resultados",
+        "One Piece · Episodios 1131–1180",
         "En tu catálogo",
         "Cuevana 3 · 23",
         "JKAnime · 22",
+        "AnimeYT · 7",
         "RePelisHD · 16",
         "DoramasMP4 · 1",
-        "AnimeYT · 7",
         "DoramasFlix · 10"
       ],
+      "bestRow": [
+        "Mejores resultados",
+        "One Piece · Episodios 1131–1180",
+        "En tu catálogo",
+        "Cuevana 3 · 23",
+        "JKAnime · 22",
+        "AnimeYT · 7",
+        "RePelisHD · 16",
+        "DoramasMP4 · 1",
+        "DoramasFlix · 10"
+      ],
+      "firstResult": "One Piece, Último episodio: 1180 · Último episodio: 1180 En emisión Anime · JKAnime",
+      "bestOk": true,
       "episodes": 24,
+      "firstBlock": "Episodios 1131–1180",
       "focus": "One Piece, Episodio 1180",
       "phase": "playing",
-      "secondsToPlay": 10.039,
+      "secondsToPlay": 13.442,
       "appAlive": true,
       "player": "https://jkanime.net/jkplayer/um",
       "position": {
-        "t": 8.321289,
+        "t": 7.320289,
         "d": 1415.6647179999986
       },
       "homeShown": true
+    },
+    {
+      "label": "1-cuevana-642",
+      "source": "cuevana",
+      "title": "One Piece",
+      "page": "https://cuevana3c.pro/serie/one-piece/episodio-15x642",
+      "player": "https://jkanime.net/jkplayer/um",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 13.4,
+      "frames": [
+        {
+          "url": "https://jkanime.net/jkplayer/um",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://jkanime.net/jkplayer/um",
+      "site": "JKAnime",
+      "key": "https://jkanime.net/one-piece/",
+      "position": {
+        "first": {
+          "t": 1.084422,
+          "d": 1419.0846339999991
+        },
+        "last": {
+          "t": 11.094422,
+          "d": 1419.0846339999991
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 11,
+        "duration": 1419
+      }
     }
   ],
   "errors": [],
@@ -49,10 +105,10 @@
         "url": "http://192.168.1.148:43190/holy/"
       }
     ],
-    "memory": "memory  1252016  815724  242444  38672   193848      339476"
+    "memory": "memory  1252016  850492  152076  41352   249448      301440"
   },
   "after": {
-    "memory": "memory  1252016  825492  189420  51204   237104      316856"
+    "memory": "memory  1252016  863580  147672  51312   240764      277972"
   },
   "bridgeErrors": []
 }
