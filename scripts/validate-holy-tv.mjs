@@ -24,7 +24,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const out = 'evidence/holy/tv';
 mkdirSync(out, { recursive: true });
 const report = { capturedAt: new Date().toISOString(), scope: 'LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.', samples: [], errors: [] };
-const reportFile = join(out, process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--episodes=')) ? 'episodes-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
+const reportFile = join(out, process.argv.includes('--ending') ? 'ending-validation.json' : process.argv.includes('--search') ? 'search-validation.json' : process.argv.includes('--taste') ? 'taste-validation.json' : process.argv.some(arg => arg.startsWith('--episodes=')) ? 'episodes-validation.json' : process.argv.some(arg => arg.startsWith('--item=')) ? 'fallback-validation.json' : 'validation.json');
 const save = () => writeFileSync(reportFile, JSON.stringify(report, null, 2));
 const memory = async () => (await ares('ares-device', '-r').catch(() => '')).split('\n').find(line => line.startsWith('memory'))?.trim();
 const libraryFile = '.local/holy-library-tvtest.json';
@@ -133,6 +133,81 @@ try {
     }
     console.log(JSON.stringify(sample));
     save();
+    samples.length = 0;
+  }
+  // --ending: the end of an episode (card, countdown, the next one by itself; or the remote's
+  // keys) and of a film (home or similar films), on the real player pages.
+  if (process.argv.includes('--ending')) {
+    const key = async code => { for (const type of ['rawKeyDown', 'keyUp']) await cdp.call('Input.dispatchKeyEvent', { type, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code }); };
+    // Jump to a few seconds before the end of the main video (shadow DOM and iframes included).
+    const toEnd = async seconds => {
+      const expression = `(()=>{const deep=(r,o=[])=>{o.push(...r.querySelectorAll('video'));for(const n of r.querySelectorAll('*'))if(n.shadowRoot)deep(n.shadowRoot,o);return o};for(const v of deep(document))if(Number.isFinite(v.duration)&&v.duration>60){v.currentTime=v.duration-${seconds};return true}return false})()`;
+      for (const { id, sessionId } of await bridge.playerContexts()) if (await bridge.evaluateWithGesture(expression, id, sessionId).catch(() => false) === true) return true;
+      return false;
+    };
+    const cardShown = () => cdp.evaluate(`!!document.querySelector('holy-end')`).catch(() => false);
+    const waitCard = () => waitFor(async () => !!bridge.session?.card && await cardShown(), 40000).then(() => true, () => false);
+    const playing = test => waitFor(() => !alive() || (bridge.session?.phase === 'playing' && (!test || test())), 90000).then(() => alive(), () => false);
+    const show = 'https://jkanime.net/one-piece/';
+    const episode = n => ({ source: 'jkanime', kind: 'anime', title: 'One Piece', show, url: show + n + '/', episode: n, subtitle: 'Episodio ' + n, genres: [] });
+    const done = sample => { console.log(JSON.stringify(sample)); save(); };
+    // 1. An episode ends: «Siguiente capítulo» with its countdown, then the next one plays by itself.
+    const next = { label: 'ending-next' };
+    report.samples.push(next);
+    await bridge.command({ action: 'play', value: episode(1178) });
+    next.started = await playing();
+    await sleep(4000);
+    next.seeked = await toEnd(12);
+    let started = Date.now();
+    next.card = await waitCard();
+    next.cardAfter = (Date.now() - started) / 1000;
+    next.options = bridge.session?.card?.options.map(option => option.action === 'play' ? option.item.subtitle : 'Volver al inicio');
+    next.countdown = !!bridge.session?.card?.timer;
+    await shot('ending-next').catch(() => {});
+    started = Date.now();
+    next.playedNext = await playing(() => bridge.session.item.episode === 1179);
+    next.secondsToNext = (Date.now() - started) / 1000;
+    next.ok = next.card && next.countdown && next.playedNext && bridge.session?.item?.episode === 1179;
+    done(next);
+    // 2. With the remote: → stops the countdown on «Volver al inicio», OK goes home.
+    const keys = { label: 'ending-keys' };
+    report.samples.push(keys);
+    await sleep(4000);
+    keys.seeked = await toEnd(12);
+    keys.card = await waitCard();
+    await key(39);
+    await sleep(1500);
+    keys.countdownStopped = bridge.session?.card?.timer === null && bridge.session?.card?.focus === 1;
+    await sleep(8000);
+    keys.stayed = bridge.session?.item?.episode === 1179 && !!bridge.session?.card;
+    await key(13);
+    keys.home = await waitFor(() => cdp.evaluate('location.href.startsWith(' + JSON.stringify(home) + ') && document.querySelectorAll(".row").length > 0'), 20000).then(() => true, () => false);
+    keys.ok = keys.card && keys.countdownStopped && keys.stayed && keys.home && !bridge.session;
+    done(keys);
+    // 3. A film ends: «Volver al inicio» and similar films; → and OK play the first similar one.
+    const film = pick('cuevana', 'movie');
+    const ending = { label: 'ending-film', title: film?.title };
+    report.samples.push(ending);
+    if (film) {
+      await bridge.command({ action: 'play', value: film });
+      ending.started = await playing();
+      await sleep(4000);
+      ending.seeked = await toEnd(25);
+      ending.card = await waitCard();
+      ending.options = bridge.session?.card?.options.map(option => option.action === 'play' ? option.item.title : 'Volver al inicio');
+      ending.countdown = !!bridge.session?.card?.timer;
+      await shot('ending-film').catch(() => {});
+      await key(39);
+      await sleep(800);
+      await key(13);
+      ending.similarPlaying = await playing(() => bridge.session.item.title === ending.options?.[1]);
+      if (alive()) {
+        await bridge.command({ action: 'back' });
+        ending.home = await waitFor(() => cdp.evaluate('document.querySelectorAll(".row").length > 0'), 20000).then(() => true, () => false);
+      }
+      ending.ok = ending.card && !ending.countdown && ending.options?.[0] === 'Volver al inicio' && ending.options.length > 1 && ending.similarPlaying && ending.home;
+    }
+    done(ending);
     samples.length = 0;
   }
   // --taste: the «Gustos» screen with the remote (test profile only, deleted at the end).

@@ -70,11 +70,19 @@ export function holyRemote(homes = [], home = '', world = '') {
     location.href = home;
   });
   addEventListener('keydown', event => {
-    if (event.keyCode !== 461 && event.keyCode !== 27) return;
     const root = document.documentElement;
+    // While Holy's end card is up, OK and the arrows belong to it (not to the player).
+    const card = root?.dataset.holyCard === '1' && [13, 37, 38, 39, 40].includes(event.keyCode);
+    if (event.keyCode !== 461 && event.keyCode !== 27 && !card) return;
     const [owner, at] = String(root?.dataset.holyBridge || '').split('|');
     const live = Date.now() - Number(at || 0) < 6000;
     if (live && owner !== world) return; // A newer connection's handler answers.
+    if (card) {
+      if (!live || typeof window.__lgLabCommand !== 'function') return;
+      event.preventDefault(); event.stopImmediatePropagation();
+      try { window.__lgLabCommand(JSON.stringify({ action: 'card', key: event.keyCode })); } catch { /* The card stays. */ }
+      return;
+    }
     if (root?.dataset.holyBack === String(event.timeStamp)) return;
     if (root) root.dataset.holyBack = String(event.timeStamp);
     event.preventDefault(); event.stopImmediatePropagation();
@@ -83,6 +91,90 @@ export function holyRemote(homes = [], home = '', world = '') {
     }
     leave();
   }, true);
+}
+
+// The end of a title, over the player (top page, bridge's isolated world): the next
+// episode with a countdown, the last one available, or for a film «Volver al inicio»
+// and similar films. The Mac decides; this only draws, counts down and passes clicks.
+export function holyEndCard(data) {
+  if (window.top !== window || !document.documentElement) return false;
+  document.querySelector('holy-end')?.remove();
+  const make = (tag, className, text) => { const node = document.createElement(tag); if (className) node.className = className; if (text) node.textContent = text; return node; };
+  const host = document.createElement('holy-end');
+  host.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:block;pointer-events:none';
+  const root = host.attachShadow({ mode: 'closed' });
+  const style = document.createElement('style');
+  style.textContent = `*{box-sizing:border-box}.w{position:absolute;inset:0;font-family:system-ui,"LG Smart UI",Arial,sans-serif;color:#fff;animation:in .4s ease}
+    .shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.95) 0%,rgba(0,0,0,.7) 38%,rgba(0,0,0,.15) 70%,transparent 100%)}
+    .p{position:absolute;left:110px;right:110px;bottom:90px;pointer-events:auto}
+    .k{font-size:24px;font-weight:800;letter-spacing:5px;color:#e50914;margin-bottom:14px}
+    h1{font-size:58px;line-height:1.05;margin:0 0 10px;font-weight:800}
+    .sub{font-size:28px;color:#cfcfcf;margin:0 0 34px}
+    .row{display:flex;gap:26px;align-items:flex-end}
+    .next{display:flex;gap:30px;align-items:center}
+    .thumb{width:420px;height:236px;border-radius:12px;background:#222 center/cover no-repeat;flex:none;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+    .b{position:relative;overflow:hidden;min-width:250px;height:76px;padding:0 34px;border-radius:10px;border:0;font:700 28px system-ui,Arial,sans-serif;color:#fff;background:rgba(109,109,110,.7);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .15s}
+    .b .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.28)}
+    .b span{position:relative}
+    .b.f{background:#fff;color:#000;transform:scale(1.06)}
+    .b.f .fill{background:rgba(0,0,0,.14)}
+    .tile{width:230px;flex:none;border-radius:10px;overflow:hidden;background:#1d1d1d;border:4px solid transparent;cursor:pointer;transition:transform .15s}
+    .tile .img{height:330px;background:#2a2a2a center/cover no-repeat}
+    .tile .t{padding:10px 12px;font-size:21px;line-height:1.2;height:68px;overflow:hidden}
+    .tile .m{color:#46d369;font-weight:700;font-size:19px;padding:0 12px 10px}
+    .tile.f{border-color:#fff;transform:scale(1.06)}
+    .home{width:230px;height:412px;flex:none;border-radius:10px;border:4px solid transparent;background:rgba(109,109,110,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-size:26px;font-weight:700;cursor:pointer;text-align:center;transition:transform .15s}
+    .home .i{font-size:64px;line-height:1}
+    .home.f{background:#fff;color:#000;transform:scale(1.06)}
+    @keyframes in{from{opacity:0}to{opacity:1}}`;
+  const wrap = make('div', 'w');
+  const panel = make('div', 'p');
+  const send = index => { try { window.__lgLabCommand?.(JSON.stringify({ action: 'card', choose: index })); } catch { /* Remote keys still work. */ } };
+  const options = [];
+  const option = (node, index) => { node.addEventListener('click', () => send(index)); options[index] = node; return node; };
+  const image = (node, url) => { if (url) node.style.backgroundImage = `url("${String(url).replace(/["\\]/g, '')}")`; return node; };
+  let fill = null, label = null, timer = null, left = Number(data.seconds) || 0;
+  if (data.mode === 'next') {
+    panel.append(make('div', 'k', 'SIGUIENTE CAPÍTULO'), make('h1', '', data.title || ''), make('p', 'sub', data.next || ''));
+    const next = make('div', 'next');
+    const play = option(make('button', 'b'), 0);
+    fill = make('div', 'fill'); label = make('span', '', `▶  Ver ahora · ${left}`);
+    play.append(fill, label);
+    const actions = make('div', 'row');
+    actions.style.flexDirection = 'column'; actions.style.alignItems = 'flex-start';
+    actions.append(play, option(make('button', 'b'), 1));
+    options[1].append(make('span', '', 'Volver al inicio'));
+    next.append(image(make('div', 'thumb'), data.image), actions);
+    panel.append(next);
+    // The bar fills in the time the Mac waits before playing the next episode.
+    requestAnimationFrame(() => { fill.style.transition = `width ${left}s linear`; fill.style.width = '100%'; });
+    timer = setInterval(() => { left = Math.max(0, left - 1); label.textContent = `▶  Ver ahora · ${left}`; if (!left) clearInterval(timer); }, 1000);
+  } else if (data.mode === 'last') {
+    panel.append(make('div', 'k', 'TERMINASTE'), make('h1', '', data.title || ''), make('p', 'sub', 'Es el último capítulo disponible por ahora.'));
+    const home = option(make('button', 'b'), 0); home.append(make('span', '', 'Volver al inicio'));
+    panel.append(home);
+  } else {
+    panel.append(make('div', 'k', 'TERMINASTE'), make('h1', '', data.title || ''), make('p', 'sub', (data.options || []).length ? '¿Vuelves al inicio o ves algo parecido?' : ''));
+    const row = make('div', 'row');
+    const home = option(make('div', 'home'), 0); home.append(make('div', 'i', '⌂'), make('div', '', 'Volver al inicio'));
+    row.append(home);
+    (data.options || []).slice(0, 4).forEach((entry, index) => {
+      const tile = option(make('div', 'tile'), index + 1);
+      tile.append(image(make('div', 'img'), entry.poster), make('div', 't', entry.title || ''));
+      if (entry.match) tile.append(make('div', 'm', `${entry.match} % para ti`));
+      row.append(tile);
+    });
+    panel.append(row);
+  }
+  const focus = (index, stopped) => {
+    options.forEach((node, at) => node.classList.toggle('f', at === index));
+    if (stopped && fill) { clearInterval(timer); fill.style.transition = 'none'; fill.style.width = '0'; label.textContent = '▶  Ver ahora'; }
+  };
+  focus(0, false);
+  wrap.append(make('div', 'shade'), panel); root.append(style, wrap);
+  document.documentElement.append(host);
+  window.__holyEnd = { focus, remove() { clearInterval(timer); host.remove(); } };
+  return true;
 }
 
 // One automation step in one frame: report the videos, and if none is playing yet,
@@ -180,3 +272,7 @@ export const remoteSource = (homes, home = '', world = '') => `(${holyRemote.toS
 export const heartbeatSource = world => `document.documentElement&&(document.documentElement.dataset.holyBridge=${JSON.stringify(world)}+'|'+Date.now())`;
 export const autoplaySource = options => `(${holyAutoplay.toString()})(${JSON.stringify(options || {})})`;
 export const theaterSource = `(${holyTheater.toString()})()`;
+export const endCardSource = data => `(${holyEndCard.toString()})(${JSON.stringify(data)})`;
+// Marks every frame while the end card is up, so OK and the arrows reach it from the player's iframe.
+export const cardFlagSource = on => (on ? "document.documentElement&&(document.documentElement.dataset.holyCard='1')"
+  : 'document.documentElement&&delete document.documentElement.dataset.holyCard,window.top===window&&window.__holyEnd&&window.__holyEnd.remove()');

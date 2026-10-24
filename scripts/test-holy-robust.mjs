@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { cuevana, repelishd, jkanime, doramasmp4 } from './holy/sources.mjs';
 import { doramasflix, asialiveaction, animeyt, flight, flixHost, rankFlixLinks } from './holy/more-sources.mjs';
 import { CONNECTORS } from './holy/connectors.mjs';
-import { Library } from './holy/library.mjs';
+import { Library, entryKey as entryKeyOf } from './holy/library.mjs';
 import { Catalog, sameTitle, episodeOf, sameEpisode } from './holy/catalog.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
 import { home } from './browser-bridge.mjs';
@@ -332,6 +332,123 @@ try {
     assert.deepEqual([sameEpisode({ season: 2, episode: 5 }, { season: null, episode: 5 }), sameEpisode({ season: 15, episode: 642 }, { season: null, episode: 642 }), sameEpisode({ season: 1, episode: 3 }, { season: null, episode: 3 }), sameEpisode({ season: 2, episode: 5 }, { season: 2, episode: 5 })], [false, true, true, true]);
     assert.deepEqual(await catalog.elsewhere({ ...cuevanaOP, url: 'https://cuevana.example/serie/one-piece/episodio-2x5', episode: 5 }, new Set(['cuevana']), { only: 'jkanime', kind: 'anime' }), []);
     catalog.stop();
+  });
+
+  await check('Final de un título: siguiente capítulo con cuenta atrás; película → inicio o parecidas', async () => {
+    const calls = [], drawn = [];
+    let video = { t: 100, d: 1400, paused: false, ready: 4, area: 1, ended: false };
+    const cdp = {
+      async call(method, params = {}) {
+        calls.push({ method, params });
+        if (method === 'Page.getFrameTree') return { frameTree: { frame: { id: 'main', url: 'https://example.com/' } } };
+        if (method === 'Page.addScriptToEvaluateOnNewDocument') return { identifier: String(calls.length) };
+        if (method === 'Runtime.evaluate') return { result: { value: { url: 'https://p.example/', top: true, videos: [video], action: '' } } };
+        return {};
+      },
+      async evaluate(expression) { drawn.push(expression); return expression.includes('hasContent') ? { url: 'https://example.com/', hasContent: true } : 'https://example.com/'; },
+      onEvent() { return () => {}; }
+    };
+    const library = new Library(join(directory, 'end.json'));
+    const show = 'https://jkanime.net/one-piece/';
+    const similar = [{ source: 'cuevana', kind: 'movie', title: 'Oro sin ley', url: 'https://c.example/oro', poster: 'https://img.example/oro.jpg', genres: ['Acción'], match: 80 }];
+    const catalog = { version: 1, find: () => null, pageFallback: () => false, resolve: async item => ({ url: 'https://p.example/play?u=' + encodeURIComponent(item.url) }),
+      next: async item => (item.episode < 1180 ? { url: show + (item.episode + 1) + '/', episode: item.episode + 1, label: 'Episodio ' + (item.episode + 1), still: '' } : null),
+      similar: () => similar };
+    const bridge = await new HolyBridge(cdp, { preferencesFile: join(directory, 'end-settings.json'), catalog, library, recorder: false, nextDelay: 40 }).start();
+    clearInterval(bridge.watchTimer);
+    bridge.contexts.set(5, { id: 5, auxData: { isDefault: true, frameId: 'main' } });
+    bridge.remoteContexts.add(9);
+    const navigated = () => calls.filter(call => call.method === 'Page.navigate').at(-1)?.params.url;
+    const playTo = async (item, at) => {
+      await bridge.command({ action: 'play', value: item });
+      bridge.frames.set(bridge.mainFrame, 'https://p.example/'); bridge.navigation.phase = 'complete';
+      video = { ...video, t: 100, ended: false, paused: false };
+      await new Promise(resolve => setTimeout(resolve, 60));
+      await bridge.watch();
+      assert.equal(bridge.session.phase, 'playing');
+      video = { ...video, ...at };
+      await bridge.watch();
+    };
+    // An episode ends: «Siguiente capítulo» and, after the countdown, the next one plays.
+    await playTo({ source: 'jkanime', kind: 'anime', title: 'One Piece', show, url: show + '1178/', episode: 1178 }, { t: 1397 });
+    assert.ok(drawn.some(expression => expression.includes('holyEndCard') && expression.includes('"mode":"next"') && expression.includes('Episodio 1179')));
+    assert.ok(drawn.some(expression => expression.includes("holyCard='1'")));
+    await new Promise(resolve => setTimeout(resolve, 120));
+    assert.equal(navigated(), 'https://p.example/play?u=' + encodeURIComponent(show + '1179/'));
+    assert.equal(bridge.session.item.episode, 1179);
+    assert.equal(library.get(show)?.url, show + '1179/');
+    // The owner moves to «Volver al inicio»: no countdown; OK goes home.
+    await playTo(bridge.session.item, { ended: true, t: 1400, paused: true });
+    await bridge.event({ method: 'Runtime.bindingCalled', params: { name: '__lgLabCommand', executionContextId: 9, payload: JSON.stringify({ action: 'card', key: 39 }) } });
+    assert.ok(drawn.at(-1).includes('__holyEnd.focus(1,true)'));
+    await new Promise(resolve => setTimeout(resolve, 120));
+    assert.equal(bridge.session.item.episode, 1179);
+    await bridge.event({ method: 'Runtime.bindingCalled', params: { name: '__lgLabCommand', executionContextId: 9, payload: JSON.stringify({ action: 'card', key: 13 }) } });
+    assert.equal(bridge.session, null);
+    assert.ok(navigated().endsWith('/holy/'));
+    // The last episode available: no countdown, only home.
+    await playTo({ source: 'jkanime', kind: 'anime', title: 'One Piece', show, url: show + '1180/', episode: 1180 }, { t: 1399 });
+    assert.ok(drawn.some(expression => expression.includes('"mode":"last"')));
+    assert.equal(bridge.session.card.timer, null);
+    // Rewinding from the card hides it.
+    video = { ...video, t: 600 };
+    await bridge.watch();
+    assert.equal(bridge.session.card, null);
+    assert.ok(drawn.at(-1).includes('__holyEnd.remove()'));
+    // A stream stuck just before its end (last piece never loads) counts as finished; a pause by the owner does not.
+    await bridge.hideEndCard(bridge.session);
+    bridge.endStall = 30;
+    video = { ...video, t: 1385, paused: true };
+    await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 60)); await bridge.watch();
+    assert.equal(bridge.session.card, null);
+    video = { ...video, paused: false };
+    await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 60)); await bridge.watch();
+    assert.ok(bridge.session.card);
+    // A film ends: «Volver al inicio» first, then similar films; a click picks one.
+    await playTo({ source: 'cuevana', kind: 'movie', title: 'Street Fighter', url: 'https://c.example/sf', genres: ['Acción'] }, { t: 5999, d: 6000 });
+    assert.ok(drawn.some(expression => expression.includes('"mode":"movie"') && expression.includes('Oro sin ley')));
+    assert.equal(bridge.session.card.timer, null);
+    // Only Holy's own isolated contexts may answer the card.
+    await bridge.event({ method: 'Runtime.bindingCalled', params: { name: '__lgLabCommand', executionContextId: 1234, payload: JSON.stringify({ action: 'card', choose: 1 }) } });
+    assert.equal(bridge.session.item.title, 'Street Fighter');
+    await bridge.event({ method: 'Runtime.bindingCalled', params: { name: '__lgLabCommand', executionContextId: 9, payload: JSON.stringify({ action: 'card', choose: 1 }) } });
+    assert.equal(bridge.session.item.title, 'Oro sin ley');
+    assert.equal(navigated(), 'https://p.example/play?u=' + encodeURIComponent('https://c.example/oro'));
+    await bridge.stop();
+    // Catalogue: the next episode by number (JKAnime lists newest first), none after the last, address pattern otherwise.
+    const real = new Catalog({ file: join(directory, 'n.json'), detailsFile: join(directory, 'nd.json'), fetch: async () => '', connectors: [
+      { id: 'jkanime', name: 'JKAnime', site: 'https://jkanime.net/', parseHome: () => [], episodes: async () => [{ title: 'Episodios 1131–1180', episodes: [1180, 1179, 1178].map(n => ({ url: show + n + '/', episode: n, label: 'Episodio ' + n })) }] },
+      { id: 'cuevana', name: 'Cuevana', site: 'https://cuevana.example/', parseHome: () => [], episodes: async () => [{ title: 'Temporada 1', episodes: [{ url: 'https://cuevana.example/serie/x/episodio-1x10', season: 1, episode: 10 }] }, { title: 'Temporada 2', episodes: [{ url: 'https://cuevana.example/serie/x/episodio-2x1', season: 2, episode: 1 }] }] }] });
+    assert.equal((await real.next({ source: 'jkanime', show, url: show + '1178/', episode: 1178 })).url, show + '1179/');
+    assert.equal(await real.next({ source: 'jkanime', show, url: show + '1180/', episode: 1180 }), null);
+    assert.equal((await real.next({ source: 'cuevana', show: 'https://cuevana.example/serie/x', url: 'https://cuevana.example/serie/x/episodio-1x10', episode: 10 })).url, 'https://cuevana.example/serie/x/episodio-2x1');
+    assert.equal((await real.next({ source: 'doramasmp4', url: 'https://doramasmp4.example/cap/x-capitulo-4/' })).url, 'https://doramasmp4.example/cap/x-capitulo-5/');
+    // Similar films: shared genres first, never the same title twice or one already finished.
+    real.items = [
+      { source: 'cuevana', kind: 'movie', title: 'Comedia', url: 'https://c.example/1', poster: 'p', genres: ['Comedia'] },
+      { source: 'cuevana', kind: 'movie', title: 'Acción 1', url: 'https://c.example/2', poster: 'p', genres: ['Acción', 'Fantasía'] },
+      { source: 'repelishd', kind: 'movie', title: 'Acción 1', url: 'https://r.example/2', poster: 'p', genres: ['Acción'] },
+      { source: 'cuevana', kind: 'movie', title: 'Vista', url: 'https://c.example/3', poster: 'p', genres: ['Acción'] },
+      { source: 'cuevana', kind: 'movie', title: 'Street Fighter', url: 'https://r.example/sf', poster: 'p', genres: ['Acción'] }];
+    const seen = new Library(join(directory, 'similar.json'));
+    seen.start(real.items[3]); seen.progress(entryKeyOf(real.items[3]), real.items[3].url, 5990, 6000);
+    assert.deepEqual(real.similar({ kind: 'movie', title: 'Street Fighter', url: 'https://c.example/sf', genres: ['Acción', 'Fantasía'] }, seen).map(item => item.title), ['Acción 1', 'Comedia']);
+    real.stop();
+    // In the player's iframe, OK and the arrows go to the card only while it is up.
+    const { holyRemote } = await import('./holy/page-scripts.mjs');
+    const sent = [];
+    const listeners = [];
+    const root = { dataset: { holyBridge: 'w|' + Date.now() } };
+    globalThis.window = { addEventListener: (type, fn) => type === 'keydown' && listeners.push(fn), location: { href: 'https://player.example/' }, __lgLabCommand: payload => sent.push(payload) };
+    window.top = window; globalThis.location = window.location; globalThis.addEventListener = window.addEventListener; globalThis.document = { documentElement: root };
+    holyRemote([], 'http://mac/holy/', 'w');
+    const press = code => { const event = { keyCode: code, timeStamp: Math.random(), preventDefault() { this.prevented = true; }, stopImmediatePropagation() {} }; listeners.forEach(fn => fn(event)); return event; };
+    assert.equal(press(13).prevented, undefined);
+    root.dataset.holyCard = '1';
+    assert.equal(press(13).prevented, true);
+    press(39);
+    assert.deepEqual(sent, ['{"action":"card","key":13}', '{"action":"card","key":39}']);
+    delete globalThis.window; delete globalThis.location; delete globalThis.addEventListener; delete globalThis.document;
   });
 
   await check('Servidor: rutas con datos malos responden sin caerse', async () => {

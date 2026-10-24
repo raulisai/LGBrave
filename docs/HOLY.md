@@ -225,3 +225,27 @@ El iframe del reproductor de Cuevana corre en el mismo proceso en la TV (`player
 | OK en la serie | 24 bloques, el primero 1131–1180, foco en el 1180 → reproduce en 13,4 s, avanza, Atrás vuelve |
 | Cuevana «One Piece» 15x642 (serie) | Va a JKAnime 642, reproduce en 13,4 s, avanza |
 
+## Holy 0.5.0 · Final de capítulo y de película (2026-10-23 22:25)
+
+**Petición:** al terminar un capítulo, ofrecer el siguiente con un temporizador y, si no se pulsa nada en 5–6 s, ponerlo solo; al terminar una película, ofrecer volver al inicio o películas parecidas.
+
+**Cómo funciona**
+
+- El puente detecta el final con la posición que ya lee cada segundo: `ended`, a 4 s del final, o atascado 6 s dentro de los últimos 30 s sin pausa (un stream cuyo último trozo no carga). Si se rebobina más de 15 s, la tarjeta se quita.
+- La tarjeta (`holyEndCard`) se dibuja en la página de arriba, en el mundo aislado del puente (sin `innerHTML`), encima del reproductor en modo teatro. Mientras está, cada marco lleva `data-holy-card` y `holyRemote` reenvía OK y flechas al Mac desde el iframe del reproductor; el clic del puntero también vale. Solo los contextos de Holy pueden responder.
+- **Capítulo**: `Catalog.next` busca el siguiente por número en la lista del sitio (JKAnime la da de más nuevo a más viejo; Cuevana pasa de 1x10 a 2x1); si la lista no tiene uno mayor, es el último. Se busca al empezar a reproducir para que la tarjeta salga al instante. A los 6 s (`NEXT_DELAY`) reproduce el siguiente por el camino normal (cortina, JKAnime primero, servidores alternos, otro sitio). Mover a «Volver al inicio» para la cuenta.
+- **Película**: «Volver al inicio» enfocado y hasta 4 parecidas (`Catalog.similar`: géneros en común ×12 + % de coincidencia; una por título; nunca la misma ni una ya terminada; con póster). No hay cuenta atrás.
+
+**Pruebas**
+
+- `npm test`: nueva comprobación «Final de un título…» (cuenta atrás → siguiente; → para la cuenta y OK → inicio; último capítulo; rebobinar; atascado al final cuenta, pausado no; película → parecida con clic; contextos ajenos no responden; `next` por número; `similar`; reenvío de teclas en el iframe).
+- **TV** (`evidence/holy/tv/ending-validation.json`, `ending-next.jpg`, `ending-film.jpg`; teclas enviadas desde el Mac con `Input.dispatchKeyEvent`, vídeo silenciado, historial de prueba borrado):
+
+| Prueba | Resultado |
+| --- | --- |
+| One Piece 1178 (JKAnime), salto a 12 s del final | Tarjeta «Siguiente capítulo · Episodio 1179» en 12,9 s con cuenta atrás; 1179 reproduciendo 17,4 s después |
+| 1179 al final + → y OK | → enfoca «Volver al inicio» y para la cuenta; 8 s después sigue en 1179; OK → inicio |
+| «Papi Ricky: La Película» (Cuevana) | Primera vez: el reproductor se quedó en 5977/5987 s tras el salto y no hubo tarjeta → regla de «atascado al final». Segunda: tarjeta con Volver al inicio + Seriously Single Too, Volver a los 17, La hipótesis del amor, Un altre home (pósters cargan); → + OK reproduce la primera; Atrás → inicio |
+
+No probado: el control físico y ver hasta el final real (la prueba salta a los últimos segundos). En la captura del capítulo, el reproductor de JKAnime muestra su propio aviso «¿Deseas continuar donde te quedaste?» (recuerda pruebas anteriores); no impidió el siguiente capítulo.
+

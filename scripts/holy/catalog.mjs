@@ -2,7 +2,7 @@ import { readFileSync, mkdirSync, writeFileSync, renameSync, existsSync, copyFil
 import { dirname } from 'node:path';
 import { fetchText, country } from './sources.mjs';
 import { CONNECTORS, connectorFor } from './connectors.mjs';
-import { entryKey, titleKey } from './library.mjs';
+import { entryKey, titleKey, nextEpisode } from './library.mjs';
 
 // The newest titles from the owner's sites, refreshed on the Mac every half hour.
 // Details (genres, synopsis, show page) are cached per page: they rarely change.
@@ -243,6 +243,34 @@ export class Catalog {
   // The same title on the owner's other sites, for when its own site cannot play it:
   // copies already in the catalogue first, then each compatible site's search. For an
   // episode, the same episode number (and season when both sites number seasons).
+  // The episode after this one, by number (JKAnime lists newest first): from the show's
+  // list when the site has one (none after the last), else from the address pattern.
+  async next(item) {
+    const current = episodeOf(item);
+    if (!current.episode) return null;
+    const order = entry => (entry.season || 0) * 1e5 + (entry.episode || 0);
+    const position = order({ season: current.season, episode: current.episode });
+    const seasons = item.show && this.connector(item.source)?.episodes ? await this.episodes(item.source, item.show).catch(() => []) : [];
+    const list = seasons.flatMap(season => season.episodes).map(entry => ({ ...entry, ...episodeOf(entry), season: entry.season ?? episodeOf(entry).season }));
+    if (list.length) {
+      const after = list.filter(entry => entry.episode && order(entry) > position).sort((a, b) => order(a) - order(b))[0];
+      return after ? { url: after.url, episode: after.episode, label: after.label || 'Episodio ' + after.episode, still: after.still || '' } : null;
+    }
+    const guess = nextEpisode(item);
+    return guess ? { ...guess, episode: guess.episode || null, still: '' } : null;
+  }
+  // Films like this one for the end of a film: shared genres first, then the match;
+  // never the same title, one already finished or one without a poster.
+  similar(item, library, limit = 4) {
+    const genres = new Set(item.genres || []);
+    const finished = new Set(library.entries.filter(entry => entry.finished).map(entry => entry.key));
+    const titles = new Set([titleKey(item)]);
+    const candidates = library.scored(this.items.filter(other => other.kind === item.kind && !other.isShow && other.poster && other.url !== item.url && !finished.has(entryKey(other))));
+    return candidates.map(other => ({ other, score: (other.genres || []).filter(name => genres.has(name)).length * 12 + (other.match || 50) }))
+      .sort((a, b) => b.score - a.score).map(entry => entry.other)
+      .filter(other => !titles.has(titleKey(other)) && titles.add(titleKey(other)))
+      .slice(0, limit).map(slim);
+  }
   // Where to look first: anime on JKAnime, also anime that a site files as a series
   // (Cuevana's One Piece carries the genre «Anime»; LEGO ONE PIECE only «Animación»).
   async preference(item) {

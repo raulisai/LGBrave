@@ -2,7 +2,7 @@ import { BrowserBridge, home, packagedHome } from '../browser-bridge.mjs';
 import { origin } from './config.mjs';
 import { entryKey } from './library.mjs';
 import { PREFERRED } from './catalog.mjs';
-import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, heartbeatSource } from './page-scripts.mjs';
+import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
 
 // Luma's engine (filters, guards, navigation) plus Holy's playback: a title is
 // opened at the player its site would show, started automatically behind a
@@ -11,6 +11,12 @@ const START_TIMEOUT = 45000;
 // A server that shows nothing playable this long is swapped for the title's next one.
 const SERVER_TIMEOUT = 28000;
 const SAVE_EVERY = 10000;
+// The end card appears this close to the end; the next episode starts after NEXT_DELAY.
+const END_MARGIN = 4;
+// A stream whose last piece never loads stops just short of the end: stuck this long within
+// its last 30 s (and not paused by the owner) counts as finished.
+const END_STALL = 6000;
+const NEXT_DELAY = 6000;
 
 export class HolyBridge extends BrowserBridge {
   constructor(cdp, options = {}) {
@@ -22,6 +28,8 @@ export class HolyBridge extends BrowserBridge {
     this.serverTimeout = options.serverTimeout || SERVER_TIMEOUT;
     this.startTimeout = options.startTimeout || START_TIMEOUT;
     this.stallTimeout = options.stallTimeout || 20000;
+    this.nextDelay = options.nextDelay || NEXT_DELAY;
+    this.endStall = options.endStall || END_STALL;
     this.remoteContexts = new Set();
     // Cross-origin player iframes may run as their own targets (sessions).
     this.childSessions = new Map();
@@ -85,6 +93,7 @@ export class HolyBridge extends BrowserBridge {
       let command = null;
       try { command = JSON.parse(params.payload); } catch { return; }
       if (command?.action === 'back') await this.command({ action: 'back' }).catch(error => this.errors.push({ phase: 'back', error: error.message }));
+      if (command?.action === 'card') await this.cardInput(command).catch(error => this.errors.push({ phase: 'card', error: error.message }));
       return;
     }
     return super.event(message);
@@ -302,6 +311,15 @@ export class HolyBridge extends BrowserBridge {
         this.library.progress(session.key, session.item.url, best.t, best.d);
       }
       session.position = best ? { t: best.t, d: best.d } : session.position;
+      if (session.phase === 'playing' && best) {
+        const tail = !best.paused && best.d - best.t <= 30;
+        if (!tail) session.endStall = null;
+        else if (!session.endStall || best.t > session.endStall.t + 0.5) session.endStall = { t: best.t, since: Date.now() };
+        const ended = best.ended || best.t >= best.d - END_MARGIN || (tail && Date.now() - session.endStall.since > this.endStall);
+        if (ended && !session.card) await this.showEndCard(session);
+        // Rewound from the card: back to watching.
+        else if (session.card && !ended && best.t < best.d - 15) await this.hideEndCard(session);
+      }
       if (session.phase === 'opening' && Date.now() - session.opened > (session.queue?.length ? this.serverTimeout : this.startTimeout) && !session.position) {
         if (session.queue?.length) { await this.nextServer(session); return; }
         if (await this.nextSite(session)) return;
@@ -315,6 +333,8 @@ export class HolyBridge extends BrowserBridge {
   }
   async started(session) {
     session.phase = 'playing'; session.playingAt = Date.now();
+    // The next episode is looked up now, so the end card has it at once.
+    if (session.item.kind !== 'movie' && this.catalog.next) session.next = this.catalog.next(session.item).catch(() => null);
     await this.dropCurtainScript();
     if (this.mainContext) await this.cdp.evaluate(theaterSource, this.mainContext).catch(() => false);
     if (session.resumeAt > 20) {
@@ -331,12 +351,66 @@ export class HolyBridge extends BrowserBridge {
     this.curtainScript = null;
     if (identifier) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier }).catch(() => {});
   }
+  // The end of a title: an episode offers the next one and plays it after a countdown
+  // unless the owner moves away; a film offers «Volver al inicio» and similar films.
+  async showEndCard(session) {
+    const card = session.card = { focus: 0, options: [{ action: 'home' }], timer: null };
+    const item = session.item;
+    let data;
+    if (item.kind !== 'movie' && (item.show || item.episode)) {
+      const pending = session.next || (this.catalog.next ? this.catalog.next(item) : null);
+      const next = pending ? await Promise.resolve(pending).catch(() => null) : null;
+      if (this.session !== session || session.card !== card) return;
+      if (next?.url) {
+        const nextItem = { ...item, url: next.url, episode: next.episode || null, subtitle: next.label, backdrop: next.still || item.backdrop || '', isShow: false };
+        card.options = [{ action: 'play', item: nextItem }, { action: 'home' }];
+        card.timer = setTimeout(() => this.chooseCard(session, 0).catch(error => this.errors.push({ phase: 'next', error: error.message })), this.nextDelay);
+        data = { mode: 'next', title: item.title, next: next.label, image: next.still || item.backdrop || item.poster || '', seconds: Math.round(this.nextDelay / 1000) };
+      } else data = { mode: 'last', title: item.title };
+    } else {
+      const similar = this.catalog.similar?.(item, this.library, 4) || [];
+      card.options.push(...similar.map(other => ({ action: 'play', item: other })));
+      data = { mode: 'movie', title: item.title, options: similar.map(other => ({ title: other.title, poster: other.poster, match: other.match || 0 })) };
+    }
+    await this.curtain(endCardSource(data));
+    await this.curtain(cardFlagSource(true));
+  }
+  async hideEndCard(session) {
+    clearTimeout(session.card?.timer);
+    session.card = null;
+    await this.curtain(cardFlagSource(false));
+  }
+  // OK and the arrows (or a click) on the end card. Moving away from «next» stops its countdown.
+  async cardInput(command) {
+    const session = this.session;
+    const card = session?.card;
+    if (!card) return;
+    if (Number.isInteger(command.choose)) return this.chooseCard(session, command.choose);
+    if (command.key === 13) return this.chooseCard(session, card.focus);
+    const step = { 37: -1, 38: -1, 39: 1, 40: 1 }[command.key];
+    if (!step) return;
+    card.focus = Math.max(0, Math.min(card.options.length - 1, card.focus + step));
+    if (card.timer) { clearTimeout(card.timer); card.timer = null; }
+    await this.curtain(`window.__holyEnd&&__holyEnd.focus(${card.focus},true)`);
+  }
+  async chooseCard(session, index) {
+    const card = session.card;
+    if (!card || this.session !== session) return;
+    clearTimeout(card.timer);
+    const option = card.options[index];
+    if (!option) return;
+    session.card = null;
+    await this.curtain(cardFlagSource(false));
+    if (option.action === 'play') return this.play(option.item);
+    return this.command({ action: 'home' });
+  }
   // Saves the last position before leaving the player.
   async endSession() {
     const session = this.session;
     this.session = null;
     await this.dropCurtainScript();
     if (!session) return;
+    clearTimeout(session.card?.timer);
     if (session.position && session.phase === 'playing') this.library.progress(session.key, session.item.url, session.position.t, session.position.d);
   }
   async stop() {
