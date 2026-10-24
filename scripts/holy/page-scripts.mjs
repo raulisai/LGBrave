@@ -165,7 +165,7 @@ export function holyEndCard(data) {
     panel.className = 'p top';
     panel.append(make('div', 'k', 'EN PAUSA'), make('h1', 'small', data.title || ''), make('p', 'sub', data.next || ''));
     const row = make('div', 'row');
-    const glyph = { play: '▶', previous: '⏮', next: '⏭', list: '☰' };
+    const glyph = { play: '▶', previous: '⏮', next: '⏭', list: '≡' };
     (data.buttons || []).forEach((entry, index) => {
       const button = option(make('button', 'b'), index);
       button.append(make('span', '', `${glyph[entry.icon] || ''}  ${entry.label}`));
