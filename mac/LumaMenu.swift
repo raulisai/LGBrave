@@ -5,8 +5,10 @@ import Darwin
 struct Config: Decodable { let root: String; let node: String }
 struct Status: Decodable {
     struct TV: Decodable { let host: String? }
+    struct Web: Decodable { let running: Bool; let built: Bool; let url: String; let friendlyUrl: String }
     let state: String; let label: String; let running: Bool
     let tv: TV?; let app: String?; let host: String?; let error: String?
+    let web: Web?
     let actions: [String]?
 }
 
@@ -119,6 +121,14 @@ final class App: NSObject, NSApplicationDelegate {
         }
     }
 
+    // The friendly «.local» name when this Mac has one, else the plain IP address.
+    func webAddress(_ web: Status.Web) -> String { web.friendlyUrl.isEmpty ? web.url : web.friendlyUrl }
+    func webLine(_ web: Status.Web?) -> String {
+        guard let web = web else { return "comprobando…" }
+        if !web.built { return "falta generarla (npm run build:all)" }
+        return web.running ? webAddress(web) : "apagada"
+    }
+
     func color(for state: String?) -> NSColor {
         if controlError != nil { return .systemRed }
         switch state {
@@ -141,7 +151,7 @@ final class App: NSObject, NSApplicationDelegate {
         headline.isEnabled = false
         menu.addItem(headline)
         if let s = status {
-            for line in ["TV: \(s.tv?.host ?? "sin configurar")", "Computadora: \(s.host ?? "sin red")", "Aplicación: \(s.app ?? "en espera")"] {
+            for line in ["TV: \(s.tv?.host ?? "sin configurar")", "Computadora: \(s.host ?? "sin red")", "Aplicación: \(s.app ?? "en espera")", "Página web: \(webLine(s.web))"] {
                 let detail = NSMenuItem(title: line, action: nil, keyEquivalent: "")
                 detail.isEnabled = false; menu.addItem(detail)
             }
@@ -164,6 +174,10 @@ final class App: NSObject, NSApplicationDelegate {
         if status?.state != "connected" {
             let take = NSMenuItem(title: "Usar esta computadora para la TV", action: #selector(useThisComputer), keyEquivalent: "")
             take.target = self; take.isEnabled = ready; menu.addItem(take)
+        }
+        if let web = status?.web, web.running {
+            let open = NSMenuItem(title: "Abrir página web (\(webAddress(web)))", action: #selector(openWebPage), keyEquivalent: "")
+            open.target = self; open.isEnabled = true; menu.addItem(open)
         }
         let doctor = NSMenuItem(title: "Doctor: revisar y arreglar", action: #selector(runDoctor), keyEquivalent: "")
         doctor.target = self; doctor.isEnabled = ready; menu.addItem(doctor)
@@ -189,6 +203,10 @@ final class App: NSObject, NSApplicationDelegate {
     @objc func useThisComputer() { perform("handoff", message: "Pidiendo la TV a la otra computadora…", title: "Usar esta computadora:") }
     @objc func runDoctor() { perform("repair", message: "Doctor revisando…", title: "Doctor:") }
     @objc func openLog() { NSWorkspace.shared.open(URL(fileURLWithPath: config.root + "/.local/logs/desktop.log")) }
+    @objc func openWebPage() {
+        guard let web = status?.web, let url = URL(string: webAddress(web)) else { return }
+        NSWorkspace.shared.open(url)
+    }
     @objc func showMenu() { item.button?.performClick(nil) }
 }
 

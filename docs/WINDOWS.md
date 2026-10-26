@@ -2,6 +2,20 @@
 
 El mismo proyecto ejecuta los dos navegadores de la TV desde Windows o macOS. Holy conserva catálogo, conectores, reproducción y gustos de `origin/holy`; Luma conserva su interfaz y sus marcadores. No es el navegador Brave completo: ambos reutilizan su motor de filtrado.
 
+## Actualizar Windows a lo último (desde Holy 0.9.5 hasta 0.9.10)
+
+Windows se quedó en código anterior mientras la Mac avanzó varias versiones (listas y premios, relevo «Usar esta computadora», la página web de Holy para cualquier dispositivo del wifi, y ahora su estado en el menú). Para ponerlo al día:
+
+1. **Antes de nada**, en PowerShell dentro del proyecto: `git status`. La reserva de la TV ya escribe el nombre de quien la atiende (`info`/`since` en `scripts/tv-lease.mjs`); si Windows la tomó con código viejo que no está en GitHub, puede haber cambios locales sin confirmar. Si `git status` muestra algo en `scripts/tv-lease.mjs` u otro archivo del repositorio (no en `.local/`), avisa antes de seguir en vez de descartarlo.
+2. `git pull` (rama `main`).
+3. `npm install` (por si hay dependencias nuevas).
+4. `npm run build:all` — genera `dist/`, `dist-holy/` y ahora también **`dist-holy-web/`** (la página del catálogo para cualquier dispositivo del wifi; sin este paso esa página da 404 aunque el resto funcione).
+5. `npm run desktop:restart` — recarga el servicio con el código nuevo (listas, relevo, idiomas, la página web).
+6. `npm run windows:install` — recompila `HolyLuma.exe` con los cambios de `windows/HolyLuma.cs` (línea «Página web» en el panel, botón «Abrir página web» en el menú) e instala el EXE nuevo. **Esto no se probó compilando en esta Mac** (no hay aquí un compilador de C#; el código se escribió revisando el patrón existente de `lastStatus`, igual que `config`/`tv`, pero su primera compilación real es la tuya). Si falla, copia aquí el error exacto.
+7. Prueba: el panel debe mostrar una línea «Página web: …» (con la dirección), y el menú contextual un botón «Abrir página web» arriba de «Doctor · Reparar conexión» que la abre en el navegador.
+
+Si Device Guard bloquea la ejecución del EXE nuevo (ya pasó antes): el instalador conserva el EXE anterior sin romper nada; dilo y seguimos sin ese paso mientras se autoriza.
+
 ## Abrir el control de Windows
 
 **Aplicación nativa instalada:** `%LOCALAPPDATA%\Programs\HolyLuma\HolyLuma.exe`, con acceso **Holy y Luma** en el menú Inicio y **arranque automático activado al iniciar sesión** por petición del usuario. Es un ejecutable WinForms de Windows, sin terminal visible. El icono **LG** aparece junto al reloj o dentro de la flecha `^`; su punto es verde conectado, ámbar esperando/conectando o rojo apagado/error. Al pasar el mouse muestra el estado; doble clic abre el panel y clic derecho ofrece los controles.

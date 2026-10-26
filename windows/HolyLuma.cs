@@ -147,6 +147,12 @@ namespace HolyLuma {
       menu.Items.Add("Apagar conexión",null,async(s,e)=>await Execute("stop"));
       menu.Items.Add("Reiniciar conexión",null,async(s,e)=>await Execute("restart"));
       menu.Items.Add("Usar esta computadora para la TV",null,async(s,e)=>{ShowPanel();await Execute("handoff");});
+      menu.Items.Add("Abrir página web",null,(s,e)=>{
+        var web=lastStatus!=null&&lastStatus.ContainsKey("web")?lastStatus["web"] as Dictionary<string,object>:null;
+        if(web==null||!Convert.ToBoolean(web["running"])){MessageBox.Show("La página web (el catálogo para cualquier teléfono, tablet o laptop de tu wifi) aún no está activa.","Página web");return;}
+        string url=web["friendlyUrl"].ToString();if(string.IsNullOrEmpty(url))url=web["url"].ToString();
+        Process.Start(new ProcessStartInfo(url){UseShellExecute=true});
+      });
       menu.Items.Add("Doctor · Reparar conexión",null,async(s,e)=>{ShowPanel();await Execute("repair");});
       menu.Items.Add("Ver diagnóstico",null,async(s,e)=>{ShowPanel();await Execute("doctor");});
       menu.Items.Add("Configurar direcciones",null,async(s,e)=>{try{await Configure();}catch(Exception error){MessageBox.Show(error.Message,"Configurar conexión");}});
@@ -202,7 +208,13 @@ namespace HolyLuma {
       heading.Text=label;statusItem.Text=label;
       string tooltip="Holy y Luma · "+label;tray.Text=tooltip.Substring(0,Math.Min(63,tooltip.Length));
       var tv=data.ContainsKey("tv")?data["tv"] as Dictionary<string,object>:null;
-      address.Text="Computadora: "+value("host")+"     TV: "+(tv!=null?tv["host"].ToString():"")+Environment.NewLine+"Aplicación: "+value("app");
+      var web=data.ContainsKey("web")?data["web"] as Dictionary<string,object>:null;
+      string webLine;
+      if(web==null)webLine="comprobando…";
+      else if(!Convert.ToBoolean(web["built"]))webLine="falta generarla (npm run build:all)";
+      else if(!Convert.ToBoolean(web["running"]))webLine="apagada";
+      else{string wUrl=web["friendlyUrl"].ToString();webLine=string.IsNullOrEmpty(wUrl)?web["url"].ToString():wUrl;}
+      address.Text="Computadora: "+value("host")+"     TV: "+(tv!=null?tv["host"].ToString():"")+Environment.NewLine+"Aplicación: "+value("app")+Environment.NewLine+"Página web: "+webLine;
       var lines=new List<string>();if(repairText!="")lines.Add(repairText);if(value("error")!="")lines.Add(value("error"));
       if(data.ContainsKey("checks")){var checks=data["checks"] as System.Collections.IEnumerable;if(checks!=null)foreach(var check in checks)lines.Add(check.ToString());}
       lines.Add("");lines.Add("Inicio automático con Windows: "+(Program.AutoStart?"Activado":"Desactivado"));

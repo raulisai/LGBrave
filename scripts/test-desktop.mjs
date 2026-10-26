@@ -3,7 +3,7 @@ import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {EventEmitter} from 'node:events';
-import {lanAddress, safePath} from './desktop-config.mjs';
+import {lanAddress, safePath, localName} from './desktop-config.mjs';
 import {acquireTVLease, sshCommand} from './tv-lease.mjs';
 import {findLumaTarget} from './cdp.mjs';
 import {LabRuntime} from './lab-runtime.mjs';
@@ -17,6 +17,13 @@ const check = async (label, fn) => {await fn(); passed++;};
 const interfaces = {'vEthernet (Default Switch)':[{family:'IPv4',address:'192.168.48.1'}],WiFi:[{family:'IPv4',address:'192.168.1.65'}],Loopback:[{family:'IPv4',address:'127.0.0.1',internal:true}]};
 await check('Select real LAN adapter rather than a virtual Windows switch', () => assert.equal(lanAddress(interfaces,{tvIp:'192.168.1.134'}),'192.168.1.65'));
 await check('Explicit host overrides auto detection', () => assert.equal(lanAddress(interfaces,{host:'192.168.1.9'}),'192.168.1.9'));
+await check('A friendly local name: this Mac\'s Bonjour name on macOS, this computer\'s own name elsewhere, never something odd', () => {
+  assert.equal(localName({platform:'darwin', run:() => 'holy-mac\n'}), 'holy-mac.local');
+  assert.equal(localName({platform:'darwin', run:() => { throw Error('no Bonjour name set'); }, hostOf:() => 'DESKTOP-PC'}), 'DESKTOP-PC');
+  assert.equal(localName({platform:'win32', hostOf:() => 'DESKTOP-PC.lan'}), 'DESKTOP-PC');
+  assert.equal(localName({platform:'darwin', run:() => "rm -rf /; echo pwned\n"}), '');
+  assert.equal(localName({platform:'win32', hostOf:() => ''}), '');
+});
 await check('Static paths work on Windows and cannot leave the build', () => {
   assert.equal(safePath('dist','../package.json'),null);
   assert.ok(safePath('dist','assets/main.js').endsWith(join('assets','main.js')));

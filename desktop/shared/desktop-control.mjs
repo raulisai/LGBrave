@@ -5,9 +5,10 @@ import {spawn} from 'node:child_process';
 import {mkdirSync, openSync, closeSync, existsSync, readFileSync, writeFileSync} from 'node:fs';
 import {join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {config, saveConfig, readJSON, tvAddress, lanAddress, ROOT} from './desktop-config.mjs';
+import {config, saveConfig, readJSON, tvAddress, lanAddress, localName, ROOT} from './desktop-config.mjs';
 import {tcpOpen} from '../../scripts/holy/doctor.mjs';
 import {syncDeviceProfile} from '../../scripts/webos-cli.mjs';
+import {PORT} from '../../scripts/holy/config.mjs';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 export async function ask(path, method = 'GET') {
@@ -28,9 +29,14 @@ export async function status({probe = false} = {}) {
   const label=repairNeeded?'El servicio necesita recargar el perfil de Windows'
     :state==='standby'&&live?.paused?`TV cedida a otra computadora; reintenta en ${live.paused} s`
     :state==='standby'&&live?.holder?`La TV la atiende ${live.holder}`:labels[state] || state;
-  return {...live,state,repairNeeded,label,running:!!live,host:lanAddress(),tv,
+  // The catalogue page for any device on the WiFi: served by this same process whenever it
+  // answers at all (even before the TV connects), as long as `npm run build:all` made it.
+  const webBuilt = existsSync(join(ROOT,'dist-holy-web/index.html'));
+  const friendlyHost = localName();
+  const web = {running:!!live && webBuilt, built:webBuilt, url:`http://${lanAddress()}:${PORT}/`, friendlyUrl:friendlyHost?`http://${friendlyHost}:${PORT}/`:''};
+  return {...live,state,repairNeeded,label,running:!!live,host:lanAddress(),tv,web,
     ...(probe ? {tvReachable:!!tv.host && await tcpOpen(tv.host,tv.port,1200)} : {}),
-    build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html'))}, config:config(),
+    build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html')),holyWeb:webBuilt}, config:config(),
     history:live?.profile?.state==='synced'?'Preferencias e historial compartidos mediante la TV con las computadoras que usan esta versión.':
       'Copia local activa. El perfil se comparte por SSH al conectar con la TV; ambos equipos deben usar esta versión.'};
 }
