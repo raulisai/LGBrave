@@ -52,3 +52,7 @@ No intercambiar doblaje por subtítulos ni pisar progreso del usuario para ocult
 Referencias del workflow: [setup-node](https://github.com/actions/setup-node), [checkout](https://github.com/actions/checkout), [upload-artifact](https://github.com/actions/upload-artifact). Se usaron sus contratos oficiales; el workflow remoto debe comprobarse en Actions.
 
 Comprobación final de TV: SSH autenticado responde, pero el puerto local9998 del inspector no está escuchando y no tiene clientes. No se lanzó ninguna app para forzarlo; el ensayo físico nuevo queda pendiente.
+
+## Resultado remoto confirmado
+
+[GitHub Actions40400150371](https://github.com/raulisai/LGBrave/actions/runs/40400150371), código c355d0e50ea5037dbd440b1b144cb43f28189fe4: playback(windows-latest) y playback(macos-latest) concluyeron success. Ambos realizaron npm ci, playback:check y subieron report.json. Es macOS de CI, no la Mac física del usuario; ésta todavía debe actualizarse según tareas. Los cambios posteriores de esta anotación son solo documentación y no cambian la huella del código validado.
