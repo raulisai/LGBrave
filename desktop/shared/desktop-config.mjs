@@ -1,9 +1,10 @@
-import {networkInterfaces, homedir} from 'node:os';
+import {networkInterfaces, homedir, hostname} from 'node:os';
 import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 import {dirname, resolve, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {isIP} from 'node:net';
+import {execFileSync} from 'node:child_process';
 const require = createRequire(import.meta.url);
 
 // Background launchers can omit APPDATA/LOCALAPPDATA. Use this Windows user's
@@ -64,6 +65,22 @@ export function lanAddress(interfaces = networkInterfaces(), cfg = config()) {
   const score = item => (/vEthernet|virtual|docker|wsl|vmware|vbox|bridge|utun|tailscale/i.test(item.name) ? -100 : 0)
     + (target && item.address.split('.').slice(0,3).join('.') === target.split('.').slice(0,3).join('.') ? 20 : 0);
   return candidates.sort((a,b) => score(b)-score(a))[0]?.address || '127.0.0.1';
+}
+// How this computer names itself on the TV («Name|IP»), so the other one can say who serves it.
+export const computerLabel = () => `${hostname().replace(/\.(local|lan|home)$/i, '')}|${lanAddress()}`;
+// A friendly name for this computer's own web pages, best effort only (the IP in lanAddress()
+// always works). On macOS, its Bonjour/mDNS name (e.g. the user renamed it to serve Holy at
+// «holy-mac.local»); on Windows/Linux, the computer's own name, which a home network's
+// NetBIOS/LLMNR usually resolves by itself, with no «.local» needed. '' when nothing to offer.
+export function localName({platform = process.platform, run = (file, args) => execFileSync(file, args, {encoding: 'utf8', timeout: 2000}), hostOf = hostname} = {}) {
+  try {
+    if (platform === 'darwin') {
+      const name = run('scutil', ['--get', 'LocalHostName']).trim();
+      return /^[A-Za-z0-9-]{1,63}$/.test(name) ? name + '.local' : '';
+    }
+  } catch { /* No Bonjour name set, or scutil unavailable. */ }
+  const name = hostOf().replace(/\.(local|lan|home)$/i, '');
+  return /^[A-Za-z0-9-]{1,63}$/.test(name) ? name : '';
 }
 export const lumaOrigin = () => process.env.LAB_ORIGIN || `http://${lanAddress()}:43187`;
 export function safePath(root, requested) {

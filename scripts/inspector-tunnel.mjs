@@ -1,7 +1,7 @@
 import net from 'node:net';
 import {createRequire} from 'node:module';
-import {config} from './desktop-config.mjs';
-import {acquireTVLease, sshCommand, armSessionWatchdog} from './tv-lease.mjs';
+import {config, computerLabel} from './desktop-config.mjs';
+import {acquireTVLease, sshCommand, requestTVHandoff, tvLeaseHolder, armSessionWatchdog} from './tv-lease.mjs';
 import {createTVProfileStore} from '../desktop/shared/tv-profile-store.mjs';
 const require = createRequire(import.meta.url);
 
@@ -36,10 +36,11 @@ export async function connectSession(device) {
 
 export async function openInspectorTunnel({
   device = config().device, connect = connectSession, reserve = connect === connectSession,
-  acquireLease = acquireTVLease, command = sshCommand
+  acquireLease = acquireTVLease, command = sshCommand, label = computerLabel()
 } = {}) {
   const session = await connect(device);
-  let lease, ended = false, closing, resolveClosed;
+  // closed resolves with why: {type:'closed'}, {type:'lost'} or {type:'handoff', by}.
+  let lease, ended = false, closing, resolveClosed, endReason = {type:'closed'};
   const sockets = new Set();
   const closed = new Promise(resolve => { resolveClosed = resolve; });
   const server = net.createServer(client => {
@@ -66,7 +67,7 @@ export async function openInspectorTunnel({
     sockets.clear(); server.close();
     closing = Promise.resolve().then(() => lease?.release()).catch(() => {}).finally(() => {
       try { session.ssh.end(); } catch { /* A failed SSH transport is already closed. */ }
-      resolveClosed();
+      resolveClosed(endReason);
     });
     return closing;
   }
@@ -76,9 +77,9 @@ export async function openInspectorTunnel({
   server.on('listening', () => { if (ended) server.close(); });
   try {
     if (reserve) {
-      lease = await acquireLease(session.ssh);
+      lease = await acquireLease(session.ssh, {label});
       if (ended) throw Error('La conexión se cerró durante la reserva.');
-      lease.lost.then(close);
+      lease.lost.then(reason => { if (!ended && reason) endReason = reason; close(); });
       if(lease.token)await armSessionWatchdog(session.ssh,lease.token,text=>command(session.ssh,text));
       // Older runtimes do not know the lease. Respect every established
       // inspector client, including a user's DevTools session.
@@ -117,4 +118,22 @@ export async function openInspectorTunnel({
     await lease?.release();
     throw error;
   }
+}
+
+// «Usar esta computadora»: asks the computer serving the TV to yield it, through a short SSH
+// session of its own (the service keeps its standby). Waits up to `wait` ms for the TV to be free.
+export async function requestHandoff({device = config().device, connect = connectSession, command = sshCommand,
+  label = computerLabel(), wait = 8000, sleep = ms => new Promise(resolve => setTimeout(resolve, ms))} = {}) {
+  const session = await connect(device);
+  const run = text => command(session.ssh, text);
+  try {
+    const asked = await requestTVHandoff(run, label);
+    if (asked.state === 'free') return {state:'free', holder:''};
+    for (let waited = 0; waited < wait; waited += 1000) {
+      await sleep(1000);
+      const now = await tvLeaseHolder(run).catch(() => null);
+      if (now && (!now.held || now.holder !== asked.holder)) return {state:'yielded', holder:asked.holder};
+    }
+    return {state:'requested', holder:asked.holder};
+  } finally { try { session.ssh.end(); } catch { /* Already closed. */ } }
 }

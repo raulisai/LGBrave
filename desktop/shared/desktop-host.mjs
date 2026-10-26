@@ -18,6 +18,7 @@ import {installCrashGuard} from '../../scripts/crash-guard.mjs';
 import {Preferences} from '../../scripts/preferences.mjs';
 import {ProfileState} from './profile-state.mjs';
 import {openInspectorTunnel} from '../../scripts/inspector-tunnel.mjs';
+import {busyPorts, describeBusy} from './port-check.mjs';
 
 process.chdir(ROOT);
 const diagnostics=new DiagnosticLog();
@@ -25,9 +26,18 @@ installCrashGuard(console.log,diagnostics);
 diagnostics.event('service','started');
 const recovery=createProfileRecovery({diagnostics});
 try{recovery.restore();recovery.capture();}catch(error){diagnostics.event('profile','recovery-error',{error},'error');}
+// Another local runtime, or another program on the service's ports (which would make it crash
+// in a loop): say which, and let the supervisor try again later (exit 2 = conflict).
+async function conflict(error) {
+  console.error(error); diagnostics.event('service','conflict',{error},'warn');
+  if (process.send) await new Promise(resolve => process.send({type:'status', status:{state:'conflict', error, pid:process.pid}}, resolve));
+  process.exit(2);
+}
 let release;
 try { release = acquireRuntimeLock(); }
-catch (error) { console.error(error.message); process.exit(2); }
+catch (error) { await conflict(`${error.message} Detén npm run lab u otra copia del servicio; se reintentará cada 30 s.`); }
+const busy = process.env.LUMA_OFFLINE_TEST === '1' ? [] : await busyPorts();
+if (busy.length) { release(); await conflict(describeBusy(busy)); }
 const library = new Library();
 const preferences=new Preferences();
 const profiles=new ProfileState({preferences,library,diagnostics});
@@ -69,7 +79,8 @@ let reportedState='';
 const report = () => {
   const state = runtime.state || 'starting';
   const status = {state, app:runtime.cdp?.target.description || '', host:lanAddress(), tv:tvAddress(),
-    error:runtime.lastError || '', profile:profiles.status(), updated:Date.now(), pid:process.pid};
+    error:runtime.lastError || '', holder:runtime.holder || '', paused:Math.max(0, Math.round((runtime.pausedUntil - Date.now()) / 1000)),
+    profile:profiles.status(), updated:Date.now(), pid:process.pid};
   const stateKey=[state,status.app,status.error,status.profile.state].join('|');
   if(stateKey!==reportedState){reportedState=stateKey;diagnostics.event('connection','state',{state,error:status.error,phase:status.profile.state},status.error?'warn':'info');}
   process.send?.({type:'status', status});
@@ -78,7 +89,12 @@ const report = () => {
 };
 const statusTimer = setInterval(report, 2000); statusTimer.unref();
 for (const signal of ['SIGINT','SIGTERM']) process.once(signal, () => finish().finally(() => process.exit(0)));
-process.on('message', message => { if (message === 'stop') finish().finally(() => process.exit(0)); });
+let wakeLoop = () => {};
+process.on('message', message => {
+  if (message === 'stop') finish().finally(() => process.exit(0));
+  // «Usar esta computadora»: drop the pause after yielding and try right away.
+  if (message === 'wake') { runtime.wake(); wakeLoop(); }
+});
 process.on('disconnect', () => finish().finally(() => process.exit(0)));
 try {
   report();
@@ -95,6 +111,7 @@ try {
     }
     if(runtime.state==='connected'||runtime.state==='waiting')await profiles.flush();
     report();
-    await delay(['offline','standby','setup'].includes(runtime.state) ? 5000 : 1500, undefined, {signal:abort.signal}).catch(() => {});
+    await Promise.race([delay(['offline','standby','setup'].includes(runtime.state) ? 5000 : 1500, undefined, {signal:abort.signal}).catch(() => {}),
+      new Promise(resolve => { wakeLoop = resolve; })]);
   }
 } finally { await finish(); }

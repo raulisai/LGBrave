@@ -1,0 +1,43 @@
+{
+  "capturedAt": "2026-10-24T07:25:37.228Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "speed",
+      "firstCardsSeconds": 6.358,
+      "moves": {
+        "median": 58,
+        "worst": 259,
+        "cards": 271,
+        "ghosts": 0
+      },
+      "cold": {
+        "title": "Klara y el sol",
+        "prepared": false,
+        "ok": false,
+        "seconds": 93.271
+      },
+      "prepared": {
+        "title": "La bola negra",
+        "prepared": true,
+        "ok": true,
+        "seconds": 11.229
+      }
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [],
+    "targets": [],
+    "memory": "memory  1252016  857628  135528  37056   258860      301620"
+  },
+  "after": {
+    "memory": "memory  1252016  878620  186980  37356   186416      278632"
+  },
+  "bridgeErrors": [
+    {
+      "phase": "Runtime.executionContextCreated",
+      "error": "La conexión con la TV está cerrada."
+    }
+  ]
+}

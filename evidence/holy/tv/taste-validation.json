@@ -1,0 +1,54 @@
+{
+  "capturedAt": "2026-10-24T01:54:34.030Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "taste",
+      "prompt": "¿Qué te pareció? · Street Fighter",
+      "promptVote": 2,
+      "rows": [
+        "Géneros",
+        "Productoras y estudios",
+        "Países",
+        "Ya calificados",
+        "Drama",
+        "Comedia",
+        "Acción",
+        "Romance",
+        "Fantasía",
+        "Suspenso",
+        "Aventura",
+        "Misterio",
+        "Ciencia ficción",
+        "Terror"
+      ],
+      "prefs": [
+        "studio:J.C.Staff:1",
+        "genre:Comedia:-1",
+        "genre:Drama:1"
+      ],
+      "sheet": "Calificar",
+      "loved": 2,
+      "panel": "Tu perfil\n\n2 me gusta (2 me encanta) · 0 no · 3 gustos elegidos · 1 vistos\n\nDrama\nAcción\nFantasía\n\nEvitas: Comedia\n\nProductoras: J.C.Staff\n\nOK\nMe gusta\nNo me gusta\nMe encanta…\nBorrar",
+      "marks": 2,
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.148:43190/holy/"
+      }
+    ],
+    "memory": "memory  1252016  832856  179608  42692   239552      318396"
+  },
+  "after": {
+    "memory": "memory  1252016  882536  181416  40356   188064      270848"
+  },
+  "bridgeErrors": []
+}

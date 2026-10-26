@@ -4,6 +4,7 @@ import { BrowserBridge } from '../browser-bridge.mjs';
 import { origin, packagedPrefix, HOME_PATH } from './config.mjs';
 import { entryKey } from './library.mjs';
 import { PREFERRED } from './catalog.mjs';
+import { KIND_LABEL } from './versions.mjs';
 import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
 import {playbackDescriptor,validDescriptor,readDescriptorSource,writeDescriptorSource,clearDescriptorSource} from './handoff.mjs';
 
@@ -213,6 +214,7 @@ export class HolyBridge extends BrowserBridge {
       const current = this.frames.get(this.mainFrame) || '';
       const onHome = this.isHome(current);
       if (action === 'forward' || (onHome && !this.session)) return;
+      if (this.session?.card?.kind === 'versions') { const open = this.session; await this.hideEndCard(open); await this.showPauseCard(open); return; }
       if (this.session && episodic(this.session.item)) return this.toEpisodes(this.session.item);
       command = { action: 'home' };
     }
@@ -261,8 +263,12 @@ export class HolyBridge extends BrowserBridge {
     if (this.sessionToken !== token || this.stopped) return;
     const known = this.catalog?.find(value.url);
     const previous = this.library.get(entryKey(value));
-    const item = { ...(previous || {}), ...(known || {}), ...value, genres: known?.genres?.length ? known.genres : value.genres || previous?.genres || [] };
-    const session = this.session = { token, item, key: entryKey(item), phase: 'resolving', started: Date.now(), resumeAt: this.library.resumeAt(item), lastSave: 0 };
+    const { version: askedVersion, versionKind: askedKind, ...clean } = value;
+    const item = { ...(previous || {}), ...(known || {}), ...clean, genres: known?.genres?.length ? known.genres : value.genres || previous?.genres || [] };
+    // The language: the one just picked, else the one remembered for this series.
+    const remembered = this.library.languageOf?.(item);
+    const choice = askedVersion || askedKind ? { version: askedVersion, kind: askedKind } : remembered ? { version: remembered.id, kind: remembered.kind } : {};
+    const session = this.session = { token, item, choice, key: entryKey(item), phase: 'resolving', started: Date.now(), resumeAt: this.library.resumeAt(item), lastSave: 0 };
     // The curtain is registered before navigating so it covers the site's first paint.
     if (!await this.installCurtain(session, curtainSource({ title: item.title, subtitle: item.subtitle || (item.year ? String(item.year) : ''), backdrop: item.backdrop || item.poster || '', message: session.resumeAt ? 'Volviendo a donde te quedaste…' : 'Preparando el vídeo…' }))) return;
     await this.status();
@@ -282,7 +288,7 @@ export class HolyBridge extends BrowserBridge {
       const copies = await this.catalog.elsewhere(item, new Set([item.source]), { only: preferred, kind: preference.kind }).catch(() => []);
       for (const copy of copies.slice(0, 2)) {
         if (this.session !== session) return;
-        target = await this.catalog.resolve(copy).catch(() => null);
+        target = await this.catalog.resolve(copy, session.choice).catch(() => null);
         if (target) { session.item = { ...copy, title: item.title, poster: item.poster || copy.poster, backdrop: item.backdrop || copy.backdrop, genres: item.genres?.length ? item.genres : copy.genres }; session.site = this.catalog.connector?.(preferred)?.name || preferred; break; }
       }
       if (this.session !== session) return;
@@ -291,7 +297,7 @@ export class HolyBridge extends BrowserBridge {
     }
     if (!target) {
       if (preferred && item.source !== preferred) { session.candidates = []; session.tried.add(item.source); }
-      try { target = await this.catalog.resolve(item); } catch (error) { session.resolveError = error; }
+      try { target = await this.catalog.resolve(item, session.choice); } catch (error) { session.resolveError = error; }
     }
     if (this.session !== session) return;
     // No player on its own site: the same title on another of the owner's sites.
@@ -316,9 +322,46 @@ export class HolyBridge extends BrowserBridge {
     session.resumeAt = session.forceResume || this.library.resumeAt(session.item);
     session.queue = [...(target.alternatives || [])];
     session.referrer = target.referrer;
+    // Languages of this episode (when the site offers several) and the one being played.
+    session.versions = Array.isArray(target.versions) ? target.versions : [];
+    session.version = target.version || '';
     session.servers = (session.servers || 0) + 1;
     session.siteServers = 1; session.sawVideo = false;
+    // The remembered (or asked) language is not in this episode: say which one opens instead.
+    if (target.matched === false && (session.choice?.version || session.choice?.kind) && !session.languageNoticed) {
+      session.languageNoticed = true;
+      const now = session.versions.find(version => version.id === session.version);
+      const asked = KIND_LABEL[session.choice.kind] || 'ese idioma';
+      await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify(`Sin «${asked}» en este episodio: se abre en ${now?.label || 'otro idioma'}`)})`);
+      if (this.session !== session || this.stopped) return;
+    }
     await this.openServer(session, target.url);
+  }
+  // Every server of this language failed: the same episode in its other languages (the same
+  // kind first) before another site. The remembered language stays the owner's choice.
+  async nextVersion(session) {
+    if (this.session !== session || this.stopped) return false;
+    const versions = session.versions || [];
+    if (versions.length < 2) return false;
+    session.versionsTried ||= new Set();
+    session.versionsTried.add(session.version);
+    const current = versions.find(version => version.id === session.version);
+    const next = versions.filter(version => !session.versionsTried.has(version.id))
+      .sort((a, b) => (b.kind === current?.kind) - (a.kind === current?.kind))[0];
+    if (!next) return false;
+    session.versionsTried.add(next.id);
+    if (!this.curtainScript) {
+      const item = session.item;
+      if (!await this.installCurtain(session, curtainSource({ title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Probando otro idioma…' }))) return false;
+    }
+    await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify(`${current?.label || 'Ese idioma'} no se pudo abrir: probando ${next.label}…`)})`);
+    if (this.session !== session) return true;
+    const target = await this.catalog.resolve(session.item, { version: next.id, kind: next.kind }).catch(() => null);
+    if (this.session !== session) return true;
+    if (!target || target.version !== next.id) return this.nextVersion(session);
+    session.languageNoticed = true;
+    await this.openTarget(session, target);
+    return true;
   }
   // Next site with the same title that resolves to a player; null when none is left.
   async findElsewhere(session) {
@@ -338,7 +381,7 @@ export class HolyBridge extends BrowserBridge {
       const name = this.catalog.connector?.(candidate.source)?.name || candidate.source;
       await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify('Probando en ' + name + '…')})`);
       if (this.session !== session) return null;
-      const target = await this.catalog.resolve(candidate).catch(() => null);
+      const target = await this.catalog.resolve(candidate, session.choice).catch(() => null);
       if (this.session !== session) return null;
       if (target) {
         // Keep the owner's title and artwork; play the other site's copy.
@@ -492,13 +535,13 @@ export class HolyBridge extends BrowserBridge {
         // Rewound from the card: back to watching.
         else if (session.card?.kind === 'end' && !ended && best.t < best.d - 15) await this.hideEndCard(session);
         // An episode paused for a moment (not at its end): the pause panel; playing again hides it.
-        if (!ended && episodic(session.item)) {
+        if (!ended && (episodic(session.item) || (session.versions || []).length > 1)) {
           if (best.paused && !best.mediaError && best.t > 1) {
             session.pausedSince ||= Date.now();
             if (!session.card && Date.now() - session.pausedSince > this.pauseDelay) await this.showPauseCard(session);
           } else {
             session.pausedSince = 0;
-            if (session.card?.kind === 'pause') await this.hideEndCard(session);
+            if (['pause', 'versions'].includes(session.card?.kind)) await this.hideEndCard(session);
           }
         }
       }
@@ -534,6 +577,8 @@ export class HolyBridge extends BrowserBridge {
       session.queue = leftover.queue;
     }
     if (session.queue?.length) { await this.nextServer(session); return true; }
+    if (await this.nextVersion(session)) return true;
+    if (this.session !== session) return true;
     if (await this.nextSite(session)) return true;
     if (this.session !== session) return true;
     if (session.leftover?.queue?.length) {
@@ -635,18 +680,40 @@ export class HolyBridge extends BrowserBridge {
   async showPauseCard(session) {
     const card = session.card = { kind: 'pause', focus: -1, options: [{ action: 'resume' }], timer: null };
     const item = session.item;
-    const [previous, next] = await Promise.all([
+    const series = episodic(item);
+    const [previous, next] = series ? await Promise.all([
       this.catalog.previous ? this.catalog.previous(item).catch(() => null) : null,
       Promise.resolve(session.next || (this.catalog.next ? this.catalog.next(item) : null)).catch(() => null)
-    ]);
+    ]) : [null, null];
     if (this.session !== session || session.card !== card) return;
-    const episode = (other, entry) => ({ ...item, url: entry.url, episode: entry.episode || null, subtitle: entry.label, backdrop: entry.still || item.backdrop || '', isShow: false });
+    // The next episode keeps the language being watched (by id, else by kind).
+    const current = (session.versions || []).find(version => version.id === session.version);
+    const episode = (other, entry) => ({ ...item, url: entry.url, episode: entry.episode || null, subtitle: entry.label, backdrop: entry.still || item.backdrop || '', isShow: false, ...(current ? { version: current.id, versionKind: current.kind } : {}) });
     const buttons = [{ label: 'Seguir viendo', icon: 'play' }];
     if (previous?.url) { card.options.push({ action: 'play', item: episode(item, previous) }); buttons.push({ label: 'Anterior', detail: previous.label, icon: 'previous' }); }
     if (next?.url) { card.options.push({ action: 'play', item: episode(item, next) }); buttons.push({ label: 'Siguiente', detail: next.label, icon: 'next' }); }
-    card.options.push({ action: 'episodes' }); buttons.push({ label: 'Capítulos', icon: 'list' });
+    if ((session.versions || []).length > 1) { card.options.push({ action: 'versions' }); buttons.push({ label: 'Idioma', detail: current?.label || '', icon: 'language' }); }
+    if (series) { card.options.push({ action: 'episodes' }); buttons.push({ label: 'Capítulos', icon: 'list' }); }
     await this.curtain(endCardSource({ mode: 'pause', title: item.title, next: item.subtitle || (item.episode ? 'Episodio ' + item.episode : ''), buttons }));
     await this.curtain(cardFlagSource('menu'));
+  }
+  // The languages this episode has: pick one and it restarts here, at the same second.
+  async showVersionsCard(session) {
+    const versions = session.versions || [];
+    if (versions.length < 2) return;
+    const start = Math.max(0, versions.findIndex(version => version.id === session.version));
+    const card = session.card = { kind: 'versions', focus: start, options: versions.map(version => ({ action: 'version', version })), timer: null };
+    await this.curtain(endCardSource({ mode: 'pause', kicker: 'IDIOMA', hint: '← → para elegir · OK para cambiar · Atrás para volver', start,
+      title: session.item.title, next: session.item.subtitle || (session.item.episode ? 'Episodio ' + session.item.episode : ''),
+      buttons: versions.map(version => ({ label: version.label, detail: version.id === session.version ? 'Ahora' : '', icon: 'language' })) }));
+    await this.curtain(cardFlagSource(true));
+  }
+  async switchVersion(session, version) {
+    this.library.setLanguage?.(session.item, version);
+    if (version.id === session.version) return this.resumeVideo(session);
+    const at = session.position?.t || 0;
+    if (at > 1) this.library.progress(session.key, session.item.url, at, session.position?.d || 0);
+    await this.play({ ...session.item, version: version.id, versionKind: version.kind });
   }
   async resumeVideo(session) {
     await this.hideEndCard(session);
@@ -688,6 +755,8 @@ export class HolyBridge extends BrowserBridge {
     await this.curtain(cardFlagSource(false));
     if (option.action === 'play') return this.play(option.item);
     if (option.action === 'resume') return this.resumeVideo(session);
+    if (option.action === 'versions') { session.card = null; return this.showVersionsCard(session); }
+    if (option.action === 'version') return this.switchVersion(session, option.version);
     if (option.action === 'episodes' && session.item?.show) return this.toEpisodes(session.item);
     return this.command({ action: 'home' });
   }

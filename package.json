@@ -1,6 +1,6 @@
 {
   "name": "lg-tv-lab",
-  "version": "0.9.3",
+  "version": "0.9.11",
   "private": true,
   "type": "module",
   "scripts": {
@@ -29,8 +29,10 @@
     "desktop:restart": "node scripts/desktop-control.mjs restart",
     "desktop:doctor": "node scripts/desktop-control.mjs doctor",
     "desktop:repair": "node scripts/desktop-control.mjs repair",
+    "desktop:handoff": "node scripts/desktop-control.mjs handoff",
     "build:holy": "vite build --mode holy",
-    "build:all": "npm run build && npm run build:holy",
+    "build:holy-web": "vite build --mode holy-web",
+    "build:all": "npm run build && npm run build:holy && npm run build:holy-web",
     "package:holy": "npm run build:holy && ares-package dist-holy -o artifacts",
     "windows:tray": "node scripts/windows-tray.mjs",
     "holy:errors": "node scripts/holy/playback-report.mjs",
@@ -38,6 +40,7 @@
     "holy:autostart": "node scripts/holy/autostart.mjs",
     "windows:install": "node scripts/install-windows-app.mjs",
     "holy:tastes": "node scripts/holy/taste-transfer.mjs",
+    "holy:lists:update": "node scripts/update-known-lists.mjs",
     "debug:export": "node scripts/debug-export.mjs"
   },
   "devDependencies": {

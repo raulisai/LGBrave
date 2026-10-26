@@ -1,5 +1,5 @@
 import {genreLabel} from '../../src/holy-genres.js';
-import { tasteKey, prefKey, publicTasteURL, cleanTasteMeta, mergeLibraryState } from './taste-state.mjs';
+import { tasteKey, prefKey, publicTasteURL, cleanTasteMeta, cleanLanguages, mergeLibraryState } from './taste-state.mjs';
 import { readFileSync, mkdirSync, writeFileSync, renameSync, copyFileSync, existsSync } from 'node:fs';
 import { dirname } from 'node:path';
 
@@ -68,6 +68,8 @@ export class Library {
     this.votes = (Array.isArray(data.votes) ? data.votes : []).map(cleanVote).filter(Boolean);
     this.prefs = (Array.isArray(data.prefs) ? data.prefs : []).map(cleanPref).filter(Boolean);
     this.tasteMeta = cleanTasteMeta(data.tasteMeta);
+    // The language chosen for each series («Between Steps» in Latino, in Korean…), by show key.
+    this.languages = cleanLanguages(data.languages);
     this.progressSamples = new Map();
     this.asked = data.asked && typeof data.asked === 'object' && !Array.isArray(data.asked) ? Object.fromEntries(Object.entries(data.asked).filter(([, at]) => Number.isFinite(at))) : {};
   }
@@ -79,7 +81,7 @@ export class Library {
     mkdirSync(dirname(this.file), { recursive: true });
     const temporary = this.file + '.tmp';
     for (const key of Object.keys(this.asked).slice(0, -200)) delete this.asked[key];
-    writeFileSync(temporary, JSON.stringify({ entries: this.entries, votes: this.votes, prefs: this.prefs, asked: this.asked, tasteMeta: this.tasteMeta }, null, 2) + '\n', { mode: 0o600 });
+    writeFileSync(temporary, JSON.stringify({ entries: this.entries, votes: this.votes, prefs: this.prefs, asked: this.asked, tasteMeta: this.tasteMeta, languages: this.languages }, null, 2) + '\n', { mode: 0o600 });
     renameSync(temporary, this.file);
   }
   tasteStamp() { this.tasteMeta.clock = Math.max(this.now(), this.tasteMeta.clock + 1, ...this.votes.map(v=>v.at+1), ...this.prefs.map(p=>p.at+1)); return this.tasteMeta.clock; }
@@ -90,7 +92,7 @@ export class Library {
     Object.assign(this, { votes: merged.votes, prefs: merged.prefs, tasteMeta: merged.tasteMeta }); this.save();
     return this.summary();
   }
-  exportTastes() { return { v: 1, exportedAt: this.now(), votes: this.votes.map(cleanVote).filter(Boolean), prefs: this.prefs.map(cleanPref).filter(Boolean), tasteMeta: { ...this.tasteMeta, removedEntries: {} } }; }
+  exportTastes() { return { v: 1, exportedAt: this.now(), votes: this.votes.map(cleanVote).filter(Boolean), prefs: this.prefs.map(cleanPref).filter(Boolean), tasteMeta: { ...this.tasteMeta, removedEntries: {}, removedLanguages: {} } }; }
   get(key) { return this.entries.find(entry => entry.key === key) || null; }
   // Seconds to resume from when this exact page was left unfinished.
   resumeAt(item) {
@@ -128,6 +130,18 @@ export class Library {
     Object.assign(entry, { t: Math.round(t), duration: Math.round(duration), finished: FINISHED(t, duration), updatedAt: this.now() });
     this.save();
     return entry;
+  }
+  // The remembered language of a title or series (null if never chosen).
+  languageOf(item) { return this.languages[entryKey(item || {})] || null; }
+  setLanguage(item, version) {
+    const key = entryKey(item || {});
+    if (!key) return null;
+    const at=this.tasteStamp();
+    if (!version) { this.tasteMeta.removedLanguages[key]=at; delete this.languages[key]; }
+    else this.languages[key] = { id: String(version.id).slice(0, 40), kind: version.kind, label: String(version.label || '').slice(0, 80), at };
+    this.languages=cleanLanguages(this.languages);
+    this.save();
+    return this.languages[key] || null;
   }
   remove(key) { this.tasteMeta.removedEntries[key] = this.tasteStamp(); this.progressSamples.delete(key); this.entries = this.entries.filter(entry => entry.key !== key); this.save(); }
   // Unfinished first; a finished episode becomes its next episode when the site's pattern allows it.
@@ -276,7 +290,8 @@ export class Library {
       if (percent === null || percent < 55) return;
       const because = this.entries.filter(entry => entry.watched >= 120 && this.voteOf(entry) >= 0).map(entry => ({ entry, shared: entry.genres.filter(name => item.genres?.includes(name)).length }))
         .filter(candidate => candidate.shared).sort((a, b) => b.shared - a.shared || b.entry.updatedAt - a.entry.updatedAt)[0];
-      scored.push({ ...item, match: percent, matchReason: reason, score: percent + 6 / (1 + index / 40), reason: because ? 'Porque viste ' + because.entry.title : reason });
+      // Titles on award or chart lists (acclaimed) get a small nudge, never past the owner's tastes.
+      scored.push({ ...item, match: percent, matchReason: reason, score: percent + 6 / (1 + index / 40) + (item.acclaimed ? 4 : 0), reason: because ? 'Porque viste ' + because.entry.title : item.acclaimed ? 'Premiada o muy popular, y va con tus gustos' : reason });
     });
     return scored.sort((a, b) => b.score - a.score).slice(0, limit);
   }

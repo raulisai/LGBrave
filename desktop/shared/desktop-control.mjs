@@ -5,9 +5,10 @@ import {spawn} from 'node:child_process';
 import {mkdirSync, openSync, closeSync, existsSync, readFileSync, writeFileSync} from 'node:fs';
 import {join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {config, saveConfig, readJSON, tvAddress, lanAddress, ROOT} from './desktop-config.mjs';
+import {config, saveConfig, readJSON, tvAddress, lanAddress, localName, ROOT} from './desktop-config.mjs';
 import {tcpOpen} from '../../scripts/holy/doctor.mjs';
 import {syncDeviceProfile} from '../../scripts/webos-cli.mjs';
+import {PORT} from '../../scripts/holy/config.mjs';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 export async function ask(path, method = 'GET') {
@@ -25,9 +26,17 @@ export async function status({probe = false} = {}) {
   const tv = tvAddress();
   const state = live?.updated && Date.now()-live.updated > 15000 ? 'unresponsive' : live?.state || 'stopped';
   const repairNeeded=state==='setup'&&tv.configured&&!tv.needsUpdate;
-  return {...live,state,error:state==='standby'?'':live?.error||'',...(state==='standby'?{standbyReason:live?.error||'',checks:['La TV está atendida por otra sesión. Esta computadora tomará el relevo cuando quede disponible.']}:{}),repairNeeded,label:repairNeeded?'El servicio necesita recargar el perfil de Windows':labels[state] || state,running:!!live,host:lanAddress(),tv,
+  const label=repairNeeded?'El servicio necesita recargar el perfil de Windows'
+    :state==='standby'&&live?.paused?`TV cedida a otra computadora; reintenta en ${live.paused} s`
+    :state==='standby'&&live?.holder?`La TV la atiende ${live.holder}`:labels[state] || state;
+  // The catalogue page for any device on the WiFi: served by this same process whenever it
+  // answers at all (even before the TV connects), as long as `npm run build:all` made it.
+  const webBuilt = existsSync(join(ROOT,'dist-holy-web/index.html'));
+  const friendlyHost = localName();
+  const web = {running:!!live && webBuilt, built:webBuilt, url:`http://${lanAddress()}:${PORT}/`, friendlyUrl:friendlyHost?`http://${friendlyHost}:${PORT}/`:''};
+  return {...live,state,error:state==='standby'?'':live?.error||'',...(state==='standby'?{standbyReason:live?.error||'',checks:[label]}:{}),repairNeeded,label,running:!!live,host:lanAddress(),tv,web,
     ...(probe ? {tvReachable:!!tv.host && await tcpOpen(tv.host,tv.port,1200)} : {}),
-    build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html'))}, config:config(),
+    build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html')),holyWeb:webBuilt}, config:config(),
     history:live?.profile?.state==='synced'?'Preferencias e historial compartidos mediante la TV con las computadoras que usan esta versión.':
       'Copia local activa. El perfil se comparte por SSH al conectar con la TV; ambos equipos deben usar esta versión.'};
 }
@@ -53,9 +62,29 @@ export async function stop() {
   return after;
 }
 export async function restart() { await stop(); return start(); }
+// «Usar esta computadora para la TV»: asks the computer serving it to yield, then wakes this
+// service so it takes the TV as soon as it is free. The other one waits 2 min before retrying.
+export async function handoff({request = async () => (await import('../../scripts/inspector-tunnel.mjs')).requestHandoff(), wait = 10000} = {}) {
+  let before = await status();
+  if (before.state === 'connected') return {...before, actions:['Esta computadora ya atiende la TV.']};
+  if (!before.tv.configured) return {...before, actions:['Primero vincula esta computadora con la TV.']};
+  if (!before.running) before = await start();
+  const asked = await request().catch(error => ({state:'error', error:error.message}));
+  if (asked.state === 'error') return {...await status(), actions:['No se pudo hablar con la TV: '+asked.error]};
+  const actions = [asked.state === 'free' ? 'La TV estaba libre.'
+    : asked.state === 'yielded' ? `${asked.holder || 'La otra computadora'} cedió la TV.`
+    : `Pedido enviado a ${asked.holder || 'la otra computadora'}; si no la suelta, puede tener una versión anterior: reinicia su servicio o apágalo.`];
+  for (let waited = 0; waited < wait; waited += 1500) {
+    await ask('/wake', 'POST');
+    await sleep(1500);
+    const now = await status();
+    if (['connected', 'waiting'].includes(now.state)) return {...now, actions:[...actions, 'Esta computadora atiende la TV.']};
+  }
+  return {...await status(), actions};
+}
 export async function doctor() {
   const report = await status({probe:true});
-  const checks = [];
+  const checks = [...(report.checks || [])];
   if (!report.tv.configured) checks.push(`Configura el perfil ${report.tv.device}: npm exec -- ares-setup-device. Después solicita la llave: npm exec -- ares-novacom --device ${report.tv.device} --getkey.`);
   if(report.tv.needsUpdate)checks.push('La IP configurada no coincide con el perfil SSH. Guarda la dirección actual en Configurar para actualizar ambos.');
   if(report.profile?.state==='error')checks.push('Perfil compartido: '+report.profile.error);
@@ -73,11 +102,11 @@ export const repair=createDesktopRepair({status,recovery:createProfileRecovery({
 export async function runCLI() {
   try {
     const action = process.argv[2] || 'status';
-    const actions = {status,start,stop,restart,configure:async()=>{
+    const actions = {status,start,stop,restart,handoff:()=>handoff(),configure:async()=>{
       saveConfig(JSON.parse(process.argv[3] || readFileSync(0,'utf8')));
       syncDeviceProfile(config()); return status();
-    },doctor:async()=>{const fixed=await repair();const report=await doctor();return {...report,repair:fixed.repair,actions:fixed.actions,checks:[...fixed.actions,...report.checks]};},diagnose:doctor,repair};
-    if(!actions[action]) throw Error('Uso: desktop-control.mjs status|start|stop|restart|doctor|diagnose|repair|configure');
+    },doctor,diagnose:doctor,repair};
+    if(!actions[action]) throw Error('Uso: desktop-control.mjs status|start|stop|restart|handoff|doctor|diagnose|repair|configure');
     console.log(JSON.stringify(await actions[action]()));
   } catch(error) {console.error(error.message);process.exitCode=1;}
 }

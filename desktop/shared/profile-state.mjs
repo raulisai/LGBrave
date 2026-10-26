@@ -1,4 +1,4 @@
-import {cleanTasteMeta,mergeLibraryState} from '../../scripts/holy/taste-state.mjs';
+import {cleanTasteMeta,cleanLanguages,mergeLibraryState} from '../../scripts/holy/taste-state.mjs';
 import {createHash} from 'node:crypto';
 import {hostname} from 'node:os';
 import {copyFileSync,existsSync} from 'node:fs';
@@ -31,6 +31,7 @@ export function cleanProfile(snapshot) {
   const pref=snapshot.preferences, lib=snapshot.library;
   if(!Array.isArray(pref.categories)||pref.categories.length>8||!Array.isArray(pref.favorites)||pref.favorites.length>200 ||
     !Array.isArray(lib.entries)||lib.entries.length>300||!Array.isArray(lib.votes)||lib.votes.length>500||!Array.isArray(lib.prefs)||lib.prefs.length>1000)throw Error('El perfil compartido excede los límites.');
+  if(lib.languages!==undefined&&(!lib.languages||typeof lib.languages!=='object'||Array.isArray(lib.languages)||Object.keys(lib.languages).length>300))throw Error('Las preferencias de idioma compartidas exceden los límites.');
   const categories=[...new Set(pref.categories.map(name=>text(name,24).trim()).filter(Boolean))];
   const favorites=pref.favorites.flatMap(value=>{
     const url=publicURL(value?.url),category=text(value?.category,24).trim();
@@ -50,7 +51,7 @@ export function cleanProfile(snapshot) {
     .filter(([key,at])=>publicURL(key)&&Number.isFinite(at)).map(([key,at])=>[publicURL(key),number(at)]));
   const tasteMeta=cleanTasteMeta(lib.tasteMeta);
   tasteMeta.removedEntries=Object.fromEntries(Object.entries(tasteMeta.removedEntries).filter(([key])=>publicURL(key)));
-  return {v:1,preferences:{searchEngine:SEARCH_ENGINES.some(item=>item.id===pref.searchEngine)?pref.searchEngine:'google',bookmarksVersion:2,categories,favorites},library:{entries,votes,prefs,asked,tasteMeta}};
+  return {v:1,preferences:{searchEngine:SEARCH_ENGINES.some(item=>item.id===pref.searchEngine)?pref.searchEngine:'google',bookmarksVersion:2,categories,favorites},library:{entries,votes,prefs,asked,tasteMeta,languages:cleanLanguages(lib.languages)}};
 }
 const digest=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 export class ProfileState {

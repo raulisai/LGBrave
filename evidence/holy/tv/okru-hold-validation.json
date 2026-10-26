@@ -1,0 +1,105 @@
+{
+  "capturedAt": "2026-10-24T01:51:46.874Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "8-asialiveaction",
+      "source": "asialiveaction",
+      "title": "Merry Berry Love",
+      "page": "https://asialiveaction.com/e/27/305551t1/0325115/",
+      "player": "https://ok.ru/videoembed/17403982582082",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 16.9,
+      "frames": [
+        {
+          "url": "https://ok.ru/videoembed/17403982582082",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://ok.ru/videoembed/17403982582082",
+      "site": "",
+      "key": "https://asialiveaction.com/tv/305551t1-merry-berry-love-sub-espanol/",
+      "position": {
+        "first": {
+          "t": 10,
+          "d": 2790.891
+        },
+        "last": {
+          "t": 50.241,
+          "d": 2790.891
+        }
+      },
+      "advancing": true,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 50,
+        "duration": 2791
+      }
+    },
+    {
+      "label": "resume",
+      "source": "asialiveaction",
+      "title": "Merry Berry Love",
+      "page": "https://asialiveaction.com/e/27/305551t1/0325115/",
+      "player": "https://ok.ru/videoembed/17403982582082",
+      "appAlive": true,
+      "phase": "playing",
+      "error": "",
+      "secondsToPlay": 11.9,
+      "frames": [
+        {
+          "url": "https://ok.ru/videoembed/17403982582082",
+          "top": true,
+          "videos": 1,
+          "action": ""
+        }
+      ],
+      "servers": 1,
+      "finalPlayer": "https://ok.ru/videoembed/17403982582082",
+      "site": "",
+      "key": "https://asialiveaction.com/tv/305551t1-merry-berry-love-sub-espanol/",
+      "position": {
+        "first": {
+          "t": 50,
+          "d": 2790.891
+        },
+        "last": {
+          "t": 50,
+          "d": 2790.891
+        }
+      },
+      "advancing": false,
+      "curtainGone": true,
+      "homeShown": true,
+      "saved": {
+        "t": 50,
+        "duration": 2791
+      },
+      "resumedFrom": 50,
+      "resumeOk": true
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.148:43190/holy/"
+      }
+    ],
+    "memory": "memory  1252016  819868  184648  47592   247500      325900"
+  },
+  "after": {
+    "memory": "memory  1252016  798416  221776  44084   231824      352052"
+  },
+  "bridgeErrors": []
+}

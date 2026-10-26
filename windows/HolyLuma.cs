@@ -13,8 +13,8 @@ using System.Windows.Forms;
 
 [assembly: System.Reflection.AssemblyTitle("Holy y Luma")]
 [assembly: System.Reflection.AssemblyProduct("Holy y Luma")]
-[assembly: System.Reflection.AssemblyVersion("0.9.2.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.9.2.0")]
+[assembly: System.Reflection.AssemblyVersion("0.9.11.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.9.11.0")]
 
 namespace HolyLuma {
   static class Program {
@@ -115,7 +115,7 @@ namespace HolyLuma {
     readonly ToolStripMenuItem statusItem=new ToolStripMenuItem("Iniciando…"), loginItem=new ToolStripMenuItem("Iniciar con Windows");
     readonly EventWaitHandle showEvent;
     readonly Dictionary<string,Icon> icons=new Dictionary<string,Icon>();
-    bool busy, quitting, disposed; int ticks; DateTime lastRepair=DateTime.MinValue; string repairText="";
+    bool busy, quitting, disposed; int ticks; DateTime lastRepair=DateTime.MinValue; string repairText="", repairState="";
     Dictionary<string,object> lastStatus;
     [DllImport("user32.dll")] static extern bool DestroyIcon(IntPtr icon);
     static Icon MakeIcon(Color color) {
@@ -133,8 +133,8 @@ namespace HolyLuma {
       form.Text="Holy y Luma · Estado de conexión"; form.ClientSize=new Size(650,440); form.MinimumSize=new Size(666,479);
       form.StartPosition=FormStartPosition.CenterScreen; form.Font=new Font("Segoe UI",10); form.Icon=icons["amber"];
       heading.SetBounds(24,24,602,60); heading.Font=new Font("Segoe UI",17,FontStyle.Bold);
-      address.SetBounds(24,89,602,40);
-      details.SetBounds(24,143,602,204); details.Multiline=true; details.ReadOnly=true; details.ScrollBars=ScrollBars.Vertical; details.BorderStyle=BorderStyle.None; details.BackColor=form.BackColor;
+      address.SetBounds(24,89,602,60);
+      details.SetBounds(24,159,602,188); details.Multiline=true; details.ReadOnly=true; details.ScrollBars=ScrollBars.Vertical; details.BorderStyle=BorderStyle.None; details.BackColor=form.BackColor;
       form.Controls.AddRange(new Control[]{heading,address,details});
       int x=24;
       foreach(var item in new[]{new[]{"Encender","start"},new[]{"Apagar","stop"},new[]{"Reiniciar","restart"},new[]{"Doctor · Reparar","repair"}}) {
@@ -146,6 +146,13 @@ namespace HolyLuma {
       menu.Items.Add("Encender conexión",null,async(s,e)=>await Execute("start"));
       menu.Items.Add("Apagar conexión",null,async(s,e)=>await Execute("stop"));
       menu.Items.Add("Reiniciar conexión",null,async(s,e)=>await Execute("restart"));
+      menu.Items.Add("Usar esta computadora para la TV",null,async(s,e)=>{ShowPanel();await Execute("handoff");});
+      menu.Items.Add("Abrir página web",null,(s,e)=>{
+        var web=lastStatus!=null&&lastStatus.ContainsKey("web")?lastStatus["web"] as Dictionary<string,object>:null;
+        if(web==null||!Convert.ToBoolean(web["running"])){MessageBox.Show("La página web (el catálogo para cualquier teléfono, tablet o laptop de tu wifi) aún no está activa.","Página web");return;}
+        string url=web["friendlyUrl"].ToString();if(string.IsNullOrEmpty(url))url=web["url"].ToString();
+        Process.Start(new ProcessStartInfo(url){UseShellExecute=true});
+      });
       menu.Items.Add("Doctor · Reparar conexión",null,async(s,e)=>{ShowPanel();await Execute("repair");});
       menu.Items.Add("Ver diagnóstico",null,async(s,e)=>{ShowPanel();await Execute("doctor");});
       menu.Items.Add("Configurar direcciones",null,async(s,e)=>{try{await Configure();}catch(Exception error){MessageBox.Show(error.Message,"Configurar conexión");}});
@@ -170,7 +177,7 @@ namespace HolyLuma {
     void OpenLog(){var path=Path.Combine(Program.Root,".local","logs","desktop.log");if(File.Exists(path))Process.Start(new ProcessStartInfo("notepad.exe","\""+path+"\""){UseShellExecute=true});}
     async Task<bool> Execute(string action, string payload = null) {
       if(busy || quitting || disposed)return false;busy=true;
-      try{var result=await Task.Run(()=>Program.Run(action,payload));if(!disposed&&!quitting){if(action=="repair"){lastRepair=DateTime.UtcNow;if(result.ContainsKey("actions")){var items=result["actions"] as System.Collections.IEnumerable;repairText=items==null?"":string.Join(Environment.NewLine,items.Cast<object>().Select(x=>x.ToString()));}}Display(result);}return true;}
+      try{var result=await Task.Run(()=>Program.Run(action,payload));if(!disposed&&!quitting){if(action=="repair")lastRepair=DateTime.UtcNow;if((action=="repair"||action=="handoff")&&result.ContainsKey("actions")){repairState=result.ContainsKey("state")?result["state"].ToString():"";var items=result["actions"] as System.Collections.IEnumerable;repairText=items==null?"":(action=="repair"?"Doctor: ":"Usar esta computadora: ")+string.Join(Environment.NewLine,items.Cast<object>().Select(x=>x.ToString()));}Display(result);}return true;}
       catch(Exception error){if(!disposed&&!quitting){heading.Text="No se pudo consultar el estado";details.Text=error.Message;statusItem.Text="Revisar conexión";tray.Icon=icons["red"];tray.Text="Holy y Luma · Revisar conexión";}return false;}
       finally{busy=false;}
     }
@@ -195,14 +202,21 @@ namespace HolyLuma {
       lastStatus=data;
       Func<string,string> value=key=>data.ContainsKey(key)&&data[key]!=null?data[key].ToString():"";
       string state=value("state"),label=value("label");
+      if(repairState!=state)repairText="";
       bool waiting=state=="standby"||state=="waiting"||state=="starting"||state=="restarting";
       string tone=state=="connected"?"green":waiting?"amber":"red";
       tray.Icon=icons[tone];form.Icon=icons[tone];heading.ForeColor=tone=="green"?Color.ForestGreen:tone=="amber"?Color.DarkGoldenrod:Color.Firebrick;
       heading.Text=label;statusItem.Text=label;
       string tooltip="Holy y Luma · "+label;tray.Text=tooltip.Substring(0,Math.Min(63,tooltip.Length));
       var tv=data.ContainsKey("tv")?data["tv"] as Dictionary<string,object>:null;
-      address.Text="Computadora: "+value("host")+"     TV: "+(tv!=null?tv["host"].ToString():"")+Environment.NewLine+"Aplicación: "+value("app");
-      var lines=new List<string>();if(repairText!="")lines.Add("Doctor: "+repairText);if(value("error")!="")lines.Add(value("error"));
+      var web=data.ContainsKey("web")?data["web"] as Dictionary<string,object>:null;
+      string webLine;
+      if(web==null)webLine="comprobando…";
+      else if(!Convert.ToBoolean(web["built"]))webLine="falta generarla (npm run build:all)";
+      else if(!Convert.ToBoolean(web["running"]))webLine="apagada";
+      else{string wUrl=web["friendlyUrl"].ToString();webLine=string.IsNullOrEmpty(wUrl)?web["url"].ToString():wUrl;}
+      address.Text="Computadora: "+value("host")+"     TV: "+(tv!=null?tv["host"].ToString():"")+Environment.NewLine+"Aplicación: "+value("app")+Environment.NewLine+"Página web: "+webLine;
+      var lines=new List<string>();if(repairText!="")lines.Add(repairText);if(value("error")!="")lines.Add(value("error"));
       if(data.ContainsKey("checks")){var checks=data["checks"] as System.Collections.IEnumerable;if(checks!=null)foreach(var check in checks)lines.Add(check.ToString());}
       lines.Add("");lines.Add("Inicio automático con Windows: "+(Program.AutoStart?"Activado":"Desactivado"));
       lines.Add("Cerrar esta ventana mantiene la conexión en segundo plano.");

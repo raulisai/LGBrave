@@ -4,6 +4,8 @@ import { fetchText, country, languageLabel } from './sources.mjs';
 import { CONNECTORS, connectorFor } from './connectors.mjs';
 import { genreShelves } from '../../src/holy.js';
 import { entryKey, titleKey, nextEpisode } from './library.mjs';
+import { matchVersion, publicVersion } from './versions.mjs';
+import { KnownLists } from './known-lists.mjs';
 
 // The newest titles from the owner's sites, refreshed on the Mac every half hour.
 // Details (genres, synopsis, show page) are cached per page: they rarely change.
@@ -86,8 +88,10 @@ export const sameEpisode = (a, b) => !!a.episode && a.episode === b.episode &&
   (a.season && b.season ? a.season === b.season : (a.season || b.season || 1) <= 1 || a.episode > 30);
 
 export class Catalog {
-  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics } = {}) {
+  // knownLists: award and chart lists (null in tests that do not want them).
+  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics, knownLists } = {}) {
     Object.assign(this, { file, detailsFile, connectors, fetch, log, diagnostics });
+    this.knownLists = knownLists === undefined ? (file === '.local/holy-catalog.json' ? new KnownLists({ log }) : null) : knownLists;
     const data = load(file) || {};
     this.items = (Array.isArray(data.items) ? data.items : []).filter(valid).map(cleanItem);
     this.updatedAt = Number(data.updatedAt) || 0;
@@ -154,7 +158,7 @@ export class Catalog {
       const detail = connector.detail ? await connector.detail(item, this.loader(connector)) : connector.parseDetail(await this.fetch(url), url);
       // Player addresses can carry tokens: never cache them, resolve at play time.
       this.details.set(url, { genres: detail?.genres || [], overview: detail?.overview || '', backdrop: detail?.backdrop || '', poster: detail?.poster || '', show: detail?.show || '',
-        studios: Array.isArray(detail?.studios) ? detail.studios : [], country: detail?.country || '', language: languageLabel(detail?.language) });
+        studios: Array.isArray(detail?.studios) ? detail.studios : [], country: detail?.country || '', language: languageLabel(detail?.language), imdb: /^tt\d+$/.test(detail?.imdb || '') ? detail.imdb : '' });
     });
     while (this.details.size > MAX_DETAILS) this.details.delete(this.details.keys().next().value);
     this.items = items.map(item => this.enrich(item)).filter(item => !item.genres.some(name => ADULT.test(name)));
@@ -171,16 +175,52 @@ export class Catalog {
     const language = detail?.language || item.language || this.connector(item.source)?.language || '';
     if (!detail) return { ...item, genres, language };
     return { ...item, genres: detail.genres?.length ? detail.genres : genres, overview: item.overview || detail.overview || '', backdrop: item.backdrop || detail.backdrop || '',
-      poster: item.poster || detail.poster || '', show: item.show || detail.show || '', studios: detail.studios?.length ? detail.studios : item.studios || [], country: country(item.country || detail.country || ''), language };
+      poster: item.poster || detail.poster || '', show: item.show || detail.show || '', studios: detail.studios?.length ? detail.studios : item.studios || [], country: country(item.country || detail.country || ''), language, ...(detail.imdb ? { imdb: detail.imdb } : {}) };
   }
   start(log = this.log) {
-    const tick = () => this.refresh().catch(error => log('Holy: catálogo: ' + error.message));
+    const tick = () => {
+      this.refresh().catch(error => log('Holy: catálogo: ' + error.message));
+      // Award and chart lists change slowly: each one is read again when its time to live ends.
+      this.knownLists?.refresh().then(read => { if (read) this.version++; return this.findListTitles(); }).catch(() => {});
+    };
     if (Date.now() - this.updatedAt > REFRESH_EVERY / 3) tick();
     this.timer = setInterval(tick, REFRESH_EVERY);
     this.timer.unref?.();
     return this;
   }
   stop() { clearInterval(this.timer); }
+  // Award/chart titles missing from the catalogue are searched on the owner's sites (a few per
+  // round, three at a time); a copy with the same title (and year when known) becomes playable
+  // in its list row. Not found is remembered for a week.
+  async findListTitles(limit = 45) {
+    const lists = this.knownLists;
+    if (!lists || this.findingLists) return this.findingLists || 0;
+    const titleKeyOf = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '');
+    this.findingLists = (async () => {
+      const jobs = lists.pending(this.items, limit);
+      let found = 0;
+      await pool(jobs, 3, async ({ list, entry, id }) => {
+        const names = [...new Set([entry.title, entry.original].filter(Boolean))];
+        const wanted = new Set(entry.aliases.map(titleKeyOf));
+        const kinds = { movie: ['movie'], series: ['series', 'dorama'], dorama: ['dorama', 'series'], anime: ['anime'] }[list.kind] || [list.kind];
+        let match = null;
+        for (const source of KIND_SITES[list.kind] || []) {
+          for (const name of names) {
+            const results = await this.search(source, name).catch(() => []);
+            match = results.find(item => kinds.includes(item.kind) && (wanted.has(titleKeyOf(item.title)) || wanted.has(titleKeyOf(String(item.title).split(/[:(]/)[0])))
+              && (!entry.year || !Number(item.year) || Math.abs(Number(item.year) - entry.year) <= 1)) || null;
+            if (match) break;
+          }
+          if (match) break;
+        }
+        lists.remember(id, match && this.enrich(match));
+        if (match) found++;
+      });
+      if (jobs.length) { lists.save(); if (found) this.version++; }
+      return found;
+    })().finally(() => { this.findingLists = null; });
+    return this.findingLists;
+  }
   find(url) { return this.items.find(item => item.url === url) || null; }
   cached(key, ttl, work) {
     // Failed lookups (null) are not kept: the next try asks the site again.
@@ -249,21 +289,67 @@ export class Catalog {
   // The player page the site itself would open for this title, resolved fresh.
   // A player found a moment ago (e.g. while the owner looked at the card) is reused for a
   // couple of minutes; one that failed to start is forgotten (`forgetPlayer`).
-  async resolve(item) {
+  // options: { version: id, kind: 'dub'|'sub'|'orig' } picks that version of a title that has several
+  // (the target carries `versions`, the chosen `version` and whether it `matched` what was asked);
+  // without a match the site's first one is used.
+  async resolve(item, options = {}) {
     const connector = this.connector(item.source);
     if (!connector || !/^https:\/\//.test(String(item?.url || ''))) return null;
-    return this.cached('resolve\n' + item.url, RESOLVE_TTL, () => this.resolveNow(item, connector));
+    const bundle = await this.cached('resolve\n' + item.url, RESOLVE_TTL, () => this.resolveNow(item, connector));
+    if (!bundle) return null;
+    if (!bundle.versions.length) return bundle.target;
+    const asked = matchVersion(bundle.versions, { id: options.version, kind: options.kind });
+    const chosen = asked || bundle.versions[0];
+    return { ...chosen.target, versions: bundle.versions.map(publicVersion), version: String(chosen.id), versionKind: chosen.kind, matched: !!asked };
+  }
+  // Which versions the title has (empty when its site offers a single one), without choosing.
+  async versionsOf(item) {
+    if (!this.connector(item.source)?.versions) return [];
+    const target = await this.resolve(item).catch(() => null);
+    return target?.versions || [];
   }
   forgetPlayer(url) { this.cache?.delete('resolve\n' + url); }
+  // The playable target for a title, tried the way the TV's own session does it, but in one
+  // pass for a plain browser tab that has no curtain or rescue to fall back on: the owner's
+  // preferred site for its kind first (anime → JKAnime), then its own site, then the other
+  // sites that carry it. Returns the title actually used (a copy on another site, kept under
+  // the asked title/art) together with its target, or null when nothing resolved anywhere.
+  async resolvePlayable(item, options = {}) {
+    const tried = new Set([item.source]);
+    const copy = candidate => ({ ...candidate, title: item.title, poster: item.poster || candidate.poster, backdrop: item.backdrop || candidate.backdrop, genres: item.genres?.length ? item.genres : candidate.genres });
+    const preference = await this.preference(item).catch(() => null);
+    if (preference?.site && !tried.has(preference.site)) {
+      const candidates = await this.elsewhere(item, new Set(tried), { only: preference.site, kind: preference.kind }).catch(() => []);
+      tried.add(preference.site);
+      for (const candidate of candidates.slice(0, 2)) {
+        const target = await this.resolve(candidate, options).catch(() => null);
+        if (target) return { item: copy(candidate), target };
+      }
+    }
+    let target = await this.resolve(item, options).catch(() => null);
+    if (!target && this.pageFallback(item)) target = { url: item.url, versions: [] };
+    if (target) return { item, target };
+    for (const candidate of (await this.elsewhere(item, tried).catch(() => [])).slice(0, 4)) {
+      const found = await this.resolve(candidate, options).catch(() => null);
+      if (found) return { item: copy(candidate), target: found };
+    }
+    return null;
+  }
   async resolveNow(item, connector) {
+    const clean = target => (target && /^https:\/\//.test(String(target.url || '')) ? { ...target, alternatives: (target.alternatives || []).filter(url => /^https:\/\//.test(String(url || '')) && url !== target.url) } : null);
+    if (connector.versions) {
+      const list = await deadline(connector.versions(item, this.loader(connector)), 30000, 'El sitio tardó demasiado en dar el reproductor.');
+      const versions = (Array.isArray(list) ? list : []).map(version => ({ ...version, target: clean(version.target) })).filter(version => version.target);
+      // One version is no choice: it behaves like a site without versions.
+      return versions.length ? { target: versions[0].target, versions: versions.length === 1 ? [] : versions } : null;
+    }
     const work = async () => {
       if (connector.resolve) return connector.resolve(item, this.loader(connector));
       const detail = connector.parseDetail(await this.fetch(item.url, { referrer: connector.site }), item.url);
       return connector.player(detail, item.url);
     };
-    const target = await deadline(work(), 30000, 'El sitio tardó demasiado en dar el reproductor.');
-    if (!target || !/^https:\/\//.test(String(target.url || ''))) return null;
-    return { ...target, alternatives: (target.alternatives || []).filter(url => /^https:\/\//.test(String(url || '')) && url !== target.url) };
+    const target = clean(await deadline(work(), 30000, 'El sitio tardó demasiado en dar el reproductor.'));
+    return target ? { target, versions: [] } : null;
   }
   // The same title on the owner's other sites, for when its own site cannot play it:
   // copies already in the catalogue first, then each compatible site's search. For an
@@ -384,7 +470,12 @@ export class Catalog {
     const watching = new Set(continuing.map(entry => entry.show).filter(Boolean));
     const airing = best(by('anime').filter(item => item.airing).sort((a, b) => (b.latest || 0) - (a.latest || 0)))
       .sort((a, b) => watching.has(b.show) - watching.has(a.show));
-    const forYou = library.recommend(once(interleave(movies, perSite('anime'), perSite('dorama'), by('series'))), 30);
+    // Well-known lists (awards, AniList charts) over this catalogue; titles on them get a small
+    // nudge in «Recomendado para ti» when they also fit the owner's tastes.
+    const listRows = this.knownLists ? this.knownLists.rows(score(this.items)) : [];
+    const acclaimed = new Set(listRows.flatMap(row => row.items.filter(item => !item.discover).map(item => item.show || item.url)));
+    const nudge = list => list.map(item => (acclaimed.has(item.show || item.url) ? { ...item, acclaimed: true } : item));
+    const forYou = library.recommend(nudge(once(interleave(movies, perSite('anime'), perSite('dorama'), by('series')))), 30);
     const rows = [
       { id: 'continue', title: 'Continuar viendo', items: score(continuing) },
       { id: 'foryou', title: 'Recomendado para ti', items: forYou.map(item => ({ ...item, vote: library.voteOf(item) })) },
@@ -402,6 +493,11 @@ export class Catalog {
     rows.push(...genreRows.map(({ affinity, order, ...row }) => row));
     const knownGenres = new Set(genreRows.map(row => row.genre));
     rows.push(...genreShelves(this.items).filter(row => !knownGenres.has(row.title)).map(row => ({ ...row, items: best(once(row.items)).slice(0, 30) })));
+    // Lists with something to play go right after the newest rows; lists of titles still to
+    // find, after the genres.
+    const after = Math.max(...['movies', 'anime', 'anime-airing', 'doramas'].map(id => rows.findIndex(row => row.id === id))) + 1;
+    rows.splice(after || rows.length, 0, ...listRows.filter(row => row.owned >= 3).map(({ owned, ...row }) => row));
+    rows.push(...listRows.filter(row => row.owned < 3).map(({ owned, ...row }) => row));
     rows.push(
       { id: 'anime-shows', title: 'Anime para descubrir', items: best(once(shows(perSite('anime')).filter(item => !item.airing))).slice(0, 30) },
       { id: 'dorama-shows', title: 'Doramas para descubrir', items: best(once(shows(perSite('dorama')))).slice(0, 30) },
@@ -417,7 +513,7 @@ export class Catalog {
   }
   sources() {
     return this.connectors.map(connector => ({ id: connector.id, name: connector.name, count: this.items.filter(item => item.source === connector.id).length,
-      error: this.errors[connector.id] || '', search: !!(connector.search || connector.searchURL), health: this.health[connector.id] || null }));
+      error: this.errors[connector.id] || '', search: !!(connector.search || connector.searchURL), versions: !!connector.versions, health: this.health[connector.id] || null }));
   }
   // «Gustos»: titles to rate, grouped by the catalogue's main genres, plus what was already rated.
   calibration(library) {

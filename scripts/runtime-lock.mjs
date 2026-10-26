@@ -4,7 +4,7 @@ import {dirname,join} from 'node:path';
 
 const occupied = () => Error('Ya hay un laboratorio activo. No se iniciará otra conexión.');
 const missing = error => error.code === 'ENOENT';
-const directoryBusy = error => ['ENOTEMPTY','EEXIST','EPERM','EACCES'].includes(error.code);
+const directoryBusy = error => ['ENOTEMPTY','EEXIST','ENOTDIR','EPERM','EACCES'].includes(error.code);
 function alive(owner) {
   if (!Number.isInteger(owner?.pid) || owner.pid <= 0) throw Error('Bloqueo del laboratorio inválido.');
   try { process.kill(owner.pid, 0); return true; }

@@ -23,7 +23,12 @@ function start() {
   child.on('exit', code => {
     child = null;
     if (stopping) return done();
-    if (code === 2) { latest = {state:'conflict',error:'Otro runtime local está activo. Detén npm run lab antes de iniciar el control común.'}; return; }
+    // A conflict (another local runtime, or a program on the ports) may clear on its own: try again.
+    if (code === 2) {
+      // The host says why before exiting; an older host does not.
+      if (latest.state !== 'conflict' || !latest.error) latest = {state:'conflict',error:'Otro runtime local está activo. Detén npm run lab antes de iniciar el control común; se reintentará cada 30 s.'};
+      timer = setTimeout(start, Number(process.env.LUMA_CONFLICT_RETRY_MS) || 30000); return;
+    }
     failures = failures.filter(time => Date.now()-time < 60000); failures.push(Date.now());
     latest = {state:'restarting',error:`El servicio terminó (${code}); se reiniciará.`};
     timer = setTimeout(start, failures.length >= 5 ? 30000 : 2000);
@@ -46,6 +51,7 @@ const server = createServer((req,res) => {
   res.setHeader('Content-Type','application/json');
   if (req.url === '/status' && req.method === 'GET') res.end(JSON.stringify({...latest,pid:process.pid,workerPid:child?.pid || null,root:ROOT,worker:!!child}));
   else if (req.url === '/stop' && req.method === 'POST') { res.end('{"ok":true}'); stop(); }
+  else if (req.url === '/wake' && req.method === 'POST') { child?.send('wake', () => {}); res.end(JSON.stringify({ok:!!child})); }
   else res.writeHead(404).end();
 });
 server.on('error', error => { console.error(error); release(); process.exit(1); });

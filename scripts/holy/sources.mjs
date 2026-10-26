@@ -3,6 +3,8 @@
 // player the site itself would open, so the TV can go straight to the video.
 // Nothing here downloads media or removes a site's protections: the TV still
 // loads the same player page, with the referrer it would have had.
+import { dedupe } from './versions.mjs';
+
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
 export async function fetchText(url, { referrer, timeout = 15000, method = 'GET', body, headers = {} } = {}) {
@@ -196,6 +198,24 @@ export const cuevana = {
       } catch { /* Next server. */ }
     }
     return urls.length ? { url: urls[0], referrer: page, alternatives: urls.slice(1, 4) } : null;
+  },
+  // One tab per version (Latino, Castellano, Subtitulado), each with its own servers.
+  async versions(entry, load) {
+    const html = await load(entry.url);
+    const tabs = html.split('<li class="tab-video-item">').slice(1).map(block => ({
+      name: text(/class="tab-item-name">\s*([^<]+)/.exec(block)?.[1]), players: [...block.matchAll(/data-server="([^"]+)"/g)].map(match => decode(match[1]))
+    })).filter(tab => tab.players.length);
+    const versions = dedupe(tabs.map(tab => {
+      const target = this.player({ players: tab.players }, entry.url);
+      if (!target) return null;
+      if (/latino/i.test(tab.name)) return { id: 'latino', label: 'Español latino', kind: 'dub', target };
+      if (/castellano|espa[ñn]a/i.test(tab.name)) return { id: 'castellano', label: 'Español (España)', kind: 'dub', target };
+      if (/subtitul/i.test(tab.name)) return { id: 'subtitulado', label: 'Subtitulado en español', kind: 'sub', target };
+      return { id: tab.name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'x', label: /multi/i.test(tab.name) ? 'Varios idiomas (multilenguaje)' : tab.name || 'Original', kind: 'orig', target };
+    }).filter(Boolean));
+    if (versions.length) return versions;
+    const target = this.player(this.parseDetail(html, entry.url), entry.url);
+    return target ? [{ id: 'x', label: 'Español latino', kind: 'dub', target }] : [];
   }
 };
 
@@ -256,6 +276,25 @@ export const jkanime = {
     const own = frames.filter(value => /^https:\/\/jkanime\.net\/jkplayer\//.test(value));
     return own.length ? { url: own[0], referrer: entry.url, alternatives: own.slice(1, 3) } : null;
   },
+  // Each server button carries its language (lg_1 = subtitled, lg_3 = Latino…), named by the page's own list.
+  async versions(entry, load) {
+    const html = await load(entry.url);
+    const frames = [...html.matchAll(/video\[(\d+)\]\s*=\s*'<iframe[^']*?src="([^"]+)"/g)].map(match => [Number(match[1]), decode(match[2])]).filter(([, url]) => /^https:\/\/jkanime\.net\/jkplayer\//.test(url));
+    const names = Object.fromEntries([...html.matchAll(/<option value="(\d+)">([^<]*)<\/option>/g)].filter(match => /sub|latino|castellano|espa[ñn]ol/i.test(match[2])).map(match => [match[1], text(match[2])]));
+    const language = Object.fromEntries([...html.matchAll(/data-id="(\d+)"[^>]*class="[^"]*\blg_(\d+)\b/g)].map(match => [Number(match[1]), match[2]]));
+    const groups = new Map();
+    for (const [index, url] of frames) { const code = language[index]; if (!code) continue; if (!groups.has(code)) groups.set(code, []); groups.get(code).push(url); }
+    const versions = dedupe([...groups].map(([code, urls]) => {
+      const name = names[code] || '';
+      const dub = /latino|castellano|espa[ñn]ol/i.test(name) && !/sub/i.test(name);
+      const label = /latino/i.test(name) && dub ? 'Español latino' : /castellano/i.test(name) && dub ? 'Español (España)' : /sub/i.test(name) ? `${text(name.replace(/Sub\.?\s*Espa[ñn]ol/i, '')).replace(/^Japones$/i, 'Japonés') || 'Original'} · subtítulos en español` : name || 'Idioma ' + code;
+      return { id: code, label, kind: dub ? 'dub' : /sub/i.test(name) || !name ? 'sub' : 'orig', target: { url: urls[0], referrer: entry.url, alternatives: urls.slice(1, 3) } };
+    }));
+    if (versions.length) return versions;
+    const target = await this.resolveFrom(frames.map(([, url]) => url), entry);
+    return target ? [{ id: 'x', label: 'Subtitulado en español', kind: 'sub', target }] : [];
+  },
+  resolveFrom(urls, entry) { return urls.length ? { url: urls[0], referrer: entry.url, alternatives: urls.slice(1, 3) } : null; },
   searchURL: query => 'https://jkanime.net/buscar/' + encodeURIComponent(query.trim().replace(/\s+/g, '_')) + '/',
   parseSearch(html, base = this.site) {
     return html.split('class="anime__item">').slice(1).map(block => {

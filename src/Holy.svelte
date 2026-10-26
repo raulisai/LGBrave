@@ -159,6 +159,7 @@
     clearTimeout(prepareTimer);
     if (!item || item.chip || item.discover || inNav || inSearch || !apiBase) return;
     prepareTimer = setTimeout(() => {
+      if (!item.isShow && hasVersions(item)) versionsFor(item);
       if (item.isShow) { if (item.show) fetch(`${apiBase}/holy-api/episodes?source=${encodeURIComponent(item.source)}&show=${encodeURIComponent(item.show)}`).catch(() => {}); }
       else command('prepare', plainItem(item));
     }, 1200);
@@ -212,11 +213,48 @@
     if (typeof window.__lgLabCommand !== 'function') return false;
     try { window.__lgLabCommand(JSON.stringify({ action, value })); return true; } catch { return false; }
   }
-  function play(item) {
+  // Languages (audio / subtitles) of a title, from the Mac; kept by address. Only sites that
+  // list several (DoramasFlix, Cuevana…) are asked; the rest answer at once with none.
+  let versionInfo = $state.raw({});
+  const hasVersions = item => !!data.sources.find(source => source.id === item?.source)?.versions;
+  async function versionsFor(item) {
+    if (!item?.url || !apiBase || !hasVersions(item)) return { versions: [], remembered: null };
+    if (versionInfo[item.url]) return versionInfo[item.url];
+    try {
+      const info = await getJSON(`${apiBase}/holy-api/versions?source=${encodeURIComponent(item.source)}&url=${encodeURIComponent(item.url)}&show=${encodeURIComponent(item.show || '')}`, { timeout: 20000, retries: 0 });
+      const value = { versions: Array.isArray(info?.versions) ? info.versions : [], remembered: info?.remembered || null };
+      // An empty answer may be a slow site: asked again next time instead of kept.
+      if (value.versions.length) versionInfo = { ...versionInfo, [item.url]: value };
+      return value;
+    } catch { return { versions: [], remembered: null }; }
+  }
+  // «¿En qué idioma?»: asked the first time a series with several languages is opened; the
+  // choice is remembered for that series (and can be changed from the pause panel).
+  let langSheet = $state(null);
+  async function chooseLanguage(version) {
+    const current = langSheet;
+    langSheet = null;
+    if (!current) return;
+    const item = current.item;
+    if (version) { try { await getJSON(apiBase + '/holy-api/language', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ item: { source: item.source, url: item.url, show: item.show || '' }, version }), retries: 0 }); } catch { /* Played anyway; asked again next time. */ } }
+    if (version) play(item, version);
+  }
+  async function play(item, chosen = null) {
     if (!item) return;
     const payload = $state.snapshot(item);
     for (const key of ['score', 'reason', 'percent', 'resume', 'layout', 'match', 'matchReason', 'vote']) delete payload[key];
-    if (!command('play', payload)) { notice = 'Holy necesita la computadora para abrir títulos. Abre «npm run holy» y vuelve a intentar.'; return; }
+    if (chosen) { payload.version = chosen.id; payload.versionKind = chosen.kind; }
+    else if (!item.isShow && hasVersions(item) && !item.version) {
+      opening = item; navigationError = '';
+      const info = await versionsFor(item);
+      if (opening !== item) return;
+      if (info.versions.length > 1) {
+        const remembered = info.remembered && (info.versions.find(version => version.id === info.remembered.id) || info.versions.find(version => version.kind === info.remembered.kind));
+        if (remembered) { payload.version = remembered.id; payload.versionKind = remembered.kind; }
+        else { opening = null; langSheet = { item, versions: info.versions, index: 0 }; return; }
+      }
+    }
+    if (!command('play', payload)) { notice = 'Holy necesita la computadora para abrir títulos. Enciende la conexión en el menú «● LG» de la computadora y vuelve a intentar.'; return; }
     opening = item; navigationError = '';
     clearTimeout(openingTimer);
     openingTimer = setTimeout(() => { if (opening === item) { opening = null; notice = 'El sitio no respondió. Intenta de nuevo u otro título.'; } }, 40000);
@@ -511,6 +549,15 @@
     // First arrow after using the pointer only brings the focus back (on that card).
     if (!sheet && leavePointer() && direction) { event.preventDefault(); return; }
     // The rating sheet has the remote while open.
+    if (langSheet) {
+      event.preventDefault();
+      const last = langSheet.versions.length - 1;
+      if (direction === 'left' || direction === 'up') langSheet = { ...langSheet, index: Math.max(0, langSheet.index - 1) };
+      else if (direction === 'right' || direction === 'down') langSheet = { ...langSheet, index: Math.min(last, langSheet.index + 1) };
+      else if (code === 13) chooseLanguage(langSheet.versions[langSheet.index]);
+      else if (code === 461 || code === 27) chooseLanguage(null);
+      return;
+    }
     if (sheet) {
       event.preventDefault();
       const options = RATINGS.length + 1;
@@ -711,7 +758,8 @@
             {#if preview.match != null}<span class="match {matchTone(preview.match)}">{preview.match} % para ti</span>{/if}
             {#if preview.upNext}<span class="pill red">Siguiente</span>{/if}
             {#if preview.subtitle}<span class="strong">{preview.subtitle}</span>{/if}
-            {#if preview.language}<span class="pill lang">{preview.language}</span>{/if}
+            {#if versionInfo[preview.url]?.versions?.length > 1}<span class="pill lang">{versionInfo[preview.url].versions.map(version => version.label).join(' · ')}</span>
+            {:else if preview.language}<span class="pill lang">{preview.language}</span>{/if}
             {#if preview.year}<span>{preview.year}</span>{/if}
             {#if Number(preview.rating) > 0}<span>★ {preview.rating}</span>{/if}
             {#if preview.badge && !preview.subtitle?.includes(preview.badge.replace(/\D/g, '') || '§')}<span class="pill">{preview.badge}</span>{/if}
@@ -854,10 +902,31 @@
   </div>
 {/if}
 
+{#if langSheet}
+  <div class="sheet-scrim" role="dialog" aria-label={'Idioma de ' + (langSheet.item.title || '')}>
+    <div class="sheet">
+      <p class="sheet-kicker">¿En qué idioma?</p>
+      <h2>{langSheet.item.title}</h2>
+      {#if langSheet.item.subtitle}<p class="sheet-sub">{langSheet.item.subtitle}</p>{/if}
+      <div class="sheet-options lang-options">
+        {#each langSheet.versions as version, index}
+          <button class="sheet-option" class:focus={langSheet.index === index} onclick={() => chooseLanguage(version)}>
+            <span class="lang-kind {version.kind}">{{ dub: 'ES', sub: 'SUB', orig: 'ORIG' }[version.kind]}</span>{version.label}
+          </button>
+        {/each}
+      </div>
+      <p class="sheet-note">Se recuerda para esta serie. Cámbialo en pausa con «Idioma».</p>
+    </div>
+  </div>
+{/if}
+
 <NavigationFeedback error={navigationError} target={navigationTarget} onretry={() => { navigationError = ''; play(focused); }} onhome={() => { navigationError = ''; command('home'); }} />
 
 <style>
   .shelf-note{margin:0 96px;font-size:18px;color:#b6bdc8}
+  .lang-options{flex-direction:column;align-items:stretch}
+  .lang-kind{min-width:76px;padding:4px 12px;border-radius:8px;font-size:19px;font-weight:800;letter-spacing:.5px;text-align:center;background:#2e9e4f;color:#fff}
+  .lang-kind.sub{background:#1f78e3}.lang-kind.orig{background:#6b6b6b}
   .taste-sync{font-size:17px;color:#b6c8e0;margin:8px 0}
   .taste-transfer{display:flex;gap:16px;font-size:17px;margin:8px 0}
   .taste-transfer a,.taste-transfer label{color:#c9ddff;cursor:pointer;text-decoration:underline}

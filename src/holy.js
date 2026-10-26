@@ -59,6 +59,8 @@ export function sectionRows(data, section) {
   if (pick('continue').length) out.push({ id: 'continue', title: 'Continuar viendo', items: pick('continue') });
   if (pick('foryou').length) out.push({ id: 'foryou', title: 'Recomendado para ti', items: pick('foryou') });
   if (pick('anime-airing').length) out.push({ id: 'anime-airing', title: 'Anime en emisión', items: pick('anime-airing') });
+  // Award and chart lists of this kind (the Mac matched them with the catalogue).
+  out.push(...rows.filter(row => row.id?.startsWith('list-') && row.kind === section && row.items?.length));
   if(section==='anime')out.push(classicAnimeRow(items));
   // Recommendations first, then genres; small catalogues still expose every genre.
   out.push(...genreShelves(items));
@@ -97,6 +99,9 @@ export function categoryRows(data, section, genre, year = new Date().getFullYear
     { id: 'category-new', title: 'Nuevas · últimos dos años', items: items.filter(item => Number(item.year) >= year - 1 && Number(item.year) <= year).sort((a, b) => Number(b.year) - Number(a.year)) },
     { id: 'category-watched', title: 'Más vistas en tu biblioteca', items: items.filter(item => item.localWatched > 0).sort((a, b) => b.localWatched - a.localWatched) },
     ...curatedRows(items),
+    // Award and chart lists, limited to this genre (titles in the catalogue only).
+    ...(data?.rows || []).filter(row => row.id?.startsWith('list-') && (section === 'inicio' || row.kind === section)).map(row => ({ id: 'category-' + row.id, title: row.title,
+      items: row.items.filter(item => !item.discover && item.genres?.some(name => canonical(name) === canonical(genre))) })),
     { id: 'category-rated', title: 'Mejor valoradas en los sitios · sobre 10', items: items.filter(item => rating(item)).sort((a, b) => rating(b) - rating(a)) },
     { id: 'category-classics', title: 'Clásicas · hace 20 años o más', items: items.filter(item => Number(item.year) > 1900 && Number(item.year) <= year - 20).sort((a, b) => rating(b) - rating(a) || Number(a.year) - Number(b.year)) },
     { id: 'category-all', title: 'Todos los títulos · ' + items.length, items }
