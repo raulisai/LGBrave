@@ -25,7 +25,8 @@
     try { await getJSON(base + '/holy-api/health', { timeout: 6000, retries: 0 }); if (apiBase === base) macReachable = true; }
     catch { if (apiBase === base) macReachable = false; }
   }
-  let opening = $state(null);
+  // Raw episode cards and proxied search cards must keep their identity during async opens.
+  let opening = $state.raw(null);
   let notice = $state('');
   let navigationError = $state('');
   let navigationTarget = $state('');
@@ -254,7 +255,7 @@
         else { opening = null; langSheet = { item, versions: info.versions, index: 0 }; return; }
       }
     }
-    if (!command('play', payload)) { notice = 'Holy necesita la computadora para abrir títulos. Enciende la conexión en el menú «● LG» de la computadora y vuelve a intentar.'; return; }
+    if (!command('play', payload)) { opening = null; clearTimeout(openingTimer); notice = 'Holy necesita la computadora para abrir títulos. Enciende la conexión en el menú «● LG» de la computadora y vuelve a intentar.'; return; }
     opening = item; navigationError = '';
     clearTimeout(openingTimer);
     openingTimer = setTimeout(() => { if (opening === item) { opening = null; notice = 'El sitio no respondió. Intenta de nuevo u otro título.'; } }, 40000);
