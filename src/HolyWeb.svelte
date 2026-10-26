@@ -73,6 +73,8 @@
     if (!item) return;
     if (item.discover) { query = item.classicQuery || item.title; openSearch(); search(); notice = `Buscando ${item.title}${item.classicYear ? ' (' + item.classicYear + ')' : ''}. Confirma el año de la versión.`; return; }
     sheet = { item };
+    // So the sheet's language row has something to show right away, instead of only once Reproducir is pressed.
+    if (!item.isShow && hasVersions(item)) versionsFor(item);
   }
 
   // Search: every site answers in parallel, under «Mejores resultados» (what was typed,
@@ -243,21 +245,36 @@
 
   // Languages (audio/subtitles): asked once per series, remembered after that.
   let versionInfo = $state.raw({});
+  // A separate, always-updated record of the last answer (even an empty one), only for the
+  // sheet/theater's «cargando…» row: versionInfo on its own never learns a genuinely-empty
+  // answer (a flaky site is retried instead of remembered as having no languages), which would
+  // otherwise leave that row stuck on «cargando…» forever once the real fetch had long finished.
+  let versionLast = $state.raw({});
   async function versionsFor(item) {
     if (!item?.url || !hasVersions(item)) return { versions: [], remembered: null };
     if (versionInfo[item.url]) return versionInfo[item.url];
     try {
       const info = await getJSON(`${apiBase}/holy-api/versions?source=${encodeURIComponent(item.source)}&url=${encodeURIComponent(item.url)}&show=${encodeURIComponent(item.show || '')}`, { timeout: 20000, retries: 0 });
       const value = { versions: Array.isArray(info?.versions) ? info.versions : [], remembered: info?.remembered || null };
+      versionLast = { ...versionLast, [item.url]: value };
       if (value.versions.length) versionInfo = { ...versionInfo, [item.url]: value };
       return value;
-    } catch { return { versions: [], remembered: null }; }
+    } catch { const value = { versions: [], remembered: null }; versionLast = { ...versionLast, [item.url]: value }; return value; }
   }
   function pickLanguage(version) {
     const current = langChoice;
     langChoice = null;
     // This tap is itself a fresh click: play() opens its own destination window from it.
     if (current && version) play(current.item, version);
+  }
+  // The language choice is only offered automatically the first time (TV does the same). This
+  // reopens it on demand — from the sheet before playing, or from the theater bar while a title
+  // is already open — so there is always a way to change it, not just the once-per-series ask.
+  async function openLanguagePicker(item) {
+    if (!item || !hasVersions(item)) return;
+    const info = await versionsFor(item);
+    if (info.versions.length < 2) { notice = 'Este título solo tiene un idioma disponible.'; return; }
+    langChoice = { item, versions: info.versions };
   }
 
   // Reproducir: this page has no curtain or autoplay helper, so the real player address is
@@ -496,6 +513,12 @@
         {#if sheet.item.genres?.length}<p class="genres">{sheet.item.genres.slice(0, 4).join(' · ')}</p>{/if}
         {#if sheet.item.overview}<p class="overview">{sheet.item.overview}</p>{/if}
         {#if sheet.item.matchReason && sheet.item.match != null}<p class="match-reason">{sheet.item.matchReason}</p>{/if}
+        {#if !sheet.item.isShow && hasVersions(sheet.item)}
+          <button type="button" class="lang-row" onclick={() => openLanguagePicker(sheet.item)}>
+            🌐 Idioma: {versionLast[sheet.item.url] ? (versionLast[sheet.item.url].remembered?.label || 'el del sitio, sin elegir') : 'cargando…'}
+            <span class="change">Cambiar</span>
+          </button>
+        {/if}
         <div class="sheet-actions">
           <button type="button" class="primary" disabled={opening === sheet.item} onclick={() => (sheet.item.isShow ? openEpisodes(sheet.item) : play(sheet.item))}>
             {opening === sheet.item ? 'Abriendo…' : sheet.item.isShow ? 'Ver episodios' : sheet.item.resume ? 'Continuar desde ' + clock(sheet.item.t) : 'Reproducir'}
@@ -520,6 +543,9 @@
     <div class="theater-bar">
       <button type="button" class="back" onclick={closeTheater}>‹ Volver a Holy</button>
       <span class="theater-title">{theater.item.title}{theater.site ? ' · ' + theater.site : ''}</span>
+      {#if !theater.item.isShow && hasVersions(theater.item)}
+        <button type="button" class="change-lang" onclick={() => openLanguagePicker(theater.item)}>🌐 Cambiar idioma</button>
+      {/if}
       <a class="new-tab" href={theater.url} target="_blank" rel="noopener noreferrer">Abrir en pestaña nueva ↗</a>
     </div>
     <iframe
@@ -644,7 +670,7 @@
   .chip-actions{display:flex;gap:8px;margin-top:8px}
   .chip-actions button{width:28px;height:28px;border-radius:50%;background:var(--fill);display:grid;place-items:center}
 
-  .scrim{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+  .scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
   .sheet{position:relative;width:100%;max-height:88vh;overflow-y:auto;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow)}
   .sheet.small{padding:24px;max-width:420px}
   .close{position:absolute;top:12px;right:12px;z-index:2;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.55);display:grid;place-items:center;font-size:16px}
@@ -667,6 +693,8 @@
   .rate button.on{background:var(--red);color:#fff}
   .link-btn{display:block;margin-top:14px;font-size:13px;background:none}
   .web-caveat{margin:18px 0 0;font-size:11px;color:var(--tertiary);line-height:1.4}
+  .lang-row{display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--fill);font-size:13px;text-align:left}
+  .lang-row .change{margin-left:auto;color:#9cc4ff;font-weight:700;font-size:12px}
 
   .lang-options{display:flex;flex-direction:column;gap:8px;margin-top:14px}
   .lang-option{padding:12px 16px;border-radius:12px;background:var(--fill);font-size:14px;text-align:left}
@@ -676,6 +704,7 @@
   .theater-bar .back{font-size:13px;color:var(--secondary);padding:6px 10px;border-radius:8px;background:var(--fill);flex-shrink:0}
   .theater-title{flex:1;min-width:0;font-size:13px;color:#d6d6d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .theater-bar .new-tab{flex-shrink:0;font-size:12px;color:#9cc4ff;text-decoration:underline}
+  .theater-bar .change-lang{flex-shrink:0;font-size:12px;padding:6px 12px;border-radius:14px;background:var(--fill)}
   .theater-frame{flex:1;width:100%;border:0;background:#000}
 
   @media (min-width:720px){
