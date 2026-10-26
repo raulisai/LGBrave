@@ -224,13 +224,16 @@ export function holyAutoplay(options = {}) {
     if (state.observed.has(video)) continue;
     state.observed.add(video);
     video.addEventListener?.('pause', () => {
-      if (!video.ended && video.dataset?.holySeenPlaying === '1') video.dataset.holyUserPaused = '1';
+      if (!video.ended && video.currentTime > 0 && video.dataset?.holySeenPlaying === '1') video.dataset.holyUserPaused = '1';
     });
     video.addEventListener?.('play', () => {
-      if (video.dataset) { video.dataset.holySeenPlaying = '1'; delete video.dataset.holyUserPaused; }
+      if (video.dataset) { if (video.currentTime > 0) video.dataset.holySeenPlaying = '1'; delete video.dataset.holyUserPaused; }
     });
     video.addEventListener?.('ended', () => { if (video.dataset) delete video.dataset.holyUserPaused; });
   }
+  // A provider can emit play/pause while loading at zero: that is not a user hold.
+  // Clear stale zero-time markers from earlier runtimes as well.
+  for (const video of videos) if (video.currentTime === 0 && video.dataset) { delete video.dataset.holySeenPlaying; delete video.dataset.holyUserPaused; }
   // Validation runs keep the TV silent.
   if (options.mute) for (const video of videos) video.muted = true;
   const report = videos.map(video => ({ t: video.currentTime, d: Number.isFinite(video.duration) ? video.duration : 0, paused: video.paused, userPaused: video.dataset?.holyUserPaused === '1', ready: video.readyState, network: video.networkState, mediaError: video.error?.code || 0, bufferAhead: (() => { for (let i = 0; i < (video.buffered?.length || 0); i++) if (video.buffered.start(i) <= video.currentTime && video.buffered.end(i) >= video.currentTime) return video.buffered.end(i) - video.currentTime; return 0; })(), area: video.clientWidth * video.clientHeight, ended: video.ended }));

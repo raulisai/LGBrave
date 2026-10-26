@@ -58,3 +58,7 @@ Hecho en orden: `git pull` (limpio, fast-forward, sin tocar `.local` ni bibliote
 ## Actualización 0.9.14 · pausa (2026-10-26, Windows)
 
 El canal Mac↔Windows ya está activado; conserva el emparejamiento existente. Tras leer SOUL y conservar cambios locales, trae main, ejecuta npm test y npm run build:all; después npm run desktop:restart y npm run profile:status. No requiere reinstalar el menú de Mac ni IPK: cambia el backend. Respeta una TV en uso y no abras otro interceptor. Comprueba pausa/reanudación con autorización del usuario, conserva capítulo, servidor y buscador. La regresión de pausa larga pasa en Windows; aún no se ejecutó esta versión en Mac. Auditoría y límites del SDK en docs/VALIDACION-PAUSA-20261026.md.
+
+## Actualización necesaria 0.9.15 · arranque tras pausa
+
+Actualizar el backend con main, npm test, npm run build:all y npm run desktop:restart. Sustituye 0.9.14: corrige su regresión de falsa pausa en segundo 0 que dejaba Volviendo a donde te quedaste. Windows ya activo; LG comprobó reanudación de Between Steps 5 y pausa de 132 segundos conservando servidor. Mac aún no ejecutó esta versión. Conserva vínculo y biblioteca existentes; no hace falta reinstalar el menú/IPK. Detalle: docs/REANUDACION-BLOQUEADA-20261026.md.

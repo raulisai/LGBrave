@@ -119,10 +119,12 @@ export class HolyBridge extends BrowserBridge {
     const descriptor=validDescriptor(await this.cdp.evaluate(readDescriptorSource));
     if(!descriptor||this.session||this.stopped)return false;
     const {item,position,paused}=descriptor;
+    const opening=!position;
+    const held=paused===true&&!opening;
     if(!this.library.get(entryKey(item)))this.library.start(item);
     const token=this.sessionToken=(this.sessionToken||0)+1;
-    this.session={token,item,key:entryKey(item),phase:'playing',started:Date.now(),playingAt:Date.now(),resumeAt:0,
-      lastSave:0,position,userPaused:paused===true,lastPaused:paused===true,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
+    this.session={token,item,key:entryKey(item),phase:opening?'opening':'playing',opened:Date.now(),started:Date.now(),playingAt:Date.now(),resumeAt:opening?this.library.resumeAt(item):0,
+      lastSave:0,position,userPaused:held,lastPaused:held,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
     if(item.kind!=='movie'&&this.catalog.next)this.session.next=this.catalog.next(item).catch(()=>null);
     await this.publishPlayback();
     return true;
@@ -482,7 +484,7 @@ export class HolyBridge extends BrowserBridge {
       const primary = [...candidates].sort((a,b) => (b.area || 0) - (a.area || 0) || b.d - a.d)[0];
       const wasPaused = this.isUserPaused(session);
       if (primary) {
-        const held = !!(!primary.ended && (primary.userPaused || primary.paused && (session.phase === 'playing' || wasPaused)));
+        const held = !!(!primary.ended && (primary.userPaused && primary.t > 0 || primary.paused && (session.phase === 'playing' || wasPaused)));
         if (held !== !!session.userPaused) this.recordPlayback(held ? 'pause-hold' : 'pause-released', session, {paused:held});
         session.userPaused = session.lastPaused = held;
         if (held || wasPaused) this.resetStallClocks(session);
@@ -650,7 +652,7 @@ export class HolyBridge extends BrowserBridge {
     }
     if (this.session !== session || this.stopped) return;
     session.forceResume = 0;
-    await this.curtain('window.__holyCurtain&&__holyCurtain.hide()');
+    await this.curtain('if(window.__holyCurtain)__holyCurtain.hide();else document.querySelectorAll("holy-curtain").forEach(node=>node.remove())');
     await this.status();
   }
   async curtain(expression) {
