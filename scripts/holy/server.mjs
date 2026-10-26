@@ -113,13 +113,20 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
     else res.end(raw);
   };
   let clientErrors=0, clientWindow=Date.now();
+  // A title from the query string: the catalogue's own copy when known, else just its addresses.
+  const versionItem = params => {
+    const address = value => (/^https:\/\/[^\s]{4,500}$/.test(String(value || '')) ? String(value) : '');
+    const link = address(params.get('url'));
+    if (!link || !catalog.connector(String(params.get('source') || ''))) return null;
+    return catalog.find(link) || { source: String(params.get('source')), url: link, show: address(params.get('show')), kind: 'dorama', title: '' };
+  };
   const server = http.createServer(async (req, res) => {
     const requestedAt=Date.now();
     res.once('finish',()=>{if(res.statusCode>=400||Date.now()-requestedAt>2000)diagnostics.event('http','response',{method:req.method,action:String(req.url||'').split('?')[0].slice(0,160),status:res.statusCode,durationMs:Date.now()-requestedAt},res.statusCode>=400?'warn':'info');});
     const ip = req.socket.remoteAddress?.replace('::ffff:', '');
     if (!local(ip)) { res.writeHead(403).end(); return; }
     const url = new URL(req.url, 'http://holy.local');
-    const mutation = ['/holy-api/vote', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh'].includes(url.pathname) &&
+    const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh'].includes(url.pathname) &&
       (req.method === 'POST' || (req.method === 'OPTIONS' && req.headers['access-control-request-method'] === 'POST'));
     if (mutation && !mutationAllowed(req, server.address()?.port || port)) {
       res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' }).end('{"ok":false,"error":"origen no permitido"}');
@@ -146,6 +153,21 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         const seasons = await catalog.episodes(url.searchParams.get('source') || '', url.searchParams.get('show') || '').catch(error => ({ error: error.message }));
         res.end(JSON.stringify(Array.isArray(seasons) ? { seasons } : { seasons: [], error: seasons.error }));
+      } else if (url.pathname === '/holy-api/versions') {
+        // The versions (audio / subtitles) a title offers and the one remembered for its series.
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        const item = versionItem(url.searchParams);
+        const versions = item ? await catalog.versionsOf(item).catch(() => []) : [];
+        res.end(JSON.stringify({ versions, remembered: item ? library.languageOf(item) : null }));
+      } else if (url.pathname === '/holy-api/language' && req.method === 'POST') {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        const { item: sent, version } = await body(req);
+        const item = versionItem(new URLSearchParams({ source: sent?.source || '', url: sent?.url || '', show: sent?.show || '' }));
+        if (!item) throw Error('Esa serie no tiene una dirección válida.');
+        const kind = ['dub', 'sub', 'orig'].includes(version?.kind) ? version.kind : null;
+        const saved = library.setLanguage(item, version && kind && version.id ? { id: String(version.id), kind, label: String(version.label || '') } : null);
+        res.end(JSON.stringify({ ok: true, remembered: saved, libraryVersion: library.version }));
       } else if (url.pathname === '/holy-api/taste') {
         res.setHeader('Cache-Control', 'no-store');
         sendJSON(req, res, catalog.calibration(library));

@@ -4,6 +4,7 @@ import { fetchText, country, languageLabel } from './sources.mjs';
 import { CONNECTORS, connectorFor } from './connectors.mjs';
 import { genreShelves } from '../../src/holy.js';
 import { entryKey, titleKey, nextEpisode } from './library.mjs';
+import { matchVersion, publicVersion } from './versions.mjs';
 
 // The newest titles from the owner's sites, refreshed on the Mac every half hour.
 // Details (genres, synopsis, show page) are cached per page: they rarely change.
@@ -249,21 +250,41 @@ export class Catalog {
   // The player page the site itself would open for this title, resolved fresh.
   // A player found a moment ago (e.g. while the owner looked at the card) is reused for a
   // couple of minutes; one that failed to start is forgotten (`forgetPlayer`).
-  async resolve(item) {
+  // options: { version: id, kind: 'dub'|'sub'|'orig' } picks that version of a title that has several
+  // (the target carries `versions`, the chosen `version` and whether it `matched` what was asked);
+  // without a match the site's first one is used.
+  async resolve(item, options = {}) {
     const connector = this.connector(item.source);
     if (!connector || !/^https:\/\//.test(String(item?.url || ''))) return null;
-    return this.cached('resolve\n' + item.url, RESOLVE_TTL, () => this.resolveNow(item, connector));
+    const bundle = await this.cached('resolve\n' + item.url, RESOLVE_TTL, () => this.resolveNow(item, connector));
+    if (!bundle) return null;
+    if (!bundle.versions.length) return bundle.target;
+    const asked = matchVersion(bundle.versions, { id: options.version, kind: options.kind });
+    const chosen = asked || bundle.versions[0];
+    return { ...chosen.target, versions: bundle.versions.map(publicVersion), version: String(chosen.id), versionKind: chosen.kind, matched: !!asked };
+  }
+  // Which versions the title has (empty when its site offers a single one), without choosing.
+  async versionsOf(item) {
+    if (!this.connector(item.source)?.versions) return [];
+    const target = await this.resolve(item).catch(() => null);
+    return target?.versions || [];
   }
   forgetPlayer(url) { this.cache?.delete('resolve\n' + url); }
   async resolveNow(item, connector) {
+    const clean = target => (target && /^https:\/\//.test(String(target.url || '')) ? { ...target, alternatives: (target.alternatives || []).filter(url => /^https:\/\//.test(String(url || '')) && url !== target.url) } : null);
+    if (connector.versions) {
+      const list = await deadline(connector.versions(item, this.loader(connector)), 30000, 'El sitio tardó demasiado en dar el reproductor.');
+      const versions = (Array.isArray(list) ? list : []).map(version => ({ ...version, target: clean(version.target) })).filter(version => version.target);
+      // One version is no choice: it behaves like a site without versions.
+      return versions.length ? { target: versions[0].target, versions: versions.length === 1 ? [] : versions } : null;
+    }
     const work = async () => {
       if (connector.resolve) return connector.resolve(item, this.loader(connector));
       const detail = connector.parseDetail(await this.fetch(item.url, { referrer: connector.site }), item.url);
       return connector.player(detail, item.url);
     };
-    const target = await deadline(work(), 30000, 'El sitio tardó demasiado en dar el reproductor.');
-    if (!target || !/^https:\/\//.test(String(target.url || ''))) return null;
-    return { ...target, alternatives: (target.alternatives || []).filter(url => /^https:\/\//.test(String(url || '')) && url !== target.url) };
+    const target = clean(await deadline(work(), 30000, 'El sitio tardó demasiado en dar el reproductor.'));
+    return target ? { target, versions: [] } : null;
   }
   // The same title on the owner's other sites, for when its own site cannot play it:
   // copies already in the catalogue first, then each compatible site's search. For an
@@ -417,7 +438,7 @@ export class Catalog {
   }
   sources() {
     return this.connectors.map(connector => ({ id: connector.id, name: connector.name, count: this.items.filter(item => item.source === connector.id).length,
-      error: this.errors[connector.id] || '', search: !!(connector.search || connector.searchURL), health: this.health[connector.id] || null }));
+      error: this.errors[connector.id] || '', search: !!(connector.search || connector.searchURL), versions: !!connector.versions, health: this.health[connector.id] || null }));
   }
   // «Gustos»: titles to rate, grouped by the catalogue's main genres, plus what was already rated.
   calibration(library) {

@@ -68,6 +68,10 @@ export class Library {
     this.votes = (Array.isArray(data.votes) ? data.votes : []).map(cleanVote).filter(Boolean);
     this.prefs = (Array.isArray(data.prefs) ? data.prefs : []).map(cleanPref).filter(Boolean);
     this.tasteMeta = cleanTasteMeta(data.tasteMeta);
+    // The language chosen for each series («Between Steps» in Latino, in Korean…), by show key.
+    this.languages = data.languages && typeof data.languages === 'object' && !Array.isArray(data.languages)
+      ? Object.fromEntries(Object.entries(data.languages).filter(([key, value]) => key && value && typeof value.id === 'string' && ['dub', 'sub', 'orig'].includes(value.kind)).slice(0, 300).map(([key, value]) => [key, { id: value.id.slice(0, 40), kind: value.kind, label: String(value.label || '').slice(0, 80), at: Number(value.at) || 0 }]))
+      : {};
     this.progressSamples = new Map();
     this.asked = data.asked && typeof data.asked === 'object' && !Array.isArray(data.asked) ? Object.fromEntries(Object.entries(data.asked).filter(([, at]) => Number.isFinite(at))) : {};
   }
@@ -79,7 +83,7 @@ export class Library {
     mkdirSync(dirname(this.file), { recursive: true });
     const temporary = this.file + '.tmp';
     for (const key of Object.keys(this.asked).slice(0, -200)) delete this.asked[key];
-    writeFileSync(temporary, JSON.stringify({ entries: this.entries, votes: this.votes, prefs: this.prefs, asked: this.asked, tasteMeta: this.tasteMeta }, null, 2) + '\n', { mode: 0o600 });
+    writeFileSync(temporary, JSON.stringify({ entries: this.entries, votes: this.votes, prefs: this.prefs, asked: this.asked, tasteMeta: this.tasteMeta, languages: this.languages }, null, 2) + '\n', { mode: 0o600 });
     renameSync(temporary, this.file);
   }
   tasteStamp() { this.tasteMeta.clock = Math.max(this.now(), this.tasteMeta.clock + 1, ...this.votes.map(v=>v.at+1), ...this.prefs.map(p=>p.at+1)); return this.tasteMeta.clock; }
@@ -128,6 +132,16 @@ export class Library {
     Object.assign(entry, { t: Math.round(t), duration: Math.round(duration), finished: FINISHED(t, duration), updatedAt: this.now() });
     this.save();
     return entry;
+  }
+  // The remembered language of a title or series (null if never chosen).
+  languageOf(item) { return this.languages[entryKey(item || {})] || null; }
+  setLanguage(item, version) {
+    const key = entryKey(item || {});
+    if (!key) return null;
+    if (!version) delete this.languages[key];
+    else this.languages[key] = { id: String(version.id).slice(0, 40), kind: version.kind, label: String(version.label || '').slice(0, 80), at: this.now() };
+    this.save();
+    return this.languages[key] || null;
   }
   remove(key) { this.tasteMeta.removedEntries[key] = this.tasteStamp(); this.progressSamples.delete(key); this.entries = this.entries.filter(entry => entry.key !== key); this.save(); }
   // Unfinished first; a finished episode becomes its next episode when the site's pattern allows it.

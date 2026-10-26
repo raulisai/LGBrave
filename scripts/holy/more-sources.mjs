@@ -1,6 +1,7 @@
 // More of the owner's sites. Same contract as sources.mjs; these also define
 // home()/detail()/search() when the site needs more than one page or a JSON call.
 import { decode, attr, text, absolute, between, genre, country, item, genrePages } from './sources.mjs';
+import { dedupe } from './versions.mjs';
 
 const tmdbPath = (path, size) => (/^\/[\w-]+\.(jpg|png|webp)$/.test(path || '') ? `https://image.tmdb.org/t/p/${size}${path}` : '');
 const json = value => { try { return JSON.parse(value); } catch { return null; } };
@@ -59,6 +60,35 @@ export function flixHost(link) {
 // Server codes from the site's own list. ok.ru and Mixdrop are proven on this TV, Streamtape and
 // Streamwish played on the Mac; Voe stalled on the TV (2026-10-23), so it comes later.
 const FLIX_RANK = ['1113', '3889', '8309', '38585', '958695', '576857', '1230', '4721', '7286', '1233', '1234'];
+// {code_flix → {name, code}} from the page's own language list.
+export function flixLanguages(data) {
+  return Object.fromEntries([...String(data).matchAll(/\{"name":"([^"]+)","code":"([a-z-]+)","code_flix":"(\d+)"/g)].map(match => [match[3], { name: decode(match[1]), code: match[2] }]));
+}
+// Links grouped by language: one version each, with its own ranked servers.
+export function flixVersions(links, languages, referrer) {
+  const groups = new Map();
+  for (const link of Array.isArray(links) ? links : []) {
+    const key = String(link?.lang ?? '');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(link);
+  }
+  const versions = [...groups].map(([code, list]) => {
+    const urls = rankFlixLinks(list);
+    if (!urls.length) return null;
+    const language = languages[code] || { name: '', code: '' };
+    const spanish = ['es', 'es-la', 'es-mx'].includes(language.code) || /latino|castellano|espa[ñn]ol/i.test(language.name);
+    const subtitled = list.some(link => (link.subtitles || []).some(entry => entry?.language_code === 'es'));
+    const name = language.name || (code ? 'Idioma ' + code : 'Original');
+    const castilian = /castellano|espa[ñn]a/i.test(name);
+    const kind = spanish ? 'dub' : subtitled ? 'sub' : 'orig';
+    const label = spanish ? (castilian ? 'Español (España)' : 'Español latino') : subtitled ? `${name} · subtítulos en español` : `${name} (original)`;
+    return { id: code || 'x', label, kind, target: { url: urls[0], referrer, alternatives: urls.slice(1, 4) } };
+  }).filter(Boolean);
+  // Same order the site recommends: the group of its best-ranked server first.
+  const best = link => FLIX_RANK.indexOf(String(link.server));
+  const rank = version => Math.min(...(groups.get(version.id === 'x' ? '' : version.id) || []).map(best).filter(position => position >= 0), 99);
+  return dedupe(versions.sort((a, b) => rank(a) - rank(b)));
+}
 export function rankFlixLinks(links) {
   const known = (Array.isArray(links) ? links : []).filter(link => FLIX_RANK.includes(String(link?.server)));
   return unique(known.sort((a, b) => FLIX_RANK.indexOf(String(a.server)) - FLIX_RANK.indexOf(String(b.server))).map(link => {
@@ -112,7 +142,9 @@ export const doramasflix = {
       studios: unique([...networks.matchAll(/"name":"([^"]+)"/g)].map(match => decode(match[1]))).slice(0, 3),
       country: country([...data.matchAll(/"country":"([a-z-]+)"/g)].map(match => match[1]).find(value => value !== 'paises')) };
   },
-  async resolve(entry, load) {
+  // The site lists each title's languages (`langs`: Coreano, Latino…) and tags every link with one.
+  // Korean links come with Spanish hard subtitles; «Latino» is the Spanish dub.
+  async versions(entry, load) {
     const origin = new URL(entry.url).origin + '/';
     const page = await load(entry.url);
     const data = flight(page);
@@ -120,9 +152,12 @@ export const doramasflix = {
     const id = new RegExp(`"${movie ? 'movie' : 'episode'}":\\{"_id":"([0-9a-f]{24})"`).exec(data)?.[1];
     if (!id) throw Error('DoramasFlix no indicó el reproductor de este título.');
     const links = await flixAction(origin, entry.url, page + data, movie ? 'getMovieLinks' : 'getEpisodeLinks', movie ? { movie_id: id } : { episode_id: id }, load);
-    const urls = rankFlixLinks(links);
-    if (!urls.length) throw Error(movie ? 'Esta película todavía no tiene servidores en DoramasFlix.' : 'Este capítulo todavía no tiene servidores en DoramasFlix.');
-    return { url: urls[0], referrer: entry.url, alternatives: urls.slice(1, 4) };
+    if (!rankFlixLinks(links).length) throw Error(movie ? 'Esta película todavía no tiene servidores en DoramasFlix.' : 'Este capítulo todavía no tiene servidores en DoramasFlix.');
+    return flixVersions(links, flixLanguages(data), entry.url);
+  },
+  async resolve(entry, load) {
+    const [first] = await this.versions(entry, load);
+    return first.target;
   },
   async search(query, load) {
     const origin = FLIX_ORIGINS[0];

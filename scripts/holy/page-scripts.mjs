@@ -132,7 +132,7 @@ export function holyEndCard(data) {
     .p.top{top:70px;bottom:auto}
     h1.small{font-size:46px}
     .p.top .row{align-items:stretch}
-    .p.top .b{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;height:96px;min-width:230px}
+    .p.top .b{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;height:96px;min-width:230px;max-width:380px;white-space:normal;text-align:left}
     .p.top .b small{position:relative;font-size:20px;font-weight:600;opacity:.75}
     .hint{margin:18px 0 0;font-size:21px;color:#bdbdbd}
     @keyframes in{from{opacity:0}to{opacity:1}}`;
@@ -163,16 +163,16 @@ export function holyEndCard(data) {
     // At the top, over the paused video: the player's own controls stay free at the bottom.
     shade.className = 'shade top';
     panel.className = 'p top';
-    panel.append(make('div', 'k', 'EN PAUSA'), make('h1', 'small', data.title || ''), make('p', 'sub', data.next || ''));
+    panel.append(make('div', 'k', data.kicker || 'EN PAUSA'), make('h1', 'small', data.title || ''), make('p', 'sub', data.next || ''));
     const row = make('div', 'row');
-    const glyph = { play: '▶', previous: '⏮', next: '⏭', list: '≡' };
+    const glyph = { play: '▶', previous: '⏮', next: '⏭', list: '≡', language: '🌐' };
     (data.buttons || []).forEach((entry, index) => {
       const button = option(make('button', 'b'), index);
       button.append(make('span', '', `${glyph[entry.icon] || ''}  ${entry.label}`));
       if (entry.detail) button.append(make('small', '', entry.detail));
       row.append(button);
     });
-    panel.append(row, make('p', 'hint', '↑ para elegir · ↓ para volver al vídeo'));
+    panel.append(row, make('p', 'hint', data.hint || '↑ para elegir · ↓ para volver al vídeo'));
   } else if (data.mode === 'last') {
     panel.append(make('div', 'k', 'TERMINASTE'), make('h1', '', data.title || ''), make('p', 'sub', 'Es el último capítulo disponible por ahora.'));
     const back = option(make('button', 'b'), 0); back.append(make('span', '', data.episodes === false ? 'Volver al inicio' : 'Ver capítulos'));
@@ -192,10 +192,9 @@ export function holyEndCard(data) {
   }
   const focus = (index, stopped) => {
     options.forEach((node, at) => node.classList.toggle('f', at === index));
-    if (data.mode === 'pause') return;
     if (stopped && fill) { clearInterval(timer); fill.style.transition = 'none'; fill.style.width = '0'; label.textContent = '▶  Ver ahora'; }
   };
-  focus(data.mode === 'pause' ? -1 : 0, false);
+  focus(data.mode === 'pause' ? (Number.isInteger(data.start) ? data.start : -1) : 0, false);
   wrap.append(shade, panel); root.append(style, wrap);
   document.documentElement.append(host);
   window.__holyEnd = { focus, remove() { clearInterval(timer); host.remove(); } };
