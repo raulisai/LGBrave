@@ -1,6 +1,6 @@
 {
   "name": "lg-tv-lab",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "private": true,
   "type": "module",
   "scripts": {
@@ -31,7 +31,8 @@
     "desktop:repair": "node scripts/desktop-control.mjs repair",
     "desktop:handoff": "node scripts/desktop-control.mjs handoff",
     "build:holy": "vite build --mode holy",
-    "build:all": "npm run build && npm run build:holy",
+    "build:holy-web": "vite build --mode holy-web",
+    "build:all": "npm run build && npm run build:holy && npm run build:holy-web",
     "package:holy": "npm run build:holy && ares-package dist-holy -o artifacts",
     "windows:tray": "node scripts/windows-tray.mjs",
     "holy:errors": "node scripts/holy/playback-report.mjs",

@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-holy/
+dist-holy-web/
 artifacts/
 .env*
 *.pem

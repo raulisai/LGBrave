@@ -57,7 +57,7 @@ function body(req, limit = 16384) {
   });
 }
 
-export function startServer({ catalog, library, doctor, port = PORT, root = 'dist-holy', imageDir = '.local/holy-images', log = console.log, status = () => ({}), fetchImage = fetch, diagnostics = new DiagnosticLog() } = {}) {
+export function startServer({ catalog, library, doctor, port = PORT, root = 'dist-holy', webRoot = 'dist-holy-web', imageDir = '.local/holy-images', log = console.log, status = () => ({}), fetchImage = fetch, diagnostics = new DiagnosticLog() } = {}) {
   const started = Date.now();
   mkdirSync(imageDir, { recursive: true });
   // Forget images not used for two weeks.
@@ -126,7 +126,7 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
     const ip = req.socket.remoteAddress?.replace('::ffff:', '');
     if (!local(ip)) { res.writeHead(403).end(); return; }
     const url = new URL(req.url, 'http://holy.local');
-    const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh'].includes(url.pathname) &&
+    const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh', '/holy-api/resolve', '/holy-api/forget'].includes(url.pathname) &&
       (req.method === 'POST' || (req.method === 'OPTIONS' && req.headers['access-control-request-method'] === 'POST'));
     if (mutation && !mutationAllowed(req, server.address()?.port || port)) {
       res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' }).end('{"ok":false,"error":"origen no permitido"}');
@@ -168,6 +168,32 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
         const kind = ['dub', 'sub', 'orig'].includes(version?.kind) ? version.kind : null;
         const saved = library.setLanguage(item, version && kind && version.id ? { id: String(version.id), kind, label: String(version.label || '') } : null);
         res.end(JSON.stringify({ ok: true, remembered: saved, libraryVersion: library.version }));
+      } else if (url.pathname === '/holy-api/resolve' && req.method === 'POST') {
+        // Plays a title from a plain browser tab (the web page, no TV/CDP involved): the same
+        // site/version chain the TV tries, in one pass, ending in the resolved player address
+        // for the client to open itself. Marks it started, same as the TV does.
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        const { item: sent, version, kind } = await body(req);
+        const address = value => (/^https:\/\/[^\s]{4,500}$/.test(String(value || '')) ? String(value) : '');
+        const link = address(sent?.url);
+        const connector = link && catalog.connector(String(sent?.source || ''));
+        if (!link || !connector) { res.end(JSON.stringify({ ok: false, error: 'Título no válido.' })); return; }
+        const item = { ...catalog.find(link), source: String(sent.source), url: link, show: address(sent.show), kind: String(sent.kind || 'movie').slice(0, 20),
+          title: String(sent.title || '').slice(0, 200), subtitle: String(sent.subtitle || '').slice(0, 200), poster: address(sent.poster), backdrop: address(sent.backdrop),
+          episode: Number.isFinite(Number(sent.episode)) ? Number(sent.episode) : null,
+          genres: Array.isArray(sent.genres) ? sent.genres.filter(name => typeof name === 'string').slice(0, 8) : [] };
+        const askedKind = ['dub', 'sub', 'orig'].includes(kind) ? kind : undefined;
+        const found = await catalog.resolvePlayable(item, { version: version ? String(version) : undefined, kind: askedKind }).catch(error => ({ failed: error.message }));
+        if (!found || found.failed) { res.end(JSON.stringify({ ok: false, error: found?.failed || 'No se encontró un reproductor para este título en tus sitios.' })); return; }
+        library.start(found.item);
+        res.end(JSON.stringify({ ok: true, url: found.target.url, versions: found.target.versions || [], version: found.target.version || '', versionKind: found.target.versionKind || '',
+          matched: found.target.matched !== false, site: catalog.connector(found.item.source)?.name || found.item.source }));
+      } else if (url.pathname === '/holy-api/forget' && req.method === 'POST') {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        const { key } = await body(req);
+        library.remove(String(key || ''));
+        res.end(JSON.stringify({ ok: true, libraryVersion: library.version }));
       } else if (url.pathname === '/holy-api/taste') {
         res.setHeader('Cache-Control', 'no-store');
         sendJSON(req, res, catalog.calibration(library));
@@ -217,6 +243,15 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
         if (!path) { res.writeHead(403).end(); return; }
         res.setHeader('Content-Type', TYPES[extname(path)] || 'application/octet-stream');
         // Hashed bundles never change; index.html is revalidated so a new build shows at once.
+        res.setHeader('Cache-Control', /[\\/]assets[\\/]/.test(path) ? 'public, max-age=31536000, immutable' : 'no-cache');
+        res.end(readFileSync(path));
+      } else if (webRoot && existsSync(resolve(webRoot))) {
+        // The same catalogue as a page for any device on the LAN (phone, laptop…), at the
+        // server's own root; the TV's packaged app keeps its separate address above untouched.
+        const base = resolve(webRoot);
+        const path = safePath(base, url.pathname === '/' ? 'index.html' : url.pathname.slice(1));
+        if (!path) { res.writeHead(403).end(); return; }
+        res.setHeader('Content-Type', TYPES[extname(path)] || 'application/octet-stream');
         res.setHeader('Cache-Control', /[\\/]assets[\\/]/.test(path) ? 'public, max-age=31536000, immutable' : 'no-cache');
         res.end(readFileSync(path));
       } else res.writeHead(404).end();

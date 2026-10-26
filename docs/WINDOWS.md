@@ -38,7 +38,7 @@ npm run desktop:repair     # reparaciones pasivas y diagnóstico de autorizació
 npm run desktop:stop
 npm run desktop            # primer plano, Ctrl-C detiene todo
 npm run holy               # alias del mismo servicio común
-npm run build:all          # dist/ (Luma) + dist-holy/ (Holy)
+npm run build:all          # dist/ (Luma) + dist-holy/ (Holy) + dist-holy-web/ (página web)
 npm run package            # IPK de Luma
 npm run package:holy       # IPK de Holy
 npm test                   # pruebas locales, sin TV
@@ -46,7 +46,7 @@ npm test                   # pruebas locales, sin TV
 
 En PowerShell usa `npm.cmd` si la política local impide ejecutar `npm.ps1`.
 
-`npm run lab` queda como ruta anterior de Luma para diagnóstico. No la ejecutes junto al control común: comparten candado y el panel avisa del conflicto. Los puertos de los servidores son 43187/43188 (Luma y fixtures) y 43190 (Holy). Si otro programa ya los ocupa, el servicio no cae en bucle: muestra «Otro runtime local está activo» con el puerto y el programa (`netstat`/`tasklist` en Windows, `lsof` en Mac) y reintenta solo cada 30 s. El canal de control elige un puerto de loopback aleatorio y exige un token local; nunca debe abrirse en el firewall. La TV necesita alcanzar los servidores de inicio: si Windows pregunta por Node, permite la red privada. La instalación no modifica automáticamente el firewall.
+`npm run lab` queda como ruta anterior de Luma para diagnóstico. No la ejecutes junto al control común: comparten candado y el panel avisa del conflicto. Los puertos de los servidores son 43187/43188 (Luma y fixtures) y 43190 (Holy; ese mismo puerto, en su raíz `http://<computadora activa>:43190/`, sirve además todo el catálogo de Holy como página para cualquier teléfono, tablet o laptop del wifi — ver «Holy desde cualquier dispositivo del wifi» más abajo). Si otro programa ya los ocupa, el servicio no cae en bucle: muestra «Otro runtime local está activo» con el puerto y el programa (`netstat`/`tasklist` en Windows, `lsof` en Mac) y reintenta solo cada 30 s. El canal de control elige un puerto de loopback aleatorio y exige un token local; nunca debe abrirse en el firewall. La TV necesita alcanzar los servidores de inicio: si Windows pregunta por Node, permite la red privada. La instalación no modifica automáticamente el firewall.
 
 ## Dos computadoras y relevo
 
@@ -65,6 +65,10 @@ El equipo activo publica preferencias, buscador, marcadores, historial y gustos 
 La caché se pierde al reiniciar la TV: en ese caso el primer equipo que conecta vuelve a publicarla desde su copia local. No es sincronización en la nube y no asegura recuperar cambios del equipo apagado que nunca alcanzó a publicarlos. Ambos equipos deben ejecutar esta versión; el Mac anterior aún necesita actualizarse. Los metadatos de la reproducción actual se conservan en la página para que el otro equipo pueda adoptar el seguimiento sin navegar ni buscar otro segundo del vídeo. Depende de que el reproductor siga abierto y de que el equipo anterior haya publicado esos metadatos; esto se probó de forma simulada.
 
 La interfaz antigua de Holy puede seguir solicitando datos a la IP del Mac apagado. El puente reconoce únicamente ese inicio privado y redirige sus recursos/API a la computadora activa. No recarga ni cambia la página. Este arreglo permitió recuperar el catálogo en la TV desde Windows; el usuario lo confirmó con la Mac apagada.
+
+## Holy desde cualquier dispositivo del wifi
+
+`http://<computadora activa>:43190/` (la misma dirección e IP que usa la TV) abre el catálogo completo de Holy en un navegador normal — teléfono, tablet o laptop — sin instalar nada y sin tocar la TV, que sigue sirviéndose por separado en `/holy/`. Funciona igual que en la TV para ver, buscar (con voz si el navegador la ofrece), calificar y revisar episodios. La diferencia es **Reproducir**: un navegador normal no tiene la automatización que limpia anuncios y abre el vídeo solo (eso es exclusivo de la conexión CDP con la TV), así que la computadora resuelve el reproductor real del sitio y lo abre en una pestaña nueva, tal cual el enlace del propio sitio — ahí puede haber anuncios o ventanas emergentes del sitio, algo que en la TV Holy evita.
 
 ## Arquitectura y verificación
 

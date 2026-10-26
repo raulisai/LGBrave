@@ -309,6 +309,32 @@ export class Catalog {
     return target?.versions || [];
   }
   forgetPlayer(url) { this.cache?.delete('resolve\n' + url); }
+  // The playable target for a title, tried the way the TV's own session does it, but in one
+  // pass for a plain browser tab that has no curtain or rescue to fall back on: the owner's
+  // preferred site for its kind first (anime → JKAnime), then its own site, then the other
+  // sites that carry it. Returns the title actually used (a copy on another site, kept under
+  // the asked title/art) together with its target, or null when nothing resolved anywhere.
+  async resolvePlayable(item, options = {}) {
+    const tried = new Set([item.source]);
+    const copy = candidate => ({ ...candidate, title: item.title, poster: item.poster || candidate.poster, backdrop: item.backdrop || candidate.backdrop, genres: item.genres?.length ? item.genres : candidate.genres });
+    const preference = await this.preference(item).catch(() => null);
+    if (preference?.site && !tried.has(preference.site)) {
+      const candidates = await this.elsewhere(item, new Set(tried), { only: preference.site, kind: preference.kind }).catch(() => []);
+      tried.add(preference.site);
+      for (const candidate of candidates.slice(0, 2)) {
+        const target = await this.resolve(candidate, options).catch(() => null);
+        if (target) return { item: copy(candidate), target };
+      }
+    }
+    let target = await this.resolve(item, options).catch(() => null);
+    if (!target && this.pageFallback(item)) target = { url: item.url, versions: [] };
+    if (target) return { item, target };
+    for (const candidate of (await this.elsewhere(item, tried).catch(() => [])).slice(0, 4)) {
+      const found = await this.resolve(candidate, options).catch(() => null);
+      if (found) return { item: copy(candidate), target: found };
+    }
+    return null;
+  }
   async resolveNow(item, connector) {
     const clean = target => (target && /^https:\/\//.test(String(target.url || '')) ? { ...target, alternatives: (target.alternatives || []).filter(url => /^https:\/\//.test(String(url || '')) && url !== target.url) } : null);
     if (connector.versions) {
