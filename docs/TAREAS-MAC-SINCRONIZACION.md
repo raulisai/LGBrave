@@ -44,3 +44,13 @@ Si cambian las direcciones de los equipos, vuelve a generar npm run browser:comp
 ## Cobertura que debe anotar el agente Mac
 
 Las pruebas locales de Windows usan Svelte/HTTP reales y Chrome simulado. Windows emparejó con la TV sin interrumpir vídeo; no se ejecutó este activador en macOS ni se instaló el complemento en un navegador físico durante ese trabajo. Anota aquí y en SOUL el resultado real de la Mac, del intercambio físico entre ambos y del minuto en Brave. Conserva la sesión y el buscador del usuario.
+
+## Resultado real en la Mac (2026-10-26 04:55, Claude)
+
+Hecho en orden: `git pull` (limpio, fast-forward, sin tocar `.local` ni biblioteca), revisión del código nuevo (`sync-protocol.mjs`, `peer-registry.mjs`, `peer-sync.mjs`, manifiesto del complemento) antes de ejecutarlo, `npm test` completo (todas las pruebas nuevas incluidas, sin fallos), `npm run build:all`, `npm run browser:companion`, `node scripts/profile-sync.mjs setup` (emparejó con la TV por el SSH ya autorizado, sin pedir nada nuevo), `npm run desktop:restart`.
+
+**Intercambio real Mac↔Windows confirmado:** `npm run profile:status` → `paired:true, state:"synced"`, con `192.168.1.65` (Windows) como par y marca de tiempo actual, mientras la TV la atendía Windows (`standby`, «La TV la atiende djoker»). Es decir: el canal de datos funcionó con la TV ocupada por el otro equipo, tal como describe este documento.
+
+**Complemento del navegador:** generado en `artifacts/holy-companion`; **no se cargó en un navegador real** (ese paso lo decide y hace el usuario, como pide este mismo documento). Pendiente que el usuario lo instale en Brave y pruebe un vídeo externo.
+
+**No probado:** una valoración real Mac→Windows o Windows→Mac de ida y vuelta con datos del usuario (se evitó tocar su biblioteca real sin pedírselo); el relevo físico de quién atiende la TV sigue siendo el mismo protocolo ya validado antes, sin cambios aquí.
