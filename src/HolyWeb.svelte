@@ -279,25 +279,35 @@
     }
     await openResolved(item, payload);
   }
+  // Reproducir aquí: a sandboxed iframe, right on this page, instead of handing the whole tab
+  // to the site. The sandbox strips exactly what makes these sites unpleasant — pop-up and
+  // pop-under windows, and the whole page hijacked to an ad by one click — by simply never
+  // granting the frame permission to open windows or navigate the top page; the site's own
+  // player still runs normally inside it. It cannot strip a banner sitting in that page
+  // (that needs reading its DOM, which a different origin never allows, sandboxed or not),
+  // and a site that requires its own address as Referer to start the video (`needsReferrer`)
+  // cannot be embedded this way at all — only the TV's own CDP navigation can fake that — so
+  // that one opens in a new tab instead, exactly as tapping the site's own link would.
+  let theater = $state(null);
   async function openResolved(item, payload) {
     opening = item;
-    let win = null;
-    try {
-      win = window.open('', '_blank');
-      if (win) { win.document.title = 'Holy'; win.document.body.textContent = 'Abriendo tu título…'; win.document.body.style.cssText = 'background:#0b0b10;color:#fff;font:16px -apple-system,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0'; }
-    } catch { /* The popup blocker decides; a full navigation below still works. */ }
     try {
       const result = await getJSON(apiBase + '/holy-api/resolve', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ item: payload, version: payload.version, kind: payload.versionKind }), timeout: 35000, retries: 0 });
-      if (opening !== item) { try { win?.close(); } catch { /* Already closed. */ } return; }
+      if (opening !== item) return;
       opening = null;
-      if (!result.ok) { try { win?.close(); } catch { /* Already closed. */ } notice = result.error || 'No se encontró un reproductor para este título en tus sitios.'; return; }
-      try { if (win && !win.closed) win.location.href = result.url; else location.href = result.url; } catch { location.href = result.url; }
-      notice = `Se abrió en ${result.site || 'el sitio'}, en una pestaña nueva. Ahí puede haber anuncios: en la TV se ve sin ellos.`;
+      if (!result.ok) { notice = result.error || 'No se encontró un reproductor para este título en tus sitios.'; return; }
+      if (result.needsReferrer) {
+        try { window.open(result.url, '_blank'); } catch { location.href = result.url; }
+        notice = `Se abrió en ${result.site || 'el sitio'}, en una pestaña nueva: ese sitio no se puede ver aquí mismo. Ahí puede haber anuncios; en la TV, Holy los limpia.`;
+      } else {
+        theater = { item, url: result.url, site: result.site || '' };
+      }
       sheet = null;
     } catch {
-      if (opening === item) { opening = null; try { win?.close(); } catch { /* Already closed. */ } notice = 'No se pudo abrir. Revisa la conexión con la computadora.'; }
+      if (opening === item) { opening = null; notice = 'No se pudo abrir. Revisa la conexión con la computadora.'; }
     }
   }
+  function closeTheater() { theater = null; }
 
   // Rows: same shape and helpers the TV uses, so categories, genres and award rows match it.
   const rows = $derived(
@@ -469,9 +479,28 @@
           {/if}
         </div>
         {#if sheet.item.key}<button type="button" class="link-btn" onclick={() => forgetItem(sheet.item)}>Quitar de «Continuar viendo»</button>{/if}
-        <p class="web-caveat">Se abre en una pestaña nueva, tal cual la página del sitio: ahí puede haber anuncios. En la TV, Holy la limpia.</p>
+        <p class="web-caveat">Se abre sin salir de aquí, bloqueando ventanas y redirecciones de anuncios; si el sitio aún así no funciona así, prueba abrirlo en una pestaña nueva. En la TV, Holy la limpia por completo.</p>
       </div>
     </div>
+  </div>
+{/if}
+
+{#if theater}
+  <div class="theater">
+    <div class="theater-bar">
+      <button type="button" class="back" onclick={closeTheater}>‹ Volver a Holy</button>
+      <span class="theater-title">{theater.item.title}{theater.site ? ' · ' + theater.site : ''}</span>
+      <a class="new-tab" href={theater.url} target="_blank" rel="noopener noreferrer">Abrir en pestaña nueva ↗</a>
+    </div>
+    <iframe
+      class="theater-frame"
+      src={theater.url}
+      title={theater.item.title}
+      sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock"
+      allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+      allowfullscreen
+      referrerpolicy="no-referrer"
+    ></iframe>
   </div>
 {/if}
 
@@ -608,6 +637,13 @@
 
   .lang-options{display:flex;flex-direction:column;gap:8px;margin-top:14px}
   .lang-option{padding:12px 16px;border-radius:12px;background:var(--fill);font-size:14px;text-align:left}
+
+  .theater{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;background:#000}
+  .theater-bar{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#111;flex-shrink:0;flex-wrap:wrap}
+  .theater-bar .back{font-size:13px;color:var(--secondary);padding:6px 10px;border-radius:8px;background:var(--fill);flex-shrink:0}
+  .theater-title{flex:1;min-width:0;font-size:13px;color:#d6d6d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .theater-bar .new-tab{flex-shrink:0;font-size:12px;color:#9cc4ff;text-decoration:underline}
+  .theater-frame{flex:1;width:100%;border:0;background:#000}
 
   @media (min-width:720px){
     .page{max-width:1100px;margin:0 auto}

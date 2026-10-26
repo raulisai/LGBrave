@@ -188,7 +188,11 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
         if (!found || found.failed) { res.end(JSON.stringify({ ok: false, error: found?.failed || 'No se encontró un reproductor para este título en tus sitios.' })); return; }
         library.start(found.item);
         res.end(JSON.stringify({ ok: true, url: found.target.url, versions: found.target.versions || [], version: found.target.version || '', versionKind: found.target.versionKind || '',
-          matched: found.target.matched !== false, site: catalog.connector(found.item.source)?.name || found.item.source }));
+          matched: found.target.matched !== false, site: catalog.connector(found.item.source)?.name || found.item.source,
+          // The site needs a Referer from its own address to start the video; a sandboxed iframe
+          // from this page cannot fake that (only the TV's CDP navigation can), so the web page
+          // opens it in a new tab instead of trying to embed it.
+          needsReferrer: !!found.target.referrer }));
       } else if (url.pathname === '/holy-api/forget' && req.method === 'POST') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         const { key } = await body(req);

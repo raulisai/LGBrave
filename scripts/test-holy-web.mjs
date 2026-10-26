@@ -71,7 +71,7 @@ try {
 
   await check('Servidor: /holy-api/resolve abre desde un navegador cualquiera y marca «empezado»; /holy-api/forget la quita', async () => {
     const library = new Library(join(directory, 'lib.json'));
-    const catalog = newCatalog([{ ...site, versions: async () => [{ id: 'a', label: 'Español latino', kind: 'dub', target: { url: 'https://p.example/a' } }, { id: 'b', label: 'Coreano · subtítulos en español', kind: 'sub', target: { url: 'https://p.example/b' } }] }]);
+    const catalog = newCatalog([{ ...site, versions: async () => [{ id: 'a', label: 'Español latino', kind: 'dub', target: { url: 'https://p.example/a' } }, { id: 'b', label: 'Coreano · subtítulos en español', kind: 'sub', target: { url: 'https://p.example/b', referrer: 'https://x.example/' } }] }]);
     const server = startServer({ catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img'), root: directory, webRoot: join(directory, 'no-web-build') });
     await new Promise(resolve => (server.listening ? resolve() : server.once('listening', resolve)));
     const base = `http://127.0.0.1:${server.address().port}`;
@@ -80,7 +80,9 @@ try {
       const item = { source: 'x', url: 'https://x.example/e1', kind: 'movie', title: 'Una película', poster: 'https://x.example/p.jpg', genres: ['Acción'] };
       const result = await resolveCall({ item, kind: 'sub' });
       const payload = await result.json();
-      assert.deepEqual([result.status, payload.ok, payload.url, payload.versionKind, payload.site], [200, true, 'https://p.example/b', 'sub', 'X']);
+      assert.deepEqual([result.status, payload.ok, payload.url, payload.versionKind, payload.site, payload.needsReferrer], [200, true, 'https://p.example/b', 'sub', 'X', true]);
+      // The version without a required referrer can be embedded in the web page's own theater.
+      assert.equal((await (await resolveCall({ item, kind: 'dub' })).json()).needsReferrer, false);
       assert.ok(library.get('https://x.example/e1'), 'queda en Continuar viendo, como hace la TV al reproducir');
       // No existe tal título en ningún conector del catálogo.
       const bad = await resolveCall({ item: { source: 'ninguno', url: 'https://x.example/e1' } });
