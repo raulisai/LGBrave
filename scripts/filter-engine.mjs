@@ -2,14 +2,17 @@ import adblock from 'adblock-rs';
 import { existsSync, readFileSync } from 'node:fs';
 import {resolve} from 'node:path';
 import { lumaRules, lumaResources } from './shields.mjs';
+import {lumaOrigin} from './desktop-config.mjs';
+const fixtureHost = new URL(lumaOrigin()).hostname;
 
 export const fixtureRules = [
   '/ad-fixture/',
   '||luma-navigation-block.invalid^$document',
   '@@/ad-fixture/allowed.js',
-  '192.168.1.148##.lab-ad',
+  'news.example,docs.example##.lab-ad',
+  `${fixtureHost},192.168.1.148##.lab-ad`,
   '## #generic-lab-ad'.replace('## ', '##'),
-  '192.168.1.148##+js(lab-marker)',
+  `${fixtureHost},192.168.1.148##+js(lab-marker)`,
 ].join('\n');
 
 // scripts/update-lists.mjs writes the manifest; without it, the bundled pair.
@@ -17,9 +20,16 @@ export function filterConfiguration() {
   const root=resolve('research/lists');
   const override=process.env.LUMA_FILTER_GENERATION;
   const manifestFile=override ? resolve(override,'lists.json') : resolve(root,'lists.json');
-  const manifest=existsSync(manifestFile) ? JSON.parse(readFileSync(manifestFile,'utf8')) : {enabled:['easylist','easyprivacy']};
+  let manifest=existsSync(manifestFile) ? JSON.parse(readFileSync(manifestFile,'utf8')) : {enabled:['easylist','easyprivacy']};
   if(manifest.directory && !/^generations\/[a-f0-9]{20}$/.test(manifest.directory))throw Error('Directorio de filtros inválido.');
-  const directory=override ? resolve(override) : manifest.directory ? resolve(root,manifest.directory) : root;
+  let directory=override ? resolve(override) : manifest.directory ? resolve(root,manifest.directory) : root;
+  // Ignored generations do not travel with a clone. Use the bundled lists until
+  // the updater downloads a validated generation; never silently run with zero lists.
+  if (!override && manifest.directory && !existsSync(directory)) {
+    directory = root;
+    manifest = {enabled:['easylist','easyprivacy','easylist-spanish','easylist-cookie','ublock-filters','ublock-privacy','ublock-unbreak'],
+      revision:'bundled', fallback:true};
+  }
   return {manifest,directory};
 }
 export function enabledLists() {

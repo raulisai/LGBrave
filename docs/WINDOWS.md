@@ -1,0 +1,89 @@
+# Holy y Luma en Windows · código 0.9.2
+
+El mismo proyecto ejecuta los dos navegadores de la TV desde Windows o macOS. Holy conserva catálogo, conectores, reproducción y gustos de `origin/holy`; Luma conserva su interfaz y sus marcadores. No es el navegador Brave completo: ambos reutilizan su motor de filtrado.
+
+## Abrir el control de Windows
+
+**Aplicación nativa instalada:** `%LOCALAPPDATA%\Programs\HolyLuma\HolyLuma.exe`, con acceso **Holy y Luma** en el menú Inicio y **arranque automático activado al iniciar sesión** por petición del usuario. Es un ejecutable WinForms de Windows, sin terminal visible. El icono **LG** aparece junto al reloj o dentro de la flecha `^`; su punto es verde conectado, ámbar esperando/conectando o rojo apagado/error. Al pasar el mouse muestra el estado; doble clic abre el panel y clic derecho ofrece los controles.
+
+También puedes abrir `windows/Iniciar Luma.cmd`, que inicia ese mismo ejecutable. Cerrar el panel conserva la bandeja y el servicio en segundo plano. «Apagar conexión» detiene el servicio y ambos servidores; «Salir del icono» conserva la conexión; «Apagar todo y salir» detiene ambos. «Iniciar con Windows» permite cambiar el arranque al iniciar sesión.
+
+La instalación es por usuario, sin administrador, y conserva Node.js y el proyecto como dependencias. Si mueves el proyecto o cambias Node, vuelve a ejecutar `npm run windows:install` para actualizar las rutas. No es un paquete autónomo que incluya todos los módulos dentro del EXE.
+
+En otra instalación, primero ejecuta desde PowerShell:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\Preparar.ps1
+npm run windows:install
+```
+
+Requiere Node 22.13 o posterior, npm y Git. `adblock-rs` es un módulo nativo: si npm necesita compilarlo, también requiere Rust y las herramientas C++ de Visual Studio. Se probó aquí con Node 24.21 y Windows. No copies `node_modules` del Mac.
+
+## Vincular la TV una vez en cada computadora
+
+En Developer Mode de la TV confirma la IP actual y activa Key Server. En el control pulsa **Vincular TV**; una ventana solicita la IP y la passphrase temporal. La herramienta oficial guarda la llave en el directorio del usuario, fuera del repositorio. No copies llaves, contraseñas ni passphrases a `.local/desktop-config.json`, informes o commits.
+
+«Configurar» guarda IP de TV, perfil webOS (por defecto `lg-lab`), IP opcional de la PC y direcciones opcionales de otras computadoras. Al guardar una IP actualiza también el perfil oficial; no basta con cambiar una etiqueta del panel. La selección automática evita adaptadores virtuales de Hyper-V/WSL. Una VPN o varias interfaces físicas pueden requerir elegir la IP manualmente.
+
+En macOS puedes usar la CLI oficial para vincular y después `npm run desktop:start`; el menú existente que llama a `luma-control.mjs`/`holy-control.mjs` usa el servicio común. El inicio automático del Mac sigue disponible mediante `npm run holy:autostart -- on|off|status`.
+
+## Comandos en Windows y Mac
+
+```powershell
+npm run desktop:start      # segundo plano
+npm run desktop:status     # JSON del estado vivo
+npm run desktop:doctor     # comprueba puerto actual, perfil, builds y otras computadoras
+npm run desktop:restart
+npm run desktop:repair     # reparaciones pasivas y diagnóstico de autorización
+npm run desktop:stop
+npm run desktop            # primer plano, Ctrl-C detiene todo
+npm run holy               # alias del mismo servicio común
+npm run build:all          # dist/ (Luma) + dist-holy/ (Holy)
+npm run package            # IPK de Luma
+npm run package:holy       # IPK de Holy
+npm test                   # pruebas locales, sin TV
+```
+
+En PowerShell usa `npm.cmd` si la política local impide ejecutar `npm.ps1`.
+
+`npm run lab` queda como ruta anterior de Luma para diagnóstico. No la ejecutes junto al control común: comparten candado y el panel avisa del conflicto. Los puertos de los servidores son 43187/43188 (Luma y fixtures) y 43190 (Holy). El canal de control elige un puerto de loopback aleatorio y exige un token local; nunca debe abrirse en el firewall. La TV necesita alcanzar los servidores de inicio: si Windows pregunta por Node, permite la red privada. La instalación no modifica automáticamente el firewall.
+
+## Dos computadoras y relevo
+
+1. Instala **esta misma versión en ambos equipos**, vincula cada uno con la TV y ejecuta el servicio común en ambos.
+2. El primero que obtiene una reserva temporal en `/tmp/luma-desktop-assist` de la TV la asiste; el otro muestra **Esperando a que se libere la conexión anterior**. No hay preferencia entre Mac y Windows: conserva al equipo que ya está atendiendo.
+3. Al apagar el servicio, la reserva se libera. Al perder energía o red, vence después de aproximadamente 60 segundos; el otro equipo vuelve a intentar cada 5 segundos (SSH puede añadir demora). Un reloj monotónico y un vigilante de 15 segundos impiden que una renovación tardía reactive una conexión vencida. SSH envía keepalive cada 5 segundos, con dos faltas permitidas.
+4. Dentro del equipo activo un único runtime selecciona Holy con prioridad; si solo está Luma, selecciona Luma. Nunca lanza apps de la TV. Si webOS conserva ambas como targets, Holy tiene prioridad hasta cerrarla.
+
+También se detecta un cliente ya conectado al puerto del inspector, por ejemplo un runtime viejo del Mac o DevTools, y se espera sin interceptar. **Un runtime antiguo no conoce las reservas y podría conectarse después**: actualizar ambos equipos y detener los servicios anteriores es necesario para el relevo seguro. No se garantiza coordinación con herramientas externas que ignoren el protocolo.
+
+El inicio de Holy recibe la dirección del equipo activo mediante CDP, incluso si aún está cargado desde el otro. Luma y Holy tienen direcciones de inicio por instancia; no se mezclan los dos navegadores. No se cambia de página por detectar una computadora distinta.
+
+El equipo activo publica preferencias, buscador, marcadores, historial y gustos por **SSH/SFTP autenticado**, usando una caché temporal de hasta 1 MiB en `/tmp/luma-desktop-profile.json` de la TV. El siguiente equipo importa las preferencias y combina la biblioteca por fecha, con marcas de borrado para evitar que reaparezcan valoraciones eliminadas. Cada equipo conserva su copia persistente; antes de la primera importación guarda un respaldo `.before-sync`. No se comparten llaves, sesiones web ni enlaces firmados de reproductores. Catálogo, listas y reglas aprendidas siguen siendo locales.
+
+La caché se pierde al reiniciar la TV: en ese caso el primer equipo que conecta vuelve a publicarla desde su copia local. No es sincronización en la nube y no asegura recuperar cambios del equipo apagado que nunca alcanzó a publicarlos. Ambos equipos deben ejecutar esta versión; el Mac anterior aún necesita actualizarse. Los metadatos de la reproducción actual se conservan en la página para que el otro equipo pueda adoptar el seguimiento sin navegar ni buscar otro segundo del vídeo. Depende de que el reproductor siga abierto y de que el equipo anterior haya publicado esos metadatos; esto se probó de forma simulada.
+
+La interfaz antigua de Holy puede seguir solicitando datos a la IP del Mac apagado. El puente reconoce únicamente ese inicio privado y redirige sus recursos/API a la computadora activa. No recarga ni cambia la página. Este arreglo permitió recuperar el catálogo en la TV desde Windows; el usuario lo confirmó con la Mac apagada.
+
+## Arquitectura y verificación
+
+- `desktop/shared/`: implementación común del servicio, configuración y datos compartidos. `scripts/desktop-*.mjs` conserva entradas compatibles para instalaciones existentes. El perfil CLI se localiza en APPDATA en Windows y HOME en Mac.
+- `desktop-control.mjs` → `desktop-supervisor.mjs` → `desktop-host.mjs`: control autenticado local, exclusión de instancias, reinicio y apagado por IPC. No usa `ps`, señales POSIX para apagar Windows ni mata PID guardados sin verificar identidad.
+- `tv-lease.mjs` + `inspector-tunnel.mjs`: reserva por SSH, detección de inspector ocupado y túnel pasivo.
+- `BrowserBridge` y `HolyBridge`: motor compartido con inicios independientes; scripts heredados de Holy en `scripts/holy/`, interfaz en `src/Holy.svelte`.
+- `windows/HolyLuma.cs` + `scripts/install-windows-app.mjs`: aplicación WinForms nativa, compilada con el .NET Framework incluido en Windows; instala EXE y accesos en Inicio/Inicio de sesión. Consulta el controlador de Node sin consola cada 4 s. Instancia única, estado por color, panel y controles asíncronos. Reinstalar reemplaza solo procesos del EXE instalado, verificados por su ruta; conserva el servicio de conexión.
+- `windows/LumaTray.ps1`: control anterior en PowerShell, conservado para diagnóstico. `Autostart.ps1` prefiere el EXE nativo cuando está instalado.
+
+Pruebas adicionales explícitas (con el servicio local apagado):
+
+```powershell
+node scripts/test-desktop-process.mjs
+node scripts/test-desktop-host.mjs
+powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File windows/LumaTray.ps1 -ValidateOnly
+```
+
+Las pruebas de procesos usan primero un hijo simulado; las del host real desactivan TV y descargas y sirven ambos builds por HTTP. `npm test` cubre selección de app, exclusión, pérdida de reserva y relevo simulados; esto no acredita un relevo físico entre computadoras, reproducción en sitios reales ni cobertura general de Internet.
+
+Validación del 2026-10-25: `npm test`, ambos builds, ciclo de procesos y host real sin TV correctos en Windows. SFTP autenticado disponible en la TV. Windows `192.168.1.65` y TV `192.168.1.134` verificados; el usuario confirmó que Holy mostró catálogo desde Windows con la Mac apagada. Después, la TV volvió a conservar dos conexiones del inspector mediante SSH desde `192.168.1.102`; Windows espera sin interrumpirlas. Ese equipo no respondió a los puertos 22/43190 al comprobarlo; eso no permite demostrar quién abrió las sesiones ni terminarlas con seguridad. Los runtimes antiguos carecen del keepalive y del protocolo nuevo.
+
+**Bandeja:** permanece instalado el EXE 0.9.1, con inicio automático activado y proceso vivo. El código 0.9.2 incluye correcciones de instancia única, errores y cierre, pero su actualización quedó bloqueada por **Device Guard** al ejecutar la autoprueba del nuevo EXE. El instalador valida antes de reemplazar la app y conservó la versión instalada. No se desactivó ni eludió esa política; hace falta una versión permitida por la política del equipo. No se verificó un reinicio físico de Windows ni se compiló la app Swift en macOS. Detalle: `VALIDACION-DOS-EQUIPOS.md`.

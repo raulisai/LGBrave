@@ -1,4 +1,4 @@
-import { readFileSync, mkdirSync, writeFileSync, renameSync } from 'node:fs';
+import { readFileSync, mkdirSync, writeFileSync, renameSync, copyFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { SEARCH_ENGINES } from '../src/navigation.js';
 
@@ -8,6 +8,7 @@ const MAX_CATEGORIES = 8;
 export const DEFAULT_CATEGORIES = ['Anime', 'Películas', 'Doramas'];
 const FALLBACK_CATEGORY = 'Otros';
 const BOOKMARKS_VERSION = 2;
+const record = value => value && typeof value === 'object' && !Array.isArray(value);
 
 // The owner's own pages. They are added once (and again only by the 0.8 migration); each can be removed.
 const SEEDS = {
@@ -47,7 +48,14 @@ export class Preferences {
   constructor(file = '.local/browser-settings.json') {
     this.file = file;
     let data = {};
-    try { data = JSON.parse(readFileSync(file, 'utf8')); } catch { /* First run: defaults. */ }
+    try {
+      data = JSON.parse(readFileSync(file, 'utf8'));
+      if (!record(data)) throw Error('shape');
+    } catch {
+      data = {};
+      // Keep malformed or unsupported data available for recovery.
+      try { copyFileSync(file, `${file}.dañado-${Date.now()}`); } catch { /* First run. */ }
+    }
     this.searchEngine = valid(data.searchEngine) ? data.searchEngine : 'google';
     // 0.6.x stored favorites without a category: they move to "Otros".
     this.favorites = cleanFavorites(data.favorites);
@@ -61,6 +69,7 @@ export class Preferences {
       this.favorites = [...seeded, ...kept];
       this.categories = [];
       for (const name of DEFAULT_CATEGORIES) this.addCategoryName(name);
+      this.syncCategories();
       this.save();
     }
     this.syncCategories();
@@ -68,14 +77,25 @@ export class Preferences {
   addCategoryName(value) {
     const name = categoryName(value);
     if (!this.categories.some(item => item.toLowerCase() === name.toLowerCase()) && this.categories.length < MAX_CATEGORIES) this.categories.push(name);
-    return this.categories.find(item => item.toLowerCase() === name.toLowerCase()) || FALLBACK_CATEGORY;
+    return this.categories.find(item => item.toLowerCase() === name.toLowerCase()) || null;
   }
   // Every bookmark's category exists. Categories are the owner's: they stay even when empty.
   syncCategories() {
     for (const item of this.favorites) {
-      item.category = this.addCategoryName(item.category);
-      if (!this.categories.includes(item.category)) this.categories.push(item.category);
+      const name = this.addCategoryName(item.category);
+      if (name) { item.category = name; continue; }
+      // Old or imported files may exceed the limit. Keep every page in one
+      // overflow bucket without letting the category list grow to nine.
+      let fallback = this.categories.find(category => category.toLowerCase() === FALLBACK_CATEGORY.toLowerCase());
+      if (!fallback) {
+        const displaced = this.categories[MAX_CATEGORIES - 1];
+        fallback = FALLBACK_CATEGORY;
+        this.categories[MAX_CATEGORIES - 1] = fallback;
+        for (const favorite of this.favorites) if (favorite.category.toLowerCase() === displaced.toLowerCase()) favorite.category = fallback;
+      }
+      item.category = fallback;
     }
+    this.favorites = cleanFavorites(this.favorites);
   }
   addCategory(value) {
     if (!String(value ?? '').trim()) throw Error('Escribe un nombre para la categoría.');
@@ -128,6 +148,7 @@ export class Preferences {
     const normalized = favoriteURL(url);
     if (!normalized) throw Error('Solo se pueden guardar páginas web http o https.');
     const name = this.addCategoryName(category);
+    if (!name) throw Error('Puedes tener hasta ' + MAX_CATEGORIES + ' categorías.');
     const existing = this.favorites.find(item => item.url === normalized && item.category === name);
     if (existing) { if (String(title ?? '').trim()) existing.title = String(title).trim().slice(0, 60); }
     else this.favorites = cleanFavorites([...this.favorites, { url: normalized, title, category: name }]);
@@ -138,6 +159,7 @@ export class Preferences {
     const normalized = favoriteURL(url);
     if (!normalized) throw Error('Solo se pueden guardar páginas web http o https.');
     const name = this.addCategoryName(category);
+    if (!name) throw Error('Puedes tener hasta ' + MAX_CATEGORIES + ' categorías.');
     if (this.favorites.some(item => item.url === normalized && item.category === name)) this.removeFavorite(normalized, name);
     else this.addBookmark(normalized, title, name);
   }

@@ -1,3 +1,4 @@
+import {lumaOrigin} from './desktop-config.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { connectTV, waitFor } from './cdp.mjs';
@@ -63,7 +64,7 @@ try {
   await capture('search-toolbar'); save();
 
   report.step = 'Carga lenta';
-  const slow = bridge.command({ action: 'navigate', value: 'http://192.168.1.148:43187/navigation-slow?delay=5000' });
+  const slow = bridge.command({ action: 'navigate', value: (lumaOrigin() + '/navigation-slow?delay=5000') });
   await waitFor(() => bridge.navigation.phase === 'loading');
   await new Promise(resolve => setTimeout(resolve, 300));
   await capture('loading');
@@ -81,7 +82,7 @@ try {
   report.tests.push({ name: 'Carga lenta y fin de animación', loading, complete: true }); save();
 
   for (const [name, path] of [['HTTP 503', 'navigation-error'], ['Página vacía', 'navigation-empty']]) {
-    await bridge.command({ action: 'navigate', value: 'http://192.168.1.148:43187/' + path });
+    await bridge.command({ action: 'navigate', value: (lumaOrigin() + '/') + path });
     await settle();
     assert.equal(bridge.navigation.phase, 'error', name);
     await waitFor(() => toolbar('window.__lumaToolbarSnapshot()?.overlay'));
@@ -98,7 +99,7 @@ try {
   }
 
   bridge.navigationTimeout = 1200;
-  const timeoutRequest = bridge.command({ action: 'navigate', value: 'http://192.168.1.148:43187/navigation-slow?delay=3500' });
+  const timeoutRequest = bridge.command({ action: 'navigate', value: (lumaOrigin() + '/navigation-slow?delay=3500') });
   await waitFor(() => bridge.navigation.phase === 'loading');
   await waitFor(() => bridge.navigation.phase === 'error');
   assert.match(bridge.navigation.error, /tardando/);
@@ -108,7 +109,7 @@ try {
   await waitFor(() => cdp.evaluate('document.body.innerText.includes("tardando")'));
   await capture('timeout-recovery');
   bridge.navigationTimeout = 25000;
-  await bridge.command({ action: 'navigate', value: 'http://192.168.1.148:43187/simple' });
+  await bridge.command({ action: 'navigate', value: (lumaOrigin() + '/simple') });
   await settle(); assert.equal(bridge.navigation.phase, 'complete');
   report.tests.push({ name: 'Recuperación después del error', pass: true });
   await bridge.command({ action: 'home' });

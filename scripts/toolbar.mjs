@@ -39,7 +39,7 @@ function installToolbar(resolve, initial, homeURLs, icons) {
   const display = url => { try { return new URL(url).hostname.replace(/^www\./, '') || url; } catch { return url || ''; } };
   const send = (action, value) => {
     if (typeof window.__lgLabCommand !== 'function') {
-      update({ phase: 'error', error: 'Se perdió la conexión con el Mac. Espera un momento y vuelve a intentar.' });
+      update({ phase: 'error', error: 'Se perdió la conexión con la computadora. Espera un momento y vuelve a intentar.' });
       return false;
     }
     window.__lgLabCommand(JSON.stringify({ action, value }));
@@ -118,8 +118,8 @@ function installToolbar(resolve, initial, homeURLs, icons) {
     put('shield', `${state.enabled}:${state.offline}:${state.blocked}`, () => {
       const count = root.getElementById('count');
       count.className = 'chip' + (state.offline ? ' offline' : state.enabled ? '' : ' paused');
-      count.replaceChildren(icon(state.enabled && !state.offline ? 'shieldCheck' : 'shield', 24), el('span', {}, state.offline ? 'Sin Mac' : state.enabled ? Number(state.blocked || 0).toLocaleString('es') : 'Pausa'));
-      count.setAttribute('aria-label', state.offline ? 'Sin conexión con el Mac' : state.enabled ? 'Protección activa' : 'Protección en pausa');
+      count.replaceChildren(icon(state.enabled && !state.offline ? 'shieldCheck' : 'shield', 24), el('span', {}, state.offline ? 'Sin conexión' : state.enabled ? Number(state.blocked || 0).toLocaleString('es') : 'Pausa'));
+      count.setAttribute('aria-label', state.offline ? 'Sin conexión con la computadora' : state.enabled ? 'Protección activa' : 'Protección en pausa');
     });
     put('favorite', !!state.favorite, value => {
       star.classList.toggle('on', value);

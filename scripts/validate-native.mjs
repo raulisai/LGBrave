@@ -1,7 +1,8 @@
+import {lumaOrigin} from './desktop-config.mjs';
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { connectTV, waitFor } from './cdp.mjs';
-const origin = process.env.LAB_ORIGIN || 'http://192.168.1.148:43187';
+const origin = lumaOrigin();
 const cdp = await connectTV(process.argv[2]);
 try {
   await cdp.call('Page.enable');

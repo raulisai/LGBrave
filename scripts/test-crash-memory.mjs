@@ -17,7 +17,8 @@ memory.begin('https://site.example/', home); clock += 2000;
 memory.closed();
 assert.deepEqual(memory.riskyHosts(), ['site.example'], 'dos seguidos lo marcan');
 assert.ok(!readFileSync(file, 'utf8').includes('token') && !readFileSync(file, 'utf8').includes('/watch'), 'solo el nombre del sitio, nunca rutas ni parámetros');
-assert.equal(statSync(file).mode & 0o777, 0o600);
+// Windows uses inherited NTFS ACLs; POSIX mode bits are not implemented there.
+if (process.platform !== 'win32') assert.equal(statSync(file).mode & 0o777, 0o600);
 
 memory.begin('https://site.example/', home);
 memory.stable('site.example');

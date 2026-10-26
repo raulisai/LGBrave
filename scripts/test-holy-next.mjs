@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync,readFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {Library} from './holy/library.mjs';
+import {mergeLibraryState} from './holy/taste-state.mjs';
+import {DiagnosticLog,redact} from './diagnostics.mjs';
+import {classicAnimeRow} from '../src/anime-classics.js';
+import snapshot from '../src/anime-classics-data.js';
+import {debugBundle} from './debug-export.mjs';
+const dir=mkdtempSync(join(tmpdir(),'holy-next-'));let now=100000;
+const item={title:'Un anime',kind:'anime',show:'https://source.example/show/',url:'https://source.example/show/1/',genres:['Acción']};
+const make=name=>new Library(join(dir,name+'.json'),()=>now);
+try{
+ const a=make('a'),b=make('b');
+ for(let i=0;i<20;i++)a.start(item);
+ assert.equal(a.profile().signals,0,'Retries do not create affinity');
+ a.progress(item.show,item.url,1000,1400);assert.equal(a.get(item.show).watched,0,'A seek is not watched time');
+ for(let t=1010;t<=1130;t+=10){now+=10000;a.progress(item.show,item.url,t,1400);}
+ assert.equal(a.profile().signals,1);assert.equal(a.get(item.show).watched,130);
+ a.vote(item,2);b.vote({...item,url:'https://copy.example/1/'},-1);now+=1000;
+ const v={title:'Otra',url:'https://source.example/other',kind:'movie',genres:['Terror'],year:'1980'};
+ a.vote(v,1);b.mergeTastes(a.exportTastes());a.mergeTastes(b.exportTastes());
+ assert.deepEqual(a.exportTastes().votes,b.exportTastes().votes);assert.equal(a.voteOf(v),1);
+ const old=b.exportTastes();a.vote(item,0);b.mergeTastes(a.exportTastes());b.mergeTastes(old);assert.equal(b.voteOf(item),0,'Deleted ratings do not return from old devices');
+ a.clearVotes();b.mergeTastes(a.exportTastes());b.mergeTastes(old);assert.equal(b.votes.length,0);
+ now+=1000;b.vote(v,2);a.mergeTastes(b.exportTastes());assert.equal(a.voteOf(v),2,'Ratings after reset survive');
+ const x=mergeLibraryState(a,b),y=mergeLibraryState(b,a);assert.deepEqual(x,y);assert.deepEqual(mergeLibraryState(x,x),x);
+ const c=make('c');c.vote({...v,url:'https://source.example/1?token=SECRET'},1);assert.ok(!JSON.stringify(c.exportTastes()).includes('SECRET'));
+ assert.equal(snapshot.items.length,100);assert.equal(new Set(snapshot.items.map(x=>x.id)).size,100);
+ assert.ok(snapshot.items.every((x,i)=>x.rank===i+1&&x.year<=2006&&x.popularity>10000&&(!i||x.score<=snapshot.items[i-1].score)));
+ let classics=classicAnimeRow([]);assert.equal(classics.items.length,100);assert.ok(classics.items.every(x=>x.discover));
+ const first=snapshot.items[0];classics=classicAnimeRow([{...item,title:first.title,year:String(first.year),isShow:true}]);assert.equal(classics.items[0].discover,undefined);
+ classics=classicAnimeRow([{...item,title:first.title,year:String(first.year+20),isShow:true}]);assert.equal(classics.items[0].discover,true,'Remakes need the right year');
+ const message='Error https://user:pw@example.com/video?token=SECRET {"password":"HIDDEN"} passphrase=PRIVATE Bearer ABCDE';
+ const cleaned=redact(message);for(const secret of ['SECRET','HIDDEN','PRIVATE','ABCDE','user:pw'])assert.ok(!cleaned.includes(secret),cleaned);
+ const file=join(dir,'.local/logs/diagnostics.jsonl'),log=new DiagnosticLog({file,maxBytes:500,backups:2});
+ for(let i=0;i<15;i++)log.event('test','error',{error:Error(message),cookie:'SECRET',recent:[{ready:2,bufferAhead:0,token:'SECRET'}]},'error');
+ const rows=readFileSync(file,'utf8').trim().split('\n').map(JSON.parse);assert.ok(rows.every(x=>x.runId===log.runId&&x.sequence>0));assert.ok(!JSON.stringify(debugBundle(dir)).includes('SECRET'));
+ console.log('Gustos precisos y portables, borrados convergentes, Top 100 AniList y diagnóstico sin secretos: correctos.');
+}finally{rmSync(dir,{recursive:true,force:true});}

@@ -1,3 +1,4 @@
+import { redact } from './diagnostics.mjs';
 // Black box for «the app closed on its own»: the last events before the TV drops the
 // connection. Hosts and paths only (never query strings: player URLs carry tokens).
 import { appendFileSync, mkdirSync, statSync, renameSync } from 'node:fs';
@@ -13,7 +14,7 @@ export class FlightRecorder {
     try {
       mkdirSync(dirname(this.file), { recursive: true });
       try { if (statSync(this.file).size > 1e6) renameSync(this.file, this.file + '.1'); } catch { /* First write. */ }
-      appendFileSync(this.file, `${new Date().toISOString().slice(11, 23)} ${kind} ${detail}\n`);
+      appendFileSync(this.file, `${new Date().toISOString().slice(11, 23)} ${kind} ${redact(detail)}\n`);
     } catch { /* Diagnostics must never break browsing. */ }
   }
   note(method, params = {}, sessionId) {

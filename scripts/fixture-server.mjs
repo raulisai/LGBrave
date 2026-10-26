@@ -2,8 +2,9 @@ import http from 'node:http';
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { resolve, extname } from 'node:path';
 
-const tv = process.env.TV_IP || '192.168.1.134';
-const host = process.env.LAB_HOST || '192.168.1.148';
+import {tvAddress, lanAddress, safePath} from './desktop-config.mjs';
+const tv = tvAddress().host;
+const host = lanAddress();
 const logs = [];
 const allowed = new Set([tv, host, '127.0.0.1', '::1']);
 mkdirSync('evidence/browser-lab', { recursive: true });
@@ -73,12 +74,12 @@ for (const port of [43187, 43188]) {
     }
     if (url.pathname.startsWith('/luma-home/')) {
       const root = resolve('dist');
-      const path = resolve(root, url.pathname.slice('/luma-home/'.length) || 'index.html');
-      if (!path.startsWith(root + '/')) { res.writeHead(403).end(); return; }
+      const path = safePath(root, url.pathname.slice('/luma-home/'.length) || 'index.html');
+      if (!path) { res.writeHead(403).end(); return; }
       try {
         res.setHeader('Content-Type', ({ '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.wasm': 'application/wasm' })[extname(path)] || 'application/octet-stream');
         // Hashed bundles never change; index.html is revalidated so a new build shows at once.
-        res.setHeader('Cache-Control', path.includes('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache');
+        res.setHeader('Cache-Control', /[\\/]assets[\\/]/.test(path) ? 'public, max-age=31536000, immutable' : 'no-cache');
         res.end(readFileSync(path));
       } catch { res.writeHead(404).end(); }
       return;
@@ -101,5 +102,5 @@ for (const port of [43187, 43188]) {
     } else {
       res.setHeader('Content-Type', 'application/json'); res.end('{"ok":true}');
     }
-  }).listen(port, '0.0.0.0', () => console.log(`Fixtures: http://${host}:${port} (TV y Mac autorizados)`));
+  }).listen(port, '0.0.0.0', () => console.log(`Fixtures: http://${host}:${port} (TV y computadora autorizadas)`));
 }

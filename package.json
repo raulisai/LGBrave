@@ -1,6 +1,6 @@
 {
   "name": "lg-tv-lab",
-  "version": "0.8.0",
+  "version": "0.9.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "lab:server": "node scripts/fixture-server.mjs",
     "lab:bridge": "node scripts/browser-bridge.mjs",
     "lab": "node scripts/lab-supervisor.mjs",
-    "test": "node scripts/test-navigation.mjs && node scripts/test-shields.mjs && node scripts/test-brave-sync.mjs && node scripts/test-ad-cleaner.mjs && node scripts/test-navigation-shield.mjs && node scripts/test-player-assist.mjs && node scripts/test-turnstile-defer.mjs && node scripts/test-devtools-quiet.mjs && node scripts/test-crash-memory.mjs && node scripts/test-bridge.mjs && node scripts/test-browser-tabs.mjs && node scripts/test-lab-runtime.mjs && node scripts/test-crash-guard.mjs && node scripts/validate-engine.mjs > /dev/null && echo 'Pruebas locales correctas.'",
+    "test": "node scripts/test-local.mjs",
     "lists:update": "node scripts/update-lists.mjs",
     "lists:rollback": "node scripts/update-lists.mjs --rollback",
     "validate:engine": "node scripts/validate-engine.mjs",
@@ -20,7 +20,25 @@
     "build:native": "node scripts/build-native.mjs",
     "package": "npm run build && ares-package dist -o artifacts",
     "tv:info": "ares-device --system-info --device lg-lab",
-    "tv:launch": "ares-launch --device lg-lab com.lgapp.lab"
+    "tv:launch": "ares-launch --device lg-lab com.lgapp.lab",
+    "desktop": "node scripts/desktop-supervisor.mjs",
+    "holy": "node scripts/desktop-supervisor.mjs",
+    "desktop:status": "node scripts/desktop-control.mjs status",
+    "desktop:start": "node scripts/desktop-control.mjs start",
+    "desktop:stop": "node scripts/desktop-control.mjs stop",
+    "desktop:restart": "node scripts/desktop-control.mjs restart",
+    "desktop:doctor": "node scripts/desktop-control.mjs doctor",
+    "desktop:repair": "node scripts/desktop-control.mjs repair",
+    "build:holy": "vite build --mode holy",
+    "build:all": "npm run build && npm run build:holy",
+    "package:holy": "npm run build:holy && ares-package dist-holy -o artifacts",
+    "windows:tray": "node scripts/windows-tray.mjs",
+    "holy:errors": "node scripts/holy/playback-report.mjs",
+    "anime:classics:update": "node scripts/update-anime-classics.mjs",
+    "holy:autostart": "node scripts/holy/autostart.mjs",
+    "windows:install": "node scripts/install-windows-app.mjs",
+    "holy:tastes": "node scripts/holy/taste-transfer.mjs",
+    "debug:export": "node scripts/debug-export.mjs"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "7.3.1",

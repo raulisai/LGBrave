@@ -1,0 +1,13 @@
+{
+  "id": "com.lgapp.holy",
+  "version": "0.9.3",
+  "vendor": "Holy local",
+  "type": "web",
+  "main": "index.html",
+  "title": "Holy",
+  "icon": "icon.png",
+  "resolution": "1920x1080",
+  "requiredACG": [],
+  "largeIcon": "large-icon.png",
+  "disableBackHistoryAPI": true
+}

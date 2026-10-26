@@ -1,10 +1,11 @@
+import {lumaOrigin} from './desktop-config.mjs';
 // Verify cancellation against the real renderer, not just mocked CDP calls.
 // Stop the normal bridge first; keep fixtures and inspector running.
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {connectTV,waitFor} from './cdp.mjs';
 import {BrowserBridge} from './browser-bridge.mjs';
-const origin=process.env.LAB_ORIGIN||'http://192.168.1.148:43187';
+const origin=lumaOrigin();
 const c=await connectTV(process.argv[2]);const b=await new BrowserBridge(c,{fixtures:true}).start();
 try{
  await b.command({action:'navigate',value:origin+'/simple'});

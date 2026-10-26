@@ -1,3 +1,4 @@
+import { DiagnosticLog, diagnosticFile } from './diagnostics.mjs';
 import { connectTV } from './cdp.mjs';
 import { createEngine, checkRequest, filterConfiguration } from './filter-engine.mjs';
 import { resolveNavigation } from '../src/navigation.js';
@@ -11,9 +12,10 @@ import { BrowserTabs } from './browser-tabs.mjs';
 import { FlightRecorder } from './flight-recorder.mjs';
 import { cleanerSource, decideCleaning, CleanerRules } from './ad-cleaner.mjs';
 import { dirname, join } from 'node:path';
+import {lumaOrigin} from './desktop-config.mjs';
 
 export const packagedHome = 'file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html';
-export const home = (process.env.LAB_ORIGIN || 'http://192.168.1.148:43187') + '/luma-home/';
+export const home = lumaOrigin() + '/luma-home/';
 // Hosts whose filters are registered once at start, so links into them are covered too.
 const PRESETS = [{ key: 'youtube', pattern: '(^|\\.)youtube(-nocookie)?\\.com$', sample: 'https://www.youtube.com/' }];
 // «No soy un robot» is a real check the user must solve, not advertising: never filter or touch it.
@@ -25,11 +27,13 @@ export const scriptletSource = script => `(()=>{const scriptletGlobals={};${scri
 export class BrowserBridge {
   constructor(cdp, options = {}) {
     this.cdp = cdp;
+    this.home = options.home || home;
+    this.packagedHome = options.packagedHome || packagedHome;
     this.debug = options.debug ?? (process.env.LUMA_DEBUG === '1');
-    this.tabs = options.tabs || new BrowserTabs(home);
+    this.tabs = options.tabs || new BrowserTabs(this.home);
     this.recorder = options.recorder === false || options.preferencesFile ? null : new FlightRecorder();
     this.tabQueue = Promise.resolve();
-    this.preferences = new Preferences(options.preferencesFile);
+    this.preferences = options.preferences || new Preferences(options.preferencesFile);
     // Learned «Limpiar anuncios» selectors live next to the preferences.
     this.cleanerRules = new CleanerRules(options.cleanerRulesFile || join(dirname(options.preferencesFile || '.local/browser-settings.json'), 'cleaner-rules.json'));
     this.cleanerWorld = 'luma-cleaner-' + Math.random().toString(36).slice(2, 10);
@@ -52,13 +56,28 @@ export class BrowserBridge {
     this.contexts = new Map();
     this.frames = new Map();
     this.uiContexts = new Set();
+    this.diagnostics = options.diagnostics || new DiagnosticLog({ file: diagnosticFile(options.preferencesFile) });
     this.errors = [];
+    this.errors.push = (...entries) => {
+      for (const entry of entries) this.diagnostics.event('browser', 'error', { phase: entry.phase, error: entry.error }, 'error');
+      Array.prototype.push.apply(this.errors, entries);
+      if (this.errors.length > 100) this.errors.splice(0, this.errors.length - 100);
+      return this.errors.length;
+    };
     this.subframesAttached = 0;
     this.blockedNavigations = 0;
     this.toolbar = options.toolbar !== false;
     this.navigation = { phase: 'idle', progress: 0, url: '', error: '' };
     this.navigationTimeout = options.navigationTimeout || 25000;
     this.toolbarWorld = 'luma-toolbar-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  }
+  isHome(url) {
+    if (url?.startsWith(this.packagedHome)) return true;
+    try {
+      const page = new URL(url), own = new URL(this.home);
+      return page.pathname === own.pathname && page.port === own.port &&
+        (page.hostname === own.hostname || /^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(page.hostname));
+    } catch { return false; }
   }
   async refreshFilters() {
     if(this.navigation.phase==='loading')return false;
@@ -106,7 +125,7 @@ export class BrowserBridge {
     await this.cdp.call('Fetch.enable', { patterns: [{ urlPattern: '*', requestStage: 'Request' }] });
     await this.cdp.call('Runtime.addBinding', { name: '__lgLabCommand', executionContextName: this.toolbarWorld });
     if (this.toolbar) this.toolbarScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', {
-      source: toolbarSource({ phase: 'loading', progress: 18, debug: this.debug }, [home, packagedHome], this.preferences.searchEngine), worldName: this.toolbarWorld
+      source: toolbarSource({ phase: 'loading', progress: 18, debug: this.debug }, [this.home, this.packagedHome], this.preferences.searchEngine), worldName: this.toolbarWorld
     })).identifier;
     try { await this.cdp.call('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: false, flatten: true }); }
     catch (error) { this.errors.push({ phase: 'autoAttach', error: error.message }); }
@@ -122,6 +141,8 @@ export class BrowserBridge {
   async event({ method, params, sessionId }) {
     try {
       this.recorder?.note(method, params, sessionId);
+    if (['Inspector.targetCrashed', 'Target.targetCrashed', 'Inspector.detached'].includes(method)) this.diagnostics?.event('browser', 'disconnected', { method }, 'error');
+    if (method === 'Runtime.exceptionThrown') this.diagnostics?.event('page', 'exception', { error: params.exceptionDetails?.exception?.description || params.exceptionDetails?.text }, 'error');
       if (method === 'Target.attachedToTarget') {
         // Worker targets do not expose Fetch. Do not mistake that for a frame.
         if (['iframe', 'page'].includes(params.targetInfo?.type) && !isHumanVerification(params.targetInfo?.url)) {
@@ -150,7 +171,7 @@ export class BrowserBridge {
         else await this.status();
       }
       if (method === 'Network.requestWillBeSent' && params.type === 'Document' && params.frameId === this.mainFrame && !sessionId && !params.request.url.includes('/wam/loaderror.html')) {
-        if (!(this.recovering && params.request.url === home)) {
+        if (!(this.recovering && params.request.url === this.home)) {
           this.mainRequest = params.requestId;
           if (this.navigation.phase !== 'loading') this.beginNavigation(params.request.url);
           else this.navigation.url = params.request.url;
@@ -203,7 +224,7 @@ export class BrowserBridge {
     const id = this.navigationId;
     clearTimeout(this.navigationTimer);
     this.navigation = { phase: 'loading', progress: 12, url, error: '' };
-    this.crashMemory.begin(url, target => target.startsWith(home) || target.startsWith(packagedHome));
+    this.crashMemory.begin(url, target => target.startsWith(this.home) || target.startsWith(this.packagedHome));
     this.navigationTimer = setTimeout(() => {
       if (this.navigationId === id) this.navigationFailed('El sitio está tardando demasiado en responder. Puedes reintentar o volver al inicio.', true).catch(() => {});
     }, this.navigationTimeout);
@@ -220,7 +241,7 @@ export class BrowserBridge {
     if (recover) {
       this.recovering = true; this.navigationId = (this.navigationId || 0) + 1; this.mainRequest = null;
       await this.cdp.call('Page.stopLoading').catch(() => {});
-      await this.cdp.call('Page.navigate', { url: home }).catch(() => {});
+      await this.cdp.call('Page.navigate', { url: this.home }).catch(() => {});
     }
     await this.status();
   }
@@ -233,7 +254,7 @@ export class BrowserBridge {
     // Events from the previous document may arrive while Page.navigate is pending.
     if (content.url !== this.navigation.url) return;
     if (this.committedNavigation !== this.navigationId) return;
-    if (content.hasContent || content.url === home || content.url === packagedHome) {
+    if (content.hasContent || content.url === this.home || content.url === this.packagedHome) {
       this.explicitNavigationURL = null;
       clearTimeout(this.navigationTimer);
       this.navigation = { phase: 'complete', progress: 100, url: content.url, error: '' };
@@ -315,7 +336,7 @@ export class BrowserBridge {
     if (css) parts.push(`try{const sheet=new CSSStyleSheet();sheet.replaceSync(${JSON.stringify(css)});Object.defineProperty(window,'__lumaFilterSheet',{value:sheet,writable:true,configurable:true});document.adoptedStyleSheets=[...document.adoptedStyleSheets,sheet]}catch(e){}`);
     if (resources.injected_script) parts.push(`if(!window.__lumaScriptlets){Object.defineProperty(window,'__lumaScriptlets',{value:true});${scriptletSource(resources.injected_script)}\n}`);
     // The home shares its host with the lab fixtures; it never gets filters.
-    return parts.length ? `if(${condition}&&location.href.indexOf(${JSON.stringify(home)})!==0){${parts.join('\n')}}` : null;
+    return parts.length ? `if(${condition}&&location.href.indexOf(${JSON.stringify(this.home)})!==0){${parts.join('\n')}}` : null;
   }
   async registerPresets() {
     if (!this.enabled) return;
@@ -330,7 +351,7 @@ export class BrowserBridge {
   async prepareDocument(url) {
     let hostname;
     try { hostname = new URL(url).hostname; } catch { return; }
-    if (!this.enabled || !/^https?:/.test(url) || url.startsWith(home) || PRESETS.some(preset => new RegExp(preset.pattern).test(hostname))) return;
+    if (!this.enabled || !/^https?:/.test(url) || url.startsWith(this.home) || PRESETS.some(preset => new RegExp(preset.pattern).test(hostname))) return;
     if (this.documentScripts.has(hostname)) {
       const entry = this.documentScripts.get(hostname);
       this.documentScripts.delete(hostname); this.documentScripts.set(hostname, entry);
@@ -352,7 +373,7 @@ export class BrowserBridge {
   }
   async addGenericCosmetics({ classes = [], ids = [] } = {}) {
     const url = this.frames.get(this.mainFrame);
-    if (!this.enabled || !this.mainContext || !/^https?:/.test(url || '') || url === home) return;
+    if (!this.enabled || !this.mainContext || !/^https?:/.test(url || '') || url === this.home) return;
     const resources = this.cosmeticResources(url);
     if (resources.generichide) return;
     const selectors = this.engine.hiddenClassIdSelectors(classes.slice(0, 4000).map(String), ids.slice(0, 4000).map(String), resources.exceptions || [])
@@ -369,7 +390,7 @@ export class BrowserBridge {
     const walk = node => { frames.push(node.frame); for (const child of node.childFrames || []) walk(child); };
     walk(frameTree);
     const limit = (promise, ms = 8000) => Promise.race([promise, new Promise((resolve, reject) => setTimeout(() => reject(Error('Tiempo agotado')), ms))]);
-    const worlds = await Promise.allSettled(frames.filter(frame => /^https?:/.test(frame.url) && !frame.url.startsWith(home)).slice(0, 40).map(async frame => {
+    const worlds = await Promise.allSettled(frames.filter(frame => /^https?:/.test(frame.url) && !frame.url.startsWith(this.home)).slice(0, 40).map(async frame => {
       const { executionContextId } = await limit(this.cdp.call('Page.createIsolatedWorld', { frameId: frame.id, worldName: this.cleanerWorld }));
       return { frame, context: executionContextId, limit };
     }));
@@ -383,7 +404,7 @@ export class BrowserBridge {
     const pageURL = this.frames.get(this.mainFrame) || '';
     let result;
     try {
-      if (!/^https?:/.test(pageURL) || pageURL.startsWith(home)) throw Error('Abre una página web para limpiarla.');
+      if (!/^https?:/.test(pageURL) || this.isHome(pageURL)) throw Error('Abre una página web para limpiarla.');
       if (this.enabled) await this.refreshCosmetics().catch(() => {});
       const host = new URL(pageURL).hostname;
       const totals = { hidden: 0, overlays: 0, confirmed: 0, frames: 0 };
@@ -453,12 +474,12 @@ export class BrowserBridge {
   }
   async setupContext(id, context) {
     const url = await this.cdp.evaluate('location.href', id);
-    if (url === home || url === packagedHome) {
+    if (this.isHome(url)) {
       await this.cdp.call('Runtime.addBinding', { name: '__lgLabCommand', executionContextId: id });
       this.uiContexts.add(id);
       await this.status();
     }
-    if ((/^https?:/.test(url) && url !== home) || url.includes('/wam/loaderror.html')) {
+    if ((/^https?:/.test(url) && !this.isHome(url)) || url.includes('/wam/loaderror.html')) {
       await this.cdp.evaluate(turnstileDeferSource, id).catch(() => {});
       await this.cdp.evaluate(devtoolsQuietSource, id).catch(() => {});
       if (this.enabled) await this.cdp.evaluate(navigationShieldSource, id);
@@ -496,18 +517,19 @@ export class BrowserBridge {
     const { executionContextId: id } = await this.cdp.call('Page.createIsolatedWorld', { frameId: this.mainFrame, worldName: this.toolbarWorld });
     this.uiContexts.add(id);
     this.toolbarContext = id;
-    await this.cdp.evaluate(toolbarSource({ ...this.navigation, debug: this.debug }, [home, packagedHome], this.preferences.searchEngine), id);
+    await this.cdp.evaluate(toolbarSource({ ...this.navigation, debug: this.debug }, [this.home, this.packagedHome], this.preferences.searchEngine), id);
     await this.status();
   }
   statusPayload() {
     const current = this.frames.get(this.mainFrame) || this.navigation.url;
     return {
       connected: true, debug: this.debug, blocked: this.blocked, enabled: this.enabled, navigation: this.navigation,
+      labURL: new URL('/fixture?run=manual', this.home).href,
       ...this.tabs.snapshot(),
       searchEngine: this.preferences.searchEngine, showSettings: this.showSettings,
       favorites: this.preferences.favorites, categories: this.preferences.categories, riskySites: this.crashMemory.riskyHosts(),
       favorite: this.preferences.isFavorite(current), favoriteCategories: this.preferences.categoriesOf(current),
-      message: this.enabled ? 'Motor de Brave activo desde tu Mac.' : 'Protección en pausa. Recarga la página para comparar.'
+      message: this.enabled ? 'Motor de Brave activo desde tu computadora.' : 'Protección en pausa. Recarga la página para comparar.'
     };
   }
   async status() {
@@ -576,14 +598,14 @@ export class BrowserBridge {
     } else if (action === 'settings') {
       this.showSettings = true;
       const current = await this.cdp.evaluate('location.href');
-      if (current !== home && current !== packagedHome) {
-        this.beginNavigation(home); await this.status();
-        await this.cdp.call('Page.navigate', { url: home });
+      if (current !== this.home && current !== this.packagedHome) {
+        this.beginNavigation(this.home); await this.status();
+        await this.cdp.call('Page.navigate', { url: this.home });
       } else await this.status();
     } else if (action === 'home') {
       this.showSettings = false;
-      this.beginNavigation(home); await this.status();
-      await this.cdp.call('Page.navigate', { url: home });
+      this.beginNavigation(this.home); await this.status();
+      await this.cdp.call('Page.navigate', { url: this.home });
     } else if (action === 'stop') {
       // Like Safari: stop loading and keep whatever already arrived.
       this.navigationId = (this.navigationId || 0) + 1;
@@ -603,13 +625,13 @@ export class BrowserBridge {
         await this.rememberTab();
         const entry = this.tabs.move(action === 'back' ? -1 : 1);
         if (entry) await this.restoreTab();
-        else if (action === 'back' && ![home, packagedHome].includes(this.tabs.current.url)) await this.command({ action: 'home' });
+        else if (action === 'back' && ![this.home, this.packagedHome].includes(this.tabs.current.url)) await this.command({ action: 'home' });
         return;
       }
       const history = await this.cdp.call('Page.getNavigationHistory');
       const entry = history.entries[history.currentIndex + (action === 'back' ? -1 : 1)];
       if (entry) { await this.prepareDocument(entry.url); this.beginNavigation(entry.url); await this.status(); await this.cdp.call('Page.navigateToHistoryEntry', { entryId: entry.id }); }
-      else if (action === 'back' && ![home, packagedHome].includes(history.entries[history.currentIndex]?.url)) await this.command({ action: 'home' });
+      else if (action === 'back' && ![this.home, this.packagedHome].includes(history.entries[history.currentIndex]?.url)) await this.command({ action: 'home' });
     } else if (action === 'toggle') await this.setProtection(!this.enabled);
     else if (action === 'set-protection') await this.setProtection(value !== false);
   }
@@ -648,7 +670,7 @@ export class BrowserBridge {
     const savedURL = this.tabs.current.url;
     // WAM refuses file:// after a remote page. A suspended packaged Inicio
     // must return through the served home, just like the Home button.
-    const url = /^https?:/.test(savedURL) ? savedURL : home;
+    const url = /^https?:/.test(savedURL) ? savedURL : this.home;
     this.explicitNavigationURL = url;
     this.showSettings = false;
     await this.cdp.call('Page.stopLoading').catch(() => {});

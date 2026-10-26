@@ -1,3 +1,4 @@
+import {lumaOrigin} from './desktop-config.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { connectTV, waitFor } from './cdp.mjs';
@@ -5,7 +6,7 @@ import { BrowserBridge, home, packagedHome } from './browser-bridge.mjs';
 import { createEngine, checkRequest } from './filter-engine.mjs';
 
 const endpoint = process.argv[2];
-const fixtureOrigin = process.env.LAB_ORIGIN || 'http://192.168.1.148:43187';
+const fixtureOrigin = lumaOrigin();
 const directory = 'evidence/browser-lab';
 mkdirSync(directory, { recursive: true });
 const cdp = await connectTV(endpoint);

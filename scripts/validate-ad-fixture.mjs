@@ -1,8 +1,9 @@
+import {lumaOrigin} from './desktop-config.mjs';
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {connectTV,waitFor} from './cdp.mjs';
 import {BrowserBridge} from './browser-bridge.mjs';
-const origin=process.env.LAB_ORIGIN||'http://192.168.1.148:43187';
+const origin=lumaOrigin();
 const c=await connectTV(process.argv[2]);const b=await new BrowserBridge(c,{lists:false,fixtures:true}).start();
 const run='cuevana-regression-'+Date.now();
 try{

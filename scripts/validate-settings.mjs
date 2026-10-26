@@ -1,3 +1,4 @@
+import {lumaOrigin} from './desktop-config.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { connectTV, waitFor } from './cdp.mjs';
@@ -60,7 +61,7 @@ try {
   assert.equal(bridge.preferences.searchEngine, 'bing');
   report.checks.push({ name: 'Preferencia conservada al reiniciar el puente', pass: true });
   await cdp.evaluate('document.querySelector(".back-settings").click()');
-  await bridge.command({ action: 'navigate', value: 'http://192.168.1.148:43187/simple' });
+  await bridge.command({ action: 'navigate', value: (lumaOrigin() + '/simple') });
   await waitFor(() => bridge.navigation.phase === 'complete', 15000);
   await waitFor(() => bridge.toolbarContext);
   const toolbar = await cdp.evaluate('window.__lumaToolbarSnapshot()', bridge.toolbarContext);

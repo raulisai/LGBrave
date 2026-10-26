@@ -36,7 +36,7 @@
   let lastHeartbeat = 0;
   let migrated = false;
 
-  const labURL = 'http://192.168.1.148:43187/fixture?run=manual';
+  let labURL = $state('');
   const palette = ['#0a84ff', '#30b0c7', '#34c759', '#ff9f0a', '#ff375f', '#5e5ce6', '#bf5af2', '#ac8e68'];
   // Simple marks, not the services' logos: known sites get their brand colour, the rest a hashed one.
   const brands = {
@@ -85,7 +85,7 @@
       catch { loading = false; navigationError = 'Se perdió la conexión. Espera un momento y vuelve a intentar.'; }
     } else if (['navigate', 'home', 'back', 'forward'].includes(action)) {
       loading = false;
-      navigationError = 'El navegador está reconectando con el Mac. Espera un momento y vuelve a intentar.';
+      navigationError = 'El navegador está reconectando con la computadora. Espera un momento y vuelve a intentar.';
     }
     return false;
   }
@@ -122,7 +122,7 @@
   function saveBookmark() {
     if (!dialog) return;
     const input = dialog.url.trim();
-    if (!connected) { dialogError = 'Conecta el Mac para guardar marcadores.'; return; }
+    if (!connected) { dialogError = 'Conecta la computadora para guardar marcadores.'; return; }
     let url;
     try { url = resolveNavigation(input, 'google'); } catch (error) { dialogError = error.message; return; }
     if (!/^https?:\/\//i.test(input) && url.startsWith('https://www.google.com/search?q=')) { dialogError = 'Escribe una dirección web, por ejemplo crunchyroll.com.'; return; }
@@ -142,7 +142,7 @@
   }
   function saveCategory() {
     if (!catDialog) return;
-    if (!connected) { catError = 'Conecta el Mac para cambiar las categorías.'; return; }
+    if (!connected) { catError = 'Conecta la computadora para cambiar las categorías.'; return; }
     const { mode, from } = catDialog;
     const name = catDialog.name.replace(/\s+/g, ' ').trim().slice(0, 24);
     if (mode === 'delete') { command('remove-category', from); closeCategoryDialog(); return; }
@@ -179,7 +179,7 @@
   }
   function selectSearchEngine(value) {
     if (pendingSearchEngine) return;
-    if (!connected) { settingsNotice = 'Conecta el Mac para guardar la preferencia.'; return; }
+    if (!connected) { settingsNotice = 'Conecta la computadora para guardar la preferencia.'; return; }
     pendingSearchEngine = value; settingsNotice = 'Guardando…';
     command('set-search-engine', value);
   }
@@ -223,7 +223,7 @@
     try {
       // Show the last known bookmarks while the Mac connects.
       const cached = JSON.parse(localStorage.getItem('luma-bookmarks') || 'null');
-      if (Array.isArray(cached?.bookmarks) && Array.isArray(cached?.categories) && cached.categories.length) { bookmarks = cached.bookmarks; categories = cached.categories; }
+      if (Array.isArray(cached?.bookmarks) && Array.isArray(cached?.categories)) { bookmarks = cached.bookmarks; categories = cached.categories; }
     } catch { /* No cache yet. */ }
     try {
       const saved = localStorage.getItem('luma-wallpaper');
@@ -234,6 +234,7 @@
     try { const saved = localStorage.getItem('luma-search-engine'); if (SEARCH_ENGINES.some(engine => engine.id === saved)) searchEngine = saved; } catch { /* Use Google until the saved preference arrives. */ }
     const update = event => {
       const detail = event.detail;
+      if (detail.labURL) labURL = detail.labURL;
       lastHeartbeat = Date.now();
       debug = detail.debug === true;
       if (Array.isArray(detail.riskySites)) riskySites = detail.riskySites;
@@ -241,7 +242,7 @@
       connected = !!detail.connected; blocked = detail.blocked || 0; enabled = detail.enabled !== false;
       if (Array.isArray(detail.favorites)) {
         bookmarks = detail.favorites;
-        if (Array.isArray(detail.categories) && detail.categories.length) categories = detail.categories;
+        if (Array.isArray(detail.categories)) categories = detail.categories;
         if (!bookmarks.length && !categories.length) editing = false;
         try { localStorage.setItem('luma-bookmarks', JSON.stringify({ bookmarks, categories })); } catch { /* The Mac keeps the real copy. */ }
         if (!migrated) migrateLocalFavorites(detail.favorites);
@@ -290,9 +291,9 @@
   {#if !settingsOpen}
     <header class="topbar">
       {#if debug}
-      <button class="glass-button shield" class:paused={!enabled} class:offline={!connected} aria-label={connected ? (enabled ? 'Protección activa, ' + shownBlocked + ' bloqueados' : 'Protección en pausa') : 'Sin conexión con el Mac'} onclick={toggleProtection}>
+      <button class="glass-button shield" class:paused={!enabled} class:offline={!connected} aria-label={connected ? (enabled ? 'Protección activa, ' + shownBlocked + ' bloqueados' : 'Protección en pausa') : 'Sin conexión con la computadora'} onclick={toggleProtection}>
         {#if connected}<Icon name={enabled ? 'shieldCheck' : 'shield'} size={26} />{:else}<Icon name="tv" size={26} />{/if}
-        <span>{!connected ? 'Sin Mac' : enabled ? shownBlocked.toLocaleString('es') : 'En pausa'}</span>
+        <span>{!connected ? 'Sin conexión' : enabled ? shownBlocked.toLocaleString('es') : 'En pausa'}</span>
       </button>
       {/if}
       {#if bookmarks.length || categories.length}<button class="glass-button edit-button" class:active={editing} aria-label={editing ? 'Terminar edición' : 'Editar marcadores y categorías'} onclick={() => (editing = !editing)}><Icon name={editing ? 'check' : 'pencil'} size={26} stroke={2.2} /></button>{/if}
@@ -316,7 +317,7 @@
               </button>
             {/each}
           </div>
-          <p class="group-note" role="status" aria-live="polite">{settingsNotice || (connected ? 'Se usa al escribir en cualquiera de las barras.' : 'Conecta el Mac para cambiar y guardar tu elección.')}</p>
+          <p class="group-note" role="status" aria-live="polite">{settingsNotice || (connected ? 'Se usa al escribir en cualquiera de las barras.' : 'Conecta la computadora para cambiar y guardar tu elección.')}</p>
           <h2 class="group-title">Fondo del inicio</h2>
           <div class="group appearance">
             <div class="wallpapers" role="radiogroup" aria-label="Fondo del inicio">
@@ -352,7 +353,7 @@
           </div>
           <h2 class="group-title">Laboratorio</h2>
           <div class="group">
-            <button class="row" onclick={() => navigate(labURL)}>
+            <button class="row" disabled={!labURL} onclick={() => navigate(labURL)}>
               <span class="row-icon" style:--tint="#5e5ce6"><Icon name="flask" size={24} /></span>
               <span class="row-label">Página de prueba<small>Anuncios controlados del laboratorio</small></span>
               <span class="chevron"><Icon name="chevron" size={24} /></span>

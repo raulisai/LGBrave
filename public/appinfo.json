@@ -1,6 +1,6 @@
 {
   "id": "com.lgapp.lab",
-  "version": "0.8.0",
+  "version": "0.9.2",
   "vendor": "LG Lab local",
   "type": "web",
   "main": "index.html",

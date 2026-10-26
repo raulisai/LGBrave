@@ -1,11 +1,12 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import {webosTool} from './webos-cli.mjs';
+import {config} from './desktop-config.mjs';
 
-const device = process.argv[2] || 'lg-lab';
+const device = process.argv[2] || config().device;
 const directory = resolve('evidence', new Date().toISOString().replaceAll(':', '-'));
 mkdirSync(directory, { recursive: true });
-const cli = name => resolve('node_modules/.bin', name);
 const checks = [
   ['identity', 'ares-device', ['--system-info', '--device', device]],
   ['permissions', 'ares-novacom', ['--device', device, '--run', 'id']],
@@ -24,7 +25,7 @@ for (const [name, binary, args] of checks) {
   let output;
   let status = 0;
   try {
-    output = execFileSync(cli(binary), args, { encoding: 'utf8', timeout: 20000, stdio: ['ignore', 'pipe', 'pipe'] });
+    output = execFileSync(process.execPath, [webosTool(binary), ...args], { encoding: 'utf8', timeout: 20000, windowsHide:true, stdio: ['ignore', 'pipe', 'pipe'] });
   } catch (error) {
     status = error.status ?? -1;
     output = `${error.stdout || ''}\n${error.stderr || ''}`;
