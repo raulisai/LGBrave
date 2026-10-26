@@ -892,6 +892,10 @@ try {
       assert.equal(mutationAllowed(req('::1', { 'sec-fetch-site': 'cross-site' })), false);
       assert.equal(mutationAllowed(req('192.168.1.134', { origin: 'null' })), true);
       assert.equal(mutationAllowed(req('192.168.1.134', { origin: `https://192.168.evil.com:${PORT}` })), false);
+      // A bare «.local» name (the Mac renamed itself to serve Holy by a friendly address,
+      // e.g. holy-mac.local) only ever resolves on this LAN, as safe a sign as a private IP.
+      assert.equal(mutationAllowed(req('192.168.1.134', { origin: `http://holy-mac.local:${PORT}` })), true);
+      assert.equal(mutationAllowed(req('192.168.1.134', { origin: `http://evil.local.example.com:${PORT}` })), false);
     } finally { await new Promise(resolve => server.close(resolve)); }
   });
   await check('Servidor: una caché de imagen incompleta se repara y después se reutiliza', async () => {

@@ -34,7 +34,11 @@ export function mutationAllowed(req, port = PORT) {
   try {
     const url = new URL(origin), host = url.hostname.replace(/^\[|\]$/g, '');
     const originPort = Number(url.port || (url.protocol === 'https:' ? 443 : 80));
-    return ['http:', 'https:'].includes(url.protocol) && url.origin === origin && !url.username && !url.password && (local(host) || host === 'localhost') &&
+    // A bare «.local» name (mDNS/Bonjour, e.g. this Mac renamed to serve Holy at a friendly
+    // address) only ever resolves inside this LAN by design (RFC 6762) — as safe a sign as a
+    // private IP, and the only way a browser gets here by that name in the first place.
+    const localName = /^[a-z0-9-]+\.local$/i.test(host);
+    return ['http:', 'https:'].includes(url.protocol) && url.origin === origin && !url.username && !url.password && (local(host) || host === 'localhost' || localName) &&
       (originPort === port || originPort === PORT);
   } catch { return false; }
 }
