@@ -1,6 +1,6 @@
 {
   "name": "lg-tv-lab",
-  "version": "0.9.14",
+  "version": "0.9.18",
   "private": true,
   "type": "module",
   "scripts": {
@@ -44,7 +44,12 @@
     "debug:export": "node scripts/debug-export.mjs",
     "profile:setup": "node scripts/profile-sync.mjs setup",
     "profile:status": "node scripts/profile-sync.mjs status",
-    "browser:companion": "node scripts/build-browser-companion.mjs"
+    "browser:companion": "node scripts/build-browser-companion.mjs",
+    "playback:check": "node scripts/check-playback.mjs",
+    "playback:probe": "node scripts/probe-playback-sources.mjs",
+    "prepackage": "npm run playback:check",
+    "prepackage:holy": "npm run playback:check",
+    "prewindows:install": "npm run playback:check"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "7.3.1",

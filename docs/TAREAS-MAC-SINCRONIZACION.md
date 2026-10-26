@@ -54,3 +54,19 @@ Hecho en orden: `git pull` (limpio, fast-forward, sin tocar `.local` ni bibliote
 **Complemento del navegador:** generado en `artifacts/holy-companion`; **no se cargó en un navegador real** (ese paso lo decide y hace el usuario, como pide este mismo documento). Pendiente que el usuario lo instale en Brave y pruebe un vídeo externo.
 
 **No probado:** una valoración real Mac→Windows o Windows→Mac de ida y vuelta con datos del usuario (se evitó tocar su biblioteca real sin pedírselo); el relevo físico de quién atiende la TV sigue siendo el mismo protocolo ya validado antes, sin cambios aquí.
+
+## Actualización 0.9.14 · pausa (2026-10-26, Windows)
+
+El canal Mac↔Windows ya está activado; conserva el emparejamiento existente. Tras leer SOUL y conservar cambios locales, trae main, ejecuta npm test y npm run build:all; después npm run desktop:restart y npm run profile:status. No requiere reinstalar el menú de Mac ni IPK: cambia el backend. Respeta una TV en uso y no abras otro interceptor. Comprueba pausa/reanudación con autorización del usuario, conserva capítulo, servidor y buscador. La regresión de pausa larga pasa en Windows; aún no se ejecutó esta versión en Mac. Auditoría y límites del SDK en docs/VALIDACION-PAUSA-20261026.md.
+
+## Actualización necesaria 0.9.15 · arranque tras pausa
+
+Actualizar el backend con main, npm test, npm run build:all y npm run desktop:restart. Sustituye 0.9.14: corrige su regresión de falsa pausa en segundo 0 que dejaba Volviendo a donde te quedaste. Windows ya activo; LG comprobó reanudación de Between Steps 5 y pausa de 132 segundos conservando servidor. Mac aún no ejecutó esta versión. Conserva vínculo y biblioteca existentes; no hace falta reinstalar el menú/IPK. Detalle: docs/REANUDACION-BLOQUEADA-20261026.md.
+
+## Actualización 0.9.16 · idioma durante recuperación
+
+Traer main conservando cambios locales, npm test, npm run build:all y npm run desktop:restart. Verificar npm run profile:status. Conserva emparejamiento y biblioteca. TV/web ahora mantienen el idioma elegido en reintentos y no aceptan una copia subtitulada cuando se pidió doblaje español; proveedor con idioma desconocido se omite en ese caso. Español confirmado por usuario en LG con Between Steps 5; este cambio aún no ejecutado en Mac. EXE/IPK sin reinstalar. Detalle: docs/BETWEEN-STEPS-ESPANOL-20261026.md.
+
+## Actualización 0.9.17 · arneses de reproducción
+
+Conservar cambios locales, traer main, leer docs/PROTOCOLO-REPRODUCCION.md y ejecutar npm run playback:check. Debe pasar suite+3builds con la misma huella de entradas. npm run playback:probe consulta las fuentes sin tocar TV; parcial no equivale a episodio completo reproducible. Reiniciar backend con npm run desktop:restart y verificar profile:status, sin renovar emparejamiento ni borrar .local. Aplica idioma vivo en relevo, IDs por tipo, seek/play al contenido observado y logs seguros. No requiere reinstalar menú/IPK. El gate pasó en Windows; Mac físico y ensayo LG0.9.17 pendientes.

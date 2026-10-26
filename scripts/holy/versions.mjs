@@ -7,10 +7,11 @@ export const KIND_LABEL = { dub: 'En español', sub: 'Subtítulos en español', 
 // A version as the screens see it (without its player).
 export const publicVersion = version => ({ id: String(version.id), label: String(version.label), kind: ['dub', 'sub', 'orig'].includes(version.kind) ? version.kind : 'orig' });
 
-// The version asked for by id, else the first of the same kind, else null (nothing matches).
+// The requested ID must agree with the audio mode; IDs belong to one provider.
+// Otherwise choose the first of the same kind, or null when nothing matches.
 export function matchVersion(versions, { id, kind } = {}) {
   const list = Array.isArray(versions) ? versions : [];
-  return list.find(version => id && String(version.id) === String(id)) || (kind && list.find(version => version.kind === kind)) || null;
+  return list.find(version => id && String(version.id) === String(id) && (!kind || version.kind === kind)) || (kind && list.find(version => version.kind === kind)) || null;
 }
 
 // Several different versions of the same kind are told apart by their label; groups with the same id are merged.
@@ -22,4 +23,14 @@ export function dedupe(versions) {
     if (!seen.has(key)) seen.set(key, version);
   }
   return [...seen.values()];
+}
+
+// A retry must preserve the audio mode the owner explicitly chose. Unknown audio is
+// not evidence that an external copy offers that mode. IDs are site-specific.
+export function targetMatchesLanguage(target, item, choice = {}) {
+  if (!choice.kind || !['dub', 'sub', 'orig'].includes(choice.kind)) return true;
+  if (!target) return false;
+  const label = String(item?.language || '');
+  const kind = target.versionKind || (/subtitul|sub[ ._-]*esp/i.test(label) ? 'sub' : /latino|castellano|espa[ñn]ol/i.test(label) ? 'dub' : /original/i.test(label) ? 'orig' : '');
+  return kind === choice.kind;
 }

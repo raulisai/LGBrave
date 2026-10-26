@@ -4,7 +4,7 @@ import { fetchText, country, languageLabel } from './sources.mjs';
 import { CONNECTORS, connectorFor } from './connectors.mjs';
 import { genreShelves } from '../../src/holy.js';
 import { entryKey, titleKey, nextEpisode } from './library.mjs';
-import { matchVersion, publicVersion } from './versions.mjs';
+import { matchVersion, publicVersion, targetMatchesLanguage } from './versions.mjs';
 import { KnownLists } from './known-lists.mjs';
 
 // The newest titles from the owner's sites, refreshed on the Mac every half hour.
@@ -323,15 +323,15 @@ export class Catalog {
       tried.add(preference.site);
       for (const candidate of candidates.slice(0, 2)) {
         const target = await this.resolve(candidate, options).catch(() => null);
-        if (target) return { item: copy(candidate), target };
+        if (targetMatchesLanguage(target, candidate, options) && target) return { item: copy(candidate), target };
       }
     }
     let target = await this.resolve(item, options).catch(() => null);
-    if (!target && this.pageFallback(item)) target = { url: item.url, versions: [] };
-    if (target) return { item, target };
+    if (!target && this.pageFallback(item) && targetMatchesLanguage({}, item, options)) target = { url: item.url, versions: [] };
+    if (target && targetMatchesLanguage(target, item, options)) return { item, target };
     for (const candidate of (await this.elsewhere(item, tried).catch(() => [])).slice(0, 4)) {
       const found = await this.resolve(candidate, options).catch(() => null);
-      if (found) return { item: copy(candidate), target: found };
+      if (found && targetMatchesLanguage(found, candidate, options)) return { item: copy(candidate), target: found };
     }
     return null;
   }
@@ -341,7 +341,7 @@ export class Catalog {
       const list = await deadline(connector.versions(item, this.loader(connector)), 30000, 'El sitio tardó demasiado en dar el reproductor.');
       const versions = (Array.isArray(list) ? list : []).map(version => ({ ...version, target: clean(version.target) })).filter(version => version.target);
       // One version is no choice: it behaves like a site without versions.
-      return versions.length ? { target: versions[0].target, versions: versions.length === 1 ? [] : versions } : null;
+      return versions.length ? { target: { ...versions[0].target, version: String(versions[0].id), versionKind: versions[0].kind }, versions: versions.length === 1 ? [] : versions } : null;
     }
     const work = async () => {
       if (connector.resolve) return connector.resolve(item, this.loader(connector));

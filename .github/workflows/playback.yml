@@ -1,0 +1,38 @@
+name: Playback
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: playback-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    name: playback (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run playback:check
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: playback-${{ matrix.os }}
+          path: .local/playback-validation/report.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

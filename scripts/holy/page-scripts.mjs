@@ -216,12 +216,30 @@ export function holyAutoplay(options = {}) {
   };
   let videos = [...document.querySelectorAll('video')];
   if (!videos.length) videos = deep('video');
+  // A pause after playback is an explicit hold, including during startup or a reconnect.
+  // DOM data survives the isolated world of a previous computer connection.
+  state.observed ||= new WeakSet();
+  for (const video of videos) {
+    if (!video.paused && video.currentTime > 0 && video.dataset) video.dataset.holySeenPlaying = '1';
+    if (state.observed.has(video)) continue;
+    state.observed.add(video);
+    video.addEventListener?.('pause', () => {
+      if (!video.ended && video.currentTime > 0 && video.dataset?.holySeenPlaying === '1') video.dataset.holyUserPaused = '1';
+    });
+    video.addEventListener?.('play', () => {
+      if (video.dataset) { if (video.currentTime > 0) video.dataset.holySeenPlaying = '1'; delete video.dataset.holyUserPaused; }
+    });
+    video.addEventListener?.('ended', () => { if (video.dataset) delete video.dataset.holyUserPaused; });
+  }
+  // A provider can emit play/pause while loading at zero: that is not a user hold.
+  // Clear stale zero-time markers from earlier runtimes as well.
+  for (const video of videos) if (video.currentTime === 0 && video.dataset) { delete video.dataset.holySeenPlaying; delete video.dataset.holyUserPaused; }
   // Validation runs keep the TV silent.
   if (options.mute) for (const video of videos) video.muted = true;
-  const report = videos.map(video => ({ t: video.currentTime, d: Number.isFinite(video.duration) ? video.duration : 0, paused: video.paused, ready: video.readyState, network: video.networkState, mediaError: video.error?.code || 0, bufferAhead: (() => { for (let i = 0; i < (video.buffered?.length || 0); i++) if (video.buffered.start(i) <= video.currentTime && video.buffered.end(i) >= video.currentTime) return video.buffered.end(i) - video.currentTime; return 0; })(), area: video.clientWidth * video.clientHeight, ended: video.ended }));
+  const report = videos.map(video => ({ t: video.currentTime, d: Number.isFinite(video.duration) ? video.duration : 0, paused: video.paused, userPaused: video.dataset?.holyUserPaused === '1', ready: video.readyState, network: video.networkState, mediaError: video.error?.code || 0, bufferAhead: (() => { for (let i = 0; i < (video.buffered?.length || 0); i++) if (video.buffered.start(i) <= video.currentTime && video.buffered.end(i) >= video.currentTime) return video.buffered.end(i) - video.currentTime; return 0; })(), area: video.clientWidth * video.clientHeight, ended: video.ended }));
   const out = { url: location.href, top: window.top === window, videos: report, action: '' };
   if (videos.some(video => !video.paused && video.currentTime > 0)) return out;
-  if (options.passive) return out;
+  if (options.passive || report.some(video => video.userPaused && !video.ended)) return out;
   const once = (key, every = 4) => { const last = state.clicked[key]; if (last && state.steps - last < every) return false; state.clicked[key] = state.steps; return true; };
   // 1. Ask the main video to play (the step runs with a user gesture). With data it
   //    starts at once; without, play() makes lazy players load it.
@@ -277,19 +295,35 @@ export function holyTheater() {
   return !!target;
 }
 
-// Resume: put the main video (shadow DOM included) at the saved second.
-export function holySeek(seconds) {
+// Resume the observed feature, never an unrelated advert in an earlier frame.
+// A known duration is a strict match; an unknown duration prefers the longest
+// ready feature and then its rendered area. The helpers include shadow DOM.
+export function holySeek(seconds, expectedDuration = 0) {
   const deep = (root, out = []) => { out.push(...root.querySelectorAll('video')); for (const node of root.querySelectorAll('*')) if (node.shadowRoot) deep(node.shadowRoot, out); return out; };
-  for (const video of deep(document)) {
-    if (Number.isFinite(video.duration) && video.duration > seconds + 30) {
-      if (video.currentTime < seconds - 5) video.currentTime = seconds;
-      return true;
-    }
-  }
-  return false;
+  const candidates = [...new Set(deep(document))].filter(video => Number.isFinite(video.duration) && video.duration > seconds + 30 && video.readyState >= 1);
+  const matching = expectedDuration > 60 ? candidates.filter(video => Math.abs(video.duration - expectedDuration) < 2) : candidates;
+  const video = matching.sort((a,b) => b.duration - a.duration || b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight)[0];
+  if (!video) return false;
+  try { if (Math.abs(video.currentTime - seconds) > 5) video.currentTime = seconds; } catch { return false; }
+  // Some players accept the assignment syntactically but defer/ignore the seek.
+  return Number.isFinite(video.currentTime) && Math.abs(video.currentTime - seconds) <= 5;
 }
 
-export const seekSource = seconds => `(${holySeek.toString()})(${Number(seconds) || 0})`;
+export async function holyResume(expectedDuration = 0) {
+  const deep = (root, out = []) => { out.push(...root.querySelectorAll('video')); for (const node of root.querySelectorAll('*')) if (node.shadowRoot) deep(node.shadowRoot, out); return out; };
+  const candidates = [...new Set(deep(document))].filter(video => Number.isFinite(video.duration) && video.duration > 60 && !video.ended);
+  const matching = expectedDuration > 60 ? candidates.filter(video => Math.abs(video.duration - expectedDuration) < 2) : candidates;
+  const video = matching.sort((a,b) => b.duration - a.duration || b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight)[0];
+  if (!video) return false;
+  let timer;
+  try {
+    await Promise.race([video.play(), new Promise((resolve,reject) => { timer = setTimeout(() => reject(Error('play timed out')), 2500); })]);
+    return !video.paused;
+  } catch { return false; } finally { clearTimeout(timer); }
+}
+
+export const seekSource = (seconds, expectedDuration = 0) => `(${holySeek.toString()})(${Number(seconds) || 0},${Number(expectedDuration) || 0})`;
+export const resumeSource = expectedDuration => `(${holyResume.toString()})(${Number(expectedDuration) || 0})`;
 export const curtainSource = data => `(${holyCurtain.toString()})(${JSON.stringify(data)});`;
 export const remoteSource = (homes, home = '', world = '') => `(${holyRemote.toString()})(${JSON.stringify(homes)},${JSON.stringify(home)},${JSON.stringify(world)});`;
 // The live connection stamps each page every couple of seconds.

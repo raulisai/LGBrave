@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { flixLanguages, flixVersions } from './holy/more-sources.mjs';
 import { cuevana, jkanime } from './holy/sources.mjs';
-import { matchVersion, publicVersion, dedupe } from './holy/versions.mjs';
+import { matchVersion, publicVersion, dedupe, targetMatchesLanguage } from './holy/versions.mjs';
 import { Catalog } from './holy/catalog.mjs';
 import { Library } from './holy/library.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
@@ -87,6 +87,48 @@ try {
     assert.deepEqual([single.url, single.versions], ['https://p.example/b', undefined]);
     assert.deepEqual(catalog.sources().map(source => source.versions), [true]);
     catalog.stop();
+  });
+
+  await check('Compatibilidad: el idioma se conserva entre sitios sin compartir IDs',async()=>{
+    assert.equal(targetMatchesLanguage({versionKind:'sub'},{language:'Latino'},{kind:'dub'}),false);
+    assert.equal(targetMatchesLanguage({},{language:'Subtitulado en español'},{kind:'dub'}),false);
+    assert.equal(targetMatchesLanguage({},{language:'Latino'},{kind:'dub'}),true);
+    assert.equal(targetMatchesLanguage({},{},{kind:'dub'}),false);
+    assert.equal(targetMatchesLanguage({},{},{}),true);
+    const sub={id:'sub-only',site:'https://sub.example/',versions:async()=>[{id:'1',kind:'sub',label:'Subtítulos en español',target:{url:'https://player.example/sub'}}]};
+    const dub={id:'dub-only',site:'https://dub.example/',versions:async()=>[{id:'2',kind:'dub',label:'Español latino',target:{url:'https://player.example/dub'}}]};
+    const c=new Catalog({file:join(directory,'guard.json'),detailsFile:join(directory,'guard-details.json'),connectors:[sub,dub],fetch:async()=>''});
+    c.preference=async()=>null;c.elsewhere=async()=>[{source:'dub-only',url:'https://dub.example/e1',title:'T',kind:'dorama'}];
+    const found=await c.resolvePlayable({source:'sub-only',url:'https://sub.example/e1',title:'T',kind:'dorama'},{kind:'dub'});assert.equal(found.item.source,'dub-only');assert.equal(found.target.versionKind,'dub');c.stop();
+  });
+
+  await check('IDs de idioma locales: una colisión no impone subtítulos sobre doblaje entre fuentes', async () => {
+    const original={id:'original',site:'https://original.example/',versions:async()=>[]};
+    const other={id:'other',site:'https://other.example/',versions:async()=>[
+      {id:'38',kind:'sub',label:'Subtítulos en español',target:{url:'https://player.example/sub'}},
+      {id:'9',kind:'dub',label:'Español latino',target:{url:'https://player.example/dub'}}]};
+    assert.equal(matchVersion([{id:'38',kind:'sub'},{id:'9',kind:'dub'}],{id:'38',kind:'dub'}).id,'9');
+    assert.equal(matchVersion([{id:'38',kind:'sub'}],{id:'38',kind:'dub'}),null);
+    const catalog=new Catalog({file:join(directory,'collisions.json'),detailsFile:join(directory,'collisions-details.json'),connectors:[original,other],fetch:async()=>''});
+    const item={source:'original',kind:'dorama',title:'Same show',episode:1,url:'https://original.example/e1',show:'https://original.example/show'};
+    const copy={...item,source:'other',url:'https://other.example/e1',show:'https://other.example/show'};
+    catalog.preference=async()=>null;catalog.elsewhere=async()=>[copy];
+    const choice={version:'38',kind:'dub'};
+    let bridge;
+    try {
+      const web=await catalog.resolvePlayable(item,choice);
+      assert.equal(web.item.source,'other');assert.equal(web.target.version,'9');assert.equal(web.target.versionKind,'dub');
+      const library=new Library(join(directory,'collision-library.json'));
+      const cdp={async evaluate(){return true;},async call(){return{};}};
+      bridge=new HolyBridge(cdp,{library,catalog,preferencesFile:join(directory,'collision-settings.json'),recorder:false});
+      bridge.session={item,choice,tried:new Set([item.source]),candidates:[copy],searched:true};
+      const target=await bridge.findElsewhere(bridge.session);
+      assert.equal(target.url,'https://player.example/dub');assert.equal(target.versionKind,'dub');
+      assert.equal(bridge.session.item.source,'other');
+      // The selected mode survives opening even when only one version is exposed.
+      await bridge.openTarget(bridge.session,{...target,versions:[]});
+      assert.equal(bridge.session.versionKind,'dub');
+    }finally{if(bridge)await bridge.stop();catalog.stop();}
   });
 
   await check('Historial: el idioma elegido se recuerda por serie, sobrevive al reinicio y no admite basura', () => {
@@ -211,7 +253,7 @@ try {
     assert.match(source, /holy-api\/language/);
     assert.match(source, /versionInfo\[preview\.url\]\?\.versions\?\.length > 1/);
   });
-  await check('Puente: si un idioma no abre, prueba los otros del mismo episodio antes de otro sitio, y avisa si falta el recordado', async () => {
+  await check('Puente: conserva español elegido, rechaza copias subtituladas y avisa si falta', async () => {
     const calls = [], drawn = [], resolved = [];
     const failing = new Set(['https://p.example/play?v=38']);
     const cdp = {
@@ -245,19 +287,25 @@ try {
     try {
       library.setLanguage(episode, versions[0]);
       await bridge.command({ action: 'play', value: episode });
-      assert.deepEqual(navigations(), ['https://p.example/play?v=38', 'https://p.example/play?v=13109']);
-      assert.deepEqual(resolved.at(-1), { version: '13109', kind: 'sub' });
-      assert.ok(drawn.some(expression => expression.includes('Español latino no se pudo abrir: probando Coreano · subtítulos en español')));
-      assert.equal(bridge.session.version, '13109');
+      assert.deepEqual(navigations(), ['https://p.example/play?v=38']);
+      assert.equal(bridge.session.phase,'failed');
+      assert.equal(resolved.some(options=>options.kind==='sub'),false,'Spanish failure cannot select Korean');
       assert.equal(library.languageOf(episode).id, '38', 'a fallback does not change the remembered language');
       // Every language fails: it ends instead of looping.
       failing.add('https://p.example/play?v=13109'); calls.length = 0;
       await bridge.command({ action: 'play', value: { ...episode, url: episode.url + '-b' } });
-      assert.deepEqual(navigations(), ['https://p.example/play?v=38', 'https://p.example/play?v=13109']);
+      assert.deepEqual(navigations(), ['https://p.example/play?v=38']);
       // The remembered language is missing in this episode: the screen says which one opens.
       failing.clear(); offered = [versions[1], { id: '77', label: 'Coreano original', kind: 'orig' }]; drawn.length = 0;
       await bridge.command({ action: 'play', value: { ...episode, url: episode.url + '-c' } });
-      assert.ok(drawn.some(expression => expression.includes('Sin «En español» en este episodio: se abre en Coreano · subtítulos en español')));
+      assert.equal(bridge.session.phase,'failed');assert.match(bridge.session.error,/En español/);
+      assert.equal(navigations().some(url=>url.includes('v=13109')),false);
+      // Cross-site recovery must skip subtitled/unknown audio and retain a Spanish copy.
+      const wrong={...episode,source:'other',language:'Subtitulado',url:'https://other.example/e1'};
+      const right={...episode,source:'spanish',language:'Latino',url:'https://spanish.example/e1'};
+      catalog.resolve=async item=>({url:'https://player.example/'+item.source});catalog.elsewhere=async()=>[];
+      bridge.session.candidates=[wrong,{...wrong,source:'unknown',language:''},right];bridge.session.searched=true;bridge.session.tried=new Set([episode.source]);
+      const recovered=await bridge.findElsewhere(bridge.session);assert.equal(recovered.url,'https://player.example/spanish');assert.equal(bridge.session.item.source,'spanish');
     } finally { await bridge.stop(); }
   });
 } finally { rmSync(directory, { recursive: true, force: true }); }

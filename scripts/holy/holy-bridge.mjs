@@ -4,8 +4,8 @@ import { BrowserBridge } from '../browser-bridge.mjs';
 import { origin, packagedPrefix, HOME_PATH } from './config.mjs';
 import { entryKey } from './library.mjs';
 import { PREFERRED } from './catalog.mjs';
-import { KIND_LABEL } from './versions.mjs';
-import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
+import { KIND_LABEL, targetMatchesLanguage } from './versions.mjs';
+import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, resumeSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
 import {playbackDescriptor,validDescriptor,readDescriptorSource,writeDescriptorSource,clearDescriptorSource} from './handoff.mjs';
 
 // Luma's engine (filters, guards, navigation) plus Holy's playback: a title is
@@ -118,11 +118,17 @@ export class HolyBridge extends BrowserBridge {
     if(this.session||this.isHome(current)||!/^https?:/.test(current))return false;
     const descriptor=validDescriptor(await this.cdp.evaluate(readDescriptorSource));
     if(!descriptor||this.session||this.stopped)return false;
-    const {item,position}=descriptor;
+    const {item,position,paused,choice:liveChoice,versionKind}=descriptor;
+    const opening=!position;
+    const held=paused===true&&!opening;
+    const remembered=this.library.languageOf?.(item);
+    // The live TV choice survives recovery onto a different provider; stored IDs
+    // belong only to their own provider and must not travel with the handoff.
+    const choice=liveChoice || (remembered?{version:remembered.id,kind:remembered.kind}:{});
     if(!this.library.get(entryKey(item)))this.library.start(item);
     const token=this.sessionToken=(this.sessionToken||0)+1;
-    this.session={token,item,key:entryKey(item),phase:'playing',started:Date.now(),playingAt:Date.now(),resumeAt:0,
-      lastSave:0,position,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
+    this.session={token,item,key:entryKey(item),phase:opening?'opening':'playing',opened:Date.now(),started:Date.now(),playingAt:Date.now(),resumeAt:opening?this.library.resumeAt(item):0,
+      lastSave:0,position,choice,versionKind:versionKind||'',userPaused:held,lastPaused:held,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
     if(item.kind!=='movie'&&this.catalog.next)this.session.next=this.catalog.next(item).catch(()=>null);
     await this.publishPlayback();
     return true;
@@ -289,6 +295,7 @@ export class HolyBridge extends BrowserBridge {
       for (const copy of copies.slice(0, 2)) {
         if (this.session !== session) return;
         target = await this.catalog.resolve(copy, session.choice).catch(() => null);
+        if (target && !targetMatchesLanguage(target, copy, session.choice)) target = null;
         if (target) { session.item = { ...copy, title: item.title, poster: item.poster || copy.poster, backdrop: item.backdrop || copy.backdrop, genres: item.genres?.length ? item.genres : copy.genres }; session.site = this.catalog.connector?.(preferred)?.name || preferred; break; }
       }
       if (this.session !== session) return;
@@ -300,14 +307,15 @@ export class HolyBridge extends BrowserBridge {
       try { target = await this.catalog.resolve(item, session.choice); } catch (error) { session.resolveError = error; }
     }
     if (this.session !== session) return;
+    if (target && !targetMatchesLanguage(target, item, session.choice)) { this.recordPlayback('language-skipped', session); target = null; }
     // No player on its own site: the same title on another of the owner's sites.
     if (!target) target = await this.findElsewhere(session);
     if (this.session !== session) return;
-    if (!target && !session.resolveError?.unsafe && this.catalog.pageFallback?.(item)) target = { url: item.url };
+    if (!target && !session.resolveError?.unsafe && this.catalog.pageFallback?.(item) && targetMatchesLanguage({}, item, session.choice)) target = { url: item.url };
     if (!target) {
       // Refuse rather than open a page known to close the app.
       session.phase = 'failed';
-      session.error = session.resolveError?.message || 'No se encontró un reproductor para este título en tus sitios.';
+      session.error = session.choice?.kind ? `No se pudo abrir ${KIND_LABEL[session.choice.kind] || 'el idioma elegido'}. Prueba otro servidor o cambia Idioma.` : session.resolveError?.message || 'No se encontró un reproductor para este título en tus sitios.';
       await this.dropCurtainScript();
       await this.status();
       return;
@@ -325,6 +333,7 @@ export class HolyBridge extends BrowserBridge {
     // Languages of this episode (when the site offers several) and the one being played.
     session.versions = Array.isArray(target.versions) ? target.versions : [];
     session.version = target.version || '';
+    session.versionKind = ['dub','sub','orig'].includes(target.versionKind) ? target.versionKind : '';
     session.servers = (session.servers || 0) + 1;
     session.siteServers = 1; session.sawVideo = false;
     // The remembered (or asked) language is not in this episode: say which one opens instead.
@@ -346,7 +355,7 @@ export class HolyBridge extends BrowserBridge {
     session.versionsTried ||= new Set();
     session.versionsTried.add(session.version);
     const current = versions.find(version => version.id === session.version);
-    const next = versions.filter(version => !session.versionsTried.has(version.id))
+    const next = versions.filter(version => !session.versionsTried.has(version.id) && (!session.choice?.kind || version.kind === session.choice.kind))
       .sort((a, b) => (b.kind === current?.kind) - (a.kind === current?.kind))[0];
     if (!next) return false;
     session.versionsTried.add(next.id);
@@ -383,6 +392,7 @@ export class HolyBridge extends BrowserBridge {
       if (this.session !== session) return null;
       const target = await this.catalog.resolve(candidate, session.choice).catch(() => null);
       if (this.session !== session) return null;
+      if (target && !targetMatchesLanguage(target, candidate, session.choice)) { this.recordPlayback('language-skipped', session); continue; }
       if (target) {
         // Keep the owner's title and artwork; play the other site's copy.
         session.item = { ...candidate, title: session.item.title || candidate.title, poster: session.item.poster || candidate.poster, backdrop: session.item.backdrop || candidate.backdrop, genres: session.item.genres?.length ? session.item.genres : candidate.genres };
@@ -406,8 +416,7 @@ export class HolyBridge extends BrowserBridge {
   }
   async openServer(session, url) {
     if (this.session !== session || this.stopped) return;
-    session.phase = 'opening'; session.opened = Date.now(); session.target = url; session.position = null;
-    session.midStall = null; session.stall = null; session.missingSince = 0; session.lastPaused = false;
+    session.phase = 'opening'; session.opened = Date.now(); session.target = url; session.position = null; session.userPaused = session.lastPaused = false; this.resetStallClocks(session);
     this.recordPlayback('server-opening', session);
     await this.prepareDocument(url);
     if (this.session !== session || this.stopped) return;
@@ -453,22 +462,21 @@ export class HolyBridge extends BrowserBridge {
     }
     return [...this.pageContexts().map(id => ({ id })), ...[...this.childSessions].flatMap(([sessionId, entry]) => [...entry.contexts].map(id => ({ id, sessionId })))];
   }
+  isUserPaused(session) { return !!(session?.userPaused || session?.lastPaused || ['pause','versions'].includes(session?.card?.kind)); }
+  resetStallClocks(session) { session.stall = null; session.midStall = null; session.endStall = null; session.missingSince = 0; }
   // Every second during a session: start the player, then save the position.
   async watch() {
     const session = this.session;
     if (!session || this.watching || !['opening', 'playing', 'manual'].includes(session.phase)) return;
     this.watching = true;
     try {
-    if (this.navigation.phase === 'error') {
-      if (session.phase === 'opening' && await this.serverFailed(session)) return;
-      if (this.session !== session) return;
-      await this.endSession(); await this.status(); return;
-    }
-    if (session.phase === 'opening' && session.queue?.length && Date.now() - session.opened > this.serverTimeout && !session.position) { await this.serverFailed(session); return; }
     if (this.navigation.phase === 'loading' && session.phase === 'opening' && Date.now() - session.opened < 4000) return;
-    const page = this.frames.get(this.mainFrame) || '';
-    if (!/^https?:/.test(page) || this.isHome(page)) return;
-      const passive = session.phase !== 'opening';
+    const page = this.frames?.get(this.mainFrame) || '';
+    if (!/^https?:/.test(page) || this.isHome(page)) {
+      if (!this.isUserPaused(session) && session.phase === 'opening' && (this.navigation.phase === 'error' || Date.now()-session.opened>this.serverTimeout)) await this.serverFailed(session);
+      return;
+    }
+      const passive = session.phase !== 'opening' || this.isUserPaused(session);
       const results = (await Promise.all((await this.playerContexts()).map(({ id, sessionId }) => Promise.race([
         this.evaluateWithGesture(autoplaySource({ passive, mute: this.mute }), id, sessionId).catch(() => null),
         new Promise(resolve => setTimeout(resolve, 2500, null))
@@ -477,8 +485,28 @@ export class HolyBridge extends BrowserBridge {
       if (results.some(frame => frame.videos.length)) session.sawVideo = true;
       session.frames = results.map(frame => ({ url: frame.url.split('?')[0], top: frame.top, videos: frame.videos.length, action: frame.action })).slice(0, 12);
       const videos = results.flatMap(frame => frame.videos).filter(video => video.d > 60);
-      const playing = videos.filter(video => !video.paused && video.t > 0).sort((a, b) => b.d - a.d)[0];
-      if (playing && session.phase !== 'playing') await this.started(session);
+      // Keep observing the feature we were watching, even if an advert in another frame plays.
+      const knownDuration = session.position?.d || 0;
+      const matching = videos.filter(video => knownDuration > 60 && Math.abs(video.d - knownDuration) < 2);
+      const candidates = matching.length ? matching : this.isUserPaused(session) && knownDuration > 60 ? [] : videos;
+      const primary = [...candidates].sort((a,b) => (b.area || 0) - (a.area || 0) || b.d - a.d)[0];
+      const wasPaused = this.isUserPaused(session);
+      if (primary) {
+        const held = !!(!primary.ended && (primary.userPaused && primary.t > 0 || primary.paused && (session.phase === 'playing' || wasPaused)));
+        if (held !== !!session.userPaused) this.recordPlayback(held ? 'pause-hold' : 'pause-released', session, {paused:held});
+        session.userPaused = session.lastPaused = held;
+        if (held || wasPaused) this.resetStallClocks(session);
+        if (held && session.card?.kind === 'end') { await this.hideEndCard(session); if (this.session !== session) return; }
+      }
+      const playing = primary && !primary.paused && !session.userPaused && primary.t > 0 ? primary : null;
+      // Inspect the player before reacting to navigation errors or expired opening clocks.
+      if (this.navigation.phase === 'error' && !this.isUserPaused(session) && !primary) {
+        if (session.phase === 'opening' && await this.serverFailed(session)) return;
+        if (session.phase === 'playing') { await this.rescue(session, session.position?.t || 0); return; }
+        if (this.session === session) { await this.endSession(); await this.status(); }
+        return;
+      }
+      if (playing && session.phase !== 'playing') await this.started(session, primary.d);
       if (this.session !== session) return;
       // A server that starts but never gets past its first seconds (still «playing») is
       // stalled: swap it for the next one. A paused video is the owner's choice and stays.
@@ -487,7 +515,7 @@ export class HolyBridge extends BrowserBridge {
         if (!stall || playing.t > stall.t + 0.5) session.stall = { t: playing.t, since: Date.now() };
         else if (Date.now() - stall.since > this.stallTimeout) { session.stall = null; this.recordPlayback('start-stalled', session, playing); await this.rescue(session, playing.t); return; }
       }
-      const best = playing || (session.phase === 'playing' ? videos.sort((a, b) => b.d - a.d)[0] : null);
+      const best = playing || (session.phase === 'playing' ? primary : null);
       if (best && Date.now() - (session.sampledAt || 0) >= 10000) {
         session.sampledAt = Date.now();
         const sample = { seconds: Math.round(best.t), duration: best.d, ready: best.ready, network: best.network, mediaError: best.mediaError, bufferAhead: Math.round(best.bufferAhead || 0), paused: best.paused, frameCount: results.length };
@@ -500,7 +528,7 @@ export class HolyBridge extends BrowserBridge {
         } else {
           for (const { id, sessionId } of await this.playerContexts()) {
             if (this.session !== session || this.stopped) return;
-            if (await this.evaluateWithGesture(seekSource(session.resumePending.at), id, sessionId).catch(() => false) === true) {
+            if (await this.evaluateWithGesture(seekSource(session.resumePending.at, session.resumePending.duration || best.d), id, sessionId).catch(() => false) === true) {
               session.resumePending = null; return;
             }
           }
@@ -510,7 +538,7 @@ export class HolyBridge extends BrowserBridge {
       if (session.recoveryCheck && best && !best.paused && best.t > session.recoveryCheck.t + 0.5) {
         this.recordPlayback('recovery-advancing', session, { seconds: best.t }); session.recoveryCheck = null;
       }
-      if (best) { session.lastPaused = best.paused; session.missingSince = 0; }
+      if (best) { session.missingSince = 0; }
       else if (session.phase === 'playing' && !session.card && !session.lastPaused) {
         session.missingSince ||= Date.now();
         if (Date.now() - session.missingSince > this.midStall && (session.rescues || 0) < MAX_RESCUES) {
@@ -530,7 +558,7 @@ export class HolyBridge extends BrowserBridge {
         const tail = !best.paused && best.d - best.t <= 30;
         if (!tail) session.endStall = null;
         else if (!session.endStall || best.t > session.endStall.t + 0.5) session.endStall = { t: best.t, since: Date.now() };
-        const ended = best.ended || best.t >= best.d - END_MARGIN || (tail && Date.now() - session.endStall.since > this.endStall);
+        const ended = best.ended || (!this.isUserPaused(session) && (best.t >= best.d - END_MARGIN || (tail && Date.now() - session.endStall.since > this.endStall)));
         if (ended && session.card?.kind !== 'end') await this.showEndCard(session);
         // Rewound from the card: back to watching.
         else if (session.card?.kind === 'end' && !ended && best.t < best.d - 15) await this.hideEndCard(session);
@@ -549,11 +577,11 @@ export class HolyBridge extends BrowserBridge {
       // swapped for the next one or another site, resuming at the same second.
       if (session.phase === 'playing' && best && !session.card && best.t >= 15 && best.d - best.t > 30) {
         const mid = session.midStall;
-        if ((best.paused && !best.mediaError) || !mid || Math.abs(best.t - mid.t) > 0.5) session.midStall = { t: best.t, since: Date.now() };
+        if (this.isUserPaused(session) || !mid || Math.abs(best.t - mid.t) > 0.5) session.midStall = { t: best.t, since: Date.now() };
         else if (Date.now() - mid.since > this.midStall && (session.rescues || 0) < MAX_RESCUES) { this.recordPlayback('video-stalled', session, best); await this.rescue(session, best.t); return; }
       }
-      const limit = session.queue?.length || session.leftover?.queue?.length ? (session.sawVideo ? this.serverTimeout : this.emptyTimeout) : this.startTimeout;
-      if (session.phase === 'opening' && Date.now() - session.opened > limit && !session.position) {
+      const limit = session.queue?.length || session.leftover?.queue?.length ? (session.sawVideo ? this.serverTimeout : Math.min(this.serverTimeout, this.emptyTimeout)) : this.startTimeout;
+      if (!this.isUserPaused(session) && session.phase === 'opening' && Date.now() - session.opened > limit && !session.position) {
         if (await this.serverFailed(session)) return;
         // Leave the page usable: the owner can pick another server with the remote.
         session.phase = 'manual'; session.error = 'No se pudo iniciar solo';
@@ -567,6 +595,7 @@ export class HolyBridge extends BrowserBridge {
   // This server did not start. Order: two servers of a site, then the same title on another
   // site, then the first site's remaining servers. False when nothing is left.
   async serverFailed(session) {
+    if (this.isUserPaused(session)) { this.resetStallClocks(session); return true; }
     if (this.session !== session || this.stopped) return true;
     this.recordPlayback('server-failed', session);
     if (session.queue?.length && session.siteServers >= SITE_TRIES && !session.leftover && this.catalog.elsewhere) {
@@ -591,6 +620,7 @@ export class HolyBridge extends BrowserBridge {
     return false;
   }
   async rescue(session, at) {
+    if (this.isUserPaused(session)) { this.resetStallClocks(session); return; }
     if (this.session !== session || this.stopped || (session.rescues || 0) >= MAX_RESCUES) return;
     session.rescues = (session.rescues || 0) + 1;
     this.recordPlayback('recovery-attempt', session, { seconds: at });
@@ -611,7 +641,7 @@ export class HolyBridge extends BrowserBridge {
     session.rescues = MAX_RESCUES;
     this.recordPlayback('recovery-exhausted', session);
   }
-  async started(session) {
+  async started(session, expectedDuration = session.position?.d || 0) {
     if (this.session !== session || this.stopped) return;
     session.phase = 'playing'; session.playingAt = Date.now(); session.lastSave = Date.now();
     this.recordPlayback(session.rescues ? 'recovery-started' : 'playback-started', session);
@@ -622,15 +652,15 @@ export class HolyBridge extends BrowserBridge {
     if (this.mainContext) await this.cdp.evaluate(theaterSource, this.mainContext).catch(() => false);
     if (this.session !== session || this.stopped) return;
     if (session.resumeAt > 0) {
-      session.resumePending = { at: session.resumeAt, until: Date.now() + 15000 };
+      session.resumePending = { at: session.resumeAt, duration: expectedDuration, until: Date.now() + 15000 };
       for (const { id, sessionId } of await this.playerContexts()) {
         if (this.session !== session || this.stopped) return;
-        if (await this.evaluateWithGesture(seekSource(session.resumeAt), id, sessionId).catch(() => false) === true) { session.resumePending = null; break; }
+        if (await this.evaluateWithGesture(seekSource(session.resumeAt, expectedDuration), id, sessionId).catch(() => false) === true) { session.resumePending = null; break; }
       }
     }
     if (this.session !== session || this.stopped) return;
     session.forceResume = 0;
-    await this.curtain('window.__holyCurtain&&__holyCurtain.hide()');
+    await this.curtain('if(window.__holyCurtain)__holyCurtain.hide();else document.querySelectorAll("holy-curtain").forEach(node=>node.remove())');
     await this.status();
   }
   async curtain(expression) {
@@ -716,9 +746,13 @@ export class HolyBridge extends BrowserBridge {
     await this.play({ ...session.item, version: version.id, versionKind: version.kind });
   }
   async resumeVideo(session) {
+    if (this.session !== session || this.stopped) return;
     await this.hideEndCard(session);
-    const play = `(()=>{const deep=(r,o=[])=>{o.push(...r.querySelectorAll('video'));for(const n of r.querySelectorAll('*'))if(n.shadowRoot)deep(n.shadowRoot,o);return o};const v=deep(document).filter(v=>Number.isFinite(v.duration)&&v.duration>60).sort((a,b)=>b.duration-a.duration)[0];if(!v)return false;const p=v.play();if(p&&p.catch)p.catch(()=>{});return true})()`;
-    for (const { id, sessionId } of await this.playerContexts()) if (await this.evaluateWithGesture(play, id, sessionId).catch(() => false) === true) break;
+    const play = resumeSource(session.position?.d || 0);
+    for (const { id, sessionId } of await this.playerContexts()) {
+      if (this.session !== session || this.stopped) return;
+      if (await this.evaluateWithGesture(play, id, sessionId).catch(() => false) === true) break;
+    }
   }
   async hideEndCard(session) {
     clearTimeout(session.card?.timer);
