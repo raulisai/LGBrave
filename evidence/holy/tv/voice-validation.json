@@ -1,0 +1,68 @@
+{
+  "capturedAt": "2026-10-24T06:27:27.681Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "voice",
+      "speechApi": {
+        "standard": "undefined",
+        "webkit": "function"
+      },
+      "state": {
+        "section": "Buscar",
+        "focus": "BODY",
+        "placeholder": "Película, anime o dorama…",
+        "toast": "Escuchando… di el nombre de lo que buscas."
+      },
+      "steps": [
+        {
+          "after": "7 s",
+          "placeholder": "Película, anime o dorama…",
+          "focus": "BODY",
+          "toast": "El procesador de audio es inestable. Vuelve a intentar."
+        },
+        {
+          "after": "cancelar",
+          "placeholder": "Película, anime o dorama…",
+          "focus": "BODY",
+          "toast": "Escuchando… di el nombre de lo que buscas."
+        },
+        {
+          "after": "otra vez",
+          "placeholder": "Película, anime o dorama…",
+          "focus": "BODY",
+          "toast": "Escuchando… di el nombre de lo que buscas."
+        }
+      ],
+      "log": [
+        "12 start()",
+        "264 error:aborted ",
+        "267 end",
+        "2067 start()",
+        "2289 error:aborted ",
+        "2291 end",
+        "4091 start()",
+        "4300 error:aborted ",
+        "4302 end"
+      ],
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.102:43190/holy/"
+      }
+    ],
+    "memory": "memory  1252016  886252  147068  40488   218696      267736"
+  },
+  "after": {
+    "memory": "memory  1252016  906460  120916  43692   224640      244076"
+  },
+  "bridgeErrors": []
+}

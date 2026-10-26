@@ -1,0 +1,65 @@
+{
+  "capturedAt": "2026-10-24T04:20:41.574Z",
+  "scope": "LG 75UR8750PSA real, vídeo silenciado, muestras cortas del título más nuevo de cada sitio.",
+  "samples": [
+    {
+      "label": "ending-next",
+      "started": true,
+      "seeked": true,
+      "card": true,
+      "cardAfter": 12.923,
+      "options": [
+        "Episodio 1179",
+        "Volver al inicio"
+      ],
+      "countdown": true,
+      "playedNext": true,
+      "secondsToNext": 17.447,
+      "ok": true
+    },
+    {
+      "label": "ending-keys",
+      "seeked": true,
+      "card": true,
+      "countdownStopped": true,
+      "stayed": true,
+      "home": true,
+      "ok": true
+    },
+    {
+      "label": "ending-film",
+      "title": "Papi Ricky: La Película",
+      "started": true,
+      "seeked": true,
+      "card": true,
+      "options": [
+        "Volver al inicio",
+        "Seriously Single Too",
+        "Volver a los 17",
+        "La hipótesis del amor",
+        "Un altre home"
+      ],
+      "countdown": false,
+      "similarPlaying": true,
+      "home": true,
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "before": {
+    "running": [
+      "com.lgapp.holy"
+    ],
+    "targets": [
+      {
+        "app": "com.lgapp.holy",
+        "url": "http://192.168.1.148:43190/holy/"
+      }
+    ],
+    "memory": "memory  1252016  869800  140112  44608   242104      279516"
+  },
+  "after": {
+    "memory": "memory  1252016  885264  143532  51460   223220      255452"
+  },
+  "bridgeErrors": []
+}

@@ -62,3 +62,12 @@ Cierre de publicación: paquete/Holy 0.9.3, Luma TV y fuente EXE 0.9.2.
 `test-holy-next` valida gustos observados, borrados convergentes, Top 100 AniList
 y diagnóstico sin secretos. Suite completa y ambos builds volvieron a pasar
 con todos los cambios de este espacio; el código se publica en `origin/main`.
+
+## Comprobación en la Mac (2026-10-25 19:50)
+
+- La Mac ejecutaba runtimes antiguos (`holy.mjs` y `start-lab.mjs`, que no conocen la reserva); se detuvieron junto al servidor de fixtures suelto que ocupaba 43187, y se inició `npm run desktop:start`.
+- Estado de la Mac: **standby** («La TV tiene una reserva de asistencia vigente»). La reserva `/tmp/luma-desktop-assist` en la TV se renovaba cada pocos segundos (edad 1–3 s en tres lecturas) **aun con el servicio de la Mac detenido**: la mantiene otro equipo, que es la Windows. La Mac no interceptó, como pide el diseño; al apagar Windows la reserva vence en ~60 s y la Mac la toma sola (cada 5 s reintenta).
+- **No probado**: ese relevo físico Windows→Mac→Windows (no se apagó la otra computadora) y reproducción larga tras el relevo. Los IPK instalados son Luma 0.9.2 y Holy 0.9.3, el mismo par para los dos equipos.
+- Direcciones de otros equipos (`peers`) vacías en la Mac: el doctor no lista a Windows hasta añadir su IP en «Configurar».
+- Fallo de macOS encontrado y corregido: `runtime-lock.mjs` trataba ENOTDIR (que macOS da al renombrar un directorio sobre un archivo antiguo) como error en vez de reintentar; `test-lab-runtime` fallaba en Mac y pasa 3/3.
+

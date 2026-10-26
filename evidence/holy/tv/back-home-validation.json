@@ -1,0 +1,13 @@
+{
+  "capturedAt": "2026-10-24T03:00:48.482Z",
+  "scope": "TV real. Atrás enviado como keydown 461 (lo que webOS entrega con disableBackHistoryAPI). El botón físico lo confirma el usuario.",
+  "cases": [
+    {
+      "name": "Atrás en el inicio: una pulsación solo avisa",
+      "toast": "Pulsa Atrás otra vez para salir de Holy.",
+      "stillOpen": true,
+      "ok": true
+    }
+  ],
+  "errors": []
+}

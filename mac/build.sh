@@ -35,5 +35,5 @@ plutil -lint "$STAGED_APP/Contents/Info.plist" >/dev/null
 codesign --force --sign - "$STAGED_APP"
 if [ -e "$APP" ]; then mv "$APP" "$BUILD_DIR/previous.app"; fi
 mv "$STAGED_APP" "$APP"
-if [ "${LUMA_AUTOSTART:-1}" = "1" ]; then "$NODE" scripts/holy/autostart.mjs on; fi
-echo "Listo: $APP (Holy y Luma). Inicio automático de sesión: ${LUMA_AUTOSTART:-1}"
+if [ "${LUMA_AUTOSTART:-0}" = "1" ]; then "$NODE" scripts/holy/autostart.mjs on; fi
+echo "Listo: $APP (Holy y Luma). Inicio automático de sesión: ${LUMA_AUTOSTART:-0}"
