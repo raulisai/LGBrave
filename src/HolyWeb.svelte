@@ -256,29 +256,37 @@
   function pickLanguage(version) {
     const current = langChoice;
     langChoice = null;
+    // This tap is itself a fresh click: play() opens its own destination window from it.
     if (current && version) play(current.item, version);
   }
 
   // Reproducir: this page has no curtain or autoplay helper, so the real player address is
-  // resolved on the computer and opened in a new tab — the same place that site's own link
-  // would open. The tab is opened before the (slower) resolve so a popup blocker still sees
-  // it as a direct result of the tap.
+  // resolved on the computer afterwards and opened in a new tab (or shown here — see
+  // openResolved below). Resolving takes a moment, so a window opened only once that answer
+  // comes back is no longer within this click as far as the browser's own popup blocker is
+  // concerned (Brave is especially strict about this) and gets silently swallowed. A blank
+  // window opened right here, inside the tap, and only redirected or closed afterwards, still
+  // counts: that is the standard, reliable way to open something after an async step.
   async function play(item, chosen = null) {
     if (!item || opening) return;
+    externalLink = null;
+    let pending = null;
+    try { pending = window.open('', '_blank'); } catch { /* The popup blocker decides; the fallback below still works. */ }
     const payload = plainItem(item);
     if (chosen) { payload.version = chosen.id; payload.versionKind = chosen.kind; }
     else if (!item.isShow && hasVersions(item) && !item.version) {
       opening = item;
       const info = await versionsFor(item);
-      if (opening !== item) return;
+      if (opening !== item) { closePending(pending); return; }
       if (info.versions.length > 1) {
         const remembered = info.remembered && (info.versions.find(version => version.id === info.remembered.id) || info.versions.find(version => version.kind === info.remembered.kind));
         if (remembered) { payload.version = remembered.id; payload.versionKind = remembered.kind; }
-        else { opening = null; langChoice = { item, versions: info.versions }; return; }
+        else { opening = null; closePending(pending); langChoice = { item, versions: info.versions }; return; }
       }
     }
-    await openResolved(item, payload);
+    await openResolved(item, payload, pending);
   }
+  function closePending(win) { try { win?.close(); } catch { /* Already closed, or the popup blocker refused it in the first place. */ } }
   // Reproducir aquí: a sandboxed iframe, right on this page, instead of handing the whole tab
   // to the site. The sandbox strips exactly what makes these sites unpleasant — pop-up and
   // pop-under windows, and the whole page hijacked to an ad by one click — by simply never
@@ -287,24 +295,35 @@
   // (that needs reading its DOM, which a different origin never allows, sandboxed or not),
   // and a site that requires its own address as Referer to start the video (`needsReferrer`)
   // cannot be embedded this way at all — only the TV's own CDP navigation can fake that — so
-  // that one opens in a new tab instead, exactly as tapping the site's own link would.
+  // that one opens in the window `play` already prepared, exactly as tapping the site's own
+  // link would.
   let theater = $state(null);
-  async function openResolved(item, payload) {
+  // A manual fallback link, for a browser (Brave's Shields can be stricter than most) that
+  // refuses even a window opened from right inside this tap: a real tap on a real <a href>
+  // is about the only thing no popup blocker second-guesses.
+  let externalLink = $state(null);
+  async function openResolved(item, payload, pending = null) {
     opening = item;
     try {
       const result = await getJSON(apiBase + '/holy-api/resolve', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ item: payload, version: payload.version, kind: payload.versionKind }), timeout: 35000, retries: 0 });
-      if (opening !== item) return;
+      if (opening !== item) { closePending(pending); return; }
       opening = null;
-      if (!result.ok) { notice = result.error || 'No se encontró un reproductor para este título en tus sitios.'; return; }
+      if (!result.ok) { closePending(pending); notice = result.error || 'No se encontró un reproductor para este título en tus sitios.'; return; }
       if (result.needsReferrer) {
-        try { window.open(result.url, '_blank'); } catch { location.href = result.url; }
-        notice = `Se abrió en ${result.site || 'el sitio'}, en una pestaña nueva: ese sitio no se puede ver aquí mismo. Ahí puede haber anuncios; en la TV, Holy los limpia.`;
+        let opened = false;
+        try { if (pending && !pending.closed) { pending.location.href = result.url; opened = true; } else { opened = !!window.open(result.url, '_blank'); } }
+        catch { opened = false; }
+        externalLink = { url: result.url, site: result.site || 'el sitio' };
+        notice = opened
+          ? `Se abrió en ${result.site || 'el sitio'}, en una pestaña nueva: ese sitio no se puede ver aquí mismo. Ahí puede haber anuncios; en la TV, Holy los limpia.`
+          : `Tu navegador bloqueó la pestaña de ${result.site || 'el sitio'}. Toca el enlace de abajo para abrirla.`;
       } else {
+        closePending(pending); // Shown here instead, in the theater below.
         theater = { item, url: result.url, site: result.site || '' };
       }
       sheet = null;
     } catch {
-      if (opening === item) { opening = null; notice = 'No se pudo abrir. Revisa la conexión con la computadora.'; }
+      if (opening === item) { opening = null; closePending(pending); notice = 'No se pudo abrir. Revisa la conexión con la computadora.'; }
     }
   }
   function closeTheater() { theater = null; }
@@ -351,6 +370,12 @@
   </header>
 
   {#if notice}<div class="toast" role="status">{notice}</div>{/if}
+  {#if externalLink}
+    <div class="toast link-toast" role="status">
+      <a href={externalLink.url} target="_blank" rel="noopener noreferrer" onclick={() => { externalLink = null; }}>Abrir {externalLink.site} en una pestaña nueva ↗</a>
+      <button type="button" class="dismiss" aria-label="Cerrar" onclick={() => { externalLink = null; }}>✕</button>
+    </div>
+  {/if}
 
   {#if searchOpen}
     <div class="search-panel">
@@ -542,6 +567,9 @@
   .dot.on{background:#46d369}
 
   .toast{margin:0 16px 10px;padding:10px 14px;border-radius:10px;background:#1e1e26;font-size:14px;color:#e8e8e8;box-shadow:var(--shadow)}
+  .link-toast{display:flex;align-items:center;gap:12px;background:#24241c;border:1px solid #4a4524}
+  .link-toast a{flex:1;color:#ffd666;font-weight:700;text-decoration:underline}
+  .link-toast .dismiss{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font-size:13px}
 
   .search-panel{padding:4px 16px 10px;display:flex;flex-direction:column;gap:10px}
   .search-panel .back{align-self:flex-start;font-size:14px;color:var(--secondary);padding:4px 0}
