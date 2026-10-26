@@ -1,6 +1,7 @@
 import {randomUUID} from 'node:crypto';
 
 export const TV_PROFILE_PATH = '/tmp/luma-desktop-profile.json';
+export const TV_PEER_REGISTRY_PATH = '/tmp/luma-peer-sync.json';
 export const TV_PROFILE_MAX_BYTES = 1024 * 1024;
 const fault = (code, message) => Object.assign(Error(message), {code});
 const missing = error => error?.code === 2 || error?.code === 'ENOENT';
@@ -9,7 +10,7 @@ const valid = value => {
   catch { return false; }
 };
 
-export function createTVProfileStore({ssh, guard, commit, timeout = 3000} = {}) {
+export function createTVProfileStore({ssh, guard, commit, path = TV_PROFILE_PATH, timeout = 3000} = {}) {
   if (!ssh || typeof ssh.sftp !== 'function' || typeof guard !== 'function' || typeof commit !== 'function')
     throw fault('TV_PROFILE_CONFIG', 'El perfil compartido necesita una conexión y una reserva activas.');
   if (!Number.isFinite(timeout) || timeout <= 0)
@@ -18,6 +19,7 @@ export function createTVProfileStore({ssh, guard, commit, timeout = 3000} = {}) 
     try { if (guard() === false) throw Error(); }
     catch { throw fault('TV_PROFILE_LEASE', 'La reserva de la TV dejó de estar vigente.'); }
   }
+  if(![TV_PROFILE_PATH,TV_PEER_REGISTRY_PATH].includes(path))throw fault('TV_PROFILE_CONFIG','Ruta de perfil inválida.');
   checkLease();
 
   function usingSFTP(operation) {
@@ -80,7 +82,7 @@ export function createTVProfileStore({ssh, guard, commit, timeout = 3000} = {}) 
       return usingSFTP(async invoke => {
         let handle;
         try {
-          try { [handle] = await invoke('open', [TV_PROFILE_PATH, 'r']); }
+          try { [handle] = await invoke('open', [path, 'r']); }
           catch (error) { if (missing(error)) return null; throw error; }
           const [stats] = await invoke('fstat', [handle]);
           if (!Number.isSafeInteger(stats?.size) || stats.size < 0 || stats.size > TV_PROFILE_MAX_BYTES)
@@ -119,7 +121,7 @@ export function createTVProfileStore({ssh, guard, commit, timeout = 3000} = {}) 
         body = Buffer.from(serialized);
       } catch { return Promise.reject(fault('TV_PROFILE_FORMAT', 'El perfil compartido contiene un formato inválido.')); }
       return usingSFTP(async (invoke, check) => {
-        const temp = `${TV_PROFILE_PATH}.${randomUUID()}.tmp`;
+        const temp = `${path}.${randomUUID()}.tmp`;
         let handle, created = false, committed = false;
         try {
           created = true;

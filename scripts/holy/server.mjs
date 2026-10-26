@@ -4,9 +4,10 @@ import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync, unlinkSync, renameSync } from 'node:fs';
 import { isIP } from 'node:net';
-import { resolve, extname, join } from 'node:path';
+import { resolve, extname, join, dirname } from 'node:path';
 import { HOME_PATH, PORT } from './config.mjs';
 import {safePath} from '../desktop-config.mjs';
+import {WebPlayback} from './web-playback.mjs';
 import { packHome } from '../../src/holy.js';
 
 // Holy's server on the Mac: the home page (dist/), the rows it shows and a small
@@ -61,8 +62,9 @@ function body(req, limit = 16384) {
   });
 }
 
-export function startServer({ catalog, library, doctor, port = PORT, root = 'dist-holy', webRoot = 'dist-holy-web', imageDir = '.local/holy-images', log = console.log, status = () => ({}), fetchImage = fetch, diagnostics = new DiagnosticLog() } = {}) {
+export function startServer({ catalog, library, doctor, peerSync, port = PORT, root = 'dist-holy', webRoot = 'dist-holy-web', imageDir = '.local/holy-images', log = console.log, status = () => ({}), fetchImage = fetch, diagnostics = new DiagnosticLog() } = {}) {
   const started = Date.now();
+  const playback=new WebPlayback({library,file:join(dirname(imageDir),'web-playback-sessions.json')});
   mkdirSync(imageDir, { recursive: true });
   // Forget images not used for two weeks.
   for (const name of readdirSync(imageDir)) {
@@ -130,6 +132,7 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
     const ip = req.socket.remoteAddress?.replace('::ffff:', '');
     if (!local(ip)) { res.writeHead(403).end(); return; }
     const url = new URL(req.url, 'http://holy.local');
+    if(url.pathname==='/holy-api/profile-sync'){if(peerSync)await peerSync.handle(req,res);else res.writeHead(404).end();return;}
     const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh', '/holy-api/resolve', '/holy-api/forget'].includes(url.pathname) &&
       (req.method === 'POST' || (req.method === 'OPTIONS' && req.headers['access-control-request-method'] === 'POST'));
     if (mutation && !mutationAllowed(req, server.address()?.port || port)) {
@@ -138,7 +141,7 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
     }
     // The packaged home (file://) reads these too.
     res.setHeader('Access-Control-Allow-Origin', '*');
-    if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type' }).end(); return; }
+    if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' }).end(); return; }
     try {
       if (url.pathname === '/holy-api/home') {
         res.setHeader('Cache-Control', 'no-store');
@@ -190,13 +193,16 @@ export function startServer({ catalog, library, doctor, port = PORT, root = 'dis
         const askedKind = ['dub', 'sub', 'orig'].includes(kind) ? kind : undefined;
         const found = await catalog.resolvePlayable(item, { version: version ? String(version) : undefined, kind: askedKind }).catch(error => ({ failed: error.message }));
         if (!found || found.failed) { res.end(JSON.stringify({ ok: false, error: found?.failed || 'No se encontró un reproductor para este título en tus sitios.' })); return; }
-        library.start(found.item);
-        res.end(JSON.stringify({ ok: true, url: found.target.url, versions: found.target.versions || [], version: found.target.version || '', versionKind: found.target.versionKind || '',
+        const progress=playback.begin(found.item);
+        res.end(JSON.stringify({ ok: true, url: found.target.url, playback:progress, versions: found.target.versions || [], version: found.target.version || '', versionKind: found.target.versionKind || '',
           matched: found.target.matched !== false, site: catalog.connector(found.item.source)?.name || found.item.source,
           // The site needs a Referer from its own address to start the video; a sandboxed iframe
           // from this page cannot fake that (only the TV's CDP navigation can), so the web page
           // opens it in a new tab instead of trying to embed it.
           needsReferrer: !!found.target.referrer }));
+      } else if(url.pathname==='/holy-api/progress'&&req.method==='POST'){
+        try{const token=/^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization||'')?.[1]||'';const result=playback.update(token,await body(req,2048));sendJSON(req,res,result);}
+        catch(error){res.writeHead(error.status||400,{'Content-Type':'application/json'}).end(JSON.stringify({ok:false,error:error.message}));}
       } else if (url.pathname === '/holy-api/forget' && req.method === 'POST') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         const { key } = await body(req);

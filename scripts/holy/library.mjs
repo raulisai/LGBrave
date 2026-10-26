@@ -84,7 +84,7 @@ export class Library {
     writeFileSync(temporary, JSON.stringify({ entries: this.entries, votes: this.votes, prefs: this.prefs, asked: this.asked, tasteMeta: this.tasteMeta, languages: this.languages }, null, 2) + '\n', { mode: 0o600 });
     renameSync(temporary, this.file);
   }
-  tasteStamp() { this.tasteMeta.clock = Math.max(this.now(), this.tasteMeta.clock + 1, ...this.votes.map(v=>v.at+1), ...this.prefs.map(p=>p.at+1)); return this.tasteMeta.clock; }
+  tasteStamp() { this.tasteMeta.clock = Math.max(this.now(), this.tasteMeta.clock + 1, ...this.entries.map(e=>(e.updatedAt||0)+1), ...this.votes.map(v=>v.at+1), ...this.prefs.map(p=>p.at+1)); return this.tasteMeta.clock; }
   mergeTastes(snapshot) {
     if (!snapshot || snapshot.v !== 1 || !Array.isArray(snapshot.votes) || snapshot.votes.length > 500 || !Array.isArray(snapshot.prefs) || snapshot.prefs.length > 1000) throw Error('El archivo de gustos no es compatible.');
     const incoming = { votes: snapshot.votes.map(cleanVote).filter(Boolean), prefs: snapshot.prefs.map(cleanPref).filter(Boolean), tasteMeta: cleanTasteMeta(snapshot.tasteMeta) };
@@ -110,10 +110,10 @@ export class Library {
       show: item.show || '', episode: item.episode || null, overview: item.overview || previous?.overview || '',
       year: item.year || previous?.year || '', rating: item.rating || previous?.rating || '',
       t: sameEpisode ? previous.t : 0, duration: sameEpisode ? previous.duration : 0, finished: sameEpisode ? previous.finished : false,
-      plays: (previous?.plays || 0) + 1, watched: previous?.watched || 0, updatedAt: this.now()
+      plays: (previous?.plays || 0) + 1, watched: previous?.watched || 0, updatedAt: this.tasteStamp()
     });
     if (!entry) return null;
-    this.progressSamples.set(key, { t: entry.t, at: this.now(), url: item.url });
+    this.progressSamples.set(key, { t: entry.t, d: entry.duration, at: this.now(), url: item.url });
     this.entries = [entry, ...this.entries.filter(other => other.key !== key)];
     this.save();
     return entry;
@@ -122,12 +122,14 @@ export class Library {
     const entry = this.get(key);
     if (!entry || entry.url !== url || !(t >= 0) || !(duration > 0) || !Number.isFinite(t) || !Number.isFinite(duration)) return null;
     const previous = this.progressSamples.get(key);
+    // An idle/paused device must not replace another device's newer position.
+    if(previous?.url===url&&Math.round(previous.t)===Math.round(t)&&Math.round(previous.d)===Math.round(duration)){this.progressSamples.set(key,{...previous,at:this.now()});return entry;}
     const elapsed = previous ? Math.max(0, (this.now() - previous.at) / 1000) : 0;
     const advance = previous?.url === url ? t - previous.t : 0;
     const watched = advance > 0 && elapsed > 0 && advance <= elapsed + 2 ? Math.min(30, elapsed, advance) : 0;
     entry.watched = Math.max(entry.watched || 0, 0) + watched;
-    this.progressSamples.set(key, { t, at: this.now(), url });
-    Object.assign(entry, { t: Math.round(t), duration: Math.round(duration), finished: FINISHED(t, duration), updatedAt: this.now() });
+    this.progressSamples.set(key, { t, d: duration, at: this.now(), url });
+    Object.assign(entry, { t: Math.round(t), duration: Math.round(duration), finished: FINISHED(t, duration), updatedAt: this.tasteStamp() });
     this.save();
     return entry;
   }

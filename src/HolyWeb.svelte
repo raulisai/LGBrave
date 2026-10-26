@@ -21,7 +21,7 @@
   let episodesView = $state(null);
   let sheet = $state(null);
   let langChoice = $state(null);
-  let opening = $state(null);
+  let opening = $state.raw(null);
   let notice = $state('');
   let connected = $state(false);
   let noticeTimer;
@@ -302,6 +302,7 @@
   // refuses even a window opened from right inside this tap: a real tap on a real <a href>
   // is about the only thing no popup blocker second-guesses.
   let externalLink = $state(null);
+  let companionReady=$state(false);
   async function openResolved(item, payload, pending = null) {
     opening = item;
     try {
@@ -309,6 +310,7 @@
       if (opening !== item) { closePending(pending); return; }
       opening = null;
       if (!result.ok) { closePending(pending); notice = result.error || 'No se encontró un reproductor para este título en tus sitios.'; return; }
+      if(result.playback){window.postMessage({type:'HOLY_PLAYBACK_OPEN',server:apiBase,url:result.url,playback:result.playback,embedded:!result.needsReferrer},location.origin);}
       if (result.needsReferrer) {
         let opened = false;
         try { if (pending && !pending.closed) { pending.location.href = result.url; opened = true; } else { opened = !!window.open(result.url, '_blank'); } }
@@ -346,10 +348,12 @@
 
   onMount(() => {
     try { const cached = unpackHome(JSON.parse(localStorage.getItem('holy-web-home') || 'null')); if (cached?.rows) data = cached; } catch { /* No cache yet. */ }
+    const companionMessage=event=>{if(event.source===window&&event.origin===location.origin&&event.data?.type==='HOLY_COMPANION_READY')companionReady=true;};
+    window.addEventListener('message',companionMessage);window.postMessage({type:'HOLY_COMPANION_HELLO'},location.origin);
     load(); checkHealth();
     const homeTimer = setInterval(load, 20000);
     const healthTimer = setInterval(checkHealth, 20000);
-    return () => { clearInterval(homeTimer); clearInterval(healthTimer); clearTimeout(cacheTimer); clearTimeout(noticeTimer); clearTimeout(searchTimer); stopListening(); };
+    return () => {window.removeEventListener('message',companionMessage); clearInterval(homeTimer); clearInterval(healthTimer); clearTimeout(cacheTimer); clearTimeout(noticeTimer); clearTimeout(searchTimer); stopListening(); };
   });
 </script>
 
@@ -372,6 +376,7 @@
   {#if notice}<div class="toast" role="status">{notice}</div>{/if}
   {#if externalLink}
     <div class="toast link-toast" role="status">
+      <span>{companionReady?'Progreso automático disponible con Holy Companion.':'Para guardar el minuto de este navegador, activa Holy Companion. Los Me gusta se guardan igualmente.'}</span>
       <a href={externalLink.url} target="_blank" rel="noopener noreferrer" onclick={() => { externalLink = null; }}>Abrir {externalLink.site} en una pestaña nueva ↗</a>
       <button type="button" class="dismiss" aria-label="Cerrar" onclick={() => { externalLink = null; }}>✕</button>
     </div>

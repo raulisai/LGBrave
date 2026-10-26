@@ -31,7 +31,7 @@ const newest = (items, keyOf, field) => {
 };
 export function mergeLibraryState(left, right) {
   const a = cleanTasteMeta(left.tasteMeta), b = cleanTasteMeta(right.tasteMeta);
-  const tasteMeta = cleanTasteMeta({ clock: Math.max(a.clock,b.clock,a.resetAt,b.resetAt,...[...(left.votes||[]),...(right.votes||[]),...(left.prefs||[]),...(right.prefs||[]),...Object.values(cleanLanguages(left.languages)),...Object.values(cleanLanguages(right.languages))].map(item=>stamp(item.at))), resetAt: Math.max(a.resetAt, b.resetAt),
+  const tasteMeta = cleanTasteMeta({ clock: Math.max(a.clock,b.clock,a.resetAt,b.resetAt,...[...(left.entries||[]),...(right.entries||[])].map(item=>stamp(item.updatedAt)),...[...(left.votes||[]),...(right.votes||[]),...(left.prefs||[]),...(right.prefs||[]),...Object.values(cleanLanguages(left.languages)),...Object.values(cleanLanguages(right.languages))].map(item=>stamp(item.at))), resetAt: Math.max(a.resetAt, b.resetAt),
     removedVotes: mergeMarkers(a.removedVotes, b.removedVotes), removedPrefs: mergeMarkers(a.removedPrefs, b.removedPrefs), removedEntries: mergeMarkers(a.removedEntries, b.removedEntries), removedLanguages: mergeMarkers(a.removedLanguages,b.removedLanguages) });
   const survives = (item, key, removed, field) => (!tasteMeta.resetAt || item[field] > tasteMeta.resetAt) && (!removed[key] || item[field] > removed[key]);
   const languageItems=newest([...Object.entries(cleanLanguages(left.languages)),...Object.entries(cleanLanguages(right.languages))].map(([key,item])=>({key,...item})),item=>item.key,'at');

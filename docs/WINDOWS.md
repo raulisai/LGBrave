@@ -1,6 +1,14 @@
-# Holy y Luma en Windows · código/EXE 0.9.11, TV Luma 0.9.2 / Holy 0.9.5
+# Holy y Luma en Windows · código 0.9.13, EXE 0.9.11, TV Luma 0.9.2 / Holy 0.9.5
 
 El mismo proyecto ejecuta los dos navegadores de la TV desde Windows o macOS. Holy conserva catálogo, conectores, reproducción y gustos de `origin/holy`; Luma conserva su interfaz y sus marcadores. No es el navegador Brave completo: ambos reutilizan su motor de filtrado.
+
+## Sincronización 0.9.13
+
+Windows ya ejecuta el canal directo cifrado entre bibliotecas. Comparte Me gusta, gustos, idiomas e historial/progreso aunque sea el equipo de respaldo. Tras vincularse una vez por la TV, los datos pueden viajar directamente por la red local con la TV apagada; cada equipo conserva su copia y combina los cambios al reconectarse. La clave queda fuera del proyecto, en el directorio del usuario.
+
+**Mac pendiente de activar:** tras actualizar el repositorio, ejecutar mac/Activar-sincronizacion.command. Instrucciones completas: docs/TAREAS-MAC-SINCRONIZACION.md. No se afirma que la Mac anterior ya esté ejecutando el canal nuevo.
+
+Comandos: npm run profile:setup, npm run profile:status. Para el minuto de los reproductores externos del navegador se preparó Holy Companion: npm run browser:companion y cargar artifacts/holy-companion una vez en Chrome/Brave/Edge, con los permisos que apruebe el usuario. La TV ya registra el minuto sin complemento; los Me gusta del catálogo tampoco lo requieren. Detalle: docs/SINCRONIZACION-DISPOSITIVOS.md.
 
 ## Actualización comprobada en Windows (2026-10-26)
 
@@ -79,7 +87,7 @@ El inicio de Holy recibe la dirección del equipo activo mediante CDP, incluso s
 
 El equipo activo publica preferencias, buscador, marcadores, historial y gustos por **SSH/SFTP autenticado**, usando una caché temporal de hasta 1 MiB en `/tmp/luma-desktop-profile.json` de la TV. El siguiente equipo importa las preferencias y combina la biblioteca por fecha, con marcas de borrado para evitar que reaparezcan valoraciones eliminadas. Desde 0.9.11, el perfil incluye también el idioma elegido por serie, con fechas y marcas de borrado (máximo 300, conservando las selecciones recientes). Para compartir esa nueva preferencia ambos equipos necesitan 0.9.11. Cada equipo conserva su copia persistente; antes de la primera importación guarda un respaldo `.before-sync`. No se comparten llaves, sesiones web ni enlaces firmados de reproductores. Catálogo, listas y reglas aprendidas siguen siendo locales.
 
-La caché se pierde al reiniciar la TV: en ese caso el primer equipo que conecta vuelve a publicarla desde su copia local. No es sincronización en la nube y no asegura recuperar cambios del equipo apagado que nunca alcanzó a publicarlos. La Mac observada con 0.9.10 coopera con el relevo y el perfil base; necesita actualizar su código a 0.9.11 para compartir también idiomas. Los metadatos de la reproducción actual se conservan en la página para que el otro equipo pueda adoptar el seguimiento sin navegar ni buscar otro segundo del vídeo. Depende de que el reproductor siga abierto y de que el equipo anterior haya publicado esos metadatos; esto se probó de forma simulada.
+La caché se pierde al reiniciar la TV: en ese caso el primer equipo que conecta vuelve a publicarla desde su copia local. No es sincronización en la nube y no asegura recuperar cambios del equipo apagado que nunca alcanzó a publicarlos. La Mac anterior coopera con el relevo y el perfil base; necesita cargar 0.9.13 y ejecutar el activador para usar el canal continuo, también estando en respaldo. El caché SSH descrito aquí se conserva para el relevo y compatibilidad; la biblioteca nueva usa además el canal directo cifrado. Los metadatos de la reproducción actual se conservan en la página para que el otro equipo pueda adoptar el seguimiento sin navegar ni buscar otro segundo del vídeo. Depende de que el reproductor siga abierto y de que el equipo anterior haya publicado esos metadatos; esto se probó de forma simulada.
 
 La interfaz antigua de Holy puede seguir solicitando datos a la IP del Mac apagado. El puente reconoce únicamente ese inicio privado y redirige sus recursos/API a la computadora activa. No recarga ni cambia la página. Este arreglo permitió recuperar el catálogo en la TV desde Windows; el usuario lo confirmó con la Mac apagada.
 

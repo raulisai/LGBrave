@@ -37,7 +37,10 @@ export async function status({probe = false} = {}) {
   return {...live,state,error:state==='standby'?'':live?.error||'',...(state==='standby'?{standbyReason:live?.error||'',checks:[label]}:{}),repairNeeded,label,running:!!live,host:lanAddress(),tv,web,
     ...(probe ? {tvReachable:!!tv.host && await tcpOpen(tv.host,tv.port,1200)} : {}),
     build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html')),holyWeb:webBuilt}, config:config(),
-    history:live?.profile?.state==='synced'?'Preferencias e historial compartidos mediante la TV con las computadoras que usan esta versión.':
+    history:live?.peerSync?.state==='synced'?'Gustos, historial, idiomas y progreso sincronizados entre tus computadoras por la red local.':
+      live?.peerSync?.state==='needs-update'?'Vínculo de sincronización creado. Falta actualizar el otro equipo para combinar las bibliotecas automáticamente.':
+      live?.peerSync?.paired?'Cambios guardados en esta computadora; se compartirán cuando el otro equipo esté conectado.':
+      live?.profile?.state==='synced'?'Preferencias e historial compartidos mediante la TV con las computadoras que usan esta versión.':
       'Copia local activa. El perfil se comparte por SSH al conectar con la TV; ambos equipos deben usar esta versión.'};
 }
 export async function start() {

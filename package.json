@@ -1,6 +1,6 @@
 {
   "name": "lg-tv-lab",
-  "version": "0.9.12",
+  "version": "0.9.13",
   "private": true,
   "type": "module",
   "scripts": {
@@ -41,7 +41,10 @@
     "windows:install": "node scripts/install-windows-app.mjs",
     "holy:tastes": "node scripts/holy/taste-transfer.mjs",
     "holy:lists:update": "node scripts/update-known-lists.mjs",
-    "debug:export": "node scripts/debug-export.mjs"
+    "debug:export": "node scripts/debug-export.mjs",
+    "profile:setup": "node scripts/profile-sync.mjs setup",
+    "profile:status": "node scripts/profile-sync.mjs status",
+    "browser:companion": "node scripts/build-browser-companion.mjs"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "7.3.1",

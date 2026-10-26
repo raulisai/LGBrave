@@ -17,6 +17,8 @@ import {FilterUpdates} from '../../scripts/filter-updates.mjs';
 import {installCrashGuard} from '../../scripts/crash-guard.mjs';
 import {Preferences} from '../../scripts/preferences.mjs';
 import {ProfileState} from './profile-state.mjs';
+import {PeerSync} from './peer-sync.mjs';
+import {connectSession} from '../../scripts/inspector-tunnel.mjs';
 import {openInspectorTunnel} from '../../scripts/inspector-tunnel.mjs';
 import {busyPorts, describeBusy} from './port-check.mjs';
 
@@ -41,6 +43,7 @@ if (busy.length) { release(); await conflict(describeBusy(busy)); }
 const library = new Library();
 const preferences=new Preferences();
 const profiles=new ProfileState({preferences,library,diagnostics});
+const peerSync=process.env.LUMA_OFFLINE_TEST==='1'?null:new PeerSync({library,host:lanAddress,peers:()=>config().peers,device:()=>config().device,connect:connectSession,diagnostics}).start();
 let activeStore;
 const catalog = new Catalog({log:console.log,diagnostics});
 if (process.env.LUMA_OFFLINE_TEST !== '1') catalog.start(console.log);
@@ -62,8 +65,8 @@ const startedAddress = lanAddress();
 const doctor = createDoctor({catalog, library, runtime, tv:tvAddress(), startedAddress, currentAddress:lanAddress,
   supervised:!!process.send, restart:() => { finish().then(() => process.exit(1)); },
   autostart:createAutostart()});
-const server = startServer({catalog, library, doctor, diagnostics,
-  status:() => ({tv:runtime.state || 'starting', computer:lanAddress(),profile:profiles.status()})});
+const server = startServer({catalog, library, doctor, diagnostics, peerSync,
+  status:() => ({tv:runtime.state || 'starting', computer:lanAddress(),profile:profiles.status(),peerSync:peerSync?.status()||null})});
 await import('../../scripts/fixture-server.mjs');
 const updates = process.env.LUMA_OFFLINE_TEST === '1' ? null : new FilterUpdates().start();
 const abort = new AbortController();
@@ -71,7 +74,7 @@ let finishing;
 function finish() {
   if (finishing) return finishing;
   diagnostics.event('service','stopping');
-  abort.abort(); clearInterval(statusTimer); updates?.stop(); catalog.stop(); server.close();
+  abort.abort(); clearInterval(statusTimer); updates?.stop();peerSync?.stop(); catalog.stop(); server.close();
   finishing = profiles.flush().catch(()=>{}).then(()=>runtime.close()).finally(() => {profiles.disconnect();release();});
   return finishing;
 }
@@ -80,7 +83,7 @@ const report = () => {
   const state = runtime.state || 'starting';
   const status = {state, app:runtime.cdp?.target.description || '', host:lanAddress(), tv:tvAddress(),
     error:runtime.lastError || '', holder:runtime.holder || '', paused:Math.max(0, Math.round((runtime.pausedUntil - Date.now()) / 1000)),
-    profile:profiles.status(), updated:Date.now(), pid:process.pid};
+    profile:profiles.status(),peerSync:peerSync?.status()||null, updated:Date.now(), pid:process.pid};
   const stateKey=[state,status.app,status.error,status.profile.state].join('|');
   if(stateKey!==reportedState){reportedState=stateKey;diagnostics.event('connection','state',{state,error:status.error,phase:status.profile.state},status.error?'warn':'info');}
   process.send?.({type:'status', status});
