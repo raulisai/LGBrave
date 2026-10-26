@@ -9,6 +9,7 @@ import { CONNECTORS } from './holy/connectors.mjs';
 import { Library, entryKey as entryKeyOf } from './holy/library.mjs';
 import { Catalog, sameTitle, episodeOf, sameEpisode } from './holy/catalog.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
+import { resumeSource } from './holy/page-scripts.mjs';
 import {origin, HOME_PATH, PORT} from './holy/config.mjs';
 const home = origin() + HOME_PATH;
 import { startServer, mutationAllowed } from './holy/server.mjs';
@@ -780,7 +781,10 @@ try {
         calls.push({ method, params });
         if (method === 'Page.getFrameTree') return { frameTree: { frame: { id: 'main', url: 'https://example.com/' } } };
         if (method === 'Page.addScriptToEvaluateOnNewDocument') return { identifier: String(calls.length) };
-        if (method === 'Runtime.evaluate') return { result: { value: params.expression.includes('v.play()') ? true : { url: 'https://p.example/', top: true, videos: [video], action: '' } } };
+        if (method === 'Runtime.evaluate') {
+          if (params.expression === resumeSource(video.d)) { video = { ...video, paused: false }; return { result: { value: true } }; }
+          return { result: { value: { url: 'https://p.example/', top: true, videos: [video], action: '' } } };
+        }
         return {};
       },
       async evaluate(expression) { drawn.push(expression); return 'https://example.com/'; },
@@ -819,8 +823,10 @@ try {
     await key(39); await key(39); assert.equal(bridge.session.card.focus, 2);
     await key(40); assert.equal(bridge.session.card.focus, -1);
     // «Seguir viendo» plays the video again; playing hides the panel.
+    const beforeResume = calls.length;
     await key(38); await key(13);
-    assert.ok(calls.some(call => call.method === 'Runtime.evaluate' && call.params.expression.includes('v.play()')));
+    assert.equal(video.paused, false, 'Seguir viendo must explicitly resume the observed feature');
+    assert.ok(calls.slice(beforeResume).some(call => call.method === 'Runtime.evaluate' && call.params.expression === resumeSource(1400) && call.params.userGesture === true && call.params.awaitPromise === true), 'The pause action must request the feature duration with a user gesture');
     video = { ...video, paused: false, t: 601 }; await bridge.watch();
     assert.equal(bridge.session.card, null);
     // Paused again → «Siguiente» plays 1179.

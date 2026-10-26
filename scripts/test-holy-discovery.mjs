@@ -27,11 +27,18 @@ try {
   assert.ok(!categoryRows({ items: [{ ...film, match: null, rating: 'TV-MA', localWatched: 0 }] }, 'movie', 'Terror').some(row => ['category-rated', 'category-watched', 'category-recommended'].includes(row.id)));
 
   const file = join(dir, 'playback.jsonl'), log = new PlaybackLog(file, 500);
-  const session = { token: 5, item: film, target: 'https://name:password@player.example/v?token=SECRET#private', phase: 'playing', position: { t: 600, d: 3000 } };
+  const session = { token: 5, item: film, choice:{kind:'dub',version:'SECRET_ID'},versionKind:'dub',target: 'https://name:password@player.example/v?token=SECRET#private', phase: 'playing', position: { t: 600, d: 3000 } };
   log.write('video-stalled', session, { ready: 2, mediaError: 3, url: session.target, error: 'SECRET', reason: 'failed https://test.example/?secret=SECRET' });
   const row = JSON.parse(readFileSync(file, 'utf8'));
+  assert.equal(row.requestedKind,'dub');assert.equal(row.playingKind,'dub');
   assert.equal(row.host, 'player.example'); assert.equal(row.position, 600); assert.equal(row.mediaError, 3);
   assert.ok(!readFileSync(file, 'utf8').includes('SECRET')); assert.match(row.at, /^\d{4}-/);
+  const privateLogFile=join(dir,'playback-enum.jsonl');
+  new PlaybackLog(privateLogFile).write('language', {...session,choice:{kind:'SECRET_KIND'},versionKind:'https://private.example/?token=SECRET'}, {requestedKind:'SECRET',playingKind:'SECRET'});
+  const privateRow=JSON.parse(readFileSync(privateLogFile,'utf8'));assert.equal(privateRow.requestedKind,'');assert.equal(privateRow.playingKind,'');assert.equal(readFileSync(privateLogFile,'utf8').includes('SECRET'),false);
+  const inferredFile=join(dir,'playback-version.jsonl');
+  new PlaybackLog(inferredFile).write('language',{...session,versionKind:undefined,version:'SECRET_ID',versions:[{id:'SECRET_ID',kind:'sub'}]});
+  const inferredRow=JSON.parse(readFileSync(inferredFile,'utf8'));assert.equal(inferredRow.playingKind,'sub');assert.equal(readFileSync(inferredFile,'utf8').includes('SECRET_ID'),false);
   for (let i = 0; i < 10; i++) log.write('test', session);
   assert.ok(existsSync(file + '.1')); assert.ok(readFileSync(file, 'utf8').length < 1000);
   new PlaybackLog(dir).write('cannot-write', session); // Diagnostics cannot crash playback.

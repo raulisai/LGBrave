@@ -1,0 +1,373 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "source-cuevana",
+      "scope": "controlled",
+      "sources": [
+        "cuevana"
+      ],
+      "description": "Formato conocido de cuevana: parser, resolución, Referer, idioma, alternativas y fallo sin Internet.",
+      "evidence": [
+        "scripts/fixtures/playback/source-contracts.mjs"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "source-repelishd",
+      "scope": "controlled",
+      "sources": [
+        "repelishd"
+      ],
+      "description": "Formato conocido de repelishd: parser, resolución, Referer, idioma, alternativas y fallo sin Internet.",
+      "evidence": [
+        "scripts/fixtures/playback/source-contracts.mjs"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "source-jkanime",
+      "scope": "controlled",
+      "sources": [
+        "jkanime"
+      ],
+      "description": "Formato conocido de jkanime: parser, resolución, Referer, idioma, alternativas y fallo sin Internet.",
+      "evidence": [
+        "scripts/fixtures/playback/source-contracts.mjs"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "source-animeyt",
+      "scope": "controlled",
+      "sources": [
+        "animeyt"
+      ],
+      "description": "Formato conocido de animeyt: parser, resolución, Referer, idioma, alternativas y fallo sin Internet.",
+      "evidence": [
+        "scripts/fixtures/playback/source-contracts.mjs"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "source-doramasflix",
+      "scope": "controlled",
+      "sources": [
+        "doramasflix"
+      ],
+      "description": "Formato conocido de doramasflix: parser, resolución, Referer, idioma, alternativas y fallo sin Internet.",
+      "evidence": [
+        "scripts/fixtures/playback/source-contracts.mjs"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "source-doramasmp4",
+      "scope": "controlled",
+      "sources": [
+        "doramasmp4"
+      ],
+      "description": "Formato conocido de doramasmp4: parser, resolución, Referer, idioma, alternativas y fallo sin Internet.",
+      "evidence": [
+        "scripts/fixtures/playback/source-contracts.mjs"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "source-asialiveaction",
+      "scope": "controlled",
+      "sources": [
+        "asialiveaction"
+      ],
+      "description": "Formato conocido de asialiveaction: parser, resolución, Referer, idioma, alternativas y fallo sin Internet.",
+      "evidence": [
+        "scripts/fixtures/playback/source-contracts.mjs"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "between-steps-spanish",
+      "scope": "tv-user-confirmed",
+      "sources": [
+        "doramasflix"
+      ],
+      "description": "Between Steps 4 y 5, español latino, Streamtape: avance e imagen/audio confirmados por usuario.",
+      "evidence": [
+        "docs/BETWEEN-STEPS-TV.md",
+        "docs/BETWEEN-STEPS-ESPANOL-20261026.md"
+      ],
+      "tests": [
+        "scripts/test-holy-ui-opening.mjs",
+        "scripts/test-holy-versions.mjs"
+      ]
+    },
+    {
+      "id": "between-steps-resume-pause",
+      "scope": "tv-metrics",
+      "sources": [
+        "doramasmp4"
+      ],
+      "description": "Capítulo5 reanudó tras falsa pausa;132s de pausa mantuvieron segundo/proveedor y después avanzó. No acredita audio español.",
+      "evidence": [
+        "docs/REANUDACION-BLOQUEADA-20261026.md"
+      ],
+      "tests": [
+        "scripts/test-holy-pause.mjs",
+        "scripts/test-playback-media.mjs"
+      ]
+    },
+    {
+      "id": "cuevana-three-films",
+      "scope": "tv-metrics",
+      "sources": [
+        "cuevana"
+      ],
+      "description": "Omaha, Bad Apples, Solomamma; Hyper: tiempo/fotogramas y salto60s. Audio silenciado.",
+      "evidence": [
+        "docs/CUEVANA-VALIDATION.md"
+      ],
+      "tests": [
+        "scripts/test-player-assist.mjs",
+        "scripts/test-shields.mjs",
+        "scripts/test-navigation-shield.mjs",
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "jkanime-three-episodes",
+      "scope": "tv-metrics",
+      "sources": [
+        "jkanime"
+      ],
+      "description": "One Piece1180/1179 y Hyouken no MajutsushiII3; Desu: tiempo/fotogramas, salto60s y QR observado ausente.",
+      "evidence": [
+        "docs/JKANIME-VALIDATION.md"
+      ],
+      "tests": [
+        "scripts/test-player-assist.mjs",
+        "scripts/test-navigation-shield.mjs",
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
+      "id": "cuevana-browser-latino",
+      "scope": "desktop-http",
+      "sources": [
+        "cuevana"
+      ],
+      "description": "Ninja Wars latino resuelto en Holy web; no es prueba de vídeo en LG.",
+      "evidence": [
+        "docs/SOUL.md"
+      ],
+      "tests": [
+        "scripts/test-holy-web.mjs",
+        "scripts/test-web-progress.mjs",
+        "scripts/test-companion.mjs"
+      ]
+    },
+    {
+      "id": "handoff-audio",
+      "scope": "controlled",
+      "sources": [
+        "doramasflix",
+        "doramasmp4"
+      ],
+      "description": "Relevo conserva pausa/posición/tipo de idioma aunque haya cambiado proveedor.",
+      "evidence": [
+        "scripts/test-playback-handoff.mjs"
+      ],
+      "tests": [
+        "scripts/test-playback-handoff.mjs",
+        "scripts/test-profile-handoff.mjs",
+        "scripts/test-shared-languages.mjs"
+      ]
+    },
+    {
+      "id": "startup-error-recovery",
+      "scope": "controlled",
+      "sources": [
+        "cuevana",
+        "repelishd",
+        "jkanime",
+        "animeyt",
+        "doramasflix",
+        "doramasmp4",
+        "asialiveaction"
+      ],
+      "description": "Carga inicial, pausa larga, error, vídeo desaparecido, reanudación y recuperación limitada.",
+      "evidence": [
+        "docs/HOLY-PLAYBACK-CATEGORIES.md",
+        "docs/VALIDACION-PAUSA-20261026.md"
+      ],
+      "tests": [
+        "scripts/test-holy-robust.mjs",
+        "scripts/test-holy-discovery.mjs",
+        "scripts/test-holy-pause.mjs"
+      ]
+    },
+    {
+      "id": "public-pages-only",
+      "scope": "navigation-only",
+      "sources": [],
+      "description": "Example/MDN/BBC y13marcadores: carga/filtrado; no acreditan reproducción de todos esos sitios.",
+      "evidence": [
+        "docs/BROWSER-VALIDATION.md",
+        "docs/SOUL.md"
+      ],
+      "tests": [
+        "scripts/test-bridge.mjs",
+        "scripts/test-lab-runtime.mjs"
+      ]
+    },
+    {
+      "id": "repelishd-klara",
+      "scope": "tv-metrics",
+      "sources": [
+        "repelishd"
+      ],
+      "description": "Klara y el Sol / Mixdrop: avance0.231→10.274s, silenciado; histórico, no reproduccióncompleta.",
+      "evidence": [
+        "evidence/holy/tv/validation.json",
+        "docs/HOLY.md"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs",
+        "scripts/test-playback-media.mjs"
+      ]
+    },
+    {
+      "id": "animeyt-tokyo",
+      "scope": "tv-metrics",
+      "sources": [
+        "animeyt"
+      ],
+      "description": "Tokyo RevengersT4 / MP4directo:1→11s, silenciado; histórico. Recurso archive.org de120s de otra prueba no acredita episodio completo.",
+      "evidence": [
+        "docs/HOLY.md",
+        "evidence/holy/tv/validation.json"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs",
+        "scripts/test-playback-media.mjs"
+      ]
+    },
+    {
+      "id": "asialiveaction-start",
+      "scope": "tv-metrics",
+      "sources": [
+        "asialiveaction"
+      ],
+      "description": "Merry Berry Love / ok.ru:10→50.241s, silenciado. Reanudación posterior50→50 no acreditó continuidad.",
+      "evidence": [
+        "evidence/holy/tv/okru-hold-validation.json",
+        "docs/HOLY.md"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs",
+        "scripts/test-playback-media.mjs"
+      ]
+    },
+    {
+      "id": "flix-teach-me",
+      "scope": "tv-metrics",
+      "sources": [
+        "doramasflix"
+      ],
+      "description": "Teach Me Touch Me / Streamwish:1.2→21.16s y reanudación20→24.88s. Histórico silenciado.",
+      "evidence": [
+        "evidence/holy/tv/doramasflix-validation.json",
+        "docs/HOLY.md"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs",
+        "scripts/test-playback-media.mjs"
+      ]
+    },
+    {
+      "id": "mp4-oops",
+      "scope": "tv-metrics",
+      "sources": [
+        "doramasmp4"
+      ],
+      "description": "Oops! Mysterious Sounds / ok.ru:0.52→10.52s. Histórico silenciado.",
+      "evidence": [
+        "evidence/holy/tv/validation.json",
+        "docs/HOLY.md"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs",
+        "scripts/test-playback-media.mjs"
+      ]
+    },
+    {
+      "id": "jkanime-nine-episodes",
+      "scope": "tv-metrics",
+      "sources": [
+        "jkanime"
+      ],
+      "description": "One Piece1180,1179,1150,1100,1000,800,500,100,1: avance, posición y Atrás; histórico silenciado.",
+      "evidence": [
+        "evidence/holy/tv/episodes-validation.json",
+        "docs/HOLY.md"
+      ],
+      "tests": [
+        "scripts/test-holy-next.mjs",
+        "scripts/test-holy-robust.mjs",
+        "scripts/test-playback-media.mjs"
+      ]
+    },
+    {
+      "id": "cuevana-holy-films",
+      "scope": "tv-metrics",
+      "sources": [
+        "cuevana"
+      ],
+      "description": "Papi Ricky5→29.792s; Timbiriche0.72→10.72s; histórico silenciado.",
+      "evidence": [
+        "evidence/holy/tv/validation.json",
+        "docs/HOLY.md"
+      ],
+      "tests": [
+        "scripts/test-playback-sources.mjs",
+        "scripts/test-holy-robust.mjs"
+      ]
+    },
+    {
+      "id": "hope-fallback",
+      "scope": "tv-metrics",
+      "sources": [
+        "doramasflix",
+        "cuevana"
+      ],
+      "description": "Hope / DoramasFlix sin servidores→Cuevana:0.833→15.875s. Histórico silenciado; no prueba cambio automático de idioma.",
+      "evidence": [
+        "evidence/holy/tv/fallback-validation.json",
+        "docs/HOLY.md"
+      ],
+      "tests": [
+        "scripts/test-holy-robust.mjs",
+        "scripts/test-holy-versions.mjs"
+      ]
+    }
+  ],
+  "caveats": [
+    "Evidencia histórica no se reejecuta físicamente en el gate.",
+    "Casos muted no confirman audio.",
+    "latest validation.json contiene advancing=false en AsiaLiveAction y reanudación deCuevana; no declarar9/9 reproducciones completas.",
+    "No hay garantía de disponibilidad de cada título ni de todos los servidores externos."
+  ]
+}

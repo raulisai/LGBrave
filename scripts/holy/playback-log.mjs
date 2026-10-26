@@ -8,10 +8,12 @@ export class PlaybackLog {
   write(event, session, detail = {}) {
     try {
       const item = session?.item || {};
+      const kind = value => ['dub','sub','orig'].includes(value) ? value : '';
       const host = value => { try { return new URL(value).hostname; } catch { return ''; } };
       const row = { at: new Date().toISOString(), runId: this.runId || '', event, session: session?.token || 0,
         title: String(item.title || '').slice(0, 160), episode: item.episode || null, source: item.source || '',
         host: host(session?.target), phase: session?.phase || '', position: session?.position?.t || 0,
+        requestedKind: kind(session?.choice?.kind), playingKind: kind(session?.versionKind || session?.versions?.find(version=>version.id===session?.version)?.kind),
         duration: session?.position?.d || 0, attempts: session?.rescues || 0 };
       for (const key of ['reason', 'ready', 'network', 'mediaError', 'bufferAhead', 'paused', 'seconds', 'phase']) {
         if (['string', 'number', 'boolean'].includes(typeof detail[key])) row[key] = typeof detail[key] === 'string' ? redact(detail[key]).slice(0, 200) : detail[key];

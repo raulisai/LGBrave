@@ -295,19 +295,35 @@ export function holyTheater() {
   return !!target;
 }
 
-// Resume: put the main video (shadow DOM included) at the saved second.
-export function holySeek(seconds) {
+// Resume the observed feature, never an unrelated advert in an earlier frame.
+// A known duration is a strict match; an unknown duration prefers the longest
+// ready feature and then its rendered area. The helpers include shadow DOM.
+export function holySeek(seconds, expectedDuration = 0) {
   const deep = (root, out = []) => { out.push(...root.querySelectorAll('video')); for (const node of root.querySelectorAll('*')) if (node.shadowRoot) deep(node.shadowRoot, out); return out; };
-  for (const video of deep(document)) {
-    if (Number.isFinite(video.duration) && video.duration > seconds + 30) {
-      if (video.currentTime < seconds - 5) video.currentTime = seconds;
-      return true;
-    }
-  }
-  return false;
+  const candidates = [...new Set(deep(document))].filter(video => Number.isFinite(video.duration) && video.duration > seconds + 30 && video.readyState >= 1);
+  const matching = expectedDuration > 60 ? candidates.filter(video => Math.abs(video.duration - expectedDuration) < 2) : candidates;
+  const video = matching.sort((a,b) => b.duration - a.duration || b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight)[0];
+  if (!video) return false;
+  try { if (Math.abs(video.currentTime - seconds) > 5) video.currentTime = seconds; } catch { return false; }
+  // Some players accept the assignment syntactically but defer/ignore the seek.
+  return Number.isFinite(video.currentTime) && Math.abs(video.currentTime - seconds) <= 5;
 }
 
-export const seekSource = seconds => `(${holySeek.toString()})(${Number(seconds) || 0})`;
+export async function holyResume(expectedDuration = 0) {
+  const deep = (root, out = []) => { out.push(...root.querySelectorAll('video')); for (const node of root.querySelectorAll('*')) if (node.shadowRoot) deep(node.shadowRoot, out); return out; };
+  const candidates = [...new Set(deep(document))].filter(video => Number.isFinite(video.duration) && video.duration > 60 && !video.ended);
+  const matching = expectedDuration > 60 ? candidates.filter(video => Math.abs(video.duration - expectedDuration) < 2) : candidates;
+  const video = matching.sort((a,b) => b.duration - a.duration || b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight)[0];
+  if (!video) return false;
+  let timer;
+  try {
+    await Promise.race([video.play(), new Promise((resolve,reject) => { timer = setTimeout(() => reject(Error('play timed out')), 2500); })]);
+    return !video.paused;
+  } catch { return false; } finally { clearTimeout(timer); }
+}
+
+export const seekSource = (seconds, expectedDuration = 0) => `(${holySeek.toString()})(${Number(seconds) || 0},${Number(expectedDuration) || 0})`;
+export const resumeSource = expectedDuration => `(${holyResume.toString()})(${Number(expectedDuration) || 0})`;
 export const curtainSource = data => `(${holyCurtain.toString()})(${JSON.stringify(data)});`;
 export const remoteSource = (homes, home = '', world = '') => `(${holyRemote.toString()})(${JSON.stringify(homes)},${JSON.stringify(home)},${JSON.stringify(world)});`;
 // The live connection stamps each page every couple of seconds.

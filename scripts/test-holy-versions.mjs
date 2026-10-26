@@ -102,6 +102,35 @@ try {
     const found=await c.resolvePlayable({source:'sub-only',url:'https://sub.example/e1',title:'T',kind:'dorama'},{kind:'dub'});assert.equal(found.item.source,'dub-only');assert.equal(found.target.versionKind,'dub');c.stop();
   });
 
+  await check('IDs de idioma locales: una colisión no impone subtítulos sobre doblaje entre fuentes', async () => {
+    const original={id:'original',site:'https://original.example/',versions:async()=>[]};
+    const other={id:'other',site:'https://other.example/',versions:async()=>[
+      {id:'38',kind:'sub',label:'Subtítulos en español',target:{url:'https://player.example/sub'}},
+      {id:'9',kind:'dub',label:'Español latino',target:{url:'https://player.example/dub'}}]};
+    assert.equal(matchVersion([{id:'38',kind:'sub'},{id:'9',kind:'dub'}],{id:'38',kind:'dub'}).id,'9');
+    assert.equal(matchVersion([{id:'38',kind:'sub'}],{id:'38',kind:'dub'}),null);
+    const catalog=new Catalog({file:join(directory,'collisions.json'),detailsFile:join(directory,'collisions-details.json'),connectors:[original,other],fetch:async()=>''});
+    const item={source:'original',kind:'dorama',title:'Same show',episode:1,url:'https://original.example/e1',show:'https://original.example/show'};
+    const copy={...item,source:'other',url:'https://other.example/e1',show:'https://other.example/show'};
+    catalog.preference=async()=>null;catalog.elsewhere=async()=>[copy];
+    const choice={version:'38',kind:'dub'};
+    let bridge;
+    try {
+      const web=await catalog.resolvePlayable(item,choice);
+      assert.equal(web.item.source,'other');assert.equal(web.target.version,'9');assert.equal(web.target.versionKind,'dub');
+      const library=new Library(join(directory,'collision-library.json'));
+      const cdp={async evaluate(){return true;},async call(){return{};}};
+      bridge=new HolyBridge(cdp,{library,catalog,preferencesFile:join(directory,'collision-settings.json'),recorder:false});
+      bridge.session={item,choice,tried:new Set([item.source]),candidates:[copy],searched:true};
+      const target=await bridge.findElsewhere(bridge.session);
+      assert.equal(target.url,'https://player.example/dub');assert.equal(target.versionKind,'dub');
+      assert.equal(bridge.session.item.source,'other');
+      // The selected mode survives opening even when only one version is exposed.
+      await bridge.openTarget(bridge.session,{...target,versions:[]});
+      assert.equal(bridge.session.versionKind,'dub');
+    }finally{if(bridge)await bridge.stop();catalog.stop();}
+  });
+
   await check('Historial: el idioma elegido se recuerda por serie, sobrevive al reinicio y no admite basura', () => {
     const file = join(directory, 'lang.json');
     const library = new Library(file);

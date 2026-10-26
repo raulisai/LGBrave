@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {loadPlaybackMatrix,validatePlaybackMatrix} from './playback-policy.mjs';
+const matrix=loadPlaybackMatrix();const result=validatePlaybackMatrix(matrix);assert.equal(result.sources,7);
+const change=fn=>{const clone=structuredClone(matrix);fn(clone);return clone;};
+assert.throws(()=>validatePlaybackMatrix(change(m=>m.cases.push(m.cases[0]))),/único/);
+assert.throws(()=>validatePlaybackMatrix(change(m=>m.cases[0].evidence=['../secret'])),/Evidencia/);
+assert.throws(()=>validatePlaybackMatrix(change(m=>m.cases[0].tests=['scripts/missing.mjs'])),/Regresión/);
+assert.throws(()=>validatePlaybackMatrix(change(m=>m.cases[0].scope='all-internet')),/Alcance/);
+assert.throws(()=>validatePlaybackMatrix(change(m=>m.cases=m.cases.filter(c=>!c.id.startsWith('source-cuevana')))),/Toda fuente/);
+console.log('Política de reproducción: matriz íntegra; evidencia, pruebas, alcance y cobertura obligatorios.');

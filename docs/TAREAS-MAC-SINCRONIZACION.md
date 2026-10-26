@@ -66,3 +66,7 @@ Actualizar el backend con main, npm test, npm run build:all y npm run desktop:re
 ## Actualización 0.9.16 · idioma durante recuperación
 
 Traer main conservando cambios locales, npm test, npm run build:all y npm run desktop:restart. Verificar npm run profile:status. Conserva emparejamiento y biblioteca. TV/web ahora mantienen el idioma elegido en reintentos y no aceptan una copia subtitulada cuando se pidió doblaje español; proveedor con idioma desconocido se omite en ese caso. Español confirmado por usuario en LG con Between Steps 5; este cambio aún no ejecutado en Mac. EXE/IPK sin reinstalar. Detalle: docs/BETWEEN-STEPS-ESPANOL-20261026.md.
+
+## Actualización 0.9.17 · arneses de reproducción
+
+Conservar cambios locales, traer main, leer docs/PROTOCOLO-REPRODUCCION.md y ejecutar npm run playback:check. Debe pasar suite+3builds con la misma huella de entradas. npm run playback:probe consulta las fuentes sin tocar TV; parcial no equivale a episodio completo reproducible. Reiniciar backend con npm run desktop:restart y verificar profile:status, sin renovar emparejamiento ni borrar .local. Aplica idioma vivo en relevo, IDs por tipo, seek/play al contenido observado y logs seguros. No requiere reinstalar menú/IPK. El gate pasó en Windows; Mac físico y ensayo LG0.9.17 pendientes.

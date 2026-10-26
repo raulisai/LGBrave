@@ -5,7 +5,7 @@ import { origin, packagedPrefix, HOME_PATH } from './config.mjs';
 import { entryKey } from './library.mjs';
 import { PREFERRED } from './catalog.mjs';
 import { KIND_LABEL, targetMatchesLanguage } from './versions.mjs';
-import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
+import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, resumeSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
 import {playbackDescriptor,validDescriptor,readDescriptorSource,writeDescriptorSource,clearDescriptorSource} from './handoff.mjs';
 
 // Luma's engine (filters, guards, navigation) plus Holy's playback: a title is
@@ -118,15 +118,17 @@ export class HolyBridge extends BrowserBridge {
     if(this.session||this.isHome(current)||!/^https?:/.test(current))return false;
     const descriptor=validDescriptor(await this.cdp.evaluate(readDescriptorSource));
     if(!descriptor||this.session||this.stopped)return false;
-    const {item,position,paused}=descriptor;
+    const {item,position,paused,choice:liveChoice,versionKind}=descriptor;
     const opening=!position;
     const held=paused===true&&!opening;
     const remembered=this.library.languageOf?.(item);
-    const choice=remembered?{version:remembered.id,kind:remembered.kind}:{};
+    // The live TV choice survives recovery onto a different provider; stored IDs
+    // belong only to their own provider and must not travel with the handoff.
+    const choice=liveChoice || (remembered?{version:remembered.id,kind:remembered.kind}:{});
     if(!this.library.get(entryKey(item)))this.library.start(item);
     const token=this.sessionToken=(this.sessionToken||0)+1;
     this.session={token,item,key:entryKey(item),phase:opening?'opening':'playing',opened:Date.now(),started:Date.now(),playingAt:Date.now(),resumeAt:opening?this.library.resumeAt(item):0,
-      lastSave:0,position,choice,userPaused:held,lastPaused:held,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
+      lastSave:0,position,choice,versionKind:versionKind||'',userPaused:held,lastPaused:held,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
     if(item.kind!=='movie'&&this.catalog.next)this.session.next=this.catalog.next(item).catch(()=>null);
     await this.publishPlayback();
     return true;
@@ -331,6 +333,7 @@ export class HolyBridge extends BrowserBridge {
     // Languages of this episode (when the site offers several) and the one being played.
     session.versions = Array.isArray(target.versions) ? target.versions : [];
     session.version = target.version || '';
+    session.versionKind = ['dub','sub','orig'].includes(target.versionKind) ? target.versionKind : '';
     session.servers = (session.servers || 0) + 1;
     session.siteServers = 1; session.sawVideo = false;
     // The remembered (or asked) language is not in this episode: say which one opens instead.
@@ -503,7 +506,7 @@ export class HolyBridge extends BrowserBridge {
         if (this.session === session) { await this.endSession(); await this.status(); }
         return;
       }
-      if (playing && session.phase !== 'playing') await this.started(session);
+      if (playing && session.phase !== 'playing') await this.started(session, primary.d);
       if (this.session !== session) return;
       // A server that starts but never gets past its first seconds (still «playing») is
       // stalled: swap it for the next one. A paused video is the owner's choice and stays.
@@ -525,7 +528,7 @@ export class HolyBridge extends BrowserBridge {
         } else {
           for (const { id, sessionId } of await this.playerContexts()) {
             if (this.session !== session || this.stopped) return;
-            if (await this.evaluateWithGesture(seekSource(session.resumePending.at), id, sessionId).catch(() => false) === true) {
+            if (await this.evaluateWithGesture(seekSource(session.resumePending.at, session.resumePending.duration || best.d), id, sessionId).catch(() => false) === true) {
               session.resumePending = null; return;
             }
           }
@@ -638,7 +641,7 @@ export class HolyBridge extends BrowserBridge {
     session.rescues = MAX_RESCUES;
     this.recordPlayback('recovery-exhausted', session);
   }
-  async started(session) {
+  async started(session, expectedDuration = session.position?.d || 0) {
     if (this.session !== session || this.stopped) return;
     session.phase = 'playing'; session.playingAt = Date.now(); session.lastSave = Date.now();
     this.recordPlayback(session.rescues ? 'recovery-started' : 'playback-started', session);
@@ -649,10 +652,10 @@ export class HolyBridge extends BrowserBridge {
     if (this.mainContext) await this.cdp.evaluate(theaterSource, this.mainContext).catch(() => false);
     if (this.session !== session || this.stopped) return;
     if (session.resumeAt > 0) {
-      session.resumePending = { at: session.resumeAt, until: Date.now() + 15000 };
+      session.resumePending = { at: session.resumeAt, duration: expectedDuration, until: Date.now() + 15000 };
       for (const { id, sessionId } of await this.playerContexts()) {
         if (this.session !== session || this.stopped) return;
-        if (await this.evaluateWithGesture(seekSource(session.resumeAt), id, sessionId).catch(() => false) === true) { session.resumePending = null; break; }
+        if (await this.evaluateWithGesture(seekSource(session.resumeAt, expectedDuration), id, sessionId).catch(() => false) === true) { session.resumePending = null; break; }
       }
     }
     if (this.session !== session || this.stopped) return;
@@ -743,9 +746,13 @@ export class HolyBridge extends BrowserBridge {
     await this.play({ ...session.item, version: version.id, versionKind: version.kind });
   }
   async resumeVideo(session) {
+    if (this.session !== session || this.stopped) return;
     await this.hideEndCard(session);
-    const play = `(()=>{const deep=(r,o=[])=>{o.push(...r.querySelectorAll('video'));for(const n of r.querySelectorAll('*'))if(n.shadowRoot)deep(n.shadowRoot,o);return o};const v=deep(document).filter(v=>Number.isFinite(v.duration)&&v.duration>60).sort((a,b)=>b.duration-a.duration)[0];if(!v)return false;const p=v.play();if(p&&p.catch)p.catch(()=>{});return true})()`;
-    for (const { id, sessionId } of await this.playerContexts()) if (await this.evaluateWithGesture(play, id, sessionId).catch(() => false) === true) break;
+    const play = resumeSource(session.position?.d || 0);
+    for (const { id, sessionId } of await this.playerContexts()) {
+      if (this.session !== session || this.stopped) return;
+      if (await this.evaluateWithGesture(play, id, sessionId).catch(() => false) === true) break;
+    }
   }
   async hideEndCard(session) {
     clearTimeout(session.card?.timer);
