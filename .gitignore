@@ -13,3 +13,5 @@ wasm-engine/target/
 # Local worktrees and regenerated filter snapshots (hundreds of MB)
 .claude/worktrees/
 research/lists/generations/
+research/lists/.stage-*/
+research/lists/.update.lock/
