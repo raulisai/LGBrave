@@ -52,7 +52,8 @@ try {
   // A player that disappears is detected, including failed frame evaluations.
   video = null; await bridge.watch(); now += 26000; await bridge.watch(); assert.equal(rescues.length, 1);
   rescues = []; video = { t: 800, d: 3000, paused: true, mediaError: 3 }; bridge.session.midStall = null;
-  await bridge.watch(); now += 26000; await bridge.watch(); assert.deepEqual(rescues, [800]);
+  await bridge.watch(); now += 26000; await bridge.watch(); assert.deepEqual(rescues, [], 'A paused media error preserves the server');
+  video.paused = false; await bridge.watch(); now += 26000; await bridge.watch(); assert.deepEqual(rescues, [800], 'The same error can recover once playback is unpaused');
   // A slow player can accept the saved position on a later poll, without losing it to a save at zero.
   rescues = []; video = { t: 2, d: 3000, paused: false };
   bridge.session.resumePending = { at: 795, until: now + 15000 };

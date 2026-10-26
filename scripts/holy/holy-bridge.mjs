@@ -118,11 +118,11 @@ export class HolyBridge extends BrowserBridge {
     if(this.session||this.isHome(current)||!/^https?:/.test(current))return false;
     const descriptor=validDescriptor(await this.cdp.evaluate(readDescriptorSource));
     if(!descriptor||this.session||this.stopped)return false;
-    const {item,position}=descriptor;
+    const {item,position,paused}=descriptor;
     if(!this.library.get(entryKey(item)))this.library.start(item);
     const token=this.sessionToken=(this.sessionToken||0)+1;
     this.session={token,item,key:entryKey(item),phase:'playing',started:Date.now(),playingAt:Date.now(),resumeAt:0,
-      lastSave:0,position,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
+      lastSave:0,position,userPaused:paused===true,lastPaused:paused===true,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
     if(item.kind!=='movie'&&this.catalog.next)this.session.next=this.catalog.next(item).catch(()=>null);
     await this.publishPlayback();
     return true;
@@ -406,8 +406,7 @@ export class HolyBridge extends BrowserBridge {
   }
   async openServer(session, url) {
     if (this.session !== session || this.stopped) return;
-    session.phase = 'opening'; session.opened = Date.now(); session.target = url; session.position = null;
-    session.midStall = null; session.stall = null; session.missingSince = 0; session.lastPaused = false;
+    session.phase = 'opening'; session.opened = Date.now(); session.target = url; session.position = null; session.userPaused = session.lastPaused = false; this.resetStallClocks(session);
     this.recordPlayback('server-opening', session);
     await this.prepareDocument(url);
     if (this.session !== session || this.stopped) return;
@@ -453,22 +452,21 @@ export class HolyBridge extends BrowserBridge {
     }
     return [...this.pageContexts().map(id => ({ id })), ...[...this.childSessions].flatMap(([sessionId, entry]) => [...entry.contexts].map(id => ({ id, sessionId })))];
   }
+  isUserPaused(session) { return !!(session?.userPaused || session?.lastPaused || ['pause','versions'].includes(session?.card?.kind)); }
+  resetStallClocks(session) { session.stall = null; session.midStall = null; session.endStall = null; session.missingSince = 0; }
   // Every second during a session: start the player, then save the position.
   async watch() {
     const session = this.session;
     if (!session || this.watching || !['opening', 'playing', 'manual'].includes(session.phase)) return;
     this.watching = true;
     try {
-    if (this.navigation.phase === 'error') {
-      if (session.phase === 'opening' && await this.serverFailed(session)) return;
-      if (this.session !== session) return;
-      await this.endSession(); await this.status(); return;
-    }
-    if (session.phase === 'opening' && session.queue?.length && Date.now() - session.opened > this.serverTimeout && !session.position) { await this.serverFailed(session); return; }
     if (this.navigation.phase === 'loading' && session.phase === 'opening' && Date.now() - session.opened < 4000) return;
-    const page = this.frames.get(this.mainFrame) || '';
-    if (!/^https?:/.test(page) || this.isHome(page)) return;
-      const passive = session.phase !== 'opening';
+    const page = this.frames?.get(this.mainFrame) || '';
+    if (!/^https?:/.test(page) || this.isHome(page)) {
+      if (!this.isUserPaused(session) && session.phase === 'opening' && (this.navigation.phase === 'error' || Date.now()-session.opened>this.serverTimeout)) await this.serverFailed(session);
+      return;
+    }
+      const passive = session.phase !== 'opening' || this.isUserPaused(session);
       const results = (await Promise.all((await this.playerContexts()).map(({ id, sessionId }) => Promise.race([
         this.evaluateWithGesture(autoplaySource({ passive, mute: this.mute }), id, sessionId).catch(() => null),
         new Promise(resolve => setTimeout(resolve, 2500, null))
@@ -477,7 +475,27 @@ export class HolyBridge extends BrowserBridge {
       if (results.some(frame => frame.videos.length)) session.sawVideo = true;
       session.frames = results.map(frame => ({ url: frame.url.split('?')[0], top: frame.top, videos: frame.videos.length, action: frame.action })).slice(0, 12);
       const videos = results.flatMap(frame => frame.videos).filter(video => video.d > 60);
-      const playing = videos.filter(video => !video.paused && video.t > 0).sort((a, b) => b.d - a.d)[0];
+      // Keep observing the feature we were watching, even if an advert in another frame plays.
+      const knownDuration = session.position?.d || 0;
+      const matching = videos.filter(video => knownDuration > 60 && Math.abs(video.d - knownDuration) < 2);
+      const candidates = matching.length ? matching : this.isUserPaused(session) && knownDuration > 60 ? [] : videos;
+      const primary = [...candidates].sort((a,b) => (b.area || 0) - (a.area || 0) || b.d - a.d)[0];
+      const wasPaused = this.isUserPaused(session);
+      if (primary) {
+        const held = !!(!primary.ended && (primary.userPaused || primary.paused && (session.phase === 'playing' || wasPaused)));
+        if (held !== !!session.userPaused) this.recordPlayback(held ? 'pause-hold' : 'pause-released', session, {paused:held});
+        session.userPaused = session.lastPaused = held;
+        if (held || wasPaused) this.resetStallClocks(session);
+        if (held && session.card?.kind === 'end') { await this.hideEndCard(session); if (this.session !== session) return; }
+      }
+      const playing = primary && !primary.paused && !session.userPaused && primary.t > 0 ? primary : null;
+      // Inspect the player before reacting to navigation errors or expired opening clocks.
+      if (this.navigation.phase === 'error' && !this.isUserPaused(session) && !primary) {
+        if (session.phase === 'opening' && await this.serverFailed(session)) return;
+        if (session.phase === 'playing') { await this.rescue(session, session.position?.t || 0); return; }
+        if (this.session === session) { await this.endSession(); await this.status(); }
+        return;
+      }
       if (playing && session.phase !== 'playing') await this.started(session);
       if (this.session !== session) return;
       // A server that starts but never gets past its first seconds (still «playing») is
@@ -487,7 +505,7 @@ export class HolyBridge extends BrowserBridge {
         if (!stall || playing.t > stall.t + 0.5) session.stall = { t: playing.t, since: Date.now() };
         else if (Date.now() - stall.since > this.stallTimeout) { session.stall = null; this.recordPlayback('start-stalled', session, playing); await this.rescue(session, playing.t); return; }
       }
-      const best = playing || (session.phase === 'playing' ? videos.sort((a, b) => b.d - a.d)[0] : null);
+      const best = playing || (session.phase === 'playing' ? primary : null);
       if (best && Date.now() - (session.sampledAt || 0) >= 10000) {
         session.sampledAt = Date.now();
         const sample = { seconds: Math.round(best.t), duration: best.d, ready: best.ready, network: best.network, mediaError: best.mediaError, bufferAhead: Math.round(best.bufferAhead || 0), paused: best.paused, frameCount: results.length };
@@ -510,7 +528,7 @@ export class HolyBridge extends BrowserBridge {
       if (session.recoveryCheck && best && !best.paused && best.t > session.recoveryCheck.t + 0.5) {
         this.recordPlayback('recovery-advancing', session, { seconds: best.t }); session.recoveryCheck = null;
       }
-      if (best) { session.lastPaused = best.paused; session.missingSince = 0; }
+      if (best) { session.missingSince = 0; }
       else if (session.phase === 'playing' && !session.card && !session.lastPaused) {
         session.missingSince ||= Date.now();
         if (Date.now() - session.missingSince > this.midStall && (session.rescues || 0) < MAX_RESCUES) {
@@ -530,7 +548,7 @@ export class HolyBridge extends BrowserBridge {
         const tail = !best.paused && best.d - best.t <= 30;
         if (!tail) session.endStall = null;
         else if (!session.endStall || best.t > session.endStall.t + 0.5) session.endStall = { t: best.t, since: Date.now() };
-        const ended = best.ended || best.t >= best.d - END_MARGIN || (tail && Date.now() - session.endStall.since > this.endStall);
+        const ended = best.ended || (!this.isUserPaused(session) && (best.t >= best.d - END_MARGIN || (tail && Date.now() - session.endStall.since > this.endStall)));
         if (ended && session.card?.kind !== 'end') await this.showEndCard(session);
         // Rewound from the card: back to watching.
         else if (session.card?.kind === 'end' && !ended && best.t < best.d - 15) await this.hideEndCard(session);
@@ -549,11 +567,11 @@ export class HolyBridge extends BrowserBridge {
       // swapped for the next one or another site, resuming at the same second.
       if (session.phase === 'playing' && best && !session.card && best.t >= 15 && best.d - best.t > 30) {
         const mid = session.midStall;
-        if ((best.paused && !best.mediaError) || !mid || Math.abs(best.t - mid.t) > 0.5) session.midStall = { t: best.t, since: Date.now() };
+        if (this.isUserPaused(session) || !mid || Math.abs(best.t - mid.t) > 0.5) session.midStall = { t: best.t, since: Date.now() };
         else if (Date.now() - mid.since > this.midStall && (session.rescues || 0) < MAX_RESCUES) { this.recordPlayback('video-stalled', session, best); await this.rescue(session, best.t); return; }
       }
-      const limit = session.queue?.length || session.leftover?.queue?.length ? (session.sawVideo ? this.serverTimeout : this.emptyTimeout) : this.startTimeout;
-      if (session.phase === 'opening' && Date.now() - session.opened > limit && !session.position) {
+      const limit = session.queue?.length || session.leftover?.queue?.length ? (session.sawVideo ? this.serverTimeout : Math.min(this.serverTimeout, this.emptyTimeout)) : this.startTimeout;
+      if (!this.isUserPaused(session) && session.phase === 'opening' && Date.now() - session.opened > limit && !session.position) {
         if (await this.serverFailed(session)) return;
         // Leave the page usable: the owner can pick another server with the remote.
         session.phase = 'manual'; session.error = 'No se pudo iniciar solo';
@@ -567,6 +585,7 @@ export class HolyBridge extends BrowserBridge {
   // This server did not start. Order: two servers of a site, then the same title on another
   // site, then the first site's remaining servers. False when nothing is left.
   async serverFailed(session) {
+    if (this.isUserPaused(session)) { this.resetStallClocks(session); return true; }
     if (this.session !== session || this.stopped) return true;
     this.recordPlayback('server-failed', session);
     if (session.queue?.length && session.siteServers >= SITE_TRIES && !session.leftover && this.catalog.elsewhere) {
@@ -591,6 +610,7 @@ export class HolyBridge extends BrowserBridge {
     return false;
   }
   async rescue(session, at) {
+    if (this.isUserPaused(session)) { this.resetStallClocks(session); return; }
     if (this.session !== session || this.stopped || (session.rescues || 0) >= MAX_RESCUES) return;
     session.rescues = (session.rescues || 0) + 1;
     this.recordPlayback('recovery-attempt', session, { seconds: at });

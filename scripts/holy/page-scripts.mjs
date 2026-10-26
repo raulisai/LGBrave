@@ -216,12 +216,27 @@ export function holyAutoplay(options = {}) {
   };
   let videos = [...document.querySelectorAll('video')];
   if (!videos.length) videos = deep('video');
+  // A pause after playback is an explicit hold, including during startup or a reconnect.
+  // DOM data survives the isolated world of a previous computer connection.
+  state.observed ||= new WeakSet();
+  for (const video of videos) {
+    if (!video.paused && video.currentTime > 0 && video.dataset) video.dataset.holySeenPlaying = '1';
+    if (state.observed.has(video)) continue;
+    state.observed.add(video);
+    video.addEventListener?.('pause', () => {
+      if (!video.ended && video.dataset?.holySeenPlaying === '1') video.dataset.holyUserPaused = '1';
+    });
+    video.addEventListener?.('play', () => {
+      if (video.dataset) { video.dataset.holySeenPlaying = '1'; delete video.dataset.holyUserPaused; }
+    });
+    video.addEventListener?.('ended', () => { if (video.dataset) delete video.dataset.holyUserPaused; });
+  }
   // Validation runs keep the TV silent.
   if (options.mute) for (const video of videos) video.muted = true;
-  const report = videos.map(video => ({ t: video.currentTime, d: Number.isFinite(video.duration) ? video.duration : 0, paused: video.paused, ready: video.readyState, network: video.networkState, mediaError: video.error?.code || 0, bufferAhead: (() => { for (let i = 0; i < (video.buffered?.length || 0); i++) if (video.buffered.start(i) <= video.currentTime && video.buffered.end(i) >= video.currentTime) return video.buffered.end(i) - video.currentTime; return 0; })(), area: video.clientWidth * video.clientHeight, ended: video.ended }));
+  const report = videos.map(video => ({ t: video.currentTime, d: Number.isFinite(video.duration) ? video.duration : 0, paused: video.paused, userPaused: video.dataset?.holyUserPaused === '1', ready: video.readyState, network: video.networkState, mediaError: video.error?.code || 0, bufferAhead: (() => { for (let i = 0; i < (video.buffered?.length || 0); i++) if (video.buffered.start(i) <= video.currentTime && video.buffered.end(i) >= video.currentTime) return video.buffered.end(i) - video.currentTime; return 0; })(), area: video.clientWidth * video.clientHeight, ended: video.ended }));
   const out = { url: location.href, top: window.top === window, videos: report, action: '' };
   if (videos.some(video => !video.paused && video.currentTime > 0)) return out;
-  if (options.passive) return out;
+  if (options.passive || report.some(video => video.userPaused && !video.ended)) return out;
   const once = (key, every = 4) => { const last = state.clicked[key]; if (last && state.steps - last < every) return false; state.clicked[key] = state.steps; return true; };
   // 1. Ask the main video to play (the step runs with a user gesture). With data it
   //    starts at once; without, play() makes lazy players load it.

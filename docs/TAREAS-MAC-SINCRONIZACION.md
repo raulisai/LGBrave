@@ -54,3 +54,7 @@ Hecho en orden: `git pull` (limpio, fast-forward, sin tocar `.local` ni bibliote
 **Complemento del navegador:** generado en `artifacts/holy-companion`; **no se cargó en un navegador real** (ese paso lo decide y hace el usuario, como pide este mismo documento). Pendiente que el usuario lo instale en Brave y pruebe un vídeo externo.
 
 **No probado:** una valoración real Mac→Windows o Windows→Mac de ida y vuelta con datos del usuario (se evitó tocar su biblioteca real sin pedírselo); el relevo físico de quién atiende la TV sigue siendo el mismo protocolo ya validado antes, sin cambios aquí.
+
+## Actualización 0.9.14 · pausa (2026-10-26, Windows)
+
+El canal Mac↔Windows ya está activado; conserva el emparejamiento existente. Tras leer SOUL y conservar cambios locales, trae main, ejecuta npm test y npm run build:all; después npm run desktop:restart y npm run profile:status. No requiere reinstalar el menú de Mac ni IPK: cambia el backend. Respeta una TV en uso y no abras otro interceptor. Comprueba pausa/reanudación con autorización del usuario, conserva capítulo, servidor y buscador. La regresión de pausa larga pasa en Windows; aún no se ejecutó esta versión en Mac. Auditoría y límites del SDK en docs/VALIDACION-PAUSA-20261026.md.
