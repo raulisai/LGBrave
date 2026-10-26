@@ -62,3 +62,7 @@ El canal Mac↔Windows ya está activado; conserva el emparejamiento existente. 
 ## Actualización necesaria 0.9.15 · arranque tras pausa
 
 Actualizar el backend con main, npm test, npm run build:all y npm run desktop:restart. Sustituye 0.9.14: corrige su regresión de falsa pausa en segundo 0 que dejaba Volviendo a donde te quedaste. Windows ya activo; LG comprobó reanudación de Between Steps 5 y pausa de 132 segundos conservando servidor. Mac aún no ejecutó esta versión. Conserva vínculo y biblioteca existentes; no hace falta reinstalar el menú/IPK. Detalle: docs/REANUDACION-BLOQUEADA-20261026.md.
+
+## Actualización 0.9.16 · idioma durante recuperación
+
+Traer main conservando cambios locales, npm test, npm run build:all y npm run desktop:restart. Verificar npm run profile:status. Conserva emparejamiento y biblioteca. TV/web ahora mantienen el idioma elegido en reintentos y no aceptan una copia subtitulada cuando se pidió doblaje español; proveedor con idioma desconocido se omite en ese caso. Español confirmado por usuario en LG con Between Steps 5; este cambio aún no ejecutado en Mac. EXE/IPK sin reinstalar. Detalle: docs/BETWEEN-STEPS-ESPANOL-20261026.md.

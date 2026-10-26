@@ -4,7 +4,7 @@ import { BrowserBridge } from '../browser-bridge.mjs';
 import { origin, packagedPrefix, HOME_PATH } from './config.mjs';
 import { entryKey } from './library.mjs';
 import { PREFERRED } from './catalog.mjs';
-import { KIND_LABEL } from './versions.mjs';
+import { KIND_LABEL, targetMatchesLanguage } from './versions.mjs';
 import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
 import {playbackDescriptor,validDescriptor,readDescriptorSource,writeDescriptorSource,clearDescriptorSource} from './handoff.mjs';
 
@@ -121,10 +121,12 @@ export class HolyBridge extends BrowserBridge {
     const {item,position,paused}=descriptor;
     const opening=!position;
     const held=paused===true&&!opening;
+    const remembered=this.library.languageOf?.(item);
+    const choice=remembered?{version:remembered.id,kind:remembered.kind}:{};
     if(!this.library.get(entryKey(item)))this.library.start(item);
     const token=this.sessionToken=(this.sessionToken||0)+1;
     this.session={token,item,key:entryKey(item),phase:opening?'opening':'playing',opened:Date.now(),started:Date.now(),playingAt:Date.now(),resumeAt:opening?this.library.resumeAt(item):0,
-      lastSave:0,position,userPaused:held,lastPaused:held,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
+      lastSave:0,position,choice,userPaused:held,lastPaused:held,queue:[],tried:new Set([item.source]),candidates:[],target:current,adopted:true};
     if(item.kind!=='movie'&&this.catalog.next)this.session.next=this.catalog.next(item).catch(()=>null);
     await this.publishPlayback();
     return true;
@@ -291,6 +293,7 @@ export class HolyBridge extends BrowserBridge {
       for (const copy of copies.slice(0, 2)) {
         if (this.session !== session) return;
         target = await this.catalog.resolve(copy, session.choice).catch(() => null);
+        if (target && !targetMatchesLanguage(target, copy, session.choice)) target = null;
         if (target) { session.item = { ...copy, title: item.title, poster: item.poster || copy.poster, backdrop: item.backdrop || copy.backdrop, genres: item.genres?.length ? item.genres : copy.genres }; session.site = this.catalog.connector?.(preferred)?.name || preferred; break; }
       }
       if (this.session !== session) return;
@@ -302,14 +305,15 @@ export class HolyBridge extends BrowserBridge {
       try { target = await this.catalog.resolve(item, session.choice); } catch (error) { session.resolveError = error; }
     }
     if (this.session !== session) return;
+    if (target && !targetMatchesLanguage(target, item, session.choice)) { this.recordPlayback('language-skipped', session); target = null; }
     // No player on its own site: the same title on another of the owner's sites.
     if (!target) target = await this.findElsewhere(session);
     if (this.session !== session) return;
-    if (!target && !session.resolveError?.unsafe && this.catalog.pageFallback?.(item)) target = { url: item.url };
+    if (!target && !session.resolveError?.unsafe && this.catalog.pageFallback?.(item) && targetMatchesLanguage({}, item, session.choice)) target = { url: item.url };
     if (!target) {
       // Refuse rather than open a page known to close the app.
       session.phase = 'failed';
-      session.error = session.resolveError?.message || 'No se encontró un reproductor para este título en tus sitios.';
+      session.error = session.choice?.kind ? `No se pudo abrir ${KIND_LABEL[session.choice.kind] || 'el idioma elegido'}. Prueba otro servidor o cambia Idioma.` : session.resolveError?.message || 'No se encontró un reproductor para este título en tus sitios.';
       await this.dropCurtainScript();
       await this.status();
       return;
@@ -348,7 +352,7 @@ export class HolyBridge extends BrowserBridge {
     session.versionsTried ||= new Set();
     session.versionsTried.add(session.version);
     const current = versions.find(version => version.id === session.version);
-    const next = versions.filter(version => !session.versionsTried.has(version.id))
+    const next = versions.filter(version => !session.versionsTried.has(version.id) && (!session.choice?.kind || version.kind === session.choice.kind))
       .sort((a, b) => (b.kind === current?.kind) - (a.kind === current?.kind))[0];
     if (!next) return false;
     session.versionsTried.add(next.id);
@@ -385,6 +389,7 @@ export class HolyBridge extends BrowserBridge {
       if (this.session !== session) return null;
       const target = await this.catalog.resolve(candidate, session.choice).catch(() => null);
       if (this.session !== session) return null;
+      if (target && !targetMatchesLanguage(target, candidate, session.choice)) { this.recordPlayback('language-skipped', session); continue; }
       if (target) {
         // Keep the owner's title and artwork; play the other site's copy.
         session.item = { ...candidate, title: session.item.title || candidate.title, poster: session.item.poster || candidate.poster, backdrop: session.item.backdrop || candidate.backdrop, genres: session.item.genres?.length ? session.item.genres : candidate.genres };

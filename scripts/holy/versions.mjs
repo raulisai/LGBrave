@@ -23,3 +23,13 @@ export function dedupe(versions) {
   }
   return [...seen.values()];
 }
+
+// A retry must preserve the audio mode the owner explicitly chose. Unknown audio is
+// not evidence that an external copy offers that mode. IDs are site-specific.
+export function targetMatchesLanguage(target, item, choice = {}) {
+  if (!choice.kind || !['dub', 'sub', 'orig'].includes(choice.kind)) return true;
+  if (!target) return false;
+  const label = String(item?.language || '');
+  const kind = target.versionKind || (/subtitul|sub[ ._-]*esp/i.test(label) ? 'sub' : /latino|castellano|espa[ñn]ol/i.test(label) ? 'dub' : /original/i.test(label) ? 'orig' : '');
+  return kind === choice.kind;
+}
