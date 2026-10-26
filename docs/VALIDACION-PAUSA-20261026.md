@@ -21,7 +21,7 @@ Limitación: algunos proveedores también ponen el elemento de vídeo en pausa a
 - Windows: servicio reiniciado con código 0.9.14 y conexión SSH real restablecida. La página conservó su huella, proveedor Streamtape, Between Steps capítulo 5 y avanzó de ~3697 a ~3713 segundos, error de vídeo 0. Sin navegar, recargar ni pausar la TV.
 - Canal Mac↔Windows: ambos activos y sincronizados en estado vivo antes del reinicio; comprobar de nuevo tras actualizar cada lado.
 
-La pausa larga es una prueba controlada: no se ha pausado físicamente la LG para ensayarla. Se solicitó autorización y no se recibió respuesta durante esta validación. La corrección nueva aún no se ha ejecutado en la Mac; sus tareas están en TAREAS-MAC-SINCRONIZACION.md.
+La pausa larga es una prueba controlada: no se ha pausado físicamente la LG para ensayarla. Se solicitó autorización, recibida después de publicar la corrección; ver intento físico posterior. La corrección nueva aún no se ha ejecutado en la Mac; sus tareas están en TAREAS-MAC-SINCRONIZACION.md.
 
 ## Dependencias: pendiente identificado
 
@@ -30,3 +30,7 @@ npm audit sobre el lockfile final informa 5 alertas: 1 moderada, 3 altas y 1 cr�
 El servicio HTTP de Holy usa node:http; el servidor Express auxiliar ares-server del SDK no está ejecutándose. Esto delimita la exposición observada, no elimina las alertas. Pendiente revisar una actualización oficial o aislar/sustituir el SDK y volver a validar SSH/instalación antes de adoptarla. No se publican credenciales ni archivos de diagnóstico privados.
 
 Referencias primarias de las alertas: [body-parser](https://github.com/advisories/GHSA-27r3-jxmh-p828), [proxy-addr](https://github.com/advisories/GHSA-jqcg-44mw-7w3h). [Reglas de npm para overrides y shrinkwrap](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#overrides).
+
+## Intento físico autorizado · 2026-10-26 13:20 México
+
+Al recibir permiso, la TV estaba en Inicio sin vídeo. Después apareció Oppenheimer en Mixdrop: se pausó mediante HTMLMediaElement.pause a los 29.986 s. El runtime registró pause-hold, sin intento de recuperación en ese intervalo. Antes de completar dos minutos, el contenido cambió a Steins;Gate 0 episodio 1; la comprobación detectó otra página y se abstuvo de pausar/reanudar ese capítulo. También hubo liberación y nueva pausa del primer vídeo antes del cambio. El ensayo no es concluyente: falta mantener un contenido estable dos minutos y verificar avance después de reanudar. Se pidió al usuario avisar cuando estuviera listo. No se navegó ni se abrió contenido desde el cliente de diagnóstico.
