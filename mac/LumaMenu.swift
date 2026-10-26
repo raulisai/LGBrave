@@ -7,6 +7,7 @@ struct Status: Decodable {
     struct TV: Decodable { let host: String? }
     let state: String; let label: String; let running: Bool
     let tv: TV?; let app: String?; let host: String?; let error: String?
+    let actions: [String]?
 }
 
 final class App: NSObject, NSApplicationDelegate {
@@ -17,6 +18,10 @@ final class App: NSObject, NSApplicationDelegate {
     var timer: Timer?
     var runningControl = false
     var controlError: String?
+    // What the last Doctor or «Usar esta computadora» did, shown for ten minutes.
+    var lastActions: [String] = []
+    var lastActionsTitle = ""
+    var lastActionsAt: Date?
     let showNotification = NSNotification.Name("com.lgapp.lab.menu.show")
     var instanceLock: Int32 = -1
 
@@ -75,7 +80,8 @@ final class App: NSObject, NSApplicationDelegate {
                         }
                     }
                 }
-                DispatchQueue.global().asyncAfter(deadline: .now() + 30, execute: deadline)
+                // Taking the TV from the other computer and the Doctor can take longer than a status.
+                DispatchQueue.global().asyncAfter(deadline: .now() + (["handoff", "repair"].contains(action) ? 45 : 30), execute: deadline)
                 let data = pipe.fileHandleForReading.readDataToEndOfFile()
                 process.waitUntilExit(); deadline.cancel()
                 let output = String(data: data, encoding: .utf8) ?? ""
@@ -102,11 +108,14 @@ final class App: NSObject, NSApplicationDelegate {
         }
     }
 
-    func perform(_ action: String, message: String) {
+    func perform(_ action: String, message: String, title: String = "") {
         guard !runningControl, config != nil else { return }
         busy = message; render()
         run(action) { [weak self] status, problem in
-            self?.busy = nil; self?.status = status; self?.controlError = problem; self?.render()
+            guard let self = self else { return }
+            self.busy = nil; self.status = status; self.controlError = problem
+            if !title.isEmpty, let actions = status?.actions { self.lastActions = actions; self.lastActionsTitle = title; self.lastActionsAt = Date() }
+            self.render()
         }
     }
 
@@ -141,7 +150,23 @@ final class App: NSObject, NSApplicationDelegate {
             let detail = NSMenuItem(title: String(problem.prefix(180)), action: nil, keyEquivalent: "")
             detail.isEnabled = false; menu.addItem(detail)
         }
+        if !lastActions.isEmpty, let at = lastActionsAt, Date().timeIntervalSince(at) < 600 {
+            menu.addItem(.separator())
+            let heading = NSMenuItem(title: lastActionsTitle, action: nil, keyEquivalent: "")
+            heading.isEnabled = false; menu.addItem(heading)
+            for line in lastActions {
+                let detail = NSMenuItem(title: String(line.prefix(180)), action: nil, keyEquivalent: "")
+                detail.isEnabled = false; detail.indentationLevel = 1; menu.addItem(detail)
+            }
+        }
         menu.addItem(.separator())
+        let ready = busy == nil && !runningControl && config != nil
+        if status?.state != "connected" {
+            let take = NSMenuItem(title: "Usar esta computadora para la TV", action: #selector(useThisComputer), keyEquivalent: "")
+            take.target = self; take.isEnabled = ready; menu.addItem(take)
+        }
+        let doctor = NSMenuItem(title: "Doctor: revisar y arreglar", action: #selector(runDoctor), keyEquivalent: "")
+        doctor.target = self; doctor.isEnabled = ready; menu.addItem(doctor)
         let on = status?.running == true
         let toggle = NSMenuItem(title: on ? "Apagar conexión" : "Encender conexión", action: #selector(toggleConnection), keyEquivalent: "")
         toggle.target = self; toggle.isEnabled = busy == nil && !runningControl && config != nil; menu.addItem(toggle)
@@ -161,6 +186,8 @@ final class App: NSObject, NSApplicationDelegate {
         if status?.running == true { perform("stop", message: "Apagando…") } else { perform("start", message: "Encendiendo…") }
     }
     @objc func restartConnection() { perform("restart", message: "Reiniciando…") }
+    @objc func useThisComputer() { perform("handoff", message: "Pidiendo la TV a la otra computadora…", title: "Usar esta computadora:") }
+    @objc func runDoctor() { perform("repair", message: "Doctor revisando…", title: "Doctor:") }
     @objc func openLog() { NSWorkspace.shared.open(URL(fileURLWithPath: config.root + "/.local/logs/desktop.log")) }
     @objc func showMenu() { item.button?.performClick(nil) }
 }

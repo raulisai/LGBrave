@@ -25,7 +25,10 @@ export async function status({probe = false} = {}) {
   const tv = tvAddress();
   const state = live?.updated && Date.now()-live.updated > 15000 ? 'unresponsive' : live?.state || 'stopped';
   const repairNeeded=state==='setup'&&tv.configured&&!tv.needsUpdate;
-  return {...live,state,repairNeeded,label:repairNeeded?'El servicio necesita recargar el perfil de Windows':labels[state] || state,running:!!live,host:lanAddress(),tv,
+  const label=repairNeeded?'El servicio necesita recargar el perfil de Windows'
+    :state==='standby'&&live?.paused?`TV cedida a otra computadora; reintenta en ${live.paused} s`
+    :state==='standby'&&live?.holder?`La TV la atiende ${live.holder}`:labels[state] || state;
+  return {...live,state,repairNeeded,label,running:!!live,host:lanAddress(),tv,
     ...(probe ? {tvReachable:!!tv.host && await tcpOpen(tv.host,tv.port,1200)} : {}),
     build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html'))}, config:config(),
     history:live?.profile?.state==='synced'?'Preferencias e historial compartidos mediante la TV con las computadoras que usan esta versión.':
@@ -53,6 +56,26 @@ export async function stop() {
   return after;
 }
 export async function restart() { await stop(); return start(); }
+// «Usar esta computadora para la TV»: asks the computer serving it to yield, then wakes this
+// service so it takes the TV as soon as it is free. The other one waits 2 min before retrying.
+export async function handoff({request = async () => (await import('../../scripts/inspector-tunnel.mjs')).requestHandoff(), wait = 10000} = {}) {
+  let before = await status();
+  if (before.state === 'connected') return {...before, actions:['Esta computadora ya atiende la TV.']};
+  if (!before.tv.configured) return {...before, actions:['Primero vincula esta computadora con la TV.']};
+  if (!before.running) before = await start();
+  const asked = await request().catch(error => ({state:'error', error:error.message}));
+  if (asked.state === 'error') return {...await status(), actions:['No se pudo hablar con la TV: '+asked.error]};
+  const actions = [asked.state === 'free' ? 'La TV estaba libre.'
+    : asked.state === 'yielded' ? `${asked.holder || 'La otra computadora'} cedió la TV.`
+    : `Pedido enviado a ${asked.holder || 'la otra computadora'}; si no la suelta, puede tener una versión anterior: reinicia su servicio o apágalo.`];
+  for (let waited = 0; waited < wait; waited += 1500) {
+    await ask('/wake', 'POST');
+    await sleep(1500);
+    const now = await status();
+    if (['connected', 'waiting'].includes(now.state)) return {...now, actions:[...actions, 'Esta computadora atiende la TV.']};
+  }
+  return {...await status(), actions};
+}
 export async function doctor() {
   const report = await status({probe:true});
   const checks = [];
@@ -73,11 +96,11 @@ export const repair=createDesktopRepair({status,recovery:createProfileRecovery({
 export async function runCLI() {
   try {
     const action = process.argv[2] || 'status';
-    const actions = {status,start,stop,restart,configure:async()=>{
+    const actions = {status,start,stop,restart,handoff:()=>handoff(),configure:async()=>{
       saveConfig(JSON.parse(process.argv[3] || readFileSync(0,'utf8')));
       syncDeviceProfile(config()); return status();
     },doctor,repair};
-    if(!actions[action]) throw Error('Uso: desktop-control.mjs status|start|stop|restart|doctor|repair|configure');
+    if(!actions[action]) throw Error('Uso: desktop-control.mjs status|start|stop|restart|handoff|doctor|repair|configure');
     console.log(JSON.stringify(await actions[action]()));
   } catch(error) {console.error(error.message);process.exitCode=1;}
 }

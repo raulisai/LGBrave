@@ -71,3 +71,10 @@ con todos los cambios de este espacio; el código se publica en `origin/main`.
 - Direcciones de otros equipos (`peers`) vacías en la Mac: el doctor no lista a Windows hasta añadir su IP en «Configurar».
 - Fallo de macOS encontrado y corregido: `runtime-lock.mjs` trataba ENOTDIR (que macOS da al renombrar un directorio sobre un archivo antiguo) como error en vez de reintentar; `test-lab-runtime` fallaba en Mac y pasa 3/3.
 
+## Relevo con nombre y «Usar esta computadora» (Mac, 2026-10-25 20:40)
+
+- Código 0.9.5. Al tomar la TV, cada equipo escribe en la reserva `info` («Nombre (IP)», saneado para el shell) y `since`. Liberar y vencer borran `owner`, `at`, `since` e `info`; antes, un `info` extra impedía `rmdir` y dejaba una reserva muerta.
+- **Visto en vivo en la Mac:** estado `standby` con «La TV la atiende djoker». Lectura SSH de solo lectura de la reserva: `owner`, `at` (renovado hace 4 s) e `info=djoker`, sin `since`. Es decir, la Windows ya escribe `info` con código que **no está en Git**; revisar `git status` en Windows antes de `git pull`.
+- «Usar esta computadora para la TV» (`npm run desktop:handoff`, menú Mac, bandeja Windows) escribe `/tmp/luma-desktop-handoff` (hora de la TV y nombre). La renovación del equipo activo la acepta solo si es posterior a su `since`: suelta la TV, la libera y queda 2 min en espera. El que pidió despierta su servicio (`POST /wake` del supervisor) y la toma en cuanto queda libre. Tomar la TV borra la petición.
+- Puertos ocupados: el servicio informa el programa y el supervisor reintenta los conflictos cada 30 s (`LUMA_CONFLICT_RETRY_MS` en pruebas).
+- Pruebas: `test-desktop-handoff.mjs` (11, simuladas) y `test-desktop-process.mjs` (procesos reales con hijo simulado: conflicto reintentado y despertar). **No probado:** el relevo físico pedido, porque la Windows corre código anterior que no conoce la petición. No se escribió ninguna petición en la TV.

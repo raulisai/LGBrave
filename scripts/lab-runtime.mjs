@@ -16,10 +16,12 @@ export class LabRuntime {
       const response = await fetch(`${endpoint}/json`, {signal: AbortSignal.timeout(3000)});
       if (!response.ok) throw Error('No se pudo consultar el inspector de la TV.');
       return response.json();
-    }, selectTarget = findLumaTarget, log = console.log} = {}) {
-    Object.assign(this, {openTunnel, connect, makeBridge, targets, selectTarget, log});
-    this.stopping = false; this.state = null; this.generation = 0;
+    }, selectTarget = findLumaTarget, log = console.log, handoffPause = 120000, now = Date.now} = {}) {
+    Object.assign(this, {openTunnel, connect, makeBridge, targets, selectTarget, log, handoffPause, now});
+    this.stopping = false; this.state = null; this.generation = 0; this.pausedUntil = 0;
   }
+  // «Usar esta computadora» here: forget a pause after yielding the TV and try at once.
+  wake() { this.pausedUntil = 0; }
   setState(state, message) {
     if (state === this.state) return;
     this.state = state; this.log(message);
@@ -58,14 +60,22 @@ export class LabRuntime {
     const generation = this.generation;
     const current = () => !this.stopping && generation === this.generation;
     try {
+      // After yielding the TV to another computer, give it time to take it.
+      if (!this.tunnel && this.now() < this.pausedUntil) return;
       if (!this.tunnel) {
         const tunnel = await this.openTunnel();
         if (!current()) { await tunnel.close(); return; }
         this.tunnel = tunnel;
-        tunnel.closed?.then(() => {
+        tunnel.closed?.then(reason => {
           if (this.tunnel !== tunnel) return;
-          this.lastError = 'Se perdió la conexión con la TV; se reintentará automáticamente.';
-          this.setState('offline', this.lastError);
+          if (reason?.type === 'handoff') {
+            this.pausedUntil = this.now() + this.handoffPause;
+            this.lastError = `${reason.by || 'Otra computadora'} pidió la TV: se la cedió esta computadora, que espera ${Math.round(this.handoffPause / 60000)} min antes de volver a intentarlo.`;
+            this.setState('standby', this.lastError);
+          } else {
+            this.lastError = 'Se perdió la conexión con la TV; se reintentará automáticamente.';
+            this.setState('offline', this.lastError);
+          }
           this.disconnect().catch(() => {});
         });
       }
@@ -98,7 +108,7 @@ export class LabRuntime {
         if (!current()) { await stopBridge(bridge); connection.close(); return; }
         tunnel.assertActive?.();
         if (this.connectionClosed) throw Error('La conexión con la TV se cerró durante el inicio.');
-        this.lastError = null;
+        this.lastError = null; this.holder = '';
         this.setState('connected', `Conexión pasiva: ${target.description || 'Luma'} · ${tunnel.endpoint}`);
       } else {
         await this.bridge.refreshFilters?.();
@@ -108,6 +118,7 @@ export class LabRuntime {
     } catch (error) {
       if (!current()) return;
       this.lastError = String(error?.message || error).slice(0, 240);
+      this.holder = error?.holder || '';
       await this.disconnect();
       if (!this.stopping) this.setState(error.code === 'TV_BUSY' ? 'standby' : 'offline', this.lastError);
     }

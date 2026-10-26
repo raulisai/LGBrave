@@ -46,14 +46,15 @@ npm test                   # pruebas locales, sin TV
 
 En PowerShell usa `npm.cmd` si la política local impide ejecutar `npm.ps1`.
 
-`npm run lab` queda como ruta anterior de Luma para diagnóstico. No la ejecutes junto al control común: comparten candado y el panel avisa del conflicto. Los puertos de los servidores son 43187/43188 (Luma y fixtures) y 43190 (Holy). El canal de control elige un puerto de loopback aleatorio y exige un token local; nunca debe abrirse en el firewall. La TV necesita alcanzar los servidores de inicio: si Windows pregunta por Node, permite la red privada. La instalación no modifica automáticamente el firewall.
+`npm run lab` queda como ruta anterior de Luma para diagnóstico. No la ejecutes junto al control común: comparten candado y el panel avisa del conflicto. Los puertos de los servidores son 43187/43188 (Luma y fixtures) y 43190 (Holy). Si otro programa ya los ocupa, el servicio no cae en bucle: muestra «Otro runtime local está activo» con el puerto y el programa (`netstat`/`tasklist` en Windows, `lsof` en Mac) y reintenta solo cada 30 s. El canal de control elige un puerto de loopback aleatorio y exige un token local; nunca debe abrirse en el firewall. La TV necesita alcanzar los servidores de inicio: si Windows pregunta por Node, permite la red privada. La instalación no modifica automáticamente el firewall.
 
 ## Dos computadoras y relevo
 
 1. Instala **esta misma versión en ambos equipos**, vincula cada uno con la TV y ejecuta el servicio común en ambos.
 2. El primero que obtiene una reserva temporal en `/tmp/luma-desktop-assist` de la TV la asiste; el otro muestra **Esperando a que se libere la conexión anterior**. No hay preferencia entre Mac y Windows: conserva al equipo que ya está atendiendo.
 3. Al apagar el servicio, la reserva se libera. Al perder energía o red, vence después de aproximadamente 60 segundos; el otro equipo vuelve a intentar cada 5 segundos (SSH puede añadir demora). Un reloj monotónico y un vigilante de 15 segundos impiden que una renovación tardía reactive una conexión vencida. SSH envía keepalive cada 5 segundos, con dos faltas permitidas.
-4. Dentro del equipo activo un único runtime selecciona Holy con prioridad; si solo está Luma, selecciona Luma. Nunca lanza apps de la TV. Si webOS conserva ambas como targets, Holy tiene prioridad hasta cerrarla.
+4. **Cambiar de equipo a mano (0.9.5):** en el que quieres usar, elige **Usar esta computadora para la TV** (menú «● LG» del Mac, bandeja de Windows) o ejecuta `npm run desktop:handoff`. La petición queda en `/tmp/luma-desktop-handoff` de la TV; el equipo activo la ve en su siguiente renovación (≤5 s), suelta la TV y espera 2 minutos antes de volver a intentarlo, y el que pidió la toma enseguida. El que espera muestra **La TV la atiende «Nombre (IP)»**, porque quien toma la TV escribe su nombre en la reserva. Un equipo con una versión anterior ignora la petición: actualízalo o apaga su servicio.
+5. Dentro del equipo activo un único runtime selecciona Holy con prioridad; si solo está Luma, selecciona Luma. Nunca lanza apps de la TV. Si webOS conserva ambas como targets, Holy tiene prioridad hasta cerrarla.
 
 También se detecta un cliente ya conectado al puerto del inspector, por ejemplo un runtime viejo del Mac o DevTools, y se espera sin interceptar. **Un runtime antiguo no conoce las reservas y podría conectarse después**: actualizar ambos equipos y detener los servicios anteriores es necesario para el relevo seguro. No se garantiza coordinación con herramientas externas que ignoren el protocolo.
 

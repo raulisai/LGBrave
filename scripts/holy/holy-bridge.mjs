@@ -4,6 +4,7 @@ import { BrowserBridge } from '../browser-bridge.mjs';
 import { origin, packagedPrefix, HOME_PATH } from './config.mjs';
 import { entryKey } from './library.mjs';
 import { PREFERRED } from './catalog.mjs';
+import { KIND_LABEL } from './versions.mjs';
 import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
 import {playbackDescriptor,validDescriptor,readDescriptorSource,writeDescriptorSource,clearDescriptorSource} from './handoff.mjs';
 
@@ -326,7 +327,41 @@ export class HolyBridge extends BrowserBridge {
     session.version = target.version || '';
     session.servers = (session.servers || 0) + 1;
     session.siteServers = 1; session.sawVideo = false;
+    // The remembered (or asked) language is not in this episode: say which one opens instead.
+    if (target.matched === false && (session.choice?.version || session.choice?.kind) && !session.languageNoticed) {
+      session.languageNoticed = true;
+      const now = session.versions.find(version => version.id === session.version);
+      const asked = KIND_LABEL[session.choice.kind] || 'ese idioma';
+      await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify(`Sin «${asked}» en este episodio: se abre en ${now?.label || 'otro idioma'}`)})`);
+      if (this.session !== session || this.stopped) return;
+    }
     await this.openServer(session, target.url);
+  }
+  // Every server of this language failed: the same episode in its other languages (the same
+  // kind first) before another site. The remembered language stays the owner's choice.
+  async nextVersion(session) {
+    if (this.session !== session || this.stopped) return false;
+    const versions = session.versions || [];
+    if (versions.length < 2) return false;
+    session.versionsTried ||= new Set();
+    session.versionsTried.add(session.version);
+    const current = versions.find(version => version.id === session.version);
+    const next = versions.filter(version => !session.versionsTried.has(version.id))
+      .sort((a, b) => (b.kind === current?.kind) - (a.kind === current?.kind))[0];
+    if (!next) return false;
+    session.versionsTried.add(next.id);
+    if (!this.curtainScript) {
+      const item = session.item;
+      if (!await this.installCurtain(session, curtainSource({ title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Probando otro idioma…' }))) return false;
+    }
+    await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify(`${current?.label || 'Ese idioma'} no se pudo abrir: probando ${next.label}…`)})`);
+    if (this.session !== session) return true;
+    const target = await this.catalog.resolve(session.item, { version: next.id, kind: next.kind }).catch(() => null);
+    if (this.session !== session) return true;
+    if (!target || target.version !== next.id) return this.nextVersion(session);
+    session.languageNoticed = true;
+    await this.openTarget(session, target);
+    return true;
   }
   // Next site with the same title that resolves to a player; null when none is left.
   async findElsewhere(session) {
@@ -542,6 +577,8 @@ export class HolyBridge extends BrowserBridge {
       session.queue = leftover.queue;
     }
     if (session.queue?.length) { await this.nextServer(session); return true; }
+    if (await this.nextVersion(session)) return true;
+    if (this.session !== session) return true;
     if (await this.nextSite(session)) return true;
     if (this.session !== session) return true;
     if (session.leftover?.queue?.length) {

@@ -290,7 +290,8 @@ export class Library {
       if (percent === null || percent < 55) return;
       const because = this.entries.filter(entry => entry.watched >= 120 && this.voteOf(entry) >= 0).map(entry => ({ entry, shared: entry.genres.filter(name => item.genres?.includes(name)).length }))
         .filter(candidate => candidate.shared).sort((a, b) => b.shared - a.shared || b.entry.updatedAt - a.entry.updatedAt)[0];
-      scored.push({ ...item, match: percent, matchReason: reason, score: percent + 6 / (1 + index / 40), reason: because ? 'Porque viste ' + because.entry.title : reason });
+      // Titles on award or chart lists (acclaimed) get a small nudge, never past the owner's tastes.
+      scored.push({ ...item, match: percent, matchReason: reason, score: percent + 6 / (1 + index / 40) + (item.acclaimed ? 4 : 0), reason: because ? 'Porque viste ' + because.entry.title : item.acclaimed ? 'Premiada o muy popular, y va con tus gustos' : reason });
     });
     return scored.sort((a, b) => b.score - a.score).slice(0, limit);
   }

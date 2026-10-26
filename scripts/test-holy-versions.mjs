@@ -211,6 +211,55 @@ try {
     assert.match(source, /holy-api\/language/);
     assert.match(source, /versionInfo\[preview\.url\]\?\.versions\?\.length > 1/);
   });
+  await check('Puente: si un idioma no abre, prueba los otros del mismo episodio antes de otro sitio, y avisa si falta el recordado', async () => {
+    const calls = [], drawn = [], resolved = [];
+    const failing = new Set(['https://p.example/play?v=38']);
+    const cdp = {
+      async call(method, params = {}) {
+        calls.push({ method, params });
+        if (method === 'Page.getFrameTree') return { frameTree: { frame: { id: 'main', url: 'https://example.com/' } } };
+        if (method === 'Page.addScriptToEvaluateOnNewDocument') return { identifier: String(calls.length) };
+        if (method === 'Page.navigate' && failing.has(params.url)) return { errorText: 'net::ERR_CONNECTION_REFUSED' };
+        if (method === 'Runtime.evaluate') return { result: { value: { url: 'https://p.example/', top: true, videos: [], action: '' } } };
+        return {};
+      },
+      async evaluate(expression) { drawn.push(expression); return 'https://example.com/'; },
+      onEvent() { return () => {}; }
+    };
+    const versions = [{ id: '38', label: 'Español latino', kind: 'dub' }, { id: '13109', label: 'Coreano · subtítulos en español', kind: 'sub' }];
+    const show = 'https://doramasflix.io/doramas/between-steps';
+    let offered = versions;
+    const catalog = { version: 1, find: () => null, pageFallback: () => false, forgetPlayer: () => {},
+      resolve: async (item, options = {}) => {
+        resolved.push(options);
+        const asked = offered.find(version => version.id === options.version) || offered.find(version => version.kind === options.kind);
+        const chosen = asked || offered[0];
+        return { url: 'https://p.example/play?v=' + chosen.id, versions: offered, version: chosen.id, versionKind: chosen.kind, matched: !!asked };
+      } };
+    const library = new Library(join(directory, 'fallback.json'));
+    const bridge = await new HolyBridge(cdp, { preferencesFile: join(directory, 'fallback-settings.json'), catalog, library, recorder: false }).start();
+    clearInterval(bridge.watchTimer);
+    bridge.remoteContexts.add(9);
+    const navigations = () => calls.filter(call => call.method === 'Page.navigate').map(call => call.params.url);
+    const episode = { source: 'doramasflix', kind: 'dorama', title: 'Between Steps', show, url: show.replace('doramas', 'capitulos') + '-1x1', episode: 1 };
+    try {
+      library.setLanguage(episode, versions[0]);
+      await bridge.command({ action: 'play', value: episode });
+      assert.deepEqual(navigations(), ['https://p.example/play?v=38', 'https://p.example/play?v=13109']);
+      assert.deepEqual(resolved.at(-1), { version: '13109', kind: 'sub' });
+      assert.ok(drawn.some(expression => expression.includes('Español latino no se pudo abrir: probando Coreano · subtítulos en español')));
+      assert.equal(bridge.session.version, '13109');
+      assert.equal(library.languageOf(episode).id, '38', 'a fallback does not change the remembered language');
+      // Every language fails: it ends instead of looping.
+      failing.add('https://p.example/play?v=13109'); calls.length = 0;
+      await bridge.command({ action: 'play', value: { ...episode, url: episode.url + '-b' } });
+      assert.deepEqual(navigations(), ['https://p.example/play?v=38', 'https://p.example/play?v=13109']);
+      // The remembered language is missing in this episode: the screen says which one opens.
+      failing.clear(); offered = [versions[1], { id: '77', label: 'Coreano original', kind: 'orig' }]; drawn.length = 0;
+      await bridge.command({ action: 'play', value: { ...episode, url: episode.url + '-c' } });
+      assert.ok(drawn.some(expression => expression.includes('Sin «En español» en este episodio: se abre en Coreano · subtítulos en español')));
+    } finally { await bridge.stop(); }
+  });
 } finally { rmSync(directory, { recursive: true, force: true }); }
 console.log(`${checks.length} comprobaciones de idiomas y versiones correctas.`);
 

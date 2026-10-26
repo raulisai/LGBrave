@@ -1,4 +1,4 @@
-import {networkInterfaces, homedir} from 'node:os';
+import {networkInterfaces, homedir, hostname} from 'node:os';
 import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 import {dirname, resolve, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -49,6 +49,8 @@ export function lanAddress(interfaces = networkInterfaces(), cfg = config()) {
     + (target && item.address.split('.').slice(0,3).join('.') === target.split('.').slice(0,3).join('.') ? 20 : 0);
   return candidates.sort((a,b) => score(b)-score(a))[0]?.address || '127.0.0.1';
 }
+// How this computer names itself on the TV («Name|IP»), so the other one can say who serves it.
+export const computerLabel = () => `${hostname().replace(/\.(local|lan|home)$/i, '')}|${lanAddress()}`;
 export const lumaOrigin = () => process.env.LAB_ORIGIN || `http://${lanAddress()}:43187`;
 export function safePath(root, requested) {
   const base = resolve(root), path = resolve(base, requested);

@@ -223,7 +223,8 @@
     try {
       const info = await getJSON(`${apiBase}/holy-api/versions?source=${encodeURIComponent(item.source)}&url=${encodeURIComponent(item.url)}&show=${encodeURIComponent(item.show || '')}`, { timeout: 20000, retries: 0 });
       const value = { versions: Array.isArray(info?.versions) ? info.versions : [], remembered: info?.remembered || null };
-      versionInfo = { ...versionInfo, [item.url]: value };
+      // An empty answer may be a slow site: asked again next time instead of kept.
+      if (value.versions.length) versionInfo = { ...versionInfo, [item.url]: value };
       return value;
     } catch { return { versions: [], remembered: null }; }
   }
@@ -253,7 +254,7 @@
         else { opening = null; langSheet = { item, versions: info.versions, index: 0 }; return; }
       }
     }
-    if (!command('play', payload)) { notice = 'Holy necesita la computadora para abrir títulos. Abre «npm run holy» y vuelve a intentar.'; return; }
+    if (!command('play', payload)) { notice = 'Holy necesita la computadora para abrir títulos. Enciende la conexión en el menú «● LG» de la computadora y vuelve a intentar.'; return; }
     opening = item; navigationError = '';
     clearTimeout(openingTimer);
     openingTimer = setTimeout(() => { if (opening === item) { opening = null; notice = 'El sitio no respondió. Intenta de nuevo u otro título.'; } }, 40000);

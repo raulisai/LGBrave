@@ -146,6 +146,7 @@ namespace HolyLuma {
       menu.Items.Add("Encender conexión",null,async(s,e)=>await Execute("start"));
       menu.Items.Add("Apagar conexión",null,async(s,e)=>await Execute("stop"));
       menu.Items.Add("Reiniciar conexión",null,async(s,e)=>await Execute("restart"));
+      menu.Items.Add("Usar esta computadora para la TV",null,async(s,e)=>{ShowPanel();await Execute("handoff");});
       menu.Items.Add("Doctor · Reparar conexión",null,async(s,e)=>{ShowPanel();await Execute("repair");});
       menu.Items.Add("Ver diagnóstico",null,async(s,e)=>{ShowPanel();await Execute("doctor");});
       menu.Items.Add("Configurar direcciones",null,async(s,e)=>{try{await Configure();}catch(Exception error){MessageBox.Show(error.Message,"Configurar conexión");}});
@@ -170,7 +171,7 @@ namespace HolyLuma {
     void OpenLog(){var path=Path.Combine(Program.Root,".local","logs","desktop.log");if(File.Exists(path))Process.Start(new ProcessStartInfo("notepad.exe","\""+path+"\""){UseShellExecute=true});}
     async Task<bool> Execute(string action, string payload = null) {
       if(busy || quitting || disposed)return false;busy=true;
-      try{var result=await Task.Run(()=>Program.Run(action,payload));if(!disposed&&!quitting){if(action=="repair"){lastRepair=DateTime.UtcNow;if(result.ContainsKey("actions")){var items=result["actions"] as System.Collections.IEnumerable;repairText=items==null?"":string.Join(Environment.NewLine,items.Cast<object>().Select(x=>x.ToString()));}}Display(result);}return true;}
+      try{var result=await Task.Run(()=>Program.Run(action,payload));if(!disposed&&!quitting){if(action=="repair")lastRepair=DateTime.UtcNow;if((action=="repair"||action=="handoff")&&result.ContainsKey("actions")){var items=result["actions"] as System.Collections.IEnumerable;repairText=items==null?"":(action=="repair"?"Doctor: ":"Usar esta computadora: ")+string.Join(Environment.NewLine,items.Cast<object>().Select(x=>x.ToString()));}Display(result);}return true;}
       catch(Exception error){if(!disposed&&!quitting){heading.Text="No se pudo consultar el estado";details.Text=error.Message;statusItem.Text="Revisar conexión";tray.Icon=icons["red"];tray.Text="Holy y Luma · Revisar conexión";}return false;}
       finally{busy=false;}
     }
@@ -202,7 +203,7 @@ namespace HolyLuma {
       string tooltip="Holy y Luma · "+label;tray.Text=tooltip.Substring(0,Math.Min(63,tooltip.Length));
       var tv=data.ContainsKey("tv")?data["tv"] as Dictionary<string,object>:null;
       address.Text="Computadora: "+value("host")+"     TV: "+(tv!=null?tv["host"].ToString():"")+Environment.NewLine+"Aplicación: "+value("app");
-      var lines=new List<string>();if(repairText!="")lines.Add("Doctor: "+repairText);if(value("error")!="")lines.Add(value("error"));
+      var lines=new List<string>();if(repairText!="")lines.Add(repairText);if(value("error")!="")lines.Add(value("error"));
       if(data.ContainsKey("checks")){var checks=data["checks"] as System.Collections.IEnumerable;if(checks!=null)foreach(var check in checks)lines.Add(check.ToString());}
       lines.Add("");lines.Add("Inicio automático con Windows: "+(Program.AutoStart?"Activado":"Desactivado"));
       lines.Add("Cerrar esta ventana mantiene la conexión en segundo plano.");

@@ -5,6 +5,7 @@ import { CONNECTORS, connectorFor } from './connectors.mjs';
 import { genreShelves } from '../../src/holy.js';
 import { entryKey, titleKey, nextEpisode } from './library.mjs';
 import { matchVersion, publicVersion } from './versions.mjs';
+import { KnownLists } from './known-lists.mjs';
 
 // The newest titles from the owner's sites, refreshed on the Mac every half hour.
 // Details (genres, synopsis, show page) are cached per page: they rarely change.
@@ -87,8 +88,10 @@ export const sameEpisode = (a, b) => !!a.episode && a.episode === b.episode &&
   (a.season && b.season ? a.season === b.season : (a.season || b.season || 1) <= 1 || a.episode > 30);
 
 export class Catalog {
-  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics } = {}) {
+  // knownLists: award and chart lists (null in tests that do not want them).
+  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics, knownLists } = {}) {
     Object.assign(this, { file, detailsFile, connectors, fetch, log, diagnostics });
+    this.knownLists = knownLists === undefined ? (file === '.local/holy-catalog.json' ? new KnownLists({ log }) : null) : knownLists;
     const data = load(file) || {};
     this.items = (Array.isArray(data.items) ? data.items : []).filter(valid).map(cleanItem);
     this.updatedAt = Number(data.updatedAt) || 0;
@@ -155,7 +158,7 @@ export class Catalog {
       const detail = connector.detail ? await connector.detail(item, this.loader(connector)) : connector.parseDetail(await this.fetch(url), url);
       // Player addresses can carry tokens: never cache them, resolve at play time.
       this.details.set(url, { genres: detail?.genres || [], overview: detail?.overview || '', backdrop: detail?.backdrop || '', poster: detail?.poster || '', show: detail?.show || '',
-        studios: Array.isArray(detail?.studios) ? detail.studios : [], country: detail?.country || '', language: languageLabel(detail?.language) });
+        studios: Array.isArray(detail?.studios) ? detail.studios : [], country: detail?.country || '', language: languageLabel(detail?.language), imdb: /^tt\d+$/.test(detail?.imdb || '') ? detail.imdb : '' });
     });
     while (this.details.size > MAX_DETAILS) this.details.delete(this.details.keys().next().value);
     this.items = items.map(item => this.enrich(item)).filter(item => !item.genres.some(name => ADULT.test(name)));
@@ -172,16 +175,52 @@ export class Catalog {
     const language = detail?.language || item.language || this.connector(item.source)?.language || '';
     if (!detail) return { ...item, genres, language };
     return { ...item, genres: detail.genres?.length ? detail.genres : genres, overview: item.overview || detail.overview || '', backdrop: item.backdrop || detail.backdrop || '',
-      poster: item.poster || detail.poster || '', show: item.show || detail.show || '', studios: detail.studios?.length ? detail.studios : item.studios || [], country: country(item.country || detail.country || ''), language };
+      poster: item.poster || detail.poster || '', show: item.show || detail.show || '', studios: detail.studios?.length ? detail.studios : item.studios || [], country: country(item.country || detail.country || ''), language, ...(detail.imdb ? { imdb: detail.imdb } : {}) };
   }
   start(log = this.log) {
-    const tick = () => this.refresh().catch(error => log('Holy: catálogo: ' + error.message));
+    const tick = () => {
+      this.refresh().catch(error => log('Holy: catálogo: ' + error.message));
+      // Award and chart lists change slowly: each one is read again when its time to live ends.
+      this.knownLists?.refresh().then(read => { if (read) this.version++; return this.findListTitles(); }).catch(() => {});
+    };
     if (Date.now() - this.updatedAt > REFRESH_EVERY / 3) tick();
     this.timer = setInterval(tick, REFRESH_EVERY);
     this.timer.unref?.();
     return this;
   }
   stop() { clearInterval(this.timer); }
+  // Award/chart titles missing from the catalogue are searched on the owner's sites (a few per
+  // round, three at a time); a copy with the same title (and year when known) becomes playable
+  // in its list row. Not found is remembered for a week.
+  async findListTitles(limit = 45) {
+    const lists = this.knownLists;
+    if (!lists || this.findingLists) return this.findingLists || 0;
+    const titleKeyOf = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '');
+    this.findingLists = (async () => {
+      const jobs = lists.pending(this.items, limit);
+      let found = 0;
+      await pool(jobs, 3, async ({ list, entry, id }) => {
+        const names = [...new Set([entry.title, entry.original].filter(Boolean))];
+        const wanted = new Set(entry.aliases.map(titleKeyOf));
+        const kinds = { movie: ['movie'], series: ['series', 'dorama'], dorama: ['dorama', 'series'], anime: ['anime'] }[list.kind] || [list.kind];
+        let match = null;
+        for (const source of KIND_SITES[list.kind] || []) {
+          for (const name of names) {
+            const results = await this.search(source, name).catch(() => []);
+            match = results.find(item => kinds.includes(item.kind) && (wanted.has(titleKeyOf(item.title)) || wanted.has(titleKeyOf(String(item.title).split(/[:(]/)[0])))
+              && (!entry.year || !Number(item.year) || Math.abs(Number(item.year) - entry.year) <= 1)) || null;
+            if (match) break;
+          }
+          if (match) break;
+        }
+        lists.remember(id, match && this.enrich(match));
+        if (match) found++;
+      });
+      if (jobs.length) { lists.save(); if (found) this.version++; }
+      return found;
+    })().finally(() => { this.findingLists = null; });
+    return this.findingLists;
+  }
   find(url) { return this.items.find(item => item.url === url) || null; }
   cached(key, ttl, work) {
     // Failed lookups (null) are not kept: the next try asks the site again.
@@ -405,7 +444,12 @@ export class Catalog {
     const watching = new Set(continuing.map(entry => entry.show).filter(Boolean));
     const airing = best(by('anime').filter(item => item.airing).sort((a, b) => (b.latest || 0) - (a.latest || 0)))
       .sort((a, b) => watching.has(b.show) - watching.has(a.show));
-    const forYou = library.recommend(once(interleave(movies, perSite('anime'), perSite('dorama'), by('series'))), 30);
+    // Well-known lists (awards, AniList charts) over this catalogue; titles on them get a small
+    // nudge in «Recomendado para ti» when they also fit the owner's tastes.
+    const listRows = this.knownLists ? this.knownLists.rows(score(this.items)) : [];
+    const acclaimed = new Set(listRows.flatMap(row => row.items.filter(item => !item.discover).map(item => item.show || item.url)));
+    const nudge = list => list.map(item => (acclaimed.has(item.show || item.url) ? { ...item, acclaimed: true } : item));
+    const forYou = library.recommend(nudge(once(interleave(movies, perSite('anime'), perSite('dorama'), by('series')))), 30);
     const rows = [
       { id: 'continue', title: 'Continuar viendo', items: score(continuing) },
       { id: 'foryou', title: 'Recomendado para ti', items: forYou.map(item => ({ ...item, vote: library.voteOf(item) })) },
@@ -423,6 +467,11 @@ export class Catalog {
     rows.push(...genreRows.map(({ affinity, order, ...row }) => row));
     const knownGenres = new Set(genreRows.map(row => row.genre));
     rows.push(...genreShelves(this.items).filter(row => !knownGenres.has(row.title)).map(row => ({ ...row, items: best(once(row.items)).slice(0, 30) })));
+    // Lists with something to play go right after the newest rows; lists of titles still to
+    // find, after the genres.
+    const after = Math.max(...['movies', 'anime', 'anime-airing', 'doramas'].map(id => rows.findIndex(row => row.id === id))) + 1;
+    rows.splice(after || rows.length, 0, ...listRows.filter(row => row.owned >= 3).map(({ owned, ...row }) => row));
+    rows.push(...listRows.filter(row => row.owned < 3).map(({ owned, ...row }) => row));
     rows.push(
       { id: 'anime-shows', title: 'Anime para descubrir', items: best(once(shows(perSite('anime')).filter(item => !item.airing))).slice(0, 30) },
       { id: 'dorama-shows', title: 'Doramas para descubrir', items: best(once(shows(perSite('dorama')))).slice(0, 30) },
