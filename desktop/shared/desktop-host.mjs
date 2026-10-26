@@ -43,7 +43,7 @@ if (busy.length) { release(); await conflict(describeBusy(busy)); }
 const library = new Library();
 const preferences=new Preferences();
 const profiles=new ProfileState({preferences,library,diagnostics});
-const peerSync=process.env.LUMA_OFFLINE_TEST==='1'?null:new PeerSync({library,host:lanAddress,peers:()=>config().peers,device:()=>config().device,connect:connectSession,diagnostics}).start();
+const peerSync=process.env.LUMA_OFFLINE_TEST==='1'?null:new PeerSync({library,host:lanAddress,peers:()=>config().peers,device:()=>config().device,connect:connectSession,diagnostics});
 let activeStore;
 const catalog = new Catalog({log:console.log,diagnostics});
 if (process.env.LUMA_OFFLINE_TEST !== '1') catalog.start(console.log);
@@ -99,6 +99,8 @@ process.on('message', message => {
   if (message === 'wake') { runtime.wake(); wakeLoop(); }
 });
 process.on('disconnect', () => finish().finally(() => process.exit(0)));
+// Start SSH discovery only after lifecycle hooks exist; SDK cleanup must retain them.
+peerSync?.start();
 try {
   report();
   while (!runtime.stopping) {
