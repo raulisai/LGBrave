@@ -4,7 +4,7 @@
 
 **Cómo mantenerlo (obligatorio):** al terminar cualquier ajuste, actualizar aquí (1) la tabla de estado si cambió una característica, (2) «Pendiente», (3) versión/fecha, (4) una línea en «Últimos cambios» (máx. 8; borrar las más viejas). Detalles largos van a `docs/SEMILLA.md` o a un informe en `docs/`. Sin secretos, sin llaves, sin passphrases. Separar siempre lo probado en TV, lo probado solo en Mac/escritorio y lo no probado.
 
-Actualizado: 2026-10-25 · Código: **0.9.2 escritorio y TV**, Windows + macOS, Holy + Luma. TV instalada: **0.8.0** según último registro; no se instalaron los IPK nuevos en esta revisión. Guías: `docs/WINDOWS.md`, `docs/VALIDACION-DOS-EQUIPOS.md`.
+Actualizado: 2026-10-25 · Código: **0.9.3 paquete/Holy, 0.9.2 Luma TV y fuente EXE**, Windows + macOS, Holy + Luma. TV instalada: **0.8.0** según último registro; no se instalaron los IPK nuevos en esta revisión. Guías: `docs/WINDOWS.md`, `docs/VALIDACION-DOS-EQUIPOS.md`.
 
 ## Qué es
 
@@ -33,9 +33,9 @@ Navegador para una LG 75UR8750PSA (webOS 25, Chromium 120, interfaz 1920×1080) 
 
 ## Pendiente (prioridad)
 
-0. Revisión del otro chat: diagnóstico por sesión, gustos combinados y lista fechada de 100 animes anteriores a 2007 desde AniList conservados. Acceso a archivos recuperado; se corrigieron los datos simulados de recomendaciones/valoración para exigir tiempo realmente observado. `npm test` y ambos builds pasan. Integración visual del Top 100 y reproducción prolongada pendientes; no se instaló IPK.
+0. Revisión del otro chat integrada en código: diagnóstico por sesión, gustos combinados y Top 100 AniList hasta 2006. `test-holy-next`, `npm test` y ambos builds pasan en Windows; la interfaz de TV y reproducción prolongada siguen pendientes. No se instaló IPK.
 
-0. Holy 0.9.2: instalar IPK y validar géneros, vídeo prolongado y logs reales sin otra prueba concurrente. El estado setup del otro chat era anterior: perfil Windows vinculado, SSH/SFTP comprobados, catálogo confirmado por usuario; al cierre Windows espera conexiones heredadas del inspector. Faltan rankings completos/globales; las selecciones AFI/BFI son subconjuntos fechados.
+0. Holy 0.9.3: instalar IPK y validar géneros, vídeo prolongado y logs reales sin otra prueba concurrente. El estado setup del otro chat era anterior: perfil Windows vinculado, SSH/SFTP comprobados, catálogo confirmado por usuario; al cierre Windows espera conexiones heredadas del inspector. Faltan rankings completos/globales; las selecciones AFI/BFI son subconjuntos fechados.
 
 0. Windows: permitir una distribución firmada/autorizada del EXE 0.9.2 bajo la política Device Guard, sin desactivar la protección. Se conserva 0.9.1 e inicio automático. Verificar reinicio físico de Windows; actualizar/compilar el Mac y probar relevo físico Mac→Windows→Mac y vídeo. Las sesiones antiguas no respetan reservas/keepalive nuevos.
 0. Reproducir un episodio en cada sitio nuevo (framextv, onlyflix, doramas*) y anotar fallos.
@@ -101,7 +101,7 @@ Entorno comprobado 2026-10-25: Windows Wi-Fi `192.168.1.65`, TV `192.168.1.134`,
 
 ## Últimos cambios
 
-- 2026-10-25 — **0.9.2: revisión Windows/Mac, relevo y organización.** `desktop/shared/` común, nativos separados, candados/reserva/keepalive y cancelación robustos; corrección del inicio antiguo de Holy atado a IP Mac, catálogo recuperado y confirmado por usuario desde Windows. Perfil por SFTP, gustos/historial por fecha y borrados, respaldo/reintento; adopción pasiva de vídeo. Pruebas locales, procesos, host HTTP y builds correctos; SFTP TV disponible. Al cierre espera por dos sesiones heredadas; no se navega TV. EXE nuevo compilado pero Device Guard bloquea ejecución: se conserva app 0.9.1. Relevo físico completo/Mac/reinicio Windows/IPK pendientes. Detalle `docs/VALIDACION-DOS-EQUIPOS.md`; publicación GitHub solicitada.
+- 2026-10-25 — **Revisión Windows/Mac y Holy 0.9.3: relevo y organización.** `desktop/shared/` común, nativos separados, candados/reserva/keepalive y cancelación robustos; corrección del inicio antiguo de Holy atado a IP Mac, catálogo recuperado y confirmado por usuario desde Windows. Perfil por SFTP, gustos/historial por fecha y borrados, respaldo/reintento; adopción pasiva de vídeo. Pruebas locales, procesos, host HTTP y builds correctos; SFTP TV disponible. Al cierre espera por dos sesiones heredadas; no se navega TV. EXE nuevo compilado pero Device Guard bloquea ejecución: se conserva app 0.9.1. Relevo físico completo/Mac/reinicio Windows/IPK pendientes. Detalle `docs/VALIDACION-DOS-EQUIPOS.md`; publicación GitHub solicitada.
 
 - 2026-10-25 — **Holy 0.9.2: registro persistente de fallos de vídeo, recuperación ampliada y categorías navegables.** Logs JSONL rotados, red/MediaError/atascos/desaparición y resultado de rescates, sin URLs con tokens; `holy:errors`. Recarga única si no hay alternativa, reanudación aplazada y pausas respetadas. Géneros tras recomendaciones en todas las secciones y vista filtrada con novedades, vistas locales, valoraciones, clásicas y selecciones AFI/BFI con año. `npm test` y build/IPK correctos en Windows, **sin prueba ni instalación en TV**. Servicio reporta falta de vinculación local; sesión/buscador intactos. Detalle: `docs/HOLY-PLAYBACK-CATEGORIES.md`.
 

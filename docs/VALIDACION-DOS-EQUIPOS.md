@@ -57,3 +57,8 @@ La caché de TV vive en `/tmp`: se pierde al reiniciar la TV. Las copias locales
 persisten. Los cambios no publicados desde un equipo apagado no pueden
 recuperarse hasta volver a encenderlo. No hay garantía de ausencia de fallos,
 cobertura general de Internet o equivalencia con Brave completo.
+
+Cierre de publicación: paquete/Holy 0.9.3, Luma TV y fuente EXE 0.9.2.
+`test-holy-next` valida gustos observados, borrados convergentes, Top 100 AniList
+y diagnóstico sin secretos. Suite completa y ambos builds volvieron a pasar
+con todos los cambios de este espacio; el código se publica en `origin/main`.

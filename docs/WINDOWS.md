@@ -1,4 +1,4 @@
-# Holy y Luma en Windows · código 0.9.2
+# Holy y Luma en Windows · paquete/Holy 0.9.3, Luma/EXE fuente 0.9.2
 
 El mismo proyecto ejecuta los dos navegadores de la TV desde Windows o macOS. Holy conserva catálogo, conectores, reproducción y gustos de `origin/holy`; Luma conserva su interfaz y sus marcadores. No es el navegador Brave completo: ambos reutilizan su motor de filtrado.
 
