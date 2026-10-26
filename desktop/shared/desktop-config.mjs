@@ -6,6 +6,22 @@ import {createRequire} from 'node:module';
 import {isIP} from 'node:net';
 const require = createRequire(import.meta.url);
 
+// Background launchers can omit APPDATA/LOCALAPPDATA. Use this Windows user's
+// standard directories consistently for both the SDK registry and installed app.
+export function userDataEnvironment(env = process.env, platform = process.platform, home = homedir()) {
+  if (platform !== 'win32') return {...env};
+  const profile = env.USERPROFILE || home;
+  return {...env, USERPROFILE: profile,
+    APPDATA: env.APPDATA || join(profile, 'AppData', 'Roaming'),
+    LOCALAPPDATA: env.LOCALAPPDATA || join(profile, 'AppData', 'Local')};
+}
+if (process.platform === 'win32') {
+  const normalized = userDataEnvironment();
+  for (const key of ['USERPROFILE', 'APPDATA', 'LOCALAPPDATA'])
+    if (!process.env[key]) process.env[key] = normalized[key];
+}
+
+
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 export const CONFIG_FILE = join(ROOT, '.local', 'desktop-config.json');
 export const readJSON = file => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; } };

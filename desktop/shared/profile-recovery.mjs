@@ -8,7 +8,7 @@ export function createProfileRecovery({registry=()=>webosRegistry(),device=()=>c
   const keyExists=profile=>typeof profile?.privateKey?.openSsh==='string'&&basename(profile.privateKey.openSsh)===profile.privateKey.openSsh&&existsSync(join(home(),'.ssh',profile.privateKey.openSsh));
   const safe=profile=>{
     if(!profile||profile.username!=='prisoner'||!keyExists(profile))return null;
-    const out={};for(const field of ['name','host','port','username','type','description','default'])if(['string','number','boolean'].includes(typeof profile[field]))out[field]=profile[field];
+    const out={};for(const field of ['name','host','port','username','type','profile','description','default'])if(['string','number','boolean'].includes(typeof profile[field]))out[field]=profile[field];
     out.privateKey={openSsh:profile.privateKey.openSsh};return out;
   };
   let last='';

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-26T00:00:17.376Z",
+  "updatedAt": "2026-10-26T07:57:10.967Z",
   "enabled": [
     "brave-default-adblock-filters",
     "brave-default-privacy-filters",
@@ -14,9 +14,9 @@
       "uuid": "default",
       "permissions": 1,
       "format": "Standard",
-      "bytes": 5417740,
-      "sha256": "cd1a57d162eed5d4f160b5ab48544ea991c35b3011b13a3ecd524b8cff802217",
-      "lines": 145654,
+      "bytes": 5155757,
+      "sha256": "4811294bd1a7957a220885e3954f6474d3f420b3d0dcc68a847f754eaa2e2f9b",
+      "lines": 134197,
       "sources": [
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
@@ -52,7 +52,7 @@
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-general.txt",
-          "sha256": "8026f96ad4440da8fb43750afad7746024423fc6897eaa5d3b330728c8fa48ed"
+          "sha256": "e1ab45cf034957675f16af123feeed272d6a98a0cb674425db276ae9644e945d"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
@@ -68,7 +68,7 @@
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
-          "sha256": "3bfff799be6b850560e9924a9ec283233a2e576a99c22c9025a7992c3fc2c6ca"
+          "sha256": "ff0d5a373424e1ab6b250efc05c6be0c4817f5b2514a521fc48bf502b7e3215e"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/ubo-link-shorteners.txt",
@@ -76,11 +76,11 @@
         },
         {
           "url": "https://easylist.to/easylist/easylist.txt",
-          "sha256": "48641c316bfec543ef281f3bf646db3c631714b54f114bdd81ac68416879aff1"
+          "sha256": "d516879c39afea72c48c44cc7ce921f5d541f2adde46436a5baa6dd04da08915"
         },
         {
           "url": "https://malware-filter.gitlab.io/malware-filter/urlhaus-filter-agh-online.txt",
-          "sha256": "edd180ae7fafeb5e663af2c7e41ed7d48ab4138b41756f4e431533e4e513a725"
+          "sha256": "3c4a5b36d22546cfeebdc62a0c54b6db326b7f64de90fac2c8e472dfa9af4cb1"
         },
         {
           "url": "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-unbreak.txt",
@@ -114,12 +114,12 @@
       "permissions": 1,
       "format": "Standard",
       "bytes": 1692077,
-      "sha256": "9d13598f7e8164bc7e6dfb74f0729a3d6a50329fa8e11363e1195e24c7b6139c",
+      "sha256": "49ae42724eb06445626135a380f7e9d3d356c3bb133fa69de5f0253dcea274bf",
       "lines": 60491,
       "sources": [
         {
           "url": "https://easylist.to/easylist/easyprivacy.txt",
-          "sha256": "b45645b3dfae88ef459e4802cae51885735ffa5e77fe66cc6cb518e36942e2a6"
+          "sha256": "affefee518c4da70ccfa2f1a55ab030bbf234013a3a72affc5dd2dafc6686a62"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
@@ -190,12 +190,12 @@
       "permissions": 0,
       "format": "Standard",
       "bytes": 128171,
-      "sha256": "d8337306d28ca9594660eba09d5cd4f27c65d4effba6c2eb7b3e441dcf4e654b",
+      "sha256": "266887c7946461cc11822ba1ec536a0e1aa5bdb7bc2cc5e5d5af1d0e4bbb62e8",
       "lines": 2719,
       "sources": [
         {
           "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt",
-          "sha256": "d8337306d28ca9594660eba09d5cd4f27c65d4effba6c2eb7b3e441dcf4e654b"
+          "sha256": "266887c7946461cc11822ba1ec536a0e1aa5bdb7bc2cc5e5d5af1d0e4bbb62e8"
         }
       ]
     }
@@ -211,12 +211,12 @@
     }
   },
   "brave": {
-    "mirrorCommit": "c48e5daf326859ea3db1f612e64cd6afead2a375",
+    "mirrorCommit": "5e60b814fcf8e8916884b1a3811f33d00220dff7",
     "packagerCommit": "72418b387cb1feddc614aaacb8cf166db8e80ed8",
     "uBlockCommit": "4dfbb048607ec4fd19c1c252fd255df6cc653720",
     "locale": "es",
     "catalogSha256": "d822848060307363bc3e517d690e961f8c9e393e58e5a2989ecca39aee274fd0"
   },
-  "revision": "5c936f07b11b2d932735535ee251ee92a1a6d3943b3215beec2f32f686b86b6a",
-  "directory": "generations/5c936f07b11b2d932735"
+  "revision": "fccdb8980fae0ae708765dfa6c06768ad7b6c21f903d0d3e664e5678561d3dae",
+  "directory": "generations/fccdb8980fae0ae70876"
 }

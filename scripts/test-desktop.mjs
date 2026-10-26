@@ -3,7 +3,7 @@ import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {EventEmitter} from 'node:events';
-import {lanAddress, safePath} from './desktop-config.mjs';
+import {lanAddress, safePath, userDataEnvironment} from './desktop-config.mjs';
 import {acquireTVLease, sshCommand} from './tv-lease.mjs';
 import {findLumaTarget} from './cdp.mjs';
 import {LabRuntime} from './lab-runtime.mjs';
@@ -15,6 +15,20 @@ import {webosTool} from './webos-cli.mjs';
 let passed = 0;
 const check = async (label, fn) => {await fn(); passed++;};
 const interfaces = {'vEthernet (Default Switch)':[{family:'IPv4',address:'192.168.48.1'}],WiFi:[{family:'IPv4',address:'192.168.1.65'}],Loopback:[{family:'IPv4',address:'127.0.0.1',internal:true}]};
+await check('Missing Windows user-data variables use this user profile',()=>{
+ const env=userDataEnvironment({},'win32','C:/Users/test-owner');
+ assert.equal(env.APPDATA,join('C:/Users/test-owner','AppData','Roaming'));
+ assert.equal(env.LOCALAPPDATA,join('C:/Users/test-owner','AppData','Local'));
+ assert.equal(env.USERPROFILE,'C:/Users/test-owner');
+});
+await check('Explicit redirected Windows directories are retained',()=>{
+ const original={USERPROFILE:'D:/owner',APPDATA:'D:/roaming',LOCALAPPDATA:'D:/local',OTHER:'keep'};
+ assert.deepEqual(userDataEnvironment(original,'win32','C:/fallback'),original);
+});
+await check('macOS environment is kept intact',()=>{
+ const original={HOME:'/Users/test-owner'};
+ assert.deepEqual(userDataEnvironment(original,'darwin','/Users/test-owner'),original);
+});
 await check('Select real LAN adapter rather than a virtual Windows switch', () => assert.equal(lanAddress(interfaces,{tvIp:'192.168.1.134'}),'192.168.1.65'));
 await check('Explicit host overrides auto detection', () => assert.equal(lanAddress(interfaces,{host:'192.168.1.9'}),'192.168.1.9'));
 await check('Static paths work on Windows and cannot leave the build', () => {

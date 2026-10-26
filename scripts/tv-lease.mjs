@@ -1,3 +1,4 @@
+import {hostname} from 'node:os';
 import {randomUUID} from 'node:crypto';
 import {performance} from 'node:perf_hooks';
 
@@ -32,14 +33,15 @@ export function sshCommand(ssh, command, timeout = 3000) {
 }
 export async function acquireTVLease(ssh, {
   run = command => sshCommand(ssh, command), interval = 5000, onLost = () => {},
-  clock = () => performance.now(), activeFor = 15000
+  clock = () => performance.now(), activeFor = 15000, computer = hostname()
 } = {}) {
   const token = randomUUID(); // generated locally, never supplied to the shell by the user
-  const claim = `d=${LOCK}; if mkdir "$d" 2>/dev/null; then echo '${token}' > "$d/owner"; date +%s > "$d/at"; echo acquired; else echo busy; fi`;
+  const label=String(computer).slice(0,80).replace(/[^a-zA-Z0-9_. -]/g,'_');
+  const claim = `d=${LOCK}; if mkdir "$d" 2>/dev/null; then echo '${token}' > "$d/owner"; date +%s > "$d/at"; echo '${label}' > "$d/info"; echo acquired; else echo busy; fi`;
   let result = await run(claim);
   if (result === 'busy') {
     // Serialize stale recovery; renewers fail closed long before 60 seconds.
-    await run(`d=${LOCK}; g=${LOCK}-reap; n=$(date +%s); ga=$(stat -c %Y "$g" 2>/dev/null || echo "$n"); if [ "$((n-ga))" -gt ${LEASE_SECONDS} ]; then rmdir "$g" 2>/dev/null || true; fi; if mkdir "$g" 2>/dev/null; then a=$(cat "$d/at" 2>/dev/null || stat -c %Y "$d" 2>/dev/null || echo "$n"); if [ "$((n-a))" -gt ${LEASE_SECONDS} ]; then rm -f "$d/owner" "$d/at"; rmdir "$d" 2>/dev/null || true; fi; rmdir "$g"; fi; echo checked`);
+    await run(`d=${LOCK}; g=${LOCK}-reap; n=$(date +%s); ga=$(stat -c %Y "$g" 2>/dev/null || echo "$n"); if [ "$((n-ga))" -gt ${LEASE_SECONDS} ]; then rmdir "$g" 2>/dev/null || true; fi; if mkdir "$g" 2>/dev/null; then a=$(cat "$d/at" 2>/dev/null || stat -c %Y "$d" 2>/dev/null || echo "$n"); if [ "$((n-a))" -gt ${LEASE_SECONDS} ]; then rm -f "$d/owner" "$d/at" "$d/info"; rmdir "$d" 2>/dev/null || true; fi; rmdir "$g"; fi; echo checked`);
     result = await run(claim);
   }
   if (result !== 'acquired') { const error = Error('La TV tiene una reserva de asistencia vigente; esta computadora espera a que se libere o expire.'); error.code = 'TV_BUSY'; error.reason = 'lease'; throw error; }
@@ -73,7 +75,7 @@ export async function acquireTVLease(ssh, {
     } catch { lose(); } finally { busy = false; }
   };
   const timer = setInterval(renew, interval); timer.unref(); armWatchdog();
-  return {lost, assertActive, async commitSnapshot(temporary) {
+  return {token, lost, assertActive, async commitSnapshot(temporary) {
     assertActive();
     if(!/^\/tmp\/luma-desktop-profile\.json\.[0-9a-f-]{36}\.tmp$/.test(temporary))throw Error('Ruta de perfil temporal inválida.');
     const result=await run(`d=${LOCK}; if [ "$(cat "$d/owner" 2>/dev/null)" = '${token}' ]; then mv '${temporary}' /tmp/luma-desktop-profile.json && chmod 600 /tmp/luma-desktop-profile.json && echo committed; else echo stale; fi`);
@@ -83,7 +85,19 @@ export async function acquireTVLease(ssh, {
     active = false; clearInterval(timer); clearTimeout(watchdog);
     // Also retire a lost lease when SSH remains available. Ownership is checked
     // remotely, so cleanup cannot remove a different computer's reservation.
-    releasePromise = Promise.resolve().then(() => run(`d=${LOCK}; if [ "$(cat "$d/owner" 2>/dev/null)" = '${token}' ]; then rm -f "$d/owner" "$d/at"; rmdir "$d" 2>/dev/null || true; fi; echo released`)).catch(() => {});
+    releasePromise = Promise.resolve().then(() => run(`d=${LOCK}; if [ "$(cat "$d/owner" 2>/dev/null)" = '${token}' ]; then rm -f "$d/owner" "$d/at" "$d/info"; rmdir "$d" 2>/dev/null || true; fi; echo released`)).catch(() => {});
     return releasePromise;
   }};
+}
+
+// A watchdog on the TV ends ONLY this connection's sshd after missed heartbeats.
+// It survives a sleeping/crashed laptop; no daemon settings, navigation or foreign PIDs.
+export function sessionWatchdogCommand(token) {
+ if(!/^[0-9a-f-]{36}$/.test(token))throw Error('Reserva inválida.');
+ const script=`p="$1"; born="$2"; while sleep 5; do d=${LOCK}; [ "$(cat "$d/owner" 2>/dev/null)" = '${token}' ] || exit 0; a=$(cat "$d/at" 2>/dev/null) || exit 0; case "$a" in ''|*[!0-9]*) exit 0;; esac; n=$(date +%s); if [ "$((n-a))" -gt 20 ]; then [ "$(cat /proc/$p/comm 2>/dev/null)" = sshd ] && [ "$(awk '{print $22}' /proc/$p/stat 2>/dev/null)" = "$born" ] && kill -TERM "$p"; exit 0; fi; done`;
+ const quote=value=>"'"+value.replaceAll("'","'\\''")+"'";
+ return `p=$PPID; born=$(awk '{print $22}' /proc/$p/stat); if [ "$(cat /proc/$p/comm)" = sshd ] && command -v nohup >/dev/null 2>&1; then nohup sh -c ${quote(script)} guard "$p" "$born" </dev/null >/dev/null 2>&1 & echo guarded; else echo unavailable; fi`;
+}
+export async function armSessionWatchdog(ssh,token,run=command=>sshCommand(ssh,command)) {
+ return await run(sessionWatchdogCommand(token))==='guarded';
 }

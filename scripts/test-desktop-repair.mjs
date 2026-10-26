@@ -1,3 +1,6 @@
+import {EventEmitter} from 'node:events';
+import {openInspectorTunnel} from './inspector-tunnel.mjs';
+import {sessionWatchdogCommand} from './tv-lease.mjs';
 import assert from 'node:assert/strict';
 import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -7,11 +10,19 @@ import {createDesktopRepair} from '../desktop/shared/desktop-repair.mjs';
 const dir=mkdtempSync(join(tmpdir(),'holy-repair-'));let passed=0;
 const check=async(name,fn)=>{await fn();passed++;};
 try{
+ assert.throws(()=>sessionWatchdogCommand('shell-injection'),/inválida/);
+ const watchdog=sessionWatchdogCommand('00000000-0000-0000-0000-000000000000');
+ assert.ok(watchdog.includes('p=$PPID'));assert.ok(watchdog.includes('/proc/$p/comm'));assert.ok(watchdog.includes('$born'));assert.ok(watchdog.includes('kill -TERM'));
  const file=join(dir,'devices.json'),cache=join(dir,'backup.json'),key=join(dir,'.ssh','existing-key');
  mkdirSync(join(dir,'.ssh'));writeFileSync(key,'FAKE TEST KEY');
  const profile={name:'lg-lab',host:'192.168.1.134',port:'9922',username:'prisoner',type:'starfish',privateKey:{openSsh:'existing-key'},passphrase:'DO_NOT_SAVE',password:'DO_NOT_SAVE'};
  const read=()=>{try{return JSON.parse(readFileSync(file));}catch{return null;}};
  const recovery=createProfileRecovery({registry:()=>({file,devices:read()}),device:()=> 'lg-lab',home:()=>dir,cache});
+ await check('Session watchdog receives the same authenticated SSH object',async()=>{
+  const ssh=new EventEmitter();ssh.end=()=>{};let guarded=false;
+  const tunnel=await openInspectorTunnel({connect:async()=>({ssh}),reserve:true,acquireLease:async()=>({token:'00000000-0000-0000-0000-000000000000',lost:new Promise(()=>{}),assertActive(){},async release(){}}),command:async(client,text)=>{assert.equal(client,ssh);if(text.includes('nohup')){guarded=true;return 'guarded';}return '0';}});
+  assert.equal(guarded,true);await tunnel.close();
+ });
  await check('Capture public registry metadata without passwords or private key contents',()=>{
   writeFileSync(file,JSON.stringify([profile]));assert.equal(recovery.capture(),true);const saved=readFileSync(cache,'utf8');assert.ok(!saved.includes('DO_NOT_SAVE'));assert.ok(!saved.includes('FAKE TEST KEY'));assert.equal(recovery.keyPresent(),true);
  });

@@ -3,7 +3,7 @@ import {createServer} from 'node:http';
 import {randomUUID} from 'node:crypto';
 import {writeFileSync, unlinkSync} from 'node:fs';
 import {join} from 'node:path';
-import {ROOT} from './desktop-config.mjs';
+import {ROOT,tvAddress} from './desktop-config.mjs';
 import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
 
 process.chdir(ROOT);
@@ -11,14 +11,14 @@ let release;
 try { release = acquireRuntimeLock('.local/desktop-supervisor.lock'); }
 catch (error) { console.error(error.message); process.exit(2); }
 const token = randomUUID();
-let child, timer, watchdog, lastHeartbeat=Date.now(), stopping = false, failures = [], latest = {state:'starting'};
+let child, timer, watchdog, lastHeartbeat=Date.now(), lastProfileReload=0, stopping = false, failures = [], latest = {state:'starting'};
 const ownerFile = join(ROOT, '.local', 'desktop-owner.json');
 function start() {
   if (stopping) return;
   lastHeartbeat=Date.now();
   child = spawn(process.execPath, [process.env.LUMA_HOST_SCRIPT || join(ROOT, 'scripts', 'desktop-host.mjs')],
     {cwd:ROOT, windowsHide:true, stdio:['ignore','inherit','inherit','ipc'], env:{...process.env,HOLY_SUPERVISED:'1'}});
-  child.on('message', message => { if (message?.type === 'status') {latest = message.status;lastHeartbeat=Date.now();} });
+  child.on('message', message => { if (message?.type === 'status') {latest = message.status;lastHeartbeat=Date.now();if(latest.state==='setup'&&latest.tv?.configured===false&&tvAddress().configured&&Date.now()-lastProfileReload>60000){lastProfileReload=Date.now();latest={state:'restarting',error:'Recargando el perfil actualizado de esta computadora.'};child.kill();}} });
   child.on('error', error => { latest = {state:'error',error:error.message}; });
   child.on('exit', code => {
     child = null;

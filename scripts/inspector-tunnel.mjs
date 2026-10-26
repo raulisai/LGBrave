@@ -1,7 +1,7 @@
 import net from 'node:net';
 import {createRequire} from 'node:module';
 import {config} from './desktop-config.mjs';
-import {acquireTVLease, sshCommand} from './tv-lease.mjs';
+import {acquireTVLease, sshCommand, armSessionWatchdog} from './tv-lease.mjs';
 import {createTVProfileStore} from '../desktop/shared/tv-profile-store.mjs';
 const require = createRequire(import.meta.url);
 
@@ -79,6 +79,7 @@ export async function openInspectorTunnel({
       lease = await acquireLease(session.ssh);
       if (ended) throw Error('La conexión se cerró durante la reserva.');
       lease.lost.then(close);
+      if(lease.token)await armSessionWatchdog(session.ssh,lease.token,text=>command(session.ssh,text));
       // Older runtimes do not know the lease. Respect every established
       // inspector client, including a user's DevTools session.
       const clients = await command(session.ssh, `for f in /proc/net/tcp /proc/net/tcp6; do if [ -r "$f" ]; then cat "$f"; fi; done | awk '$2 ~ /:270E$/ && $4 == "01" {n++} END {print n+0}'`);

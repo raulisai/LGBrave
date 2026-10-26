@@ -18,14 +18,14 @@ export async function ask(path, method = 'GET') {
     return response.ok ? await response.json() : null;
   } catch { return null; }
 }
-const labels = {connected:'Conectado a la TV',waiting:'En espera: abre Holy o Luma en la TV',standby:'Esperando a que se libere la conexión anterior',
+const labels = {connected:'Conectado a la TV',waiting:'En espera: abre Holy o Luma en la TV',standby:'En respaldo · la TV tiene otra sesión activa',
   stopped:'Apagado',starting:'Iniciando',offline:'Sin conexión con la TV',setup:'Falta vincular esta computadora con webOS',conflict:'Otro runtime local está activo',restarting:'Reiniciando',error:'Error',unresponsive:'El servicio no está respondiendo: reinicia la conexión'};
 export async function status({probe = false} = {}) {
   const live = await ask('/status');
   const tv = tvAddress();
   const state = live?.updated && Date.now()-live.updated > 15000 ? 'unresponsive' : live?.state || 'stopped';
   const repairNeeded=state==='setup'&&tv.configured&&!tv.needsUpdate;
-  return {...live,state,repairNeeded,label:repairNeeded?'El servicio necesita recargar el perfil de Windows':labels[state] || state,running:!!live,host:lanAddress(),tv,
+  return {...live,state,error:state==='standby'?'':live?.error||'',...(state==='standby'?{standbyReason:live?.error||'',checks:['La TV está atendida por otra sesión. Esta computadora tomará el relevo cuando quede disponible.']}:{}),repairNeeded,label:repairNeeded?'El servicio necesita recargar el perfil de Windows':labels[state] || state,running:!!live,host:lanAddress(),tv,
     ...(probe ? {tvReachable:!!tv.host && await tcpOpen(tv.host,tv.port,1200)} : {}),
     build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html'))}, config:config(),
     history:live?.profile?.state==='synced'?'Preferencias e historial compartidos mediante la TV con las computadoras que usan esta versión.':
@@ -76,8 +76,8 @@ export async function runCLI() {
     const actions = {status,start,stop,restart,configure:async()=>{
       saveConfig(JSON.parse(process.argv[3] || readFileSync(0,'utf8')));
       syncDeviceProfile(config()); return status();
-    },doctor,repair};
-    if(!actions[action]) throw Error('Uso: desktop-control.mjs status|start|stop|restart|doctor|repair|configure');
+    },doctor:async()=>{const fixed=await repair();const report=await doctor();return {...report,repair:fixed.repair,actions:fixed.actions,checks:[...fixed.actions,...report.checks]};},diagnose:doctor,repair};
+    if(!actions[action]) throw Error('Uso: desktop-control.mjs status|start|stop|restart|doctor|diagnose|repair|configure');
     console.log(JSON.stringify(await actions[action]()));
   } catch(error) {console.error(error.message);process.exitCode=1;}
 }
