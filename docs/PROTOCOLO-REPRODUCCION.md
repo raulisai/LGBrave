@@ -57,6 +57,6 @@ Comprobación final de TV: SSH autenticado responde, pero el puerto local9998 de
 
 [GitHub Actions40400150371](https://github.com/raulisai/LGBrave/actions/runs/40400150371), código c355d0e50ea5037dbd440b1b144cb43f28189fe4: playback(windows-latest) y playback(macos-latest) concluyeron success. Ambos realizaron npm ci, playback:check y subieron report.json. Es macOS de CI, no la Mac física del usuario; ésta todavía debe actualizarse según tareas. Los cambios posteriores de esta anotación son solo documentación y no cambian la huella del código validado.
 
-## Regresión Windows0.9.18 · 2026-10-28
+## Regresión Windows0.9.19 · 2026-10-28
 
-La matriz añade el caso24: test-windows-launcher compila el EXE0.9.12.0 y verifica su Node real bajo entorno normal y APPDATA/LOCALAPPDATA/HOME alterados. Deben coincidir las huellas de carpetas del usuario. Corre en Windows dentro de npm test/playback:check; macOS lo omite explícitamente. No instala ni navega TV. Gate local0.9.18 correcto; instalación real y LG conectado verificados. Detalle: docs/WINDOWS-CONEXION-20261028.md.
+La matriz añade el caso24: test-windows-launcher compila el EXE0.9.12.0 y verifica su Node real bajo entorno normal y APPDATA/LOCALAPPDATA/HOME alterados. Deben coincidir las huellas de carpetas del usuario. Corre en Windows dentro de npm test/playback:check; macOS lo omite explícitamente. No instala ni navega TV. Gate local0.9.19 correcto; instalación real y LG conectado verificados. Detalle: docs/WINDOWS-CONEXION-20261028.md.

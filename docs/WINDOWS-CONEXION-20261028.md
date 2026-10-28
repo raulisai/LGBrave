@@ -1,4 +1,4 @@
-# Conexión Windows · 2026-10-28 · 0.9.18 / EXE0.9.12.0
+# Conexión Windows · 2026-10-28 · 0.9.19 / EXE0.9.12.0
 
 ## Evidencia y recuperación
 
@@ -26,3 +26,5 @@ scripts/test-windows-launcher.mjs compila el ejecutable y ejecuta esa regresión
 - No se cambiaron firewall, DNS, firmware, arranque de la TV, credenciales ni biblioteca.
 
 El arreglo de conexión no modifica parsers de vídeo ni resuelve por sí mismo el aviso de RePelisHD sobre Between Steps. Ese reporte anterior sigue pendiente: se identificó que el mensaje estático confunde falta de enlaces con servidores no compatibles y que la ficha se publica como película; no se entregó aún una corrección de esa ruta.
+
+Integración final: se conservó también el cambio web de la Mac (ba72910/origin1d86ca8) para cambiar idioma desde ficha/reproductor. Código combinado0.9.19; EXEWindows0.9.12.0.
