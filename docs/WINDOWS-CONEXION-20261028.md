@@ -29,4 +29,4 @@ El arreglo de conexión no modifica parsers de vídeo ni resuelve por sí mismo 
 
 Integración final: se conservó también el cambio web de la Mac (ba72910/origin1d86ca8) para cambiar idioma desde ficha/reproductor. Código combinado0.9.19; EXEWindows0.9.12.0.
 
-Verificación final tras integrar la Mac: playback:check0.9.19 pasa, con24casos/7fuentes/3builds y prueba nativa. Servicio continúa connected, profile=synced, repairNeeded=false y error vacío. Lectura final de LG conserva Coda seleccionada y Conectado a la computadora. El inicio actual es file://; no se actualizó IPK ni se atribuye a esa interfaz código HTTP nuevo.
+Verificación final tras integrar la Mac: playback:check0.9.19 pasa, con24casos/7fuentes/3builds y prueba nativa. Servicio continúa connected, profile=synced, repairNeeded=false y error vacío. Lectura final de LG confirma Conectado a la computadora; el usuario ya había navegado a Full Metal Panic! The Second Raid, episodio3. Esa navegación no la ejecutó el diagnóstico. El inicio actual es file://; no se actualizó IPK ni se atribuye a esa interfaz código HTTP nuevo.
