@@ -13,12 +13,12 @@ const startupLink=join(process.env.APPDATA,'Microsoft','Windows','Start Menu','P
 const autostart=process.argv.includes('--without-autostart')?false:!wasInstalled||existsSync(startupLink);
 const build=join(ROOT,'.local','windows-native');mkdirSync(build,{recursive:true});
 const output=join(build,'HolyLuma.exe');
-async function run(binary,args) {
+async function run(binary,args,options={}) {
   await new Promise((resolve,reject)=>{
     const explain=error=>error.code==='UNKNOWN'&&binary.endsWith('.exe')?
       Error('Windows no permitió ejecutar la nueva aplicación. Comprueba Device Guard o la política de aplicaciones de tu equipo. Se conserva la instalación anterior.'):error;
     let child;
-    try{child=spawn(binary,args,{cwd:ROOT,windowsHide:true,stdio:['ignore','pipe','pipe']});}
+    try{child=spawn(binary,args,{cwd:ROOT,windowsHide:true,stdio:['ignore','pipe','pipe'],...options});}
     catch(error){reject(explain(error));return;}
     let output='';
     child.stdout.on('data',bytes=>{output+=bytes;});child.stderr.on('data',bytes=>{output+=bytes;});
@@ -32,6 +32,11 @@ await run(compiler,['/nologo','/target:winexe','/optimize+','/platform:anycpu','
 writeFileSync(join(build,'installation.json'),JSON.stringify({root:ROOT,node:process.execPath},null,2));
 rmSync(join(build,'self-test.json'),{force:true});
 await run(output,['--self-test']);
+const normalEnvironment=JSON.parse(readFileSync(join(build,'self-test.json'),'utf8')).environmentHash;
+// Exercise the actual executable and its Node child with a polluted launcher environment.
+await run(output,['--self-test'],{env:{...process.env,APPDATA:join(build,'wrong-roaming'),LOCALAPPDATA:join(build,'wrong-local'),HOME:join(build,'wrong-home')}});
+const pollutedEnvironment=JSON.parse(readFileSync(join(build,'self-test.json'),'utf8'));
+if(!pollutedEnvironment.environmentVerified||!normalEnvironment||normalEnvironment!==pollutedEnvironment.environmentHash)throw Error('El lanzador cambió de carpetas al heredar otro entorno.');
 if(!JSON.parse(readFileSync(join(build,'self-test.json'),'utf8')).ok)throw Error('Falló la autoprueba de la nueva aplicación.');
 if(buildOnly) {
   console.log(JSON.stringify({built:true,exe:output,selfTest:true,installed:false}));

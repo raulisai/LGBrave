@@ -362,6 +362,19 @@
         "scripts/test-holy-robust.mjs",
         "scripts/test-holy-versions.mjs"
       ]
+    },
+    {
+      "id": "windows-user-profile-startup",
+      "scope": "controlled",
+      "sources": [],
+      "description": "EXE Windows y su hijo Node usan las mismas carpetas del usuario con APPDATA/LOCALAPPDATA/HOME heredados incorrectos; sin reinstalar ni navegar TV.",
+      "evidence": [
+        "windows/HolyLuma.cs",
+        "scripts/install-windows-app.mjs"
+      ],
+      "tests": [
+        "scripts/test-windows-launcher.mjs"
+      ]
     }
   ],
   "caveats": [

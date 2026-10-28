@@ -13,8 +13,8 @@ using System.Windows.Forms;
 
 [assembly: System.Reflection.AssemblyTitle("Holy y Luma")]
 [assembly: System.Reflection.AssemblyProduct("Holy y Luma")]
-[assembly: System.Reflection.AssemblyVersion("0.9.11.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.9.11.0")]
+[assembly: System.Reflection.AssemblyVersion("0.9.12.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.9.12.0")]
 
 namespace HolyLuma {
   static class Program {
@@ -46,19 +46,49 @@ namespace HolyLuma {
         if(link!=null)Marshal.FinalReleaseComObject(link);if(shell!=null)Marshal.FinalReleaseComObject(shell);
       }
     }
-    internal static Dictionary<string,object> Run(string action, string payload = null) {
+    internal static Dictionary<string,string> UserDirectories() {
+      string profile=Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+      string roaming=Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+      string local=Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+      if(string.IsNullOrWhiteSpace(profile)||string.IsNullOrWhiteSpace(roaming)||string.IsNullOrWhiteSpace(local))
+        throw new Exception("Windows no pudo localizar las carpetas de este usuario.");
+      return new Dictionary<string,string>{{"USERPROFILE",profile},{"HOME",profile},{"APPDATA",roaming},{"LOCALAPPDATA",local}};
+    }
+    internal static ProcessStartInfo ControlStartInfo(string action) {
       var info = new ProcessStartInfo(Node, "\"" + Path.Combine(Root,"scripts","desktop-control.mjs") + "\" " + action) {
         WorkingDirectory=Root, UseShellExecute=false, CreateNoWindow=true,
         RedirectStandardOutput=true, RedirectStandardError=true, RedirectStandardInput=true, StandardOutputEncoding=Encoding.UTF8, StandardErrorEncoding=Encoding.UTF8
       };
+      // A launcher can inherit temporary or stale application-data directories.
+      // Use Windows known folders, including redirected profiles, for every child.
+      foreach(var entry in UserDirectories())info.EnvironmentVariables[entry.Key]=entry.Value;
+      return info;
+    }
+    static string RunNode(ProcessStartInfo info,string payload=null) {
       using(var process = Process.Start(info)) {
         var stdout=process.StandardOutput.ReadToEndAsync(); var stderr=process.StandardError.ReadToEndAsync();
         if(payload!=null)process.StandardInput.Write(payload);process.StandardInput.Close();
         if(!process.WaitForExit(30000)) { try{process.Kill();}catch(InvalidOperationException){} throw new Exception("El control tardó demasiado. Revisa el registro."); }
         if(!Task.WaitAll(new Task[]{stdout,stderr},3000))throw new Exception("No se pudo leer la respuesta del control.");
         if(process.ExitCode!=0) throw new Exception(string.IsNullOrWhiteSpace(stderr.Result)?"El control terminó con error "+process.ExitCode+".":stderr.Result.Trim());
-        return Deserialize<Dictionary<string,object>>(stdout.Result);
+        return stdout.Result;
       }
+    }
+    internal static Dictionary<string,object> Run(string action, string payload = null) {
+      return Deserialize<Dictionary<string,object>>(RunNode(ControlStartInfo(action),payload));
+    }
+    static string VerifyUserEnvironment() {
+      var info=ControlStartInfo("status");
+      info.Arguments="-e \"console.log(JSON.stringify([process.env.USERPROFILE,process.env.HOME,process.env.APPDATA,process.env.LOCALAPPDATA]))\"";
+      var actual=Deserialize<string[]>(RunNode(info));
+      var expected=UserDirectories();
+      var keys=new[]{"USERPROFILE","HOME","APPDATA","LOCALAPPDATA"};
+      if(actual==null||actual.Length!=keys.Length)throw new Exception("Falló la prueba del entorno de Node.");
+      for(int i=0;i<keys.Length;i++)
+        if(!string.Equals(actual[i],expected[keys[i]],StringComparison.OrdinalIgnoreCase))
+          throw new Exception("Node no recibió la carpeta de usuario correcta: "+keys[i]);
+      using(var sha=System.Security.Cryptography.SHA256.Create())
+        return BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(string.Join("|",actual.Select(path=>path.ToUpperInvariant()).ToArray())))).Replace("-","");
     }
     [STAThread] static void Main(string[] args) {
       try {
@@ -80,9 +110,10 @@ namespace HolyLuma {
         }
         Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
         if(args.Contains("--self-test")) {
+          string environmentHash=VerifyUserEnvironment();
           using(var context=new TrayContext(false)) {
             context.Display(Run("status"));
-            File.WriteAllText(Path.Combine(AppDir,"self-test.json"),Serialize(new {ok=true,autostart=AutoStart,at=DateTime.UtcNow.ToString("o")}));
+            File.WriteAllText(Path.Combine(AppDir,"self-test.json"),Serialize(new {ok=true,environmentVerified=true,environmentHash=environmentHash,autostart=AutoStart,at=DateTime.UtcNow.ToString("o")}));
           }
           return;
         }
