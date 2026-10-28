@@ -28,3 +28,5 @@ scripts/test-windows-launcher.mjs compila el ejecutable y ejecuta esa regresión
 El arreglo de conexión no modifica parsers de vídeo ni resuelve por sí mismo el aviso de RePelisHD sobre Between Steps. Ese reporte anterior sigue pendiente: se identificó que el mensaje estático confunde falta de enlaces con servidores no compatibles y que la ficha se publica como película; no se entregó aún una corrección de esa ruta.
 
 Integración final: se conservó también el cambio web de la Mac (ba72910/origin1d86ca8) para cambiar idioma desde ficha/reproductor. Código combinado0.9.19; EXEWindows0.9.12.0.
+
+Verificación final tras integrar la Mac: playback:check0.9.19 pasa, con24casos/7fuentes/3builds y prueba nativa. Servicio continúa connected, profile=synced, repairNeeded=false y error vacío. Lectura final de LG conserva Coda seleccionada y Conectado a la computadora. El inicio actual es file://; no se actualizó IPK ni se atribuye a esa interfaz código HTTP nuevo.
