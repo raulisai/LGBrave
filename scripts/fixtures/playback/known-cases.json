@@ -375,6 +375,21 @@
       "tests": [
         "scripts/test-windows-launcher.mjs"
       ]
+    },
+    {
+      "id": "doctor-verified-recovery",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Doctor integra perfil/contexto, permisos existentes, respaldo, verificación, límites persistentes y supervisor real aislado; no navega TV ni reemplaza llaves.",
+      "evidence": [
+        "desktop/shared/repair-policy.mjs",
+        "scripts/test-doctor-coverage.mjs"
+      ],
+      "tests": [
+        "scripts/test-doctor-coverage.mjs",
+        "scripts/test-desktop-repair.mjs",
+        "scripts/test-holy-doctor.mjs"
+      ]
     }
   ],
   "caveats": [

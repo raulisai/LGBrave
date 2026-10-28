@@ -70,3 +70,7 @@ Traer main conservando cambios locales, npm test, npm run build:all y npm run de
 ## Actualización 0.9.17 · arneses de reproducción
 
 Conservar cambios locales, traer main, leer docs/PROTOCOLO-REPRODUCCION.md y ejecutar npm run playback:check. Debe pasar suite+3builds con la misma huella de entradas. npm run playback:probe consulta las fuentes sin tocar TV; parcial no equivale a episodio completo reproducible. Reiniciar backend con npm run desktop:restart y verificar profile:status, sin renovar emparejamiento ni borrar .local. Aplica idioma vivo en relevo, IDs por tipo, seek/play al contenido observado y logs seguros. No requiere reinstalar menú/IPK. El gate pasó en Windows; Mac físico y ensayo LG0.9.17 pendientes.
+
+## Doctor0.9.20 · 2026-10-28
+
+Traer main conservando cambios, ejecutar npm run playback:check y reiniciar backend con npm run desktop:restart cuando sea apropiado. No requiere recompilar menú ni renovar emparejamiento. Comparte diagnóstico de perfil/contexto, límites persistentes y reserva de reparaciones; el Doctor web ya reconoce standby sin desconectar. Supervisor aislado probado y activo en Windows; activación en Mac física pendiente. Ver docs/DOCTOR-RECUPERACION-20261028.md.

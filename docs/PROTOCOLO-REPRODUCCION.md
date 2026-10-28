@@ -60,3 +60,7 @@ Comprobación final de TV: SSH autenticado responde, pero el puerto local9998 de
 ## Regresión Windows0.9.19 · 2026-10-28
 
 La matriz añade el caso24: test-windows-launcher compila el EXE0.9.12.0 y verifica su Node real bajo entorno normal y APPDATA/LOCALAPPDATA/HOME alterados. Deben coincidir las huellas de carpetas del usuario. Corre en Windows dentro de npm test/playback:check; macOS lo omite explícitamente. No instala ni navega TV. Gate local0.9.19 correcto; instalación real y LG conectado verificados. Detalle: docs/WINDOWS-CONEXION-20261028.md.
+
+## Doctor0.9.20 · 2026-10-28
+
+El caso25 incorpora15escenarios del Doctor y un supervisor real aislado. Distingue verificación/espera/bloqueo, comparte reserva y presupuesto persistente, preserva otro dueño y la sesión sana. Gate y3builds pasan. Doctor real dos veces no cambió el PID; LG conservó página y avance. Código/alcance y procedimiento para nuevos incidentes en docs/DOCTOR-RECUPERACION-20261028.md.

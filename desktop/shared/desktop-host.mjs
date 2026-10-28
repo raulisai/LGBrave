@@ -1,4 +1,6 @@
 import {createProfileRecovery} from './profile-recovery.mjs';
+import {RepairJournal} from './repair-journal.mjs';
+import {join} from 'node:path';
 import {DiagnosticLog} from '../../scripts/diagnostics.mjs';
 import {setTimeout as delay} from 'node:timers/promises';
 import {writeFileSync, mkdirSync} from 'node:fs';
@@ -11,7 +13,7 @@ import {Library} from '../../scripts/holy/library.mjs';
 import {startServer} from '../../scripts/holy/server.mjs';
 import {createDoctor} from '../../scripts/holy/doctor.mjs';
 import {createAutostart} from '../../scripts/holy/autostart.mjs';
-import {lanAddress, tvAddress, config, ROOT,lumaOrigin} from './desktop-config.mjs';
+import {lanAddress, tvAddress, config, ROOT,lumaOrigin,userDataContext} from './desktop-config.mjs';
 import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
 import {FilterUpdates} from '../../scripts/filter-updates.mjs';
 import {installCrashGuard} from '../../scripts/crash-guard.mjs';
@@ -62,7 +64,9 @@ const runtime = new LabRuntime({
     ? new HolyBridge(cdp, {...options, catalog, library,preferences,diagnostics}) : new BrowserBridge(cdp, {...options,preferences,diagnostics,home:lumaOrigin()+'/luma-home/'})
 });
 const startedAddress = lanAddress();
-const doctor = createDoctor({catalog, library, runtime, tv:tvAddress(), startedAddress, currentAddress:lanAddress,
+const doctorBudget=new RepairJournal({file:join(ROOT,'.local','doctor-state.json')});
+const doctor = createDoctor({catalog, library, runtime, tv:tvAddress,profile:{inspect:recovery.inspect,restore:()=>{const unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));try{return recovery.restore();}finally{unlock();}}},
+  reserveRepair:(action,code)=>{let unlock;try{unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));return doctorBudget.reserve(action,code);}catch{return{allowed:false,reason:'repair-busy'};}finally{unlock?.();}}, startedAddress, currentAddress:lanAddress,
   supervised:!!process.send, restart:() => { finish().then(() => process.exit(1)); },
   autostart:createAutostart()});
 const server = startServer({catalog, library, doctor, diagnostics, peerSync,
@@ -81,7 +85,7 @@ function finish() {
 let reportedState='';
 const report = () => {
   const state = runtime.state || 'starting';
-  const status = {state, app:runtime.cdp?.target.description || '', host:lanAddress(), tv:tvAddress(),
+  const status = {state,context:userDataContext(), app:runtime.cdp?.target.description || '', host:lanAddress(), tv:tvAddress(),
     error:runtime.lastError || '', holder:runtime.holder || '', paused:Math.max(0, Math.round((runtime.pausedUntil - Date.now()) / 1000)),
     profile:profiles.status(),peerSync:peerSync?.status()||null, updated:Date.now(), pid:process.pid};
   const stateKey=[state,status.app,status.error,status.profile.state].join('|');

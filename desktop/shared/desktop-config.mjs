@@ -3,6 +3,7 @@ import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 import {dirname, resolve, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
 import {isIP} from 'node:net';
 import {execFileSync} from 'node:child_process';
 const require = createRequire(import.meta.url);
@@ -87,4 +88,11 @@ export function safePath(root, requested) {
   const base = resolve(root), path = resolve(base, requested);
   const prefix = base.endsWith('\\') || base.endsWith('/') ? base : base + (process.platform === 'win32' ? '\\' : '/');
   return path.startsWith(prefix) ? path : null;
+}
+
+// Compare process contexts without exposing account paths, keys or sync credentials.
+export function userDataContext({env=process.env,home=homedir(),registry=webosRegistry({env,home}),platform=process.platform}={}) {
+  const normalize=value=>{const text=String(value||'').replace(/\\/g,'/').replace(/\/$/,'');return platform==='win32'?text.toLowerCase():text;};
+  const values=[registry.file,env.HOME||env.USERPROFILE||home,env.LOCALAPPDATA||join(home,'.config')].map(normalize);
+  return {id:createHash('sha256').update(JSON.stringify(values)).digest('hex')};
 }

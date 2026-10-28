@@ -1,11 +1,14 @@
 import {createProfileRecovery} from './profile-recovery.mjs';
 import {createDesktopRepair} from './desktop-repair.mjs';
+import {repairPlan,profileMismatch} from './repair-policy.mjs';
+import {RepairJournal} from './repair-journal.mjs';
+import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
 import {DiagnosticLog} from '../../scripts/diagnostics.mjs';
 import {spawn} from 'node:child_process';
 import {mkdirSync, openSync, closeSync, existsSync, readFileSync, writeFileSync} from 'node:fs';
 import {join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {config, saveConfig, readJSON, tvAddress, lanAddress, localName, ROOT} from './desktop-config.mjs';
+import {config, saveConfig, readJSON, tvAddress, lanAddress, localName, ROOT,userDataContext} from './desktop-config.mjs';
 import {tcpOpen} from '../../scripts/holy/doctor.mjs';
 import {syncDeviceProfile} from '../../scripts/webos-cli.mjs';
 import {PORT} from '../../scripts/holy/config.mjs';
@@ -25,8 +28,10 @@ export async function status({probe = false} = {}) {
   const live = await ask('/status');
   const tv = tvAddress();
   const state = live?.updated && Date.now()-live.updated > 15000 ? 'unresponsive' : live?.state || 'stopped';
-  const repairNeeded=state==='setup'&&tv.configured&&!tv.needsUpdate;
-  const label=repairNeeded?'El servicio necesita recargar el perfil de Windows'
+  const context=userDataContext();
+  const mismatch=profileMismatch(live,context,tv);
+  const repairNeeded=!!(mismatch&& !['connected','standby','starting','restarting'].includes(state) || state==='setup'&&tv.configured&&!tv.needsUpdate);
+  const label=repairNeeded?'El servicio necesita recargar el perfil de esta computadora'
     :state==='standby'&&live?.paused?`TV cedida a otra computadora; reintenta en ${live.paused} s`
     :state==='standby'&&live?.holder?`La TV la atiende ${live.holder}`:labels[state] || state;
   // The catalogue page for any device on the WiFi: served by this same process whenever it
@@ -34,7 +39,7 @@ export async function status({probe = false} = {}) {
   const webBuilt = existsSync(join(ROOT,'dist-holy-web/index.html'));
   const friendlyHost = localName();
   const web = {running:!!live && webBuilt, built:webBuilt, url:`http://${lanAddress()}:${PORT}/`, friendlyUrl:friendlyHost?`http://${friendlyHost}:${PORT}/`:''};
-  return {...live,state,error:state==='standby'?'':live?.error||'',...(state==='standby'?{standbyReason:live?.error||'',checks:[label]}:{}),repairNeeded,label,running:!!live,host:lanAddress(),tv,web,
+  return {...live,state,profileContext:{mismatch,known:!!live?.context?.id},error:state==='standby'?'':live?.error||'',...(state==='standby'?{standbyReason:live?.error||'',checks:[label]}:{}),repairNeeded,label,running:!!live,host:lanAddress(),tv,web,
     ...(probe ? {tvReachable:!!tv.host && await tcpOpen(tv.host,tv.port,1200)} : {}),
     build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html')),holyWeb:webBuilt}, config:config(),
     history:live?.peerSync?.state==='synced'?'Gustos, historial, idiomas y progreso sincronizados entre tus computadoras por la red local.':
@@ -97,10 +102,15 @@ export async function doctor() {
   if(report.host === '127.0.0.1') checks.push('Sin dirección de red local: conecta Wi-Fi o Ethernet, o configura la IP de la computadora.');
   if(report.error) checks.push(report.error);
   const peers = await Promise.all(config().peers.map(async host => ({host,reachable:await tcpOpen(host,43190,800)})));
-  return {...report,checks,peers};
+  const diagnosis=repairPlan(report,repairRecovery.inspect());
+  if(diagnosis.code!=='healthy')checks.push(diagnosis.message);
+  return {...report,checks:[...new Set(checks)],peers,diagnosis,coverage:['profile-context-mismatch','registry-unreadable','authorization-missing','tv-address-mismatch','tv-unreachable','other-owner','service-stopped','service-unresponsive','service-error','connection-retry','local-conflict','app-not-open']};
 }
 const repairLog=new DiagnosticLog();
-export const repair=createDesktopRepair({status,recovery:createProfileRecovery({diagnostics:repairLog}),start,restart,log:result=>repairLog.event('doctor','repair',{phase:result.before,state:result.after})});
+const repairRecovery=createProfileRecovery({diagnostics:repairLog});
+export const repair=createDesktopRepair({status,recovery:repairRecovery,start,restart,wake:()=>ask('/wake','POST'),
+  journal:new RepairJournal({file:join(ROOT,'.local','doctor-state.json')}),lock:()=>acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock')),
+  log:result=>repairLog.event('doctor','repair',{phase:result.outcome,state:result.after,code:result.code,action:result.action,attempt:result.attempt})});
 
 export async function runCLI() {
   try {

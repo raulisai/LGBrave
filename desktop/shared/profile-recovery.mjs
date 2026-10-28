@@ -30,5 +30,10 @@ export function createProfileRecovery({registry=()=>webosRegistry(),device=()=>c
     writeFileSync(current.file+'.luma-tmp',JSON.stringify([...(current.devices||[]),profile],null,2)+'\n',{mode:0o600});renameSync(current.file+'.luma-tmp',current.file);
     diagnostics?.event('profile','registry-restored',{source:device()});return {restored:true,reason:'restored-existing-key'};
   }
-  return {capture,restore,keyPresent(){return keyExists(registry().devices?.find(item=>item.name===device()));}};
+  function inspect() {
+    const current=registry(),profile=current.devices?.find(item=>item.name===device());
+    const saved=load(cache);
+    return {registry:current.devices?'ok':existsSync(current.file)?'unreadable':'missing',profilePresent:!!profile,keyPresent:keyExists(profile),backupUsable:!!(saved?.v===1&&saved.profile?.name===device()&&safe(saved.profile))};
+  }
+  return {capture,restore,inspect,keyPresent(){return keyExists(registry().devices?.find(item=>item.name===device()));}};
 }
