@@ -60,4 +60,7 @@ export const SOURCE_CONTRACTS = [
    {url:'https://onlyflix.to/fixture/',body:'<div class="player-frame" data-player-nonce="fixture" data-player-post-id="1" data-player-content-type="movie"></div>'},
    {url:'https://onlyflix.to/wp-admin/admin-ajax.php',method:'POST',referrer:'https://onlyflix.to/fixture/',body:JSON.stringify({data:{players:[{url:'https://cdn.example/embed/1',language:'EN'},{url:'javascript:alert(1)',language:'EN'},{url:'https://vid.example/embed/1',language:''}]}})}
   ]},
+ {source:'doramasflixbeer',identity:{"title":"Contrato Beer","kind":"dorama","url":"https://doramasflix.beer/series/fixture-2026/"},declaredLanguage:"Subtitulado",home:'<a href="https://doramasflix.beer/series/fixture-2026/" class="v6-arch-card"><img src="https://image.tmdb.org/t/p/w500/x.jpg" class="v6-arch-img"><h3 class="v6-arch-text-title">Contrato Beer (2026)</h3></a>',
+  expected:{url:'https://ok.ru/videoembed/9?autoplay=1',referrer:'https://doramasflix.beer/series/fixture-2026/',alternatives:['https://vidmoly.example/embed-1.html']},
+  responses:[{url:'https://doramasflix.beer/series/fixture-2026/',body:'<select><option value="'+Buffer.from('https://vidmoly.example/embed-1.html').toString('base64')+'">Vidmoly (Option 2)</option><option value="'+Buffer.from('https://ok.ru/videoembed/9').toString('base64')+'">OK.RU (Option 1)</option><option value="'+Buffer.from('javascript:alert(1)').toString('base64')+'">Malo</option></select>'}]},
 ];

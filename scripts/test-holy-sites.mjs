@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { Catalog } from './holy/catalog.mjs';
 import { SiteRegistry, cleanSite, checkSite } from './holy/site-registry.mjs';
 import { startServer } from './holy/server.mjs';
-import { onlyflix } from './holy/more-sources.mjs';
+import { onlyflix, doramasflixbeer } from './holy/more-sources.mjs';
 
 // The window «Webs»: moving a site keeps its parsers and saved titles working. No Internet.
 const dir = mkdtempSync(join(tmpdir(), 'holy-sites-'));
@@ -82,4 +82,10 @@ await check('OnlyFlix: temporadas completas y servidores en inglés, con los dem
   assert.deepEqual(await onlyflix.resolve({ url: 'https://onlyflix.to/episodes/x-s01e01/' }, load), { url: 'https://a.example/1', referrer: 'https://onlyflix.to/episodes/x-s01e01/', alternatives: ['https://c.example/1'] });
   await assert.rejects(() => onlyflix.resolve({ url: 'https://onlyflix.to/x/' }, async () => '<html>'), /no muestra reproductor/);
 });
-console.log(`${passed} comprobaciones de la ventana Webs y OnlyFlix correctas.`);
+await check('DoramasFlix .beer: capítulos por temporada y capítulo sin servidores avisa claro', async () => {
+  const page = '<div id="season-content-1"><a href="https://doramasflix.beer/episodios/x-1x02/"></a><a href="https://doramasflix.beer/episodios/x-1x01/"></a></div><div id="season-content-2"><a href="https://doramasflix.beer/episodios/x-2x01/"></a></div>';
+  const seasons = await doramasflixbeer.episodes('https://doramasflix.beer/series/x/', async () => page);
+  assert.deepEqual(seasons.map(season => [season.number, season.episodes.map(episode => episode.episode)]), [[1, [1, 2]], [2, [1]]]);
+  await assert.rejects(() => doramasflixbeer.resolve({ url: 'https://doramasflix.beer/episodios/x-1x01/' }, async () => '<div>NO SERVERS AVAILABLE</div>'), /todavía no tiene servidores/);
+});
+console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix y .beer correctas.`);

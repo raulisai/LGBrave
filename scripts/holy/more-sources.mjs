@@ -380,3 +380,48 @@ export const onlyflix = {
     return { url: players[0].url, referrer: entry.url, alternatives: players.slice(1).map(player => player.url) };
   }
 };
+
+// ---------------------------------------------------------------- DoramasFlix .beer
+// A WordPress site with its own list of servers: every option of an episode carries its
+// player address in base64. Many episodes still say «NO SERVERS AVAILABLE»; those fail with
+// a clear message and Holy tries the same title on the other sites.
+const beerURL = 'https://doramasflix.beer/';
+const beerCards = (html, base = beerURL) => [...String(html).matchAll(/<a href="(https:\/\/doramasflix\.beer\/series\/[a-z0-9-]+\/)" class="v6-arch-card">([\s\S]*?)<\/a>/g)].map(([, url, block]) =>
+  item({ source: 'doramasflixbeer', kind: 'dorama', url, show: url, isShow: true, language: 'Subtitulado', title: decode(text(/class="v6-arch-text-title">([\s\S]*?)<\/h3>/.exec(block)?.[1]).replace(/\s*\(\d{4}\)$/, '')),
+    year: /\((\d{4})\)<\/h3>/.exec(block)?.[1] || '', poster: attr(/<img[^>]*>/.exec(block)?.[0] || '', 'src'), rating: /⭐\s*([\d.]+)/.exec(block)?.[1] || '' })).filter(entry => entry.title);
+export const doramasflixbeer = {
+  id: 'doramasflixbeer', name: 'DoramasFlix .beer', site: beerURL, language: 'Subtitulado',
+  parseHome: html => beerCards(html),
+  more(load) { return genrePages(load, [2, 3, 4].map(page => [`${beerURL}series/page/${page}/`, '']), html => beerCards(html), `${beerURL}series/`); },
+  parseSearch: html => beerCards(html),
+  searchURL: query => beerURL + '?s=' + encodeURIComponent(query),
+  async detail(entry, load) {
+    const html = await load(entry.show || entry.url);
+    return { show: entry.show || entry.url, genres: unique([...html.matchAll(/href="https:\/\/doramasflix\.beer\/generos\/[a-z0-9-]+\/">([^<]+)</g)].map(match => genre(match[1]))).filter(Boolean),
+      overview: decode(/og:description" content="([^"]*)"/.exec(html)?.[1] || ''), poster: attr(/<meta property="og:image"[^>]*>/.exec(html)?.[0], 'content') };
+  },
+  async episodes(show, load) {
+    const html = await load(show);
+    const seasons = [...html.matchAll(/id="season-content-\d+"([\s\S]*?)(?=id="season-content-\d+"|<\/section|$)/g)].map((match, index) => {
+      const episodes = [...new Map([...match[1].matchAll(/href="(https:\/\/doramasflix\.beer\/episodios\/[a-z0-9-]*?-(\d+)x(\d+)\/)"/g)].map(link => [Number(link[3]), { url: link[1], season: Number(link[2]), episode: Number(link[3]), label: 'Capítulo ' + Number(link[3]) }]))]
+        .sort((a, b) => a[0] - b[0]).map(([, episode]) => episode);
+      return { title: 'Temporada ' + (episodes[0]?.season || index + 1), number: episodes[0]?.season || index + 1, episodes };
+    }).filter(season => season.episodes.length);
+    return seasons;
+  },
+  async resolve(entry, load) {
+    const html = await load(entry.url);
+    if (/NO SERVERS AVAILABLE/.test(html)) throw Error('DoramasFlix .beer todavía no tiene servidores para este capítulo.');
+    const options = [...html.matchAll(/<option value="([A-Za-z0-9+/=]{16,})"[^>]*>\s*([^<(]*)/g)].map(match => {
+      let url = ''; try { url = Buffer.from(match[1], 'base64').toString('utf8'); } catch { /* Not an address. */ }
+      return { url, name: match[2].trim() };
+    }).filter(option => /^https:\/\/[^\s"'<>]+$/.test(option.url));
+    // Same order the other DoramasFlix uses: ok.ru and Mixdrop are proven on this TV.
+    const rank = option => (/ok\.ru/.test(option.url) ? 0 : /mixdrop|mxdrop/.test(option.url) ? 1 : 2);
+    const sorted = options.sort((a, b) => rank(a) - rank(b));
+    if (!sorted.length) throw Error('DoramasFlix .beer no mostró servidores para este capítulo.');
+    const first = new URL(sorted[0].url);
+    if (/(^|\.)ok\.ru$/.test(first.hostname)) first.searchParams.set('autoplay', '1');
+    return { url: first.href, referrer: entry.url, alternatives: sorted.slice(1).map(option => option.url) };
+  }
+};

@@ -114,6 +114,20 @@
       ]
     },
     {
+      "id": "source-doramasflixbeer",
+      "scope": "controlled",
+      "sources": [
+        "doramasflixbeer"
+      ],
+      "description": "Formato conocido de DoramasFlix .beer: tarjetas, temporadas, servidores en base64, Referer y alternativas, sin Internet.",
+      "evidence": [
+        "scripts/test-holy-sites.mjs"
+      ],
+      "tests": [
+        "scripts/test-holy-sites.mjs"
+      ]
+    },
+    {
       "id": "between-steps-spanish",
       "scope": "tv-user-confirmed",
       "sources": [
