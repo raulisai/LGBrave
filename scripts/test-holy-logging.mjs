@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, readFileSync, readdirSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, readFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DiagnosticLog, redact } from './diagnostics.mjs';
 import { PlaybackLog } from './holy/playback-log.mjs';
+import { Catalog } from './holy/catalog.mjs';
 import { attempts, serverStats, closures, incidentSummary } from './holy/playback-report.mjs';
 
 const dir = mkdtempSync(join(tmpdir(), 'holy-log-'));
@@ -55,4 +56,20 @@ try {
     assert.match(closures(closed, [later(1, 'waiting'), later(900, 'offline')])[0].cause, /TV encendida/);
   });
 } finally { rmSync(dir, { recursive: true, force: true }); }
-console.log(`${passed} comprobaciones del registro de fallos correctas.`);
+
+// City Hunter 1 (2026-10-31): ok.ru blocked and Streamtape deleted, Mixdrop and Uqload alive.
+const urls = ['https://ok.ru/1', 'https://mix.example/1', 'https://st.example/1', 'https://uq.example/1'];
+const resolved = async probe => {
+  const connector = { id: 'x', name: 'X', site: 'https://x.example/', resolve: async () => ({ url: urls[0], alternatives: urls.slice(1) }) };
+  const catalog = new Catalog({ file: join(dir, 'gone.json'), detailsFile: join(dir, 'gone-details.json'), connectors: [connector], fetch: async () => '', probe });
+  return catalog.resolve({ source: 'x', url: 'https://x.example/e', title: 'City Hunter' });
+};
+mkdirSync(dir, { recursive: true });
+const living = await resolved(async url => /ok\.ru|st\.example/.test(url));
+assert.equal(living.url, urls[1]); assert.deepEqual(living.alternatives, [urls[3]]); passed++;
+const allGone = await resolved(async () => true);
+assert.equal(allGone.url, urls[0]); assert.equal(allGone.alternatives.length, 3); passed++;
+const unknown = await resolved(async () => { throw Error('lento'); });
+assert.equal(unknown.url, urls[0]); assert.equal(unknown.alternatives.length, 3); passed++;
+rmSync(dir, { recursive: true, force: true });
+console.log(`${passed} comprobaciones del registro de fallos y servidores caídos correctas.`);

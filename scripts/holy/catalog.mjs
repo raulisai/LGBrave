@@ -87,9 +87,19 @@ export function episodeOf(item) {
 export const sameEpisode = (a, b) => !!a.episode && a.episode === b.episode &&
   (a.season && b.season ? a.season === b.season : (a.season || b.season || 1) <= 1 || a.episode > 30);
 
+// The page each host serves for a video it removed. Only a clear answer counts: a slow or
+// unknown host stays in the list and the TV tries it as before.
+const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+const GONE_PAGE = /vp_video_stub_txt|can't find the video you are looking for|deleted by the creator|file was deleted|video not found/i;
+export async function playerGone(url, referrer) {
+  const response = await fetch(url, { headers: { 'User-Agent': UA, Referer: referrer }, signal: AbortSignal.timeout(4000) });
+  if ([404, 410].includes(response.status)) return true;
+  return response.ok && GONE_PAGE.test(await response.text());
+}
 export class Catalog {
   // knownLists: award and chart lists (null in tests that do not want them).
-  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics, knownLists } = {}) {
+  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics, knownLists, probe = fetch === fetchText ? playerGone : null } = {}) {
+    this.probe = probe;
     Object.assign(this, { file, detailsFile, connectors, fetch, log, diagnostics });
     this.knownLists = knownLists === undefined ? (file === '.local/holy-catalog.json' ? new KnownLists({ log }) : null) : knownLists;
     const data = load(file) || {};
@@ -267,7 +277,6 @@ export class Catalog {
   // Same-site form POST (JKAnime's episode list needs its session cookie and token).
   // The page's session (cookie and token) is reused for a few minutes: one list is several POSTs.
   async post(url, referrer, fresh = false) {
-    const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
     this.sessions ||= new Map();
     let session = this.sessions.get(referrer);
     if (fresh || !session || Date.now() - session.at > 5 * 60000) {
@@ -336,10 +345,20 @@ export class Catalog {
     return null;
   }
   async resolveNow(item, connector) {
+    // A player the host already took down is skipped here, so the TV never waits on it.
+    const living = async target => {
+      if (!target || !this.probe) return target;
+      const urls = [target.url, ...target.alternatives];
+      const gone = await Promise.all(urls.map(url => this.probe(url, item.url).catch(() => false)));
+      const alive = urls.filter((url, index) => !gone[index]);
+      if (alive.length === urls.length || !alive.length) return target;
+      this.diagnostics?.event('catalog', 'player-gone', { source: item.source, title: item.title, host: urls.filter((url, index) => gone[index]).map(url => new URL(url).hostname).join(' ') }, 'warn');
+      return { ...target, url: alive[0], alternatives: alive.slice(1) };
+    };
     const clean = target => (target && /^https:\/\//.test(String(target.url || '')) ? { ...target, alternatives: (target.alternatives || []).filter(url => /^https:\/\//.test(String(url || '')) && url !== target.url) } : null);
     if (connector.versions) {
       const list = await deadline(connector.versions(item, this.loader(connector)), 30000, 'El sitio tardó demasiado en dar el reproductor.');
-      const versions = (Array.isArray(list) ? list : []).map(version => ({ ...version, target: clean(version.target) })).filter(version => version.target);
+      const versions = (await Promise.all((Array.isArray(list) ? list : []).map(async version => ({ ...version, target: await living(clean(version.target)) })))).filter(version => version.target);
       // One version is no choice: it behaves like a site without versions.
       return versions.length ? { target: { ...versions[0].target, version: String(versions[0].id), versionKind: versions[0].kind }, versions: versions.length === 1 ? [] : versions } : null;
     }
@@ -348,7 +367,7 @@ export class Catalog {
       const detail = connector.parseDetail(await this.fetch(item.url, { referrer: connector.site }), item.url);
       return connector.player(detail, item.url);
     };
-    const target = clean(await deadline(work(), 30000, 'El sitio tardó demasiado en dar el reproductor.'));
+    const target = await living(clean(await deadline(work(), 30000, 'El sitio tardó demasiado en dar el reproductor.')));
     return target ? { target, versions: [] } : null;
   }
   // The same title on the owner's other sites, for when its own site cannot play it:
