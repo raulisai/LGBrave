@@ -100,6 +100,20 @@
       ]
     },
     {
+      "id": "source-onlyflix",
+      "scope": "controlled",
+      "sources": [
+        "onlyflix"
+      ],
+      "description": "Formato conocido de OnlyFlix: tarjetas, temporadas, servidores en inglés, Referer y alternativas, sin Internet.",
+      "evidence": [
+        "scripts/test-holy-sites.mjs"
+      ],
+      "tests": [
+        "scripts/test-holy-sites.mjs"
+      ]
+    },
+    {
       "id": "between-steps-spanish",
       "scope": "tv-user-confirmed",
       "sources": [

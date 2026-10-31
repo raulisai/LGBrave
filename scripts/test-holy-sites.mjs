@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { Catalog } from './holy/catalog.mjs';
 import { SiteRegistry, cleanSite, checkSite } from './holy/site-registry.mjs';
 import { startServer } from './holy/server.mjs';
+import { onlyflix } from './holy/more-sources.mjs';
 
 // The window «Webs»: moving a site keeps its parsers and saved titles working. No Internet.
 const dir = mkdtempSync(join(tmpdir(), 'holy-sites-'));
@@ -59,4 +60,26 @@ try {
     } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
   });
 } finally { rmSync(dir, { recursive: true, force: true }); }
-console.log(`${passed} comprobaciones de la ventana Webs correctas.`);
+
+await check('OnlyFlix: tres tipos de tarjeta, todo marcado en inglés', () => {
+  const page = `<article class="of-title-card-v2" data-title="The Matrix" data-url="https://onlyflix.to/the-matrix/" data-backdrop="https://onlyflix.to/b.jpg" data-year="1999" data-rating="8.7" data-genres="Action, Sci-Fi" data-overview="Neo"><a class="x"><img class="of-title-card-v2__poster" src="https://onlyflix.to/p.jpg"></a>
+  <article class="ofb-card"><a class="ofb-card-link" href="https://onlyflix.to/series/carrie/" aria-label="Carrie"></a><img src="https://onlyflix.to/c.jpg"></article>
+  <article class="of-media-card of-lazy-bg" data-of-lazy-bg="https://onlyflix.to/h.jpg"><a class="of-media-card__link" href="https://onlyflix.to/clayface/"></a><span class="of-media-card__name">Clayface</span><span class="of-media-card__genres">Horror</span></article>`;
+  const items = onlyflix.parseHome(page);
+  assert.deepEqual(items.map(item => [item.title, item.kind, !!item.isShow, item.language]), [['The Matrix', 'movie', false, 'Inglés'], ['Carrie', 'series', true, 'Inglés'], ['Clayface', 'movie', false, 'Inglés']]);
+  assert.equal(items[0].year, '1999');
+});
+await check('OnlyFlix: temporadas completas y servidores en inglés, con los demás de respaldo', async () => {
+  const load = async (url, options) => {
+    if (!options?.method) return '<body class="single postid-77"><div class="player-frame" data-player-nonce="n1" data-player-post-id="5" data-player-content-type="episode"></div>';
+    const form = new URLSearchParams(options.body);
+    if (form.get('action') === 'mcs_home_hero_tv_episodes') { assert.equal(form.get('show_id'), '77'); return JSON.stringify({ data: { seasons: [{ season: 2, episodes: [{ permalink: 'https://onlyflix.to/episodes/x-s02e01/', episode: 1 }] }, { season: 1, episodes: [{ permalink: 'https://malo.example/', episode: 1 }, { permalink: 'https://onlyflix.to/episodes/x-s01e01/', episode: 1 }] }] } }); }
+    assert.equal(form.get('type'), 'episode');
+    return JSON.stringify({ data: { players: [{ url: 'https://a.example/1', language: 'EN' }, { url: 'https://b.example/1', language: 'ES' }, { url: 'https://c.example/1', language: '' }, { url: 'http://d.example/1', language: 'EN' }] } });
+  };
+  const seasons = await onlyflix.episodes('https://onlyflix.to/series/x/', load);
+  assert.deepEqual(seasons.map(season => [season.number, season.episodes.length]), [[1, 1], [2, 1]]);
+  assert.deepEqual(await onlyflix.resolve({ url: 'https://onlyflix.to/episodes/x-s01e01/' }, load), { url: 'https://a.example/1', referrer: 'https://onlyflix.to/episodes/x-s01e01/', alternatives: ['https://c.example/1'] });
+  await assert.rejects(() => onlyflix.resolve({ url: 'https://onlyflix.to/x/' }, async () => '<html>'), /no muestra reproductor/);
+});
+console.log(`${passed} comprobaciones de la ventana Webs y OnlyFlix correctas.`);

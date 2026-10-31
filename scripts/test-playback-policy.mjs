@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {loadPlaybackMatrix,validatePlaybackMatrix} from './playback-policy.mjs';
-const matrix=loadPlaybackMatrix();const result=validatePlaybackMatrix(matrix);assert.equal(result.sources,7);
+const matrix=loadPlaybackMatrix();const result=validatePlaybackMatrix(matrix);assert.equal(result.sources,8);
 const change=fn=>{const clone=structuredClone(matrix);fn(clone);return clone;};
 assert.throws(()=>validatePlaybackMatrix(change(m=>m.cases.push(m.cases[0]))),/único/);
 assert.throws(()=>validatePlaybackMatrix(change(m=>m.cases[0].evidence=['../secret'])),/Evidencia/);

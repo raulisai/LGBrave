@@ -56,7 +56,7 @@ const slim = item => (item.overview && item.overview.length > 280 ? { ...item, o
 const RESOLVE_TTL = 150000;
 export const PREFERRED = { anime: 'jkanime' };
 // Which of the owner's sites carry each kind of title (for finding a title elsewhere).
-const KIND_SITES = { movie: ['cuevana', 'repelishd', 'doramasflix'], series: ['cuevana'], anime: ['jkanime', 'animeyt'], dorama: ['doramasflix', 'doramasmp4', 'asialiveaction'] };
+const KIND_SITES = { movie: ['cuevana', 'repelishd', 'doramasflix', 'onlyflix'], series: ['cuevana', 'onlyflix'], anime: ['jkanime', 'animeyt'], dorama: ['doramasflix', 'doramasmp4', 'asialiveaction'] };
 const plain = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, ' y ').replace(/[^a-z0-9]+/g, ' ').trim();
 // Same work on two sites: same title (or the same main title before «:»), and close years when both say.
 export function sameTitle(a, b) {

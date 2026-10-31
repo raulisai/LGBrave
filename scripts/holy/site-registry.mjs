@@ -9,7 +9,6 @@ import { isIP } from 'node:net';
 const KNOWN_PENDING = [
   { name: 'AnimeOnline Ninja', url: 'https://ww3.animeonline.ninja/', reason: 'Cloudflare responde 403 a la computadora' },
   { name: 'FrameTV', url: 'https://framextv.cc/', reason: 'La página se arma solo con scripts' },
-  { name: 'OnlyFlix', url: 'https://onlyflix.to/', reason: 'Catálogo en inglés' },
   { name: 'DoramasFlix .beer', url: 'https://doramasflix.beer/', reason: 'Los reproductores no vienen en la página' }
 ];
 const hostOf = url => new URL(url).hostname;

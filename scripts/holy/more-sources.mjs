@@ -321,3 +321,62 @@ export const animeyt = {
     return episodes.length ? [{ title: 'Episodios', episodes }] : [];
   }
 };
+
+// ---------------------------------------------------------------- OnlyFlix
+// English catalogue (WordPress). Cards carry their data in attributes; each title or episode
+// asks the site's own «available players» call, like the page does when Play is pressed.
+const onlyflixURL = 'https://onlyflix.to/';
+const onlyflixCard = block => {
+  const url = decode(attr(block, 'data-url')), show = /\/series\//.test(url);
+  const backdrop = decode(attr(block, 'data-backdrop'));
+  return item({ source: 'onlyflix', kind: show ? 'series' : 'movie', url, title: decode(attr(block, 'data-title')), isShow: show, ...(show ? { show: url } : {}), language: 'Inglés',
+    year: attr(block, 'data-year'), rating: attr(block, 'data-rating'), overview: decode(attr(block, 'data-overview')), backdrop,
+    poster: attr(/<img class="of-title-card-v2__poster"[^>]*>/.exec(block)?.[0] || '', 'src'),
+    genres: unique(decode(attr(block, 'data-genres')).split(',').map(name => genre(name.trim()))).filter(Boolean) });
+};
+// Lists use three card styles: search (attributes), home and «best» pages.
+const onlyflixEntry = (url, title, fields) => item({ source: 'onlyflix', kind: /\/series\//.test(url) ? 'series' : 'movie', url, title, language: 'Inglés', ...(/\/series\//.test(url) ? { isShow: true, show: url } : {}), ...fields });
+const onlyflixCards = html => {
+  const page = String(html), cards = [...page.matchAll(/<article class="of-title-card-v2"[\s\S]*?<\/a>/g)].map(match => onlyflixCard(match[0]));
+  for (const [block] of page.matchAll(/<article class="ofb-card">[\s\S]*?<\/article>/g)) {
+    const link = /class="ofb-card-link" href="([^"]+)" aria-label="([^"]*)"/.exec(block);
+    if (link) cards.push(onlyflixEntry(link[1], decode(link[2]), { poster: attr(/<img[^>]*>/.exec(block)?.[0] || '', 'src') }));
+  }
+  for (const [block] of page.matchAll(/<article class="of-media-card[\s\S]*?<\/article>/g)) {
+    const url = /class="of-media-card__link" href="([^"]+)"/.exec(block)?.[1] || '';
+    cards.push(onlyflixEntry(url, text(/class="of-media-card__name">([\s\S]*?)<\/span>/.exec(block)?.[1]), { backdrop: attr(/<article[^>]*>/.exec(block)?.[0] || '', 'data-of-lazy-bg'),
+      genres: unique(text(/class="of-media-card__genres">([\s\S]*?)<\/span>/.exec(block)?.[1]).split(',').map(name => genre(name.trim()))).filter(Boolean) }));
+  }
+  return [...new Map(cards.filter(entry => entry.title && entry.url.startsWith(onlyflixURL)).map(entry => [entry.url, entry])).values()];
+};
+export const onlyflix = {
+  id: 'onlyflix', name: 'OnlyFlix', site: onlyflixURL, language: 'Inglés',
+  parseHome: html => onlyflixCards(html),
+  more(load) {
+    const year = new Date().getFullYear();
+    return genrePages(load, [year, year - 1].flatMap(value => [[`${onlyflixURL}best/movies/${value}/`, ''], [`${onlyflixURL}best/tv-shows/${value}/`, '']]), onlyflixCards);
+  },
+  parseSearch: html => onlyflixCards(html),
+  searchURL: query => onlyflixURL + '?s=' + encodeURIComponent(query),
+  async episodes(show, load) {
+    const html = await load(show);
+    const id = /\bpostid-(\d+)/.exec(html)?.[1], nonce = /data-player-nonce="([^"]+)"/.exec(html)?.[1] || '';
+    if (!id) return [];
+    const body = new URLSearchParams({ action: 'mcs_home_hero_tv_episodes', nonce, show_id: id }).toString();
+    const answer = json(await load(onlyflixURL + 'wp-admin/admin-ajax.php', { method: 'POST', body, referrer: show, headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } }));
+    return (answer?.data?.seasons || []).map(season => ({ title: 'Temporada ' + season.season, number: Number(season.season),
+      episodes: (season.episodes || []).filter(episode => /^https:\/\/onlyflix\.to\/episodes\//.test(episode.permalink)).map(episode => ({ url: episode.permalink, season: Number(season.season), episode: Number(episode.episode), label: 'Episodio ' + episode.episode })) }))
+      .filter(season => season.episodes.length).sort((a, b) => a.number - b.number);
+  },
+  async resolve(entry, load) {
+    const html = await load(entry.url);
+    const value = name => attr(/class="player-frame[\s\S]*?>/.exec(html)?.[0] || '', name);
+    const post = value('data-player-post-id');
+    if (!post) throw Error('OnlyFlix no muestra reproductor para este título.');
+    const body = new URLSearchParams({ action: 'mcp_get_available_players', nonce: value('data-player-nonce'), post_id: post, type: value('data-player-content-type') || 'movie' }).toString();
+    const answer = json(await load(onlyflixURL + 'wp-admin/admin-ajax.php', { method: 'POST', body, referrer: entry.url, headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } }));
+    const players = (answer?.data?.players || []).filter(player => /^https:\/\//.test(player.url) && ['EN', ''].includes(String(player.language || '').toUpperCase()));
+    if (!players.length) throw Error('OnlyFlix todavía no tiene servidores para este título.');
+    return { url: players[0].url, referrer: entry.url, alternatives: players.slice(1).map(player => player.url) };
+  }
+};

@@ -53,5 +53,11 @@ export const SOURCE_CONTRACTS = [
   ]},
  {source:'asialiveaction',identity:{"title":"Contrato ALA","kind":"dorama","episode":1,"url":"https://asialiveaction.com/e/1/fixture/1/"},declaredLanguage:null,home:'Últimos Episodios</h3><li><a href="https://asialiveaction.com/e/1/fixture/1/"><figure><img src="https://image.tmdb.org/t/p/w533_and_h300_multi_faces/fixture.jpg"></figure><h5>Contrato ALA<span>1</span></h5></a></li></section>',
   expected:{url:'https://ok.ru/videoembed/13?autoplay=1',referrer:'https://asialiveaction.com/e/1/fixture/1/',alternatives:['https://bysejikuar.com/e/fixture','https://vkvideo.ru/video_ext.php?id=fixture']},
-  responses:[{url:'https://asialiveaction.com/e/1/fixture/1/',body:'<script>var allVideos = '+JSON.stringify({fixture:[['VK','https://vkvideo.ru/video_ext.php?id=fixture'],['FM','https://bysejikuar.com/e/fixture'],['OK','https://ok.ru/videoembed/13'],['bad','http://insecure.example/fixture'],['bad','javascript:alert(1)']]})+';</script>'}]}
+  responses:[{url:'https://asialiveaction.com/e/1/fixture/1/',body:'<script>var allVideos = '+JSON.stringify({fixture:[['VK','https://vkvideo.ru/video_ext.php?id=fixture'],['FM','https://bysejikuar.com/e/fixture'],['OK','https://ok.ru/videoembed/13'],['bad','http://insecure.example/fixture'],['bad','javascript:alert(1)']]})+';</script>'}]},
+ {source:'onlyflix',identity:{"title":"Contrato OnlyFlix","kind":"movie","url":"https://onlyflix.to/fixture/"},declaredLanguage:"Inglés",home:'<article class="of-title-card-v2" data-title="Contrato OnlyFlix" data-url="https://onlyflix.to/fixture/" data-year="2026"><a class="x"></a>',
+  expected:{url:'https://cdn.example/embed/1',referrer:'https://onlyflix.to/fixture/',alternatives:['https://vid.example/embed/1']},
+  responses:[
+   {url:'https://onlyflix.to/fixture/',body:'<div class="player-frame" data-player-nonce="fixture" data-player-post-id="1" data-player-content-type="movie"></div>'},
+   {url:'https://onlyflix.to/wp-admin/admin-ajax.php',method:'POST',referrer:'https://onlyflix.to/fixture/',body:JSON.stringify({data:{players:[{url:'https://cdn.example/embed/1',language:'EN'},{url:'javascript:alert(1)',language:'EN'},{url:'https://vid.example/embed/1',language:''}]}})}
+  ]},
 ];

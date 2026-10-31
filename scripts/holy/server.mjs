@@ -17,7 +17,7 @@ import { packHome } from '../../src/holy.js';
 // only fetches from the sites' own image hosts.
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.json': 'application/json' };
 // Every connector's image hosts (test-holy-robust checks the catalogue's images are all covered).
-export const IMAGE_HOSTS = /(^|\.)(anilist\.co|image\.tmdb\.org|jkdesa\.com|jkanime\.net|wp\.com|repelishd\.blog|cuevana3c\.pro|doramasmp4\.cyou|animeyt\.cc|asialiveaction\.com|doramasflix\.(io|in)|doramasia\.com|mytsumi\.com)$/;
+export const IMAGE_HOSTS = /(^|\.)(anilist\.co|image\.tmdb\.org|jkdesa\.com|jkanime\.net|wp\.com|repelishd\.blog|cuevana3c\.pro|doramasmp4\.cyou|animeyt\.cc|asialiveaction\.com|doramasflix\.(io|in)|doramasia\.com|mytsumi\.com|onlyflix\.to)$/;
 const loopback = ip => ip === '::1' || (isIP(ip || '') === 4 && ip.startsWith('127.'));
 const local = ip => {
   if (ip === '::1') return true;
