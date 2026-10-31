@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-31T09:08:22.560Z",
+  "scope": "Consulta real a sitios y servidores desde la computadora; no prueba reproducción en TV",
+  "report": [
+    {
+      "sitio": "Cuevana 3",
+      "títulos": 5,
+      "conServidor": 5,
+      "sinServidor": 0,
+      "conRespaldo": 5,
+      "caídos": 0,
+      "primeros": "tungtungsahur.cuevana3c.pro",
+      "errores": ""
+    },
+    {
+      "sitio": "RePelisHD",
+      "títulos": 5,
+      "conServidor": 3,
+      "sinServidor": 2,
+      "conRespaldo": 3,
+      "caídos": 0,
+      "primeros": "mxdrop.to",
+      "errores": "Este título solo tiene servidores que cierran la app en la TV."
+    },
+    {
+      "sitio": "JKAnime",
+      "títulos": 5,
+      "conServidor": 5,
+      "sinServidor": 0,
+      "conRespaldo": 5,
+      "caídos": 0,
+      "primeros": "jkanime.net",
+      "errores": ""
+    },
+    {
+      "sitio": "AnimeYT",
+      "títulos": 5,
+      "conServidor": 5,
+      "sinServidor": 0,
+      "conRespaldo": 5,
+      "caídos": 1,
+      "primeros": "archive.org",
+      "errores": ""
+    },
+    {
+      "sitio": "DoramasFlix",
+      "títulos": 5,
+      "conServidor": 5,
+      "sinServidor": 0,
+      "conRespaldo": 5,
+      "caídos": 0,
+      "primeros": "voe.sx streamtape.com flaswish.com",
+      "errores": ""
+    },
+    {
+      "sitio": "DoramasMP4",
+      "títulos": 5,
+      "conServidor": 4,
+      "sinServidor": 1,
+      "conRespaldo": 4,
+      "caídos": 0,
+      "primeros": "ok.ru",
+      "errores": ""
+    },
+    {
+      "sitio": "Asia Live Action",
+      "títulos": 5,
+      "conServidor": 5,
+      "sinServidor": 0,
+      "conRespaldo": 5,
+      "caídos": 0,
+      "primeros": "ok.ru",
+      "errores": ""
+    }
+  ],
+  "gone": [
+    "ok.ru"
+  ]
+}

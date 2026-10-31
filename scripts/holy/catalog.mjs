@@ -98,8 +98,11 @@ export async function playerGone(url, referrer) {
 }
 export class Catalog {
   // knownLists: award and chart lists (null in tests that do not want them).
-  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics, knownLists, probe = fetch === fetchText ? playerGone : null } = {}) {
+  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics, knownLists, sites = null, probe = fetch === fetchText ? playerGone : null } = {}) {
     this.probe = probe;
+    // A site that moved is asked at its new address and read as the original (site-registry.mjs).
+    this.sites = sites?.attach(connectors) || null;
+    if (this.sites) { const read = fetch; fetch = async (url, options = {}) => this.sites.toCanonical(await read(this.sites.toLive(url), options.referrer ? { ...options, referrer: this.sites.toLive(options.referrer) } : options)); }
     Object.assign(this, { file, detailsFile, connectors, fetch, log, diagnostics });
     this.knownLists = knownLists === undefined ? (file === '.local/holy-catalog.json' ? new KnownLists({ log }) : null) : knownLists;
     const data = load(file) || {};
@@ -280,13 +283,13 @@ export class Catalog {
     this.sessions ||= new Map();
     let session = this.sessions.get(referrer);
     if (fresh || !session || Date.now() - session.at > 5 * 60000) {
-      const page = await fetch(referrer, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) });
+      const page = await fetch(this.liveURL(referrer), { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) });
       const html = await page.text();
       session = { at: Date.now(), token: /csrf-token" content="([^"]+)"/.exec(html)?.[1] || '', cookie: page.headers.getSetCookie().map(value => value.split(';')[0]).join('; ') };
       this.sessions.set(referrer, session);
       if (this.sessions.size > 50) this.sessions.delete(this.sessions.keys().next().value);
     }
-    const response = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(10000), headers: { 'User-Agent': UA, Referer: referrer, Cookie: session.cookie, 'X-CSRF-TOKEN': session.token, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body: '_token=' + encodeURIComponent(session.token) });
+    const response = await fetch(this.liveURL(url), { method: 'POST', signal: AbortSignal.timeout(10000), headers: { 'User-Agent': UA, Referer: referrer, Cookie: session.cookie, 'X-CSRF-TOKEN': session.token, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body: '_token=' + encodeURIComponent(session.token) });
     // An expired session (419 and the like) is renewed once.
     if (!response.ok && !fresh && [401, 403, 419].includes(response.status)) return this.post(url, referrer, true);
     if (!response.ok) throw Error(new URL(url).hostname + ' respondió ' + response.status);
@@ -306,16 +309,21 @@ export class Catalog {
     if (!connector || !/^https:\/\//.test(String(item?.url || ''))) return null;
     const bundle = await this.cached('resolve\n' + item.url, RESOLVE_TTL, () => this.resolveNow(item, connector));
     if (!bundle) return null;
-    if (!bundle.versions.length) return bundle.target;
+    if (!bundle.versions.length) return this.liveTarget(bundle.target);
     const asked = matchVersion(bundle.versions, { id: options.version, kind: options.kind });
     const chosen = asked || bundle.versions[0];
-    return { ...chosen.target, versions: bundle.versions.map(publicVersion), version: String(chosen.id), versionKind: chosen.kind, matched: !!asked };
+    return { ...this.liveTarget(chosen.target), versions: bundle.versions.map(publicVersion), version: String(chosen.id), versionKind: chosen.kind, matched: !!asked };
   }
   // Which versions the title has (empty when its site offers a single one), without choosing.
   async versionsOf(item) {
     if (!this.connector(item.source)?.versions) return [];
     const target = await this.resolve(item).catch(() => null);
     return target?.versions || [];
+  }
+  liveURL(url) { return this.sites ? this.sites.toLive(url) : url; }
+  liveTarget(target) {
+    if (!target || !this.sites) return target;
+    return { ...target, url: this.liveURL(target.url), referrer: target.referrer && this.liveURL(target.referrer), alternatives: target.alternatives?.map(url => this.liveURL(url)) };
   }
   forgetPlayer(url) { this.cache?.delete('resolve\n' + url); }
   // The playable target for a title, tried the way the TV's own session does it, but in one
@@ -336,7 +344,7 @@ export class Catalog {
       }
     }
     let target = await this.resolve(item, options).catch(() => null);
-    if (!target && this.pageFallback(item) && targetMatchesLanguage({}, item, options)) target = { url: item.url, versions: [] };
+    if (!target && this.pageFallback(item) && targetMatchesLanguage({}, item, options)) target = { url: this.liveURL(item.url), versions: [] };
     if (target && targetMatchesLanguage(target, item, options)) return { item, target };
     for (const candidate of (await this.elsewhere(item, tried).catch(() => [])).slice(0, 4)) {
       const found = await this.resolve(candidate, options).catch(() => null);
@@ -349,7 +357,7 @@ export class Catalog {
     const living = async target => {
       if (!target || !this.probe) return target;
       const urls = [target.url, ...target.alternatives];
-      const gone = await Promise.all(urls.map(url => this.probe(url, item.url).catch(() => false)));
+      const gone = await Promise.all(urls.map(url => this.probe(this.liveURL(url), this.liveURL(item.url)).catch(() => false)));
       const alive = urls.filter((url, index) => !gone[index]);
       if (alive.length === urls.length || !alive.length) return target;
       this.diagnostics?.event('catalog', 'player-gone', { source: item.source, title: item.title, host: urls.filter((url, index) => gone[index]).map(url => new URL(url).hostname).join(' ') }, 'warn');

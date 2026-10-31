@@ -314,7 +314,7 @@ export class HolyBridge extends BrowserBridge {
     // No player on its own site: the same title on another of the owner's sites.
     if (!target) target = await this.findElsewhere(session);
     if (this.session !== session) return;
-    if (!target && !session.resolveError?.unsafe && this.catalog.pageFallback?.(item) && targetMatchesLanguage({}, item, session.choice)) target = { url: item.url };
+    if (!target && !session.resolveError?.unsafe && this.catalog.pageFallback?.(item) && targetMatchesLanguage({}, item, session.choice)) target = { url: this.catalog.liveURL?.(item.url) || item.url };
     if (!target) {
       // Refuse rather than open a page known to close the app.
       session.phase = 'failed';

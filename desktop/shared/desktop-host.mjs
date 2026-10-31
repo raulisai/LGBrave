@@ -17,6 +17,7 @@ import {lanAddress, tvAddress, config, ROOT,lumaOrigin,userDataContext} from './
 import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
 import {FilterUpdates} from '../../scripts/filter-updates.mjs';
 import {installCrashGuard} from '../../scripts/crash-guard.mjs';
+import {SiteRegistry} from '../../scripts/holy/site-registry.mjs';
 import {Preferences} from '../../scripts/preferences.mjs';
 import {ProfileState} from './profile-state.mjs';
 import {PeerSync} from './peer-sync.mjs';
@@ -47,7 +48,7 @@ const preferences=new Preferences();
 const profiles=new ProfileState({preferences,library,diagnostics});
 const peerSync=process.env.LUMA_OFFLINE_TEST==='1'?null:new PeerSync({library,host:lanAddress,peers:()=>config().peers,device:()=>config().device,connect:connectSession,diagnostics});
 let activeStore;
-const catalog = new Catalog({log:console.log,diagnostics});
+const catalog = new Catalog({log:console.log,diagnostics,sites:new SiteRegistry()});
 if (process.env.LUMA_OFFLINE_TEST !== '1') catalog.start(console.log);
 const runtime = new LabRuntime({
   openTunnel:async()=>{

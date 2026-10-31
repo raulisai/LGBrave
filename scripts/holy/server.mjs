@@ -1,5 +1,7 @@
 import http from 'node:http';
 import { DiagnosticLog } from '../diagnostics.mjs';
+import { checkSite } from './site-registry.mjs';
+import { SITES_PAGE } from './sites-page.mjs';
 import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync, unlinkSync, renameSync } from 'node:fs';
@@ -89,7 +91,7 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
       }
     }
     if (!pending.has(key)) pending.set(key, (async () => {
-      const response = await fetchImage(url, { headers: { 'User-Agent': UA, Referer: parsed.origin + '/' }, signal: AbortSignal.timeout(15000) });
+      const response = await fetchImage(catalog?.liveURL?.(url) || url, { headers: { 'User-Agent': UA, Referer: parsed.origin + '/' }, signal: AbortSignal.timeout(15000) });
       const type = response.headers.get('content-type') || 'image/jpeg';
       if (!response.ok || !type.startsWith('image/')) throw Error('image ' + response.status);
       const body = Buffer.from(await response.arrayBuffer());
@@ -135,7 +137,7 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
     const url = new URL(req.url, 'http://holy.local');
     if (/^\/(favicon\.ico|apple-touch-icon.*\.png)$/.test(url.pathname)) { res.writeHead(204).end(); return; }
     if(url.pathname==='/holy-api/profile-sync'){if(peerSync)await peerSync.handle(req,res);else res.writeHead(404).end();return;}
-    const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh', '/holy-api/resolve', '/holy-api/forget'].includes(url.pathname) &&
+    const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh', '/holy-api/resolve', '/holy-api/forget', '/holy-api/sites'].includes(url.pathname) &&
       (req.method === 'POST' || (req.method === 'OPTIONS' && req.headers['access-control-request-method'] === 'POST'));
     if (mutation && !mutationAllowed(req, server.address()?.port || port)) {
       diagnostics.event('http', 'origin-refused', { action: url.pathname, origin: String(req.headers.origin || req.headers.referer || 'sin origen').slice(0, 120) }, 'warn');
@@ -248,6 +250,27 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
         res.end(JSON.stringify(req.method === 'POST' ? { ...(await doctor.prescribe()), report: await doctor.diagnose() } : await doctor.diagnose()));
+      } else if (url.pathname === '/holy-sites/') {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end(SITES_PAGE);
+      } else if (url.pathname === '/holy-api/sites' && catalog.sites) {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        const list = () => ({ sites: catalog.sources().map(source => { const connector = catalog.connector(source.id); return { ...source, site: catalog.sites.currentSite(connector), original: connector.site, moved: !!catalog.sites.moved[source.id] }; }), pending: catalog.sites.pending() });
+        if (req.method !== 'POST') { res.end(JSON.stringify(list())); return; }
+        // Changing where Holy reads from is for this computer only, not other devices on the Wi-Fi.
+        if (!loopback(req.socket.remoteAddress?.replace('::ffff:', ''))) { res.writeHead(403).end('{"ok":false,"error":"Solo desde esta computadora."}'); return; }
+        const { action, id, url: address, name } = await body(req);
+        try {
+          if (action === 'check') { res.end(JSON.stringify(await checkSite(address))); return; }
+          if (action === 'move' || action === 'reset') {
+            if (action === 'move') catalog.sites.move(id, address); else catalog.sites.reset(id);
+            diagnostics.event('catalog', 'site-address', { source: id, host: address || 'original' }, 'warn');
+            catalog.refresh().catch(() => {});
+          } else if (action === 'add') catalog.sites.add(address, name);
+          else if (action === 'remove') catalog.sites.remove(address);
+          else throw Error('Acción desconocida.');
+          res.end(JSON.stringify({ ok: true, ...list() }));
+        } catch (error) { res.writeHead(400).end(JSON.stringify({ ok: false, error: error.message })); }
       } else if (url.pathname === '/holy-api/refresh' && req.method === 'POST') {
         catalog.refresh().catch(() => {});
         res.end('{"ok":true}');

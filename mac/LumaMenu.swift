@@ -1,5 +1,6 @@
 import Cocoa
 import Darwin
+import WebKit
 
 // The same supervisor and service as Windows; this process only draws the menu.
 struct Config: Decodable { let root: String; let node: String }
@@ -26,6 +27,7 @@ final class App: NSObject, NSApplicationDelegate {
     var lastActionsAt: Date?
     let showNotification = NSNotification.Name("com.lgapp.lab.menu.show")
     var instanceLock: Int32 = -1
+    var sitesWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         do {
@@ -179,6 +181,10 @@ final class App: NSObject, NSApplicationDelegate {
             let open = NSMenuItem(title: "Abrir página web (\(webAddress(web)))", action: #selector(openWebPage), keyEquivalent: "")
             open.target = self; open.isEnabled = true; menu.addItem(open)
         }
+        if status?.web?.running == true {
+            let webs = NSMenuItem(title: "Webs…", action: #selector(openSites), keyEquivalent: "")
+            webs.target = self; menu.addItem(webs)
+        }
         let doctor = NSMenuItem(title: "Doctor: revisar y arreglar", action: #selector(runDoctor), keyEquivalent: "")
         doctor.target = self; doctor.isEnabled = ready; menu.addItem(doctor)
         let on = status?.running == true
@@ -206,6 +212,20 @@ final class App: NSObject, NSApplicationDelegate {
     @objc func openWebPage() {
         guard let web = status?.web, let url = URL(string: webAddress(web)) else { return }
         NSWorkspace.shared.open(url)
+    }
+    // The list of sites Holy reads, in its own window (the page comes from the service).
+    @objc func openSites() {
+        guard let web = status?.web, let page = URL(string: web.url), let port = page.port,
+              let url = URL(string: "http://127.0.0.1:\(port)/holy-sites/") else { return }
+        if sitesWindow == nil {
+            let view = WKWebView(frame: NSRect(x: 0, y: 0, width: 720, height: 680))
+            let window = NSWindow(contentRect: view.frame, styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
+            window.title = "Webs de Holy"; window.contentView = view; window.isReleasedWhenClosed = false; window.center()
+            sitesWindow = window
+        }
+        (sitesWindow?.contentView as? WKWebView)?.load(URLRequest(url: url))
+        NSApp.activate(ignoringOtherApps: true)
+        sitesWindow?.makeKeyAndOrderFront(nil)
     }
     @objc func showMenu() { item.button?.performClick(nil) }
 }
