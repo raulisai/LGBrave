@@ -13,6 +13,11 @@ check('A dropped TV connection does not end the lab process',()=>{
  for(const message of ['Callback was already called.','read ETIMEDOUT','read ECONNRESET','connect EHOSTUNREACH 192.168.1.134:9922','novacom: session lost'])
   assert.equal(run(message).status,0,message);
 });
+check('A full disk does not end the process either',()=>{
+ const code=spawnSync(process.execPath,['--input-type=module','-e',
+  `import {installCrashGuard} from ${guard};installCrashGuard(()=>{});setImmediate(()=>{throw Object.assign(new Error('no space left'),{code:'ENOSPC'})});setTimeout(()=>process.exit(0),200);`],{encoding:'utf8'});
+ assert.equal(code.status,0);
+});
 check('Any other error still exits so the supervisor can restart it',()=>{
  const result=run('otra cosa rota');assert.equal(result.status,1);assert.match(result.stderr,/otra cosa rota/);
 });

@@ -6,6 +6,8 @@ export const CONNECTION_ERROR = /Callback was already called|ETIMEDOUT|ECONNRESE
 export function installCrashGuard(log = console.log, diagnostics) {
   process.on('uncaughtException', error => {
     diagnostics?.event('process', 'uncaught-exception', { error }, 'error');
+    // A full disk cannot be fixed by restarting; the Doctor reports it (seen 2026-10-27).
+    if (error?.code === 'ENOSPC') { log('Laboratorio: el disco está lleno; libera espacio.'); return; }
     if (CONNECTION_ERROR.test(String(error?.stack || error))) { log('Laboratorio: se cortó la conexión con la TV; se reintentará.'); return; }
     console.error('Laboratorio: error inesperado:', error?.stack || error);
     process.exit(1);

@@ -84,7 +84,9 @@ export class ProfileState {
         this.hash=digest(clean);this.updated=this.now();this.state='synced';
       } else this.state='local';
       this.error='';
-      this.diagnostics?.event('profile','merged',{count:this.library.votes.length,state:this.state});
+      // Only a real change: this runs on every poll and used to flood the rotating log.
+      const mergedKey=this.library.votes.length+':'+this.state;
+      if(mergedKey!==this.lastMerged){this.lastMerged=mergedKey;this.diagnostics?.event('profile','merged',{count:this.library.votes.length,state:this.state});}
     }catch(error){if(generation===this.generation){this.state='error';this.error=String(error.message).slice(0,160);this.store=null;this.retryStore=store;this.retryAt=this.now()+30000;this.diagnostics?.event('profile','merge-error',{error},'error');}}
   }
   flush() {

@@ -74,7 +74,8 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
   const pending = new Map();
   async function image(url) {
     const parsed = new URL(url);
-    if (parsed.protocol !== 'https:' || !IMAGE_HOSTS.test(parsed.hostname)) throw Error('host');
+    if (parsed.protocol === 'http:') parsed.protocol = 'https:';
+    if (parsed.protocol !== 'https:' || !IMAGE_HOSTS.test(parsed.hostname)) { diagnostics.event('http', 'image-host-refused', { host: parsed.hostname }, 'warn'); throw Error('host'); }
     const key = createHash('sha1').update(url).digest('hex');
     const path = join(imageDir, key);
     if (existsSync(path) || existsSync(path + '.type')) {
@@ -132,10 +133,12 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
     const ip = req.socket.remoteAddress?.replace('::ffff:', '');
     if (!local(ip)) { res.writeHead(403).end(); return; }
     const url = new URL(req.url, 'http://holy.local');
+    if (/^\/(favicon\.ico|apple-touch-icon.*\.png)$/.test(url.pathname)) { res.writeHead(204).end(); return; }
     if(url.pathname==='/holy-api/profile-sync'){if(peerSync)await peerSync.handle(req,res);else res.writeHead(404).end();return;}
     const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh', '/holy-api/resolve', '/holy-api/forget'].includes(url.pathname) &&
       (req.method === 'POST' || (req.method === 'OPTIONS' && req.headers['access-control-request-method'] === 'POST'));
     if (mutation && !mutationAllowed(req, server.address()?.port || port)) {
+      diagnostics.event('http', 'origin-refused', { action: url.pathname, origin: String(req.headers.origin || req.headers.referer || 'sin origen').slice(0, 120) }, 'warn');
       res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' }).end('{"ok":false,"error":"origen no permitido"}');
       return;
     }

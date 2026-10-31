@@ -33,6 +33,7 @@ const END_MARGIN = 4;
 const END_STALL = 6000;
 const NEXT_DELAY = 6000;
 
+const hostOf = value => { try { return new URL(value).hostname; } catch { return ''; } };
 export class HolyBridge extends BrowserBridge {
   constructor(cdp, options = {}) {
     super(cdp, { ...options, toolbar: false, home: origin() + HOME_PATH, packagedHome: packagedPrefix + 'index.html' });
@@ -66,8 +67,10 @@ export class HolyBridge extends BrowserBridge {
     this.session = null;
   }
   recordPlayback(event, session, detail = {}) {
+    if (session?.opened) detail = { elapsedMs: Date.now() - session.opened, ...detail };
+    if (session?.failReason && /failed|timeout/.test(event) && !detail.reason) detail = { ...detail, reason: session.failReason };
     this.playbackLog?.write(event, session, detail);
-    this.diagnostics?.event('playback', event, { ...detail, title: session?.item?.title, position: session?.position?.t, recent: session?.samples || [] }, /error|failed|stalled|exhausted|missing|timeout|disconnected/.test(event) ? 'error' : 'info');
+    this.diagnostics?.event('playback', event, { ...detail, host: hostOf(session?.target), source: session?.item?.source, title: session?.item?.title, position: session?.position?.t, recent: session?.samples || [] }, /error|failed|stalled|exhausted|missing|timeout|disconnected/.test(event) ? 'error' : 'info');
   }
   async start() {
     await super.start();
@@ -315,6 +318,7 @@ export class HolyBridge extends BrowserBridge {
     if (!target) {
       // Refuse rather than open a page known to close the app.
       session.phase = 'failed';
+      this.recordPlayback('attempt-failed', session, { reason: session.resolveError?.message || 'sin reproductor en ningún sitio' });
       session.error = session.choice?.kind ? `No se pudo abrir ${KIND_LABEL[session.choice.kind] || 'el idioma elegido'}. Prueba otro servidor o cambia Idioma.` : session.resolveError?.message || 'No se encontró un reproductor para este título en tus sitios.';
       await this.dropCurtainScript();
       await this.status();
@@ -426,6 +430,7 @@ export class HolyBridge extends BrowserBridge {
     if (this.session !== session || this.stopped) return;
     const result = await this.cdp.call('Page.navigate', { url, ...(session.referrer ? { referrer: session.referrer } : {}) }).catch(error => ({ errorText: error.message }));
     if (result.errorText && this.session === session) {
+      session.failReason = result.errorText;
       if (await this.serverFailed(session)) return;
       session.phase = 'failed'; await this.navigationFailed(this.readableError(result.errorText));
     }
@@ -473,7 +478,7 @@ export class HolyBridge extends BrowserBridge {
     if (this.navigation.phase === 'loading' && session.phase === 'opening' && Date.now() - session.opened < 4000) return;
     const page = this.frames?.get(this.mainFrame) || '';
     if (!/^https?:/.test(page) || this.isHome(page)) {
-      if (!this.isUserPaused(session) && session.phase === 'opening' && (this.navigation.phase === 'error' || Date.now()-session.opened>this.serverTimeout)) await this.serverFailed(session);
+      if (!this.isUserPaused(session) && session.phase === 'opening' && (this.navigation.phase === 'error' || Date.now()-session.opened>this.serverTimeout)) { session.failReason = this.navigation.error || 'la página del reproductor no abrió'; await this.serverFailed(session); }
       return;
     }
       const passive = session.phase !== 'opening' || this.isUserPaused(session);
@@ -501,6 +506,7 @@ export class HolyBridge extends BrowserBridge {
       const playing = primary && !primary.paused && !session.userPaused && primary.t > 0 ? primary : null;
       // Inspect the player before reacting to navigation errors or expired opening clocks.
       if (this.navigation.phase === 'error' && !this.isUserPaused(session) && !primary) {
+        if (session.phase === 'opening') session.failReason = this.navigation.error || 'error de navegación';
         if (session.phase === 'opening' && await this.serverFailed(session)) return;
         if (session.phase === 'playing') { await this.rescue(session, session.position?.t || 0); return; }
         if (this.session === session) { await this.endSession(); await this.status(); }
@@ -520,7 +526,6 @@ export class HolyBridge extends BrowserBridge {
         session.sampledAt = Date.now();
         const sample = { seconds: Math.round(best.t), duration: best.d, ready: best.ready, network: best.network, mediaError: best.mediaError, bufferAhead: Math.round(best.bufferAhead || 0), paused: best.paused, frameCount: results.length };
         session.samples = [...(session.samples || []), sample].slice(-12);
-        this.diagnostics?.event('playback', 'sample', sample);
       }
       if (session.resumePending && best) {
         if (Date.now() > session.resumePending.until || best.paused) {
@@ -582,9 +587,11 @@ export class HolyBridge extends BrowserBridge {
       }
       const limit = session.queue?.length || session.leftover?.queue?.length ? (session.sawVideo ? this.serverTimeout : Math.min(this.serverTimeout, this.emptyTimeout)) : this.startTimeout;
       if (!this.isUserPaused(session) && session.phase === 'opening' && Date.now() - session.opened > limit && !session.position) {
+        session.failReason = session.sawVideo ? `el vídeo apareció pero no avanzó en ${Math.round(limit / 1000)} s` : `sin vídeo en la página tras ${Math.round(limit / 1000)} s`;
         if (await this.serverFailed(session)) return;
         // Leave the page usable: the owner can pick another server with the remote.
         session.phase = 'manual'; session.error = 'No se pudo iniciar solo';
+        this.recordPlayback('attempt-failed', session, { reason: 'ningún servidor arrancó solo' });
         this.recordPlayback('start-timeout', session);
         await this.curtain(`window.__holyCurtain&&(__holyCurtain.say('No arrancó solo. Elige un servidor con el control.'),setTimeout(()=>__holyCurtain.hide(),2500))`);
         await this.dropCurtainScript();
@@ -598,6 +605,7 @@ export class HolyBridge extends BrowserBridge {
     if (this.isUserPaused(session)) { this.resetStallClocks(session); return true; }
     if (this.session !== session || this.stopped) return true;
     this.recordPlayback('server-failed', session);
+    session.failReason = '';
     if (session.queue?.length && session.siteServers >= SITE_TRIES && !session.leftover && this.catalog.elsewhere) {
       const leftover = { queue: session.queue, referrer: session.referrer, item: session.item, site: session.site, key: session.key };
       session.queue = [];

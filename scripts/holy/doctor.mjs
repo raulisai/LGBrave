@@ -1,4 +1,5 @@
 import net from 'node:net';
+import {statfsSync} from 'node:fs';
 import {repairPlan} from '../../desktop/shared/repair-policy.mjs';
 import {RepairJournal} from '../../desktop/shared/repair-journal.mjs';
 
@@ -24,7 +25,7 @@ export function createDoctor({
   catalog, library, runtime, tv = { host: '192.168.1.134', port: 9922 }, startedAddress, currentAddress,
   autostart = { status: async () => ({ installed: true, loaded: true }), install: async () => {} },
   supervised = !!process.env.HOLY_SUPERVISED, restart = () => process.kill(process.pid, 'SIGTERM'),
-  profile, reserveRepair, probe = tcpOpen, now = Date.now, rss = () => process.memoryUsage().rss, log = console.log
+  profile, reserveRepair, diskFree = () => { const fs = statfsSync('.'); return fs.bavail * fs.bsize; }, probe = tcpOpen, now = Date.now, rss = () => process.memoryUsage().rss, log = console.log
 } = {}) {
   const check = (id, label, level, detail, fix = null, hint = '') => ({ id, label, level, detail, fix, hint });
   const journal=new RepairJournal({now});
@@ -64,6 +65,8 @@ export function createDoctor({
     else if (failing.length) checks.push(check('catalog', 'Catálogo', 'warn', `Sitios con fallo: ${failing.join(', ')}`, 'refresh', 'Se reintenta; si el sitio cambió, no hay arreglo automático.'));
     else checks.push(check('catalog', 'Catálogo', 'ok', `${catalog.items.length} títulos`));
 
+    // A full disk stopped the service on 2026-10-27 (ENOSPC).
+    try { const fs = diskFree(), gb = fs / 1024 ** 3; checks.push(gb < 2 ? check('disk', 'Espacio en disco', 'warn', `Quedan ${gb.toFixed(1)} GB`, null, 'Libera espacio: sin disco se pierden registros y progreso.') : check('disk', 'Espacio en disco', 'ok', `${gb.toFixed(0)} GB libres`)); } catch { /* Not available here. */ }
     checks.push(Array.isArray(library.entries) ? check('library', 'Historial y gustos', 'ok', `${library.entries.length} títulos vistos`) : check('library', 'Historial y gustos', 'warn', 'No se pudo leer'));
 
     const login = await autostart.status().catch(() => ({ installed: false, loaded: false }));

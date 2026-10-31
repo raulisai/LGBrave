@@ -9,9 +9,9 @@ export function redact(value) {
     try { const url = new URL(raw); return url.origin + url.pathname.replace(/[A-Za-z0-9_-]{40,}/g, '[id]'); } catch { return '[url]'; }
   }).replace(/(bearer\s+)[^\s,;]+/gi, '$1[redacted]')
     .replace(/(["']?(?:token|authorization|password|passwd|passphrase|secret|signature|cookie|api[_-]?key)["']?\s*[=:]\s*)["']?[^\s,;"'}]+["']?/gi, '$1[redacted]')
-    .replace(/[A-Z]:[\\/][^\s:]+/gi, '[local-path]').slice(0, 1600);
+    .replace(/(?<![A-Za-z])[A-Z]:\\[^\s:]+/g, '[local-path]').replace(/\/(?:Users|home)\/[^\s:'"]+/g, '[local-path]').slice(0, 1600);
 }
-const allowed = new Set(['phase','action','method','reason','code','status','durationMs','count','attempt','source','state','position','duration','ready','network','mediaError','bufferAhead','paused','frameCount','requestType','resourceHost','title','episode','seconds','recent']);
+const allowed = new Set(['phase','action','method','reason','code','status','durationMs','count','attempt','source','state','position','duration','ready','network','mediaError','bufferAhead','paused','frameCount','requestType','resourceHost','title','episode','seconds','recent','host','origin','elapsedMs','repeats','free']);
 export function safeDetail(detail = {}) {
   const output = {};
   for (const [key, value] of Object.entries(detail)) {
@@ -25,12 +25,30 @@ export function safeDetail(detail = {}) {
   }
   return output;
 }
+// Permanent records, one file per month: 'history' (every playback attempt) and 'incidents'
+// (every warning or error). `npm run holy:errors` reads both.
+export const monthlyFile = (file, kind, at = new Date().toISOString()) => join(dirname(file), `${kind}-${String(at).slice(0, 7)}.jsonl`);
+// Failures must outlive rotation: warnings and errors also go, forever, to a monthly file.
+// The same problem repeated within ten minutes is one line with a count.
+const REPEAT_WINDOW = 600000, MONTH_LIMIT = 50 * 1024 * 1024;
 export class DiagnosticLog {
   constructor({ file = '.local/logs/diagnostics.jsonl', maxBytes = 1024 * 1024, backups = 4, now = () => new Date().toISOString() } = {}) {
     Object.assign(this, { file, maxBytes, backups, now }); this.runId = randomUUID(); this.sequence = 0;
     this.device = createHash('sha256').update(hostname()).digest('hex').slice(0, 12);
   }
+  incident(row) {
+    try {
+      const key = [row.component, row.event, row.state, row.error?.message, row.action, row.source].join('|');
+      const seen = (this.seen ||= new Map()), last = seen.get(key), now = Date.parse(row.at) || Date.now();
+      if (last && now - last.at < REPEAT_WINDOW) { last.repeats++; return; }
+      seen.set(key, { at: now, repeats: 0 });
+      const file = monthlyFile(this.file, 'incidents', row.at);
+      let size = 0; try { size = statSync(file).size; } catch { /* First of the month. */ }
+      if (size < MONTH_LIMIT) appendFileSync(file, JSON.stringify(last?.repeats ? { ...row, repeats: last.repeats } : row) + '\n', { mode: 0o600 });
+    } catch { /* A log problem cannot break the service. */ }
+  }
   event(component, event, detail = {}, level = 'info') {
+    if (level === 'warn' || level === 'error') this.incident({ at: this.now(), runId: this.runId, build, component, event, level, ...safeDetail(detail) });
     try {
       mkdirSync(dirname(this.file), { recursive: true });
       let size = 0; try { size = statSync(this.file).size; } catch { /* First entry. */ }

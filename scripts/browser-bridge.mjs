@@ -314,6 +314,8 @@ export class BrowserBridge {
       } else if (result.should_block) await this.emptyResponse(requestId, resourceType, sessionId);
       else await this.cdp.call('Fetch.continueRequest', { requestId, ...(result.rewritten_url ? { url: result.rewritten_url } : {}) }, sessionId);
     } catch (error) {
+      // The page moved on and the request no longer exists: nothing was lost.
+      if (/Invalid InterceptionId/.test(error.message)) return;
       this.errors.push({ phase: 'request', error: error.message });
       await this.cdp.call('Fetch.continueRequest', { requestId }, sessionId).catch(() => {});
     }
