@@ -1,4 +1,4 @@
-# Holy y Luma en Windows · código 0.9.13, EXE 0.9.11, TV Luma 0.9.2 / Holy 0.9.5
+# Holy y Luma en Windows · código 0.9.21, EXE 0.9.13, TV Luma 0.9.2 / Holy 0.9.5
 
 El mismo proyecto ejecuta los dos navegadores de la TV desde Windows o macOS. Holy conserva catálogo, conectores, reproducción y gustos de `origin/holy`; Luma conserva su interfaz y sus marcadores. No es el navegador Brave completo: ambos reutilizan su motor de filtrado.
 
@@ -43,6 +43,10 @@ npm run windows:install
 ```
 
 Requiere Node 22.13 o posterior, npm y Git. `adblock-rs` es un módulo nativo: si npm necesita compilarlo, también requiere Rust y las herramientas C++ de Visual Studio. Se probó aquí con Node 24.21 y Windows. No copies `node_modules` del Mac.
+
+## Apps de Tienda: Codex y Claude Desktop
+
+Lo que estas apps escriben en `AppData` queda en una copia privada suya, y sus procesos terminan cuando se cierran o actualizan. Vincula y configura la TV desde el panel de Holy y Luma, no con `ares-*` desde ellas. Desde 0.9.21 `npm run desktop:start`/`restart` ejecutados ahí arrancan el servicio fuera de la app, y el servicio recupera un perfil que haya quedado en una de esas copias. Detalle: `docs/WINDOWS-APPS-TIENDA-20261031.md`.
 
 ## Vincular la TV una vez en cada computadora
 

@@ -47,9 +47,9 @@ export function webosRegistry({env=process.env,home=homedir(),read=readJSON}={})
   let dataDir=join('.webos','tv');
   try{dataDir=readJSON(require.resolve('@webos-tools/cli/files/conf/config.json'))?.dataDir||dataDir;}catch{}
   const base=env.APPDATA||env.HOME||env.USERPROFILE||home;
-  const file=join(base,dataDir,'novacom-devices.json');
+  const relative=join(dataDir,'novacom-devices.json'),file=join(base,relative);
   const devices=read(file);
-  return {file,devices:Array.isArray(devices)?devices:null};
+  return {file,relative,devices:Array.isArray(devices)?devices:null};
 }
 export function tvAddress() {
   const cfg=config(),registry=webosRegistry();

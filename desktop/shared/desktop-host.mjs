@@ -20,7 +20,8 @@ import {installCrashGuard} from '../../scripts/crash-guard.mjs';
 import {SiteRegistry} from '../../scripts/holy/site-registry.mjs';
 import {Preferences} from '../../scripts/preferences.mjs';
 import {ProfileState} from './profile-state.mjs';
-import {PeerSync} from './peer-sync.mjs';
+import {PeerSync,syncSettingsFile} from './peer-sync.mjs';
+import {adoptPackagedSettings,currentPackage} from './app-package.mjs';
 import {connectSession} from '../../scripts/inspector-tunnel.mjs';
 import {openInspectorTunnel} from '../../scripts/inspector-tunnel.mjs';
 import {busyPorts, describeBusy} from './port-check.mjs';
@@ -31,6 +32,8 @@ installCrashGuard(console.log,diagnostics);
 diagnostics.event('service','started');
 const recovery=createProfileRecovery({diagnostics});
 try{recovery.restore();recovery.capture();}catch(error){diagnostics.event('profile','recovery-error',{error},'error');}
+const appPackage=currentPackage();
+if(appPackage)diagnostics.event('service','inside-app-package',{source:appPackage},'warn');
 // Another local runtime, or another program on the service's ports (which would make it crash
 // in a loop): say which, and let the supervisor try again later (exit 2 = conflict).
 async function conflict(error) {
@@ -46,6 +49,8 @@ if (busy.length) { release(); await conflict(describeBusy(busy)); }
 const library = new Library();
 const preferences=new Preferences();
 const profiles=new ProfileState({preferences,library,diagnostics});
+try{const source=adoptPackagedSettings(syncSettingsFile(),join('HolyLuma','peer-sync.json'),saved=>/^[a-f0-9]{64}$/.test(saved?.key||''));if(source)diagnostics.event('profile','sync-settings-adopted',{source});}
+catch(error){diagnostics.event('profile','recovery-error',{error},'error');}
 const peerSync=process.env.LUMA_OFFLINE_TEST==='1'?null:new PeerSync({library,host:lanAddress,peers:()=>config().peers,device:()=>config().device,connect:connectSession,diagnostics});
 let activeStore;
 const catalog = new Catalog({log:console.log,diagnostics,sites:new SiteRegistry()});
@@ -88,7 +93,7 @@ const report = () => {
   const state = runtime.state || 'starting';
   const status = {state,context:userDataContext(), app:runtime.cdp?.target.description || '', host:lanAddress(), tv:tvAddress(),
     error:runtime.lastError || '', holder:runtime.holder || '', paused:Math.max(0, Math.round((runtime.pausedUntil - Date.now()) / 1000)),
-    profile:profiles.status(),peerSync:peerSync?.status()||null, updated:Date.now(), pid:process.pid};
+    profile:profiles.status(),peerSync:peerSync?.status()||null, updated:Date.now(), pid:process.pid, appPackage};
   const stateKey=[state,status.app,status.error,status.profile.state].join('|');
   if(stateKey!==reportedState){reportedState=stateKey;diagnostics.event('connection','state',{state,error:status.error,phase:status.profile.state},status.error?'warn':'info');}
   process.send?.({type:'status', status});

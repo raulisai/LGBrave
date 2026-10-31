@@ -2,6 +2,7 @@ import {spawn} from 'node:child_process';
 import {mkdirSync,writeFileSync,existsSync,readFileSync,copyFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 import {ROOT} from './desktop-config.mjs';
+import {currentPackage,launchThroughShell} from '../desktop/shared/app-package.mjs';
 if(process.platform!=='win32') throw Error('La aplicación de bandeja se instala en Windows.');
 const compiler=['Framework64','Framework'].map(framework=>join(process.env.SystemRoot,'Microsoft.NET',framework,'v4.0.30319','csc.exe')).find(existsSync);
 if(!compiler) throw Error('No se encontró el compilador de .NET Framework incluido en Windows.');
@@ -51,6 +52,9 @@ const receipt=JSON.parse(readFileSync(join(directory,'installed.json'),'utf8'));
 const validation=JSON.parse(readFileSync(join(directory,'self-test.json'),'utf8'));
 if(receipt.autostart!==autostart||!validation.ok)throw Error('No se pudo verificar la instalación o el arranque automático.');
 console.log(JSON.stringify({installed:true,exe,autostart,selfTest:true}));
+// Installing from a Store app must not leave the icon inside that app's private data.
+if(!(currentPackage()&&await launchThroughShell())) {
 const child=spawn(exe,['--background'],{cwd:directory,windowsHide:true,detached:true,stdio:'ignore'});
 await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject);});child.unref();
+}
 }

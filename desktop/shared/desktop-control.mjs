@@ -9,6 +9,7 @@ import {mkdirSync, openSync, closeSync, existsSync, readFileSync, writeFileSync}
 import {join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {config, saveConfig, readJSON, tvAddress, lanAddress, localName, ROOT,userDataContext} from './desktop-config.mjs';
+import {currentPackage,launchThroughShell} from './app-package.mjs';
 import {tcpOpen} from '../../scripts/holy/doctor.mjs';
 import {syncDeviceProfile} from '../../scripts/webos-cli.mjs';
 import {PORT} from '../../scripts/holy/config.mjs';
@@ -48,10 +49,12 @@ export async function status({probe = false} = {}) {
       live?.profile?.state==='synced'?'Preferencias e historial compartidos mediante la TV con las computadoras que usan esta versión.':
       'Copia local activa. El perfil se comparte por SSH al conectar con la TV; ambos equipos deben usar esta versión.'};
 }
-export async function start() {
+export async function start({packageName=currentPackage,shell=launchThroughShell}={}) {
   mkdirSync(join(ROOT,'.local'),{recursive:true});
   writeFileSync(join(ROOT,'.local','node-path.txt'),process.execPath);
   if (!(await ask('/status'))) {
+    // From a Store app the service would use that app's private data and die with it.
+    if(process.env.LUMA_OFFLINE_TEST!=='1'&&packageName()&&await shell())for(let i=0;i<60;i++) { if(await ask('/status')) return status(); await sleep(250); }
     mkdirSync(join(ROOT,'.local/logs'),{recursive:true});
     const out = openSync(join(ROOT,'.local/logs/desktop.log'),'a');
     try {
@@ -101,6 +104,7 @@ export async function doctor() {
   if(!report.build.holy || !report.build.luma) checks.push('Genera los dos inicios: npm run build:all.');
   if(report.host === '127.0.0.1') checks.push('Sin dirección de red local: conecta Wi-Fi o Ethernet, o configura la IP de la computadora.');
   if(report.error) checks.push(report.error);
+  if(report.appPackage) checks.push(`El servicio se inició dentro de ${report.appPackage.split('_')[0]}: usa una copia privada de los datos y se cerrará con esa aplicación. Reinícialo desde el panel de Holy y Luma.`);
   const peers = await Promise.all(config().peers.map(async host => ({host,reachable:await tcpOpen(host,43190,800)})));
   const diagnosis=repairPlan(report,repairRecovery.inspect());
   if(diagnosis.code!=='healthy')checks.push(diagnosis.message);

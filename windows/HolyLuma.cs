@@ -13,8 +13,8 @@ using System.Windows.Forms;
 
 [assembly: System.Reflection.AssemblyTitle("Holy y Luma")]
 [assembly: System.Reflection.AssemblyProduct("Holy y Luma")]
-[assembly: System.Reflection.AssemblyVersion("0.9.12.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.9.12.0")]
+[assembly: System.Reflection.AssemblyVersion("0.9.13.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.9.13.0")]
 
 namespace HolyLuma {
   static class Program {
@@ -121,8 +121,10 @@ namespace HolyLuma {
         using(var mutex=new Mutex(true,"Local\\HolyLumaNativeTray",out created)) {
           if(!created) {
             // The first process may still be constructing its form and event.
+            // --background comes from the login or shell shortcut: start quietly, no panel.
+            string signal=args.Contains("--background")?"Local\\HolyLumaStartService":"Local\\HolyLumaShowStatus";
             for(int attempt=0;attempt<30;attempt++) {
-              try {using(var existing=EventWaitHandle.OpenExisting("Local\\HolyLumaShowStatus"))existing.Set();return;}
+              try {using(var existing=EventWaitHandle.OpenExisting(signal))existing.Set();return;}
               catch(WaitHandleCannotBeOpenedException){Thread.Sleep(100);}
             }
             return;
@@ -144,9 +146,9 @@ namespace HolyLuma {
     readonly TextBox details=new TextBox();
     readonly System.Windows.Forms.Timer timer=new System.Windows.Forms.Timer();
     readonly ToolStripMenuItem statusItem=new ToolStripMenuItem("Iniciando…"), loginItem=new ToolStripMenuItem("Iniciar con Windows");
-    readonly EventWaitHandle showEvent;
+    readonly EventWaitHandle showEvent, startEvent;
     readonly Dictionary<string,Icon> icons=new Dictionary<string,Icon>();
-    bool busy, quitting, disposed; int ticks; DateTime lastRepair=DateTime.MinValue; string repairText="", repairState="";
+    bool busy, quitting, disposed, startWanted; int ticks; DateTime lastRepair=DateTime.MinValue; string repairText="", repairState="";
     Dictionary<string,object> lastStatus;
     [DllImport("user32.dll")] static extern bool DestroyIcon(IntPtr icon);
     static Icon MakeIcon(Color color) {
@@ -200,8 +202,9 @@ namespace HolyLuma {
       menu.Items.Add("Apagar todo y salir",null,async(s,e)=>{if(busy)return;if(await Execute("stop")){quitting=true;ExitThread();}});
       tray.ContextMenuStrip=menu;tray.Icon=icons["amber"];tray.Text="Holy y Luma · Iniciando";tray.DoubleClick+=(s,e)=>ShowPanel();tray.Visible=visible;
       showEvent=new EventWaitHandle(false,EventResetMode.AutoReset,"Local\\HolyLumaShowStatus");
+      startEvent=new EventWaitHandle(false,EventResetMode.AutoReset,"Local\\HolyLumaStartService");
       timer.Interval=1000;
-      timer.Tick+=async(s,e)=>{if(showEvent.WaitOne(0))ShowPanel();if(++ticks%4==0){await Execute("status");if(lastStatus!=null&&!busy&&DateTime.UtcNow-lastRepair>TimeSpan.FromSeconds(60)){string state=lastStatus["state"].ToString();bool mismatch=lastStatus.ContainsKey("repairNeeded")&&Convert.ToBoolean(lastStatus["repairNeeded"]);if(mismatch||state=="unresponsive"||state=="error"){lastRepair=DateTime.UtcNow;await Execute("repair");}}}};
+      timer.Tick+=async(s,e)=>{if(showEvent.WaitOne(0))ShowPanel();if(startEvent.WaitOne(0))startWanted=true;if(startWanted&&!busy){startWanted=false;await Execute("start");}if(++ticks%4==0){await Execute("status");if(lastStatus!=null&&!busy&&DateTime.UtcNow-lastRepair>TimeSpan.FromSeconds(60)){string state=lastStatus["state"].ToString();bool mismatch=lastStatus.ContainsKey("repairNeeded")&&Convert.ToBoolean(lastStatus["repairNeeded"]);if(mismatch||state=="unresponsive"||state=="error"){lastRepair=DateTime.UtcNow;await Execute("repair");}}}};
       if(visible){timer.Start(); var initial=Execute(startConnection?"start":"status");}
     }
     void ShowPanel(){form.Show();form.WindowState=FormWindowState.Normal;form.Activate();}
@@ -256,7 +259,7 @@ namespace HolyLuma {
       Program.WriteDiagnostic("tray-status.json",new {pid=Process.GetCurrentProcess().Id,state=state,label=label,autostart=Program.AutoStart,updated=DateTime.UtcNow.ToString("o")});
     }
     protected override void Dispose(bool disposing) {
-      if(disposing&&!disposed){disposed=true;timer.Stop();timer.Dispose();tray.Visible=false;tray.Dispose();form.Dispose();showEvent.Dispose();foreach(var icon in icons.Values)icon.Dispose();}
+      if(disposing&&!disposed){disposed=true;timer.Stop();timer.Dispose();tray.Visible=false;tray.Dispose();form.Dispose();showEvent.Dispose();startEvent.Dispose();foreach(var icon in icons.Values)icon.Dispose();}
       base.Dispose(disposing);
     }
   }

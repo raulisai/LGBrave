@@ -9,7 +9,7 @@ import {createProfileRecovery} from './profile-recovery.mjs';
 import {createDesktopRepair} from './desktop-repair.mjs';
 import {RepairJournal} from './repair-journal.mjs';
 import {profileMismatch} from './repair-policy.mjs';
-import {createRepairMonitor} from './repair-monitor.mjs';
+import {createRepairMonitor,createSleepClock} from './repair-monitor.mjs';
 import {DiagnosticLog} from '../../scripts/diagnostics.mjs';
 
 process.chdir(ROOT);
@@ -88,6 +88,7 @@ server.on('error', error => { console.error(error); release(); process.exit(1); 
 server.listen(0,'127.0.0.1', () => {
   writeFileSync(ownerFile, JSON.stringify({pid:process.pid,token,port:server.address().port}), {mode:0o600});
   start();
-  watchdog=setInterval(()=>{if(!stopping&&child)monitor.tick().catch(()=>{});},1000);watchdog.unref();
+  const resumed=createSleepClock();
+  watchdog=setInterval(()=>{if(resumed())lastHeartbeat=Date.now();if(!stopping&&child)monitor.tick().catch(()=>{});},1000);watchdog.unref();
 });
 for (const signal of ['SIGINT','SIGTERM','SIGHUP']) process.once(signal, stop);

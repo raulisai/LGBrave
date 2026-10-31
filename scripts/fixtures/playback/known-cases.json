@@ -390,6 +390,19 @@
         "scripts/test-desktop-repair.mjs",
         "scripts/test-holy-doctor.mjs"
       ]
+    },
+    {
+      "id": "windows-store-app-isolation",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Perfil webOS y ajustes guardados en la copia privada de una app de Tienda se recuperan con su llave y passphrase existentes; el servicio arranca fuera de esa app y distingue suspensión de bloqueo. Sin navegar TV.",
+      "evidence": [
+        "desktop/shared/app-package.mjs",
+        "docs/WINDOWS-APPS-TIENDA-20261031.md"
+      ],
+      "tests": [
+        "scripts/test-app-package.mjs"
+      ]
     }
   ],
   "caveats": [
