@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { Catalog } from './holy/catalog.mjs';
 import { SiteRegistry, cleanSite, checkSite } from './holy/site-registry.mjs';
 import { startServer } from './holy/server.mjs';
-import { onlyflix, doramasflixbeer } from './holy/more-sources.mjs';
+import { onlyflix, doramasflixbeer, tmdb } from './holy/more-sources.mjs';
 
 // The window «Webs»: moving a site keeps its parsers and saved titles working. No Internet.
 const dir = mkdtempSync(join(tmpdir(), 'holy-sites-'));
@@ -88,4 +88,13 @@ await check('DoramasFlix .beer: capítulos por temporada y capítulo sin servido
   assert.deepEqual(seasons.map(season => [season.number, season.episodes.map(episode => episode.episode)]), [[1, [1, 2]], [2, [1]]]);
   await assert.rejects(() => doramasflixbeer.resolve({ url: 'https://doramasflix.beer/episodios/x-1x01/' }, async () => '<div>NO SERVERS AVAILABLE</div>'), /todavía no tiene servidores/);
 });
-console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix y .beer correctas.`);
+await check('Catálogo público: títulos, series con temporadas y servidores por identificador', async () => {
+  const list = JSON.stringify({ metas: [{ imdb_id: 'tt1', type: 'movie', name: 'Peli', releaseInfo: '1999', genres: ['Sci-Fi'] }, { imdb_id: 'tt2', type: 'series', name: 'Serie' }, { imdb_id: 'x', type: 'movie', name: 'Mala' }, { imdb_id: 'tt3', type: 'person', name: 'Otro' }] });
+  const items = tmdb.parseHome(list);
+  assert.deepEqual(items.map(entry => [entry.title, entry.kind, !!entry.isShow, entry.language, entry.url]), [['Peli', 'movie', false, 'Inglés', 'https://www.imdb.com/title/tt1/'], ['Serie', 'series', true, 'Inglés', 'https://www.imdb.com/title/tt2/']]);
+  const seasons = await tmdb.episodes('https://www.imdb.com/title/tt2/', async () => JSON.stringify({ meta: { videos: [{ season: 2, episode: 1 }, { season: 1, episode: 2, name: 'B' }, { season: 1, episode: 1 }, { season: 0, episode: 1 }] } }));
+  assert.deepEqual(seasons.map(season => [season.number, season.episodes.map(episode => episode.episode)]), [[1, [1, 2]], [2, [1]]]);
+  assert.equal((await tmdb.resolve({ url: seasons[1].episodes[0].url })).url, 'https://vidfast.vc/tv/tt2/2/1');
+  assert.equal((await tmdb.search('x', async url => (/movie/.test(url) ? list : '{}'))).length, 2);
+});
+console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix, .beer y catálogo público correctas.`);
