@@ -12,6 +12,7 @@ import {Catalog} from '../../scripts/holy/catalog.mjs';
 import {Library} from '../../scripts/holy/library.mjs';
 import {startServer} from '../../scripts/holy/server.mjs';
 import {createDoctor} from '../../scripts/holy/doctor.mjs';
+import {latestPlaybackExit} from '../../scripts/holy/playback-log.mjs';
 import {createAutostart} from '../../scripts/holy/autostart.mjs';
 import {lanAddress, tvAddress, config, ROOT,lumaOrigin,userDataContext} from './desktop-config.mjs';
 import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
@@ -71,7 +72,7 @@ const runtime = new LabRuntime({
 });
 const startedAddress = lanAddress();
 const doctorBudget=new RepairJournal({file:join(ROOT,'.local','doctor-state.json')});
-const doctor = createDoctor({catalog, library, runtime, tv:tvAddress,profile:{inspect:recovery.inspect,restore:()=>{const unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));try{return recovery.restore();}finally{unlock();}}},
+const doctor = createDoctor({catalog, library, runtime, playbackIncident:()=>latestPlaybackExit(join(ROOT,'.local/logs/holy-playback.jsonl')), tv:tvAddress,profile:{inspect:recovery.inspect,restore:()=>{const unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));try{return recovery.restore();}finally{unlock();}}},
   reserveRepair:(action,code)=>{let unlock;try{unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));return doctorBudget.reserve(action,code);}catch{return{allowed:false,reason:'repair-busy'};}finally{unlock?.();}}, startedAddress, currentAddress:lanAddress,
   supervised:!!process.send, restart:() => { finish().then(() => process.exit(1)); },
   autostart:createAutostart()});

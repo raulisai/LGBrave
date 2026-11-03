@@ -1,4 +1,5 @@
 import net from 'node:net';
+import {describePlaybackExit} from './playback-log.mjs';
 import {statfsSync} from 'node:fs';
 import {repairPlan} from '../../desktop/shared/repair-policy.mjs';
 import {RepairJournal} from '../../desktop/shared/repair-journal.mjs';
@@ -25,7 +26,7 @@ export function createDoctor({
   catalog, library, runtime, tv = { host: '192.168.1.134', port: 9922 }, startedAddress, currentAddress,
   autostart = { status: async () => ({ installed: true, loaded: true }), install: async () => {} },
   supervised = !!process.env.HOLY_SUPERVISED, restart = () => process.kill(process.pid, 'SIGTERM'),
-  profile, reserveRepair, diskFree = () => { const fs = statfsSync('.'); return fs.bavail * fs.bsize; }, probe = tcpOpen, now = Date.now, rss = () => process.memoryUsage().rss, log = console.log
+  profile, reserveRepair, playbackIncident = () => null, diskFree = () => { const fs = statfsSync('.'); return fs.bavail * fs.bsize; }, probe = tcpOpen, now = Date.now, rss = () => process.memoryUsage().rss, log = console.log
 } = {}) {
   const check = (id, label, level, detail, fix = null, hint = '') => ({ id, label, level, detail, fix, hint });
   const journal=new RepairJournal({now});
@@ -57,6 +58,11 @@ export function createDoctor({
     else if(state==='waiting')checks.push(check('tv-link','Conexión con Holy en la TV','warn','Holy no está abierta en la TV',null,'Abre Holy con el control; la computadora no la abre sola.'));
     else if(['starting','restarting'].includes(state))checks.push(check('tv-link','Conexión con Holy en la TV','info','La conexión está iniciando; se esperará.',null));
     else checks.push(check('tv-link','Conexión con Holy en la TV','warn',connection.message,connection.action==='wake'?'reconnect':connection.action==='restart'?'restart':null,connection.message));
+
+    const incident = runtime?.bridge?.lastPlaybackIncident || runtime?.lastPlaybackIncident || playbackIncident();
+    if (incident && now() - incident.at >= 0 && now() - incident.at < 30 * 60000) checks.push(check('player-exit', 'Último cierre del reproductor', 'warn',
+      describePlaybackExit(incident), null,
+      'Se guardó el minuto. Un cierre no demuestra fallo de red ni memoria: se conserva la reproducción activa y se revisa el registro; no se reinicia la TV.'));
 
     const failing = catalog.sources().filter(source => source.health && !source.health.ok).map(source => source.name || source.id);
     const age = now() - (catalog.updatedAt || 0);

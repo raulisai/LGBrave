@@ -237,7 +237,9 @@ export function holyAutoplay(options = {}) {
   // Validation runs keep the TV silent.
   if (options.mute) for (const video of videos) video.muted = true;
   const report = videos.map(video => ({ t: video.currentTime, d: Number.isFinite(video.duration) ? video.duration : 0, paused: video.paused, userPaused: video.dataset?.holyUserPaused === '1', ready: video.readyState, network: video.networkState, mediaError: video.error?.code || 0, bufferAhead: (() => { for (let i = 0; i < (video.buffered?.length || 0); i++) if (video.buffered.start(i) <= video.currentTime && video.buffered.end(i) >= video.currentTime) return video.buffered.end(i) - video.currentTime; return 0; })(), area: video.clientWidth * video.clientHeight, ended: video.ended }));
-  const out = { url: location.href, top: window.top === window, videos: report, action: '' };
+  const out = { url: location.href, top: window.top === window, videos: report, action: '',
+    blockedCloses: Number(document.documentElement?.dataset.holyBlockedCloses || 0),
+    heapMB: typeof performance === 'undefined' ? 0 : Math.round((performance.memory?.usedJSHeapSize || 0) / 1048576) };
   if (videos.some(video => !video.paused && video.currentTime > 0)) return out;
   if (options.passive || report.some(video => video.userPaused && !video.ended)) return out;
   const once = (key, every = 4) => { const last = state.clicked[key]; if (last && state.steps - last < every) return false; state.clicked[key] = state.steps; return true; };

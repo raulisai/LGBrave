@@ -4,6 +4,7 @@ import {repairPlan,profileMismatch} from './repair-policy.mjs';
 import {RepairJournal} from './repair-journal.mjs';
 import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
 import {DiagnosticLog} from '../../scripts/diagnostics.mjs';
+import {latestPlaybackExit,describePlaybackExit} from '../../scripts/holy/playback-log.mjs';
 import {spawn} from 'node:child_process';
 import {mkdirSync, openSync, closeSync, existsSync, readFileSync, writeFileSync} from 'node:fs';
 import {join, resolve} from 'node:path';
@@ -29,6 +30,8 @@ export async function status({probe = false} = {}) {
   const live = await ask('/status');
   const tv = tvAddress();
   const state = live?.updated && Date.now()-live.updated > 15000 ? 'unresponsive' : live?.state || 'stopped';
+  const recentExit=latestPlaybackExit(join(ROOT,'.local/logs/holy-playback.jsonl'));
+  const playbackIncident=recentExit&&Date.now()-recentExit.at>=0&&Date.now()-recentExit.at<30*60000?recentExit:null;
   const context=userDataContext();
   const mismatch=profileMismatch(live,context,tv);
   const repairNeeded=!!(mismatch&& !['connected','standby','starting','restarting'].includes(state) || state==='setup'&&tv.configured&&!tv.needsUpdate);
@@ -41,6 +44,7 @@ export async function status({probe = false} = {}) {
   const friendlyHost = localName();
   const web = {running:!!live && webBuilt, built:webBuilt, url:`http://${lanAddress()}:${PORT}/`, friendlyUrl:friendlyHost?`http://${friendlyHost}:${PORT}/`:''};
   return {...live,state,profileContext:{mismatch,known:!!live?.context?.id},error:state==='standby'?'':live?.error||'',...(state==='standby'?{standbyReason:live?.error||'',checks:[label]}:{}),repairNeeded,label,running:!!live,host:lanAddress(),tv,web,
+    playbackIncident,checks:[...(state==='standby'?[label]:live?.checks||[]),...(playbackIncident?[describePlaybackExit(playbackIncident)+' · El minuto está guardado; revisar el registro.']:[])],
     ...(probe ? {tvReachable:!!tv.host && await tcpOpen(tv.host,tv.port,1200)} : {}),
     build:{luma:existsSync(join(ROOT,'dist/index.html')),holy:existsSync(join(ROOT,'dist-holy/index.html')),holyWeb:webBuilt}, config:config(),
     history:live?.peerSync?.state==='synced'?'Gustos, historial, idiomas y progreso sincronizados entre tus computadoras por la red local.':

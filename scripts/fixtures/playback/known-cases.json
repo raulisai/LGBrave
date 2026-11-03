@@ -445,6 +445,23 @@
       "tests": [
         "scripts/test-app-package.mjs"
       ]
+    },
+    {
+      "id": "player-exit-safety",
+      "scope": "controlled",
+      "sources": [
+        "cuevana",
+        "jkanime"
+      ],
+      "description": "Scripts de reproductor no pueden cerrar Holy ni abrir ventanas; cierre raíz guarda motivo, iframe no cuenta como app cerrada, Doctor conserva incidente sin reiniciar vídeo sano.",
+      "evidence": [
+        "scripts/holy/player-safety.mjs",
+        "docs/CIERRES-REPRODUCCION-20261102.md"
+      ],
+      "tests": [
+        "scripts/test-player-safety.mjs",
+        "scripts/test-holy-logging.mjs"
+      ]
     }
   ],
   "caveats": [

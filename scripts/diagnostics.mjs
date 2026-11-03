@@ -11,7 +11,7 @@ export function redact(value) {
     .replace(/(["']?(?:token|authorization|password|passwd|passphrase|secret|signature|cookie|api[_-]?key)["']?\s*[=:]\s*)["']?[^\s,;"'}]+["']?/gi, '$1[redacted]')
     .replace(/(?<![A-Za-z])[A-Z]:\\[^\s:]+/g, '[local-path]').replace(/\/(?:Users|home)\/[^\s:'"]+/g, '[local-path]').slice(0, 1600);
 }
-const allowed = new Set(['phase','action','method','reason','code','status','durationMs','count','attempt','source','state','position','duration','ready','network','mediaError','bufferAhead','paused','frameCount','requestType','resourceHost','title','episode','seconds','recent','host','origin','elapsedMs','repeats','free']);
+const allowed = new Set(['phase','action','method','reason','code','status','durationMs','count','attempt','source','state','position','duration','ready','network','mediaError','bufferAhead','paused','frameCount','requestType','resourceHost','title','episode','seconds','recent','host','origin','elapsedMs','repeats','free','heapMB']);
 export function safeDetail(detail = {}) {
   const output = {};
   for (const [key, value] of Object.entries(detail)) {

@@ -74,3 +74,9 @@ Conservar cambios locales, traer main, leer docs/PROTOCOLO-REPRODUCCION.md y eje
 ## Doctor0.9.20 · 2026-10-28
 
 Traer main conservando cambios, ejecutar npm run playback:check y reiniciar backend con npm run desktop:restart cuando sea apropiado. No requiere recompilar menú ni renovar emparejamiento. Comparte diagnóstico de perfil/contexto, límites persistentes y reserva de reparaciones; el Doctor web ya reconoce standby sin desconectar. Supervisor aislado probado y activo en Windows; activación en Mac física pendiente. Ver docs/DOCTOR-RECUPERACION-20261028.md.
+
+## Actualización 0.9.22 · cierres del reproductor (2026-11-02 Windows)
+
+Traer main que incluya la integración de las3fuentes y el arreglo de aislamiento Windows. Ejecutar npm ci y npm run playback:check antes de reiniciar desde el menú. La guardia close/open y el Doctor se aplican en la computadora activa; actualizar la Mac evita volver a una implementación anterior tras un relevo. No reinstalar menú/IPK para este cambio de backend, ni cambiar llaves.
+
+Investigar Dragon Ball con npm run holy:errors en esta Mac: no se encontró en los registros locales de Windows. Conservar título exacto, capítulo, fuente, hora y motivo nativo de cierre. No atribuir target_closed a falta de memoria o red sin evidencia. Ver docs/CIERRES-REPRODUCCION-20261102.md.

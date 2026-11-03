@@ -64,3 +64,7 @@ La matriz añade el caso24: test-windows-launcher compila el EXE0.9.12.0 y verif
 ## Doctor0.9.20 · 2026-10-28
 
 El caso25 incorpora15escenarios del Doctor y un supervisor real aislado. Distingue verificación/espera/bloqueo, comparte reserva y presupuesto persistente, preserva otro dueño y la sesión sana. Gate y3builds pasan. Doctor real dos veces no cambió el PID; LG conservó página y avance. Código/alcance y procedimiento para nuevos incidentes en docs/DOCTOR-RECUPERACION-20261028.md.
+
+## Ampliación0.9.22 · 2026-11-02
+
+Matriz30casos/10fuentes tras integrar OnlyFlix, DoramasFlix.beer e IMDb/TMDB. Caso player-exit-safety: guardia de close/open en documentos de Holy y targets de iframe; causa nativa y Doctor sin reinicio de vídeo sano. Las6regresiones controladas no prueban que el cierre histórico fuera causado por window.close. Ver docs/CIERRES-REPRODUCCION-20261102.md para resultados vivos y límites.
