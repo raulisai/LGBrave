@@ -28,6 +28,12 @@ await check('Todo bien → verde y nada que recetar', async () => {
   const result = await doctor.prescribe();
   assert.deepEqual(result.done, []); assert.deepEqual(calls, []);
 });
+await check('Cierre leído del registro sigue visible después de reiniciar, sin receta de reinicio', async () => {
+  const {doctor,calls}=make({playbackIncident:()=>({at:NOW-1000,title:'Amadeus',reason:'target_closed',position:7727})});
+  const issue=(await doctor.diagnose()).checks.find(c=>c.id==='player-exit');
+  assert.match(issue.detail,/minuto 128/);assert.equal(issue.fix,null);
+  await doctor.prescribe();assert.deepEqual(calls,[]);
+});
 await check('Holy cerrada en la TV → naranja sin arreglo automático (no se abre sola)', async () => {
   const { doctor, runtime } = make(); runtime.state = 'waiting';
   const report = await doctor.diagnose();

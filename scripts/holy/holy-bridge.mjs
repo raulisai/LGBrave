@@ -1,4 +1,5 @@
 import { PlaybackLog } from './playback-log.mjs';
+import { playerSafetySource } from './player-safety.mjs';
 import { dirname, join } from 'node:path';
 import { BrowserBridge } from '../browser-bridge.mjs';
 import { origin, packagedPrefix, HOME_PATH } from './config.mjs';
@@ -74,6 +75,7 @@ export class HolyBridge extends BrowserBridge {
   }
   async start() {
     await super.start();
+    this.safetyScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: playerSafetySource([this.home, this.packagedHome]) })).identifier;
     this.remoteScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: remoteSource([this.home, this.packagedHome], this.home, this.toolbarWorld), worldName: this.toolbarWorld })).identifier;
     // The page already open (e.g. a film when the Mac reconnects) gets the Back handler too.
     await this.armCurrentPage().catch(() => {});
@@ -89,6 +91,11 @@ export class HolyBridge extends BrowserBridge {
     this.heartbeat();
     this.watchTimer.unref?.();
     return this;
+  }
+  async setupContext(id, context) {
+    // Also arm documents that were already playing when this computer took over.
+    await this.cdp.evaluate(playerSafetySource([this.home, this.packagedHome]), id).catch(() => {});
+    return super.setupContext(id, context);
   }
   async armCurrentPage() {
     const { frameTree } = await this.cdp.call('Page.getFrameTree');
@@ -137,7 +144,7 @@ export class HolyBridge extends BrowserBridge {
     return true;
   }
   async event(message) {
-    const { method, params, sessionId } = message;
+    const { method, params = {}, sessionId } = message;
     if (this.session && (this.session.networkErrors || 0) < 10) {
       if (method === 'Network.loadingFailed' && params.type === 'Media' && !params.canceled) {
         this.session.networkErrors = (this.session.networkErrors || 0) + 1;
@@ -148,7 +155,15 @@ export class HolyBridge extends BrowserBridge {
         this.recordPlayback('media-http-error', this.session, { reason: 'HTTP ' + params.response.status });
       }
     }
-    if (this.session && ['Inspector.targetCrashed', 'Target.targetCrashed', 'Inspector.detached'].includes(method)) this.recordPlayback('player-disconnected', this.session, { reason: method });
+    const rootEvent = !sessionId && (!params.targetId || params.targetId === this.cdp.target?.id);
+    if (this.session && rootEvent && ['Inspector.targetCrashed', 'Target.targetCrashed', 'Inspector.detached'].includes(method) && !this.session.disconnected) {
+      this.session.disconnected = true;
+      const reason = ['target_closed', 'replaced_with_devtools', 'render_process_gone', 'canceled_by_user'].includes(params.reason) ? params.reason : method;
+      this.lastPlaybackIncident = { at: Date.now(), title: this.session.item?.title || '', reason, position: this.session.position?.t || 0 };
+      this.recordPlayback('player-disconnected', this.session, { reason });
+    }
+    if (this.session && !sessionId && method === 'Page.frameNavigated' && !params.frame.parentId && params.frame.url === 'about:blank')
+      this.recordPlayback('player-blank', this.session, { reason: 'top-frame-about-blank' });
     if (method === 'Runtime.executionContextCreated' && !sessionId && params.context.name === this.toolbarWorld) {
       this.remoteContexts.add(params.context.id);
       this.cdp.evaluate(heartbeatSource(this.toolbarWorld), params.context.id).catch(() => {});
@@ -164,7 +179,10 @@ export class HolyBridge extends BrowserBridge {
     if (method === 'Target.detachedFromTarget') this.childSessions.delete(params.sessionId);
     const child = sessionId && this.childSessions.get(sessionId);
     if (child) {
-      if (method === 'Runtime.executionContextCreated' && params.context.auxData?.isDefault) child.contexts.add(params.context.id);
+      if (method === 'Runtime.executionContextCreated' && params.context.auxData?.isDefault) {
+        child.contexts.add(params.context.id);
+        await this.cdp.call('Runtime.evaluate', { expression: playerSafetySource([this.home, this.packagedHome]), contextId: params.context.id }, sessionId).catch(() => {});
+      }
       if (method === 'Runtime.executionContextDestroyed') child.contexts.delete(params.executionContextId);
       if (method === 'Runtime.executionContextsCleared') child.contexts.clear();
     }
@@ -462,6 +480,7 @@ export class HolyBridge extends BrowserBridge {
     for (const [sessionId, child] of this.childSessions) {
       if (child.enabled) continue;
       child.enabled = true;
+      child.safetyScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: playerSafetySource([this.home, this.packagedHome]) }, sessionId).catch(() => null))?.identifier;
       await this.cdp.call('Runtime.enable', {}, sessionId).catch(() => this.childSessions.delete(sessionId));
       await this.cdp.call('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: false, flatten: true }, sessionId).catch(() => {});
     }
@@ -524,7 +543,10 @@ export class HolyBridge extends BrowserBridge {
       const best = playing || (session.phase === 'playing' ? primary : null);
       if (best && Date.now() - (session.sampledAt || 0) >= 10000) {
         session.sampledAt = Date.now();
-        const sample = { seconds: Math.round(best.t), duration: best.d, ready: best.ready, network: best.network, mediaError: best.mediaError, bufferAhead: Math.round(best.bufferAhead || 0), paused: best.paused, frameCount: results.length };
+        const safety = { closes: results.reduce((sum, frame) => sum + (frame.blockedCloses || 0), 0), heapMB: Math.max(0, ...results.map(frame => frame.heapMB || 0)) };
+        if (safety?.closes > (session.blockedCloses || 0)) this.recordPlayback('player-exit-blocked', session, { reason: 'script-close', count: safety.closes });
+        if (safety) session.blockedCloses = safety.closes;
+        const sample = { seconds: Math.round(best.t), duration: best.d, ready: best.ready, network: best.network, mediaError: best.mediaError, bufferAhead: Math.round(best.bufferAhead || 0), paused: best.paused, frameCount: results.length, heapMB: safety?.heapMB || 0 };
         session.samples = [...(session.samples || []), sample].slice(-12);
       }
       if (session.resumePending && best) {
@@ -820,6 +842,8 @@ export class HolyBridge extends BrowserBridge {
     clearInterval(this.watchTimer);
     clearInterval(this.heartbeatTimer);
     await this.endSession().catch(() => {});
+    for (const [sessionId, child] of this.childSessions) if (child.safetyScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: child.safetyScript }, sessionId).catch(() => {});
+    if (this.safetyScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.safetyScript }).catch(() => {});
     if (this.remoteScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.remoteScript }).catch(() => {});
     await super.stop();
   }

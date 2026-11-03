@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, readFileSync, readdirSync } from 'node:
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DiagnosticLog, redact } from './diagnostics.mjs';
-import { PlaybackLog } from './holy/playback-log.mjs';
+import { PlaybackLog, latestPlaybackExit } from './holy/playback-log.mjs';
 import { Catalog } from './holy/catalog.mjs';
 import { attempts, serverStats, closures, incidentSummary } from './holy/playback-report.mjs';
 
@@ -39,6 +39,14 @@ try {
     assert.equal(rows.length, 5); assert.equal(rows[4].reason, 'sin vídeo tras 14 s'); assert.equal(rows[4].elapsedMs, 14000);
     assert.ok(!JSON.stringify(rows).includes('secreto'));
   });
+  check('Doctor recupera cierre después de reiniciar, sin direcciones ni secretos y tolerando líneas rotas', () => {
+    const file=join(dir,'exit.jsonl'), log=new PlaybackLog(file);
+    const session={item:{title:'Amadeus'},position:{t:7727},target:'https://player.example/private?token=SECRET'};
+    log.write('player-disconnected',session,{reason:'target_closed'});
+    const exit=latestPlaybackExit(file);
+    assert.equal(exit.title,'Amadeus');assert.equal(exit.reason,'target_closed');assert.equal(exit.position,7727);
+    assert.equal(JSON.stringify(exit).includes('SECRET'),false);assert.equal(latestPlaybackExit(join(dir,'absent')),null);
+  });
   const row = (event, extra = {}) => ({ at: '2026-10-26T22:00:00.000Z', runId: 'r', session: 1, title: 'Coda', event, ...extra });
   check('Cada título sale con su resultado', () => {
     const rescued = attempts([row('server-opening', { host: 'a' }), row('server-failed', { host: 'a', reason: 'sin vídeo' }), row('server-opening', { host: 'b' }), row('playback-started', { host: 'b', elapsedMs: 9000 })]);
@@ -49,11 +57,14 @@ try {
     assert.deepEqual(serverStats([row('server-opening', { host: 'a' }), row('server-failed', { host: 'a' })]), [{ servidor: 'a', abiertos: 1, arrancaron: 0, fallaron: 1 }]);
   });
   check('Un cierre durante el vídeo se explica por lo que hizo la conexión después', () => {
-    const closed = [row('player-disconnected', { position: 965, duration: 5826 })];
+    const closed = [row('player-disconnected', { position: 965, duration: 5826, reason: 'target_closed' })];
+    assert.equal(attempts([row('playback-started'), ...closed])[0].outcome, 'interrumpido');
+    assert.match(closures([row('player-disconnected', {reason:'replaced_with_devtools'})], [])[0].cause, /reemplazó/);
+    assert.match(closures(closed, [{at:'2026-10-26T22:00:10.000Z',state:'standby'}])[0].following, /después del corte/);
     const later = (seconds, state) => ({ at: new Date(Date.parse(closed[0].at) + seconds * 1000).toISOString(), state });
-    assert.match(closures(closed, [later(1, 'waiting'), later(8, 'offline')])[0].cause, /apagó/);
-    assert.match(closures(closed, [later(1, 'waiting'), later(30, 'connected')])[0].cause, /volvió a abrir/);
-    assert.match(closures(closed, [later(1, 'waiting'), later(900, 'offline')])[0].cause, /TV encendida/);
+    assert.match(closures(closed, [later(1, 'waiting'), later(8, 'offline')])[0].cause, /no confirmado/);
+    assert.match(closures(closed, [later(1, 'waiting'), later(30, 'connected')])[0].cause, /no confirmado/);
+    assert.match(closures(closed, [later(1, 'waiting'), later(900, 'offline')])[0].cause, /no confirmado/);
   });
 } finally { rmSync(dir, { recursive: true, force: true }); }
 

@@ -28,6 +28,7 @@ export class LabRuntime {
   }
   async detach() {
     const bridge = this.bridge, cdp = this.cdp;
+    if (bridge?.lastPlaybackIncident) this.lastPlaybackIncident = bridge.lastPlaybackIncident;
     if (bridge?.tabs) {
       this.sessionTabs = bridge.tabs;
       this.sessionTargetId = cdp?.target.id;

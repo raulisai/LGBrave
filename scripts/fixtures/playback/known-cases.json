@@ -432,6 +432,36 @@
         "scripts/test-desktop-repair.mjs",
         "scripts/test-holy-doctor.mjs"
       ]
+    },
+    {
+      "id": "windows-store-app-isolation",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Perfil webOS y ajustes guardados en la copia privada de una app de Tienda se recuperan con su llave y passphrase existentes; el servicio arranca fuera de esa app y distingue suspensión de bloqueo. Sin navegar TV.",
+      "evidence": [
+        "desktop/shared/app-package.mjs",
+        "docs/WINDOWS-APPS-TIENDA-20261031.md"
+      ],
+      "tests": [
+        "scripts/test-app-package.mjs"
+      ]
+    },
+    {
+      "id": "player-exit-safety",
+      "scope": "controlled",
+      "sources": [
+        "cuevana",
+        "jkanime"
+      ],
+      "description": "Scripts de reproductor no pueden cerrar Holy ni abrir ventanas; cierre raíz guarda motivo, iframe no cuenta como app cerrada, Doctor conserva incidente sin reiniciar vídeo sano.",
+      "evidence": [
+        "scripts/holy/player-safety.mjs",
+        "docs/CIERRES-REPRODUCCION-20261102.md"
+      ],
+      "tests": [
+        "scripts/test-player-safety.mjs",
+        "scripts/test-holy-logging.mjs"
+      ]
     }
   ],
   "caveats": [

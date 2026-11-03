@@ -138,10 +138,10 @@ export class BrowserBridge {
     await this.status();
     return this;
   }
-  async event({ method, params, sessionId }) {
+  async event({ method, params = {}, sessionId }) {
     try {
       this.recorder?.note(method, params, sessionId);
-    if (['Inspector.targetCrashed', 'Target.targetCrashed', 'Inspector.detached'].includes(method)) this.diagnostics?.event('browser', 'disconnected', { method }, 'error');
+    if (['Inspector.targetCrashed', 'Target.targetCrashed', 'Inspector.detached'].includes(method)) this.diagnostics?.event('browser', 'disconnected', { method, reason: ['target_closed','replaced_with_devtools','render_process_gone','canceled_by_user'].includes(params.reason) ? params.reason : 'unspecified' }, 'error');
     if (method === 'Runtime.exceptionThrown') this.diagnostics?.event('page', 'exception', { error: params.exceptionDetails?.exception?.description || params.exceptionDetails?.text }, 'error');
       if (method === 'Target.attachedToTarget') {
         // Worker targets do not expose Fetch. Do not mistake that for a frame.

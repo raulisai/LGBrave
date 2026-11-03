@@ -23,7 +23,7 @@ export function attempts(rows) {
     if (['playback-started', 'recovery-started'].includes(row.event)) { group.started = true; group.host = row.host; group.startMs ??= row.elapsedMs; }
     if (row.event === 'player-disconnected') group.closed = true;
   }
-  return [...groups.values()].map(group => ({ ...group, outcome: group.gaveUp || (!group.started && group.failed.length) ? 'FALLÓ' : !group.started ? 'sin arrancar' : group.failed.length ? 'rescatado' : 'reproducido' }));
+  return [...groups.values()].map(group => ({ ...group, outcome: group.gaveUp || (!group.started && group.failed.length) ? 'FALLÓ' : group.closed ? 'interrumpido' : !group.started ? 'sin arrancar' : group.failed.length ? 'rescatado' : 'reproducido' }));
 }
 
 export function serverStats(rows) {
@@ -42,8 +42,14 @@ export function serverStats(rows) {
 export function closures(rows, connection) {
   return rows.filter(row => row.event === 'player-disconnected').map(row => {
     const after = connection.filter(item => item.at > row.at && Date.parse(item.at) - Date.parse(row.at) < 120000 && item.state !== 'waiting')[0];
-    const cause = after?.state === 'offline' ? 'la TV se apagó o perdió la red' : after?.state === 'connected' ? 'la app se cerró y se volvió a abrir' : 'la app se cerró con la TV encendida';
-    return { at: row.at, title: row.title, position: Math.round(row.position || 0), duration: Math.round(row.duration || 0), cause };
+    // A lost inspector is not proof of TV power, network loss or low memory.
+    const cause = row.reason === 'replaced_with_devtools' ? 'otro cliente reemplazó el inspector'
+      : /targetCrashed/.test(row.reason || '') ? 'el inspector notificó un crash del reproductor'
+      : row.reason === 'target_closed' ? 'la TV cerró el target; motivo del cierre no confirmado'
+      : 'se perdió el inspector; motivo del cierre no confirmado';
+    const following = after?.state === 'standby' ? 'otro equipo tomó la asistencia después del corte'
+      : after?.state === 'connected' ? 'se volvió a conectar' : after?.state === 'offline' ? 'la conexión quedó fuera de línea' : 'sin dato posterior';
+    return { at: row.at, title: row.title, position: Math.round(row.position || 0), duration: Math.round(row.duration || 0), reason: row.reason || 'sin detalle', cause, following };
   });
 }
 

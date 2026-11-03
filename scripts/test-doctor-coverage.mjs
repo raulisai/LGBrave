@@ -139,7 +139,7 @@ try{
  });
  await test('Real supervisor repairs stale setup without tray and preserves healthy/other owner',async()=>{
   const root=join(dir,'isolated'),files=[
-   'desktop/shared/desktop-supervisor.mjs','desktop/shared/desktop-config.mjs','desktop/shared/profile-recovery.mjs',
+   'desktop/shared/desktop-supervisor.mjs','desktop/shared/desktop-config.mjs','desktop/shared/profile-recovery.mjs','desktop/shared/app-package.mjs',
    'desktop/shared/desktop-repair.mjs','desktop/shared/repair-policy.mjs','desktop/shared/repair-journal.mjs','desktop/shared/repair-monitor.mjs',
    'scripts/runtime-lock.mjs','scripts/holy/doctor.mjs','scripts/diagnostics.mjs'];
   for(const file of files){mkdirSync(dirname(join(root,file)),{recursive:true});copyFileSync(join(ROOT,file),join(root,file));}

@@ -1,0 +1,75 @@
+{
+  "v": 1,
+  "dateMexico": "2026-11-02",
+  "code": "5133c40",
+  "scope": "Observación física parcial; dos cierres confirmados, no es certificación de reproducción completa.",
+  "previousClosures": [
+    {
+      "at": "2026-11-03T04:27:53.524Z",
+      "title": "Amadeus",
+      "position": 7052.378666,
+      "duration": 10825.606000000189,
+      "inspector": "target_closed",
+      "videoBefore": {
+        "ready": 4,
+        "mediaError": 0,
+        "bufferAhead": 63
+      }
+    },
+    {
+      "at": "2026-11-03T04:55:35.357Z",
+      "title": "Amadeus",
+      "position": 7727.928544,
+      "inspector": "target_closed",
+      "automaticExitConfirmedByUser": true,
+      "guardAppliedToAlreadyLoadedDocument": true
+    }
+  ],
+  "newLoad": {
+    "startedAt": "2026-11-03T05:03:24.436Z",
+    "observedUntil": "2026-11-03T05:22:28.675Z",
+    "elapsedSeconds": 1144,
+    "rootHash": "0d09951ee7e84b4c3c13cd858c813b541834d96f6dafbf5411f8657a8369f84d",
+    "title": "Amadeus",
+    "video": {
+      "t": 8867.775588,
+      "d": 10825.606000000189,
+      "paused": false,
+      "error": 0,
+      "ready": 4
+    },
+    "guardObservedRootAndIframe": true,
+    "wholeMovieCompleted": false,
+    "audioVerified": false
+  },
+  "dragonBall": {
+    "title": "Dragon Ball Super: Beerus",
+    "episode": 4,
+    "source": "jkanime",
+    "observedPosition": 1266.953667,
+    "duration": 1397.6880880000003,
+    "mediaError": 0,
+    "priorClosureLogAvailable": false
+  },
+  "memory": {
+    "samples": 36,
+    "from": "2026-11-03T05:09:13.935Z",
+    "to": "2026-11-03T05:20:58.332Z",
+    "minAvailableMB": 131,
+    "maxAvailableMB": 194,
+    "minRendererRSSMB": 209,
+    "maxRendererRSSMB": 295,
+    "oomConfirmed": false
+  },
+  "validation": {
+    "localGate": true,
+    "cases": 30,
+    "sourceContracts": 10,
+    "builds": 3,
+    "ciWindows": "success",
+    "ciMac": "success",
+    "ciRun": "https://github.com/raulisai/LGBrave/actions/runs/41582366855"
+  },
+  "rootCauseConfirmed": false,
+  "definitiveResolutionConfirmed": false
+}
