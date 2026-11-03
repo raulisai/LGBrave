@@ -442,7 +442,7 @@ export const tmdb = {
   parseHome: value => metaList(value).map(metaItem).filter(Boolean),
   async home(load) {
     const year = new Date().getFullYear();
-    const pages = ['movie/top', 'movie/top/skip=50', 'series/top', 'series/top/skip=50', `movie/year/genre=${year}`, `series/year/genre=${year}`];
+    const pages = ['movie/top', 'series/top',`movie/year/genre=${year}`, `series/year/genre=${year}`];
     const lists = await Promise.all(pages.map(page => load(`${cinemetaURL}catalog/${page}.json`).then(text => this.parseHome(text)).catch(() => [])));
     return [...new Map(lists.flat().map(entry => [entry.url, entry])).values()];
   },
@@ -450,6 +450,13 @@ export const tmdb = {
     const q = encodeURIComponent(query);
     const lists = await Promise.all(['movie', 'series'].map(type => load(`${cinemetaURL}catalog/${type}/top/search=${q}.json`).then(text => this.parseHome(text)).catch(() => [])));
     return lists.flat().slice(0, 40);
+  },
+  // Genres and synopsis of one title (for what the owner watched from a search result).
+  async detail(entry, load) {
+    const id = /tt\d+/.exec(entry.show || entry.url)?.[0];
+    const meta = id && json(await load(`${cinemetaURL}meta/${entry.kind === 'movie' ? 'movie' : 'series'}/${id}.json`))?.meta;
+    const found = meta && metaItem({ ...meta, type: entry.kind === 'movie' ? 'movie' : 'series' });
+    return { show: entry.show || '', genres: found?.genres || [], overview: found?.overview || '', poster: found?.poster || '', backdrop: found?.backdrop || '' };
   },
   async episodes(show, load) {
     const id = /tt\d+/.exec(show)?.[0];

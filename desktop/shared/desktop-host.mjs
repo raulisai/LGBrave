@@ -50,6 +50,10 @@ const peerSync=process.env.LUMA_OFFLINE_TEST==='1'?null:new PeerSync({library,ho
 let activeStore;
 const catalog = new Catalog({log:console.log,diagnostics,sites:new SiteRegistry()});
 if (process.env.LUMA_OFFLINE_TEST !== '1') catalog.start(console.log);
+// What was watched without genres gets them from the catalogue or its page, so it counts toward taste.
+const fillGenres=()=>library.fillGenres(item=>catalog.genresFor(item)).then(count=>{if(count)diagnostics.event('library','genres-filled',{count});},error=>diagnostics.event('library','genres-error',{error},'warn'));
+const genresTimer=process.env.LUMA_OFFLINE_TEST==='1'?null:setInterval(fillGenres,10*60000);genresTimer?.unref();
+if(genresTimer)setTimeout(fillGenres,30000).unref();
 const runtime = new LabRuntime({
   openTunnel:async()=>{
     const tunnel=await openInspectorTunnel();
@@ -79,7 +83,7 @@ let finishing;
 function finish() {
   if (finishing) return finishing;
   diagnostics.event('service','stopping');
-  abort.abort(); clearInterval(statusTimer); updates?.stop();peerSync?.stop(); catalog.stop(); server.close();
+  abort.abort(); clearInterval(statusTimer); clearInterval(genresTimer); updates?.stop();peerSync?.stop(); catalog.stop(); server.close();
   finishing = profiles.flush().catch(()=>{}).then(()=>runtime.close()).finally(() => {profiles.disconnect();release();});
   return finishing;
 }

@@ -37,6 +37,7 @@
     "windows:tray": "node scripts/windows-tray.mjs",
     "holy:errors": "node scripts/holy/playback-report.mjs",
     "anime:classics:update": "node scripts/update-anime-classics.mjs",
+    "holy:taste-eval": "node scripts/eval-holy-taste.mjs",
     "holy:autostart": "node scripts/holy/autostart.mjs",
     "windows:install": "node scripts/install-windows-app.mjs",
     "holy:tastes": "node scripts/holy/taste-transfer.mjs",

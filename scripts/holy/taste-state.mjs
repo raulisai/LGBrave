@@ -29,6 +29,13 @@ const newest = (items, keyOf, field) => {
   }
   return [...found.values()].sort((a,b) => (b[field] || 0) - (a[field] || 0) || (keyOf(a)<keyOf(b)?-1:keyOf(a)>keyOf(b)?1:0));
 };
+// Genres are looked up after the fact (Library.fillGenres) without changing the title's time, so a
+// copy without them must not erase them: the winner borrows them from any copy of the same title.
+const keepGenres = (chosen, items, keyOf) => {
+  const known = new Map();
+  for (const item of items) if (Array.isArray(item.genres) && item.genres.length && !known.has(keyOf(item))) known.set(keyOf(item), item.genres);
+  return chosen.map(item => (item.genres?.length || !known.has(keyOf(item)) ? item : { ...item, genres: known.get(keyOf(item)) }));
+};
 export function mergeLibraryState(left, right) {
   const a = cleanTasteMeta(left.tasteMeta), b = cleanTasteMeta(right.tasteMeta);
   const tasteMeta = cleanTasteMeta({ clock: Math.max(a.clock,b.clock,a.resetAt,b.resetAt,...[...(left.entries||[]),...(right.entries||[])].map(item=>stamp(item.updatedAt)),...[...(left.votes||[]),...(right.votes||[]),...(left.prefs||[]),...(right.prefs||[]),...Object.values(cleanLanguages(left.languages)),...Object.values(cleanLanguages(right.languages))].map(item=>stamp(item.at))), resetAt: Math.max(a.resetAt, b.resetAt),
@@ -37,9 +44,9 @@ export function mergeLibraryState(left, right) {
   const languageItems=newest([...Object.entries(cleanLanguages(left.languages)),...Object.entries(cleanLanguages(right.languages))].map(([key,item])=>({key,...item})),item=>item.key,'at');
   const languages=Object.fromEntries(languageItems.filter(item=>!tasteMeta.removedLanguages[item.key]||item.at>tasteMeta.removedLanguages[item.key]).slice(0,300).map(({key,...item})=>[key,item]));
   return { tasteMeta, languages,
-    votes: newest([...(left.votes || []), ...(right.votes || [])], tasteKey, 'at').filter(item => survives(item, tasteKey(item), tasteMeta.removedVotes, 'at')).slice(0, 500),
+    votes: keepGenres(newest([...(left.votes || []), ...(right.votes || [])], tasteKey, 'at').filter(item => survives(item, tasteKey(item), tasteMeta.removedVotes, 'at')).slice(0, 500), [...(left.votes || []), ...(right.votes || [])], tasteKey),
     prefs: newest([...(left.prefs || []), ...(right.prefs || [])], prefKey, 'at').filter(item => survives(item, prefKey(item), tasteMeta.removedPrefs, 'at')).slice(0, 1000),
-    entries: newest([...(left.entries || []), ...(right.entries || [])], item => item.key, 'updatedAt').filter(item => !tasteMeta.removedEntries[item.key] || item.updatedAt > tasteMeta.removedEntries[item.key]).slice(0, 300),
+    entries: keepGenres(newest([...(left.entries || []), ...(right.entries || [])], item => item.key, 'updatedAt').filter(item => !tasteMeta.removedEntries[item.key] || item.updatedAt > tasteMeta.removedEntries[item.key]).slice(0, 300), [...(left.entries || []), ...(right.entries || [])], item => item.key),
     asked: mergeMarkers(left.asked || {}, right.asked || {})
   };
 }

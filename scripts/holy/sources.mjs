@@ -51,8 +51,17 @@ const GENRES = {
   musical: 'Música', musica: 'Música', western: 'Western', biografia: 'Biografía', intriga: 'Misterio', deportes: 'Deportes', escolares: 'Escolar', escolar: 'Escolar',
   shounen: 'Shounen', seinen: 'Seinen', shoujo: 'Shoujo', josei: 'Josei', isekai: 'Isekai', mecha: 'Mecha', magia: 'Magia', 'super poderes': 'Superpoderes',
   'recuentos de la vida': 'Vida cotidiana', 'slice of life': 'Vida cotidiana', sobrenatural: 'Sobrenatural', psicologico: 'Psicológico', juegos: 'Juegos', samurai: 'Samurái',
-  vampiros: 'Vampiros', militar: 'Bélica', policial: 'Crimen', medico: 'Médico', melodrama: 'Melodrama', juvenil: 'Juvenil', 'artes marciales': 'Artes marciales'
+  vampiros: 'Vampiros', militar: 'Bélica', policial: 'Crimen', medico: 'Médico', melodrama: 'Melodrama', juvenil: 'Juvenil', 'artes marciales': 'Artes marciales',
+  romantico: 'Romance', romantica: 'Romance', historico: 'Historia', familiar: 'Familia', ninos: 'Familia', infantil: 'Familia', 'cosas de la vida': 'Vida cotidiana', vida: 'Vida cotidiana',
+  deporte: 'Deportes', documentales: 'Documental', suspense: 'Suspenso',
+  // English sites (OnlyFlix, the public catalogue) use the same genres in English.
+  action: 'Acción', adventure: 'Aventura', animation: 'Animación', comedy: 'Comedia', crime: 'Crimen', fantasy: 'Fantasía', horror: 'Terror', mystery: 'Misterio',
+  'science fiction': 'Ciencia ficción', family: 'Familia', documentary: 'Documental', history: 'Historia', war: 'Bélica', music: 'Música', biography: 'Biografía',
+  sport: 'Deportes', sports: 'Deportes', kids: 'Familia', 'war & politics': 'Bélica', 'tv movie': 'Pelicula de tv'
 };
+// «Action & Adventure», «Sci-Fi & Fantasy»: one genre per part. Quality tags are dropped.
+export const genreList = list => [...new Set((Array.isArray(list) ? list : []).filter(name => typeof name === 'string')
+  .flatMap(name => (/^war & politics$/i.test(name.trim()) ? [name] : name.split(/\s*&\s*/))).map(genre).filter(Boolean))];
 export const fold = value => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 export function genre(value) {
   const key = fold(decode(value));

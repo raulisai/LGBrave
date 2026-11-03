@@ -1,2 +1,4 @@
-const labels = { horror: 'Terror', terror: 'Terror', action: 'Acción', accion: 'Acción', adventure: 'Aventura', aventura: 'Aventura', thriller: 'Suspenso', suspenso: 'Suspenso', comedy: 'Comedia', comedia: 'Comedia', romance: 'Romance', drama: 'Drama', 'sci-fi': 'Ciencia ficción', 'ciencia ficcion': 'Ciencia ficción', fantasy: 'Fantasía', fantasia: 'Fantasía' };
-export const genreLabel = value => labels[String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase()] || String(value || '').trim();
+import { genre } from '../scripts/holy/sources.mjs';
+
+// One genre vocabulary for tastes: the sites' own (Spanish and English names alike).
+export const genreLabel = value => genre(String(value || '')) || String(value || '').trim();

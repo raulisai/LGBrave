@@ -1,6 +1,6 @@
 import { readFileSync, mkdirSync, writeFileSync, renameSync, existsSync, copyFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { fetchText, country, languageLabel } from './sources.mjs';
+import { fetchText, country, languageLabel, genreList } from './sources.mjs';
 import { CONNECTORS, connectorFor } from './connectors.mjs';
 import { genreShelves } from '../../src/holy.js';
 import { entryKey, titleKey, nextEpisode } from './library.mjs';
@@ -44,7 +44,7 @@ const deadline = (promise, ms, message) => {
   return Promise.race([promise, new Promise((resolve, reject) => { timer = setTimeout(() => reject(Error(message)), ms); })]).finally(() => clearTimeout(timer));
 };
 const valid = item => record(item) && typeof item.title === 'string' && item.title.trim() && typeof item.url === 'string' && /^https:\/\//.test(item.url);
-const cleanItem = item => ({ ...item, genres: strings(item.genres), studios: strings(item.studios), overview: String(item.overview || ''), country: typeof item.country === 'string' ? country(item.country) : '' });
+const cleanItem = item => ({ ...item, genres: genreList(strings(item.genres)), studios: strings(item.studios), overview: String(item.overview || ''), country: typeof item.country === 'string' ? country(item.country) : '' });
 // Genre rows of the home, in their default order ([catalogue genre, row title]).
 const GENRE_ROWS = [['Acción', 'Acción'], ['Comedia', 'Comedia'], ['Drama', 'Drama'], ['Suspenso', 'Suspenso y thriller'], ['Terror', 'Terror'], ['Ciencia ficción', 'Ciencia ficción'],
   ['Romance', 'Romance'], ['Animación', 'Animación'], ['Aventura', 'Aventura'], ['Crimen', 'Crimen'], ['Fantasía', 'Fantasía'], ['Misterio', 'Misterio'], ['Familia', 'Familia'],
@@ -183,11 +183,11 @@ export class Catalog {
   }
   enrich(item) {
     const detail = this.details.get(this.detailURL(item));
-    const genres = Array.isArray(item.genres) ? item.genres : [];
+    const genres = genreList(item.genres);
     // Audio/subtitles: what the title's page says, else its site's usual version; unknown stays empty.
     const language = detail?.language || item.language || this.connector(item.source)?.language || '';
     if (!detail) return { ...item, genres, language };
-    return { ...item, genres: detail.genres?.length ? detail.genres : genres, overview: item.overview || detail.overview || '', backdrop: item.backdrop || detail.backdrop || '',
+    return { ...item, genres: detail.genres?.length ? genreList(detail.genres) : genres, overview: item.overview || detail.overview || '', backdrop: item.backdrop || detail.backdrop || '',
       poster: item.poster || detail.poster || '', show: item.show || detail.show || '', studios: detail.studios?.length ? detail.studios : item.studios || [], country: country(item.country || detail.country || ''), language, ...(detail.imdb ? { imdb: detail.imdb } : {}) };
   }
   start(log = this.log) {
@@ -432,13 +432,19 @@ export class Catalog {
     const url = item.show || this.detailURL(item);
     if (!/^https:\/\//.test(String(url || ''))) return [];
     const known = this.details.get(url);
-    if (known) return known.genres || [];
+    if (known?.genres?.length) return genreList(known.genres);
     const connector = this.connector(item.source);
-    if (!connector) return [];
+    if (!connector || !(connector.detail || connector.parseDetail)) return [];
     return this.cached('genres\n' + url, 6 * 3600000, async () => {
       const detail = await deadline(connector.detail ? connector.detail({ ...item, url }, this.loader(connector)) : this.fetch(url).then(html => connector.parseDetail(html, url)), 6000, 'la ficha tardó demasiado');
-      return detail?.genres || [];
+      return genreList(detail?.genres);
     });
+  }
+  // Genres for a title the owner watched: the same title in the catalogue (any site), else its page.
+  async genresFor(item) {
+    const key = titleKey(item);
+    const known = this.items.find(other => other.genres?.length && (other.url === item.url || other.url === item.show || titleKey(other) === key));
+    return known ? known.genres : this.genresOf(item);
   }
   // kind: look for it as this kind (an anime filed as a series is searched on the anime sites).
   async elsewhere(item, tried = new Set(), { only, kind } = {}) {
@@ -474,6 +480,7 @@ export class Catalog {
   }
   // Rows for the home: «Continuar viendo», «Para ti», then the latest by kind, each title with its match.
   home(library) {
+    library.learnCatalogue?.(this.items, this.version);
     const by = kind => this.items.filter(item => item.kind === kind);
     const interleave = (...lists) => {
       const out = [];
@@ -519,7 +526,9 @@ export class Catalog {
     }).filter(row => row.items.length >= 6).sort((a, b) => (personal ? b.affinity - a.affinity : 0) || a.order - b.order);
     rows.push(...genreRows.map(({ affinity, order, ...row }) => row));
     const knownGenres = new Set(genreRows.map(row => row.genre));
-    rows.push(...genreShelves(this.items).filter(row => !knownGenres.has(row.title)).map(row => ({ ...row, items: best(once(row.items)).slice(0, 30) })));
+    // Smaller genres get a row only with enough titles (8, or 1 % of a small catalogue): one-title rows are noise.
+    const shelfMinimum = Math.min(8, Math.ceil(this.items.length / 100));
+    rows.push(...genreShelves(this.items).filter(row => !knownGenres.has(row.title) && once(row.items).length >= shelfMinimum).map(row => ({ ...row, items: best(once(row.items)).slice(0, 30) })));
     // Lists with something to play go right after the newest rows; lists of titles still to
     // find, after the genres.
     const after = Math.max(...['movies', 'anime', 'anime-airing', 'doramas'].map(id => rows.findIndex(row => row.id === id))) + 1;
