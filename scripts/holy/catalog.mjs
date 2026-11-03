@@ -275,8 +275,18 @@ export class Catalog {
     if (!connector?.episodes || !/^https:\/\//.test(String(show || ''))) return [];
     return this.cached('episodes\n' + show, 20 * 60000, async () => {
       const seasons = await deadline(connector.episodes(show, this.loader(connector), (url, referrer) => this.post(url, referrer)), 25000, 'la lista de episodios tardó demasiado');
-      return (Array.isArray(seasons) ? seasons : []).map(season => ({ title: String(season?.title || 'Episodios'), episodes: (season?.episodes || []).filter(entry => /^https:\/\//.test(String(entry?.url || ''))) }))
+      const lists = (Array.isArray(seasons) ? seasons : []).map(season => ({ title: String(season?.title || 'Episodios'), episodes: (season?.episodes || []).filter(entry => /^https:\/\//.test(String(entry?.url || ''))) }))
         .filter(season => season.episodes.length);
+      // A season longer than 60 becomes rows of 50 («Temporada 1 · 51–100»): one row of hundreds is unusable with the remote.
+      return lists.flatMap(season => {
+        if (season.episodes.length <= 60) return [season];
+        const blocks = [];
+        for (let index = 0; index < season.episodes.length; index += 50) {
+          const chunk = season.episodes.slice(index, index + 50), numbers = chunk.map(entry => entry.episode).filter(Number.isFinite);
+          blocks.push({ title: `${season.title} · ${numbers.length ? Math.min(...numbers) + '–' + Math.max(...numbers) : index + 1 + '–' + (index + chunk.length)}`, episodes: chunk });
+        }
+        return blocks;
+      });
     });
   }
   // Same-site form POST (JKAnime's episode list needs its session cookie and token).

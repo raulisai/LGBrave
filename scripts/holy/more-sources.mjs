@@ -176,6 +176,18 @@ export const doramasflix = {
       if (!seasons.has(+season)) seasons.set(+season, new Map());
       seasons.get(+season).set(+episode, { url: absolute('/capitulos/' + slug, show), season: +season, episode: +episode, label: `T${season} · Capítulo ${+episode}` });
     }
+    // The page only carries the first 8 episodes of a season (the rest load as you scroll), but it
+    // says how many each season has: the missing ones follow the same address (`the-heirs-1x20`).
+    const base = /"slug":"([\w-]+?)-\d+x\d+"/.exec(data)?.[1];
+    const counts = /"seasons":(\[\{"season_number":[^\]]*\])/.exec(data)?.[1];
+    let declared = [];
+    try { declared = JSON.parse(counts || '[]'); } catch { /* Unknown: keep what the page lists. */ }
+    for (const { season_number: season, number_of_episodes: total } of base ? declared : []) {
+      if (!(season > 0) || !(total > 0) || total > 2000) continue;
+      if (!seasons.has(season)) seasons.set(season, new Map());
+      for (let episode = 1; episode <= total; episode++) if (!seasons.get(season).has(episode))
+        seasons.get(season).set(episode, { url: absolute(`/capitulos/${base}-${season}x${episode}`, show), season, episode, label: `T${season} · Capítulo ${episode}` });
+    }
     return [...seasons].sort((a, b) => a[0] - b[0]).map(([season, list]) => ({ title: 'Temporada ' + season, episodes: [...list.values()].sort((a, b) => a.episode - b.episode) }));
   }
 };
@@ -312,10 +324,23 @@ export const animeyt = {
     const html = await load(show);
     // Arcs share the show's episode slugs (one-piece-arco-de-elbaph → one-piece-capitulo-1180): no slug filter.
     const found = new Map();
-    for (const match of html.matchAll(/href="(https:\/\/animeyt\.cc\/\d+\/anime\/[\w-]+?-capitulo-(\d+)[\w-]*\/)"/g)) {
-      const [, url, number] = match;
-      if (/sin-censura/.test(url) || found.has(+number)) continue;
-      found.set(+number, { url, episode: +number, label: 'Episodio ' + number });
+    const read = page => {
+      let added = 0;
+      for (const match of String(page).matchAll(/href="(https:\/\/animeyt\.cc\/\d+\/anime\/[\w-]+?-capitulo-(\d+)[\w-]*\/)"/g)) {
+        const [, url, number] = match;
+        if (/sin-censura/.test(url) || found.has(+number)) continue;
+        found.set(+number, { url, episode: +number, label: 'Episodio ' + number }); added++;
+      }
+      return added;
+    };
+    read(html);
+    // Long shows come in blocks of 50 and the page only carries the newest one: the earlier blocks
+    // are asked like the page's own selector does, newest first, until one is empty (arc pages such
+    // as One Piece's only fill their own block).
+    const browser = /data-anime-id="(\d+)"\s+data-blocks="(\d+)"\s+data-endpoint="(https:\/\/animeyt\.cc\/wp-json\/aniyt\/v1\/anime-episode-browser)"/.exec(html);
+    for (let block = Math.min(Number(browser?.[2]) || 1, 60) - 2; browser && block >= 0; block--) {
+      const page = json(await load(`${browser[3]}?anime_id=${browser[1]}&block=${block}&order=ASC`).catch(() => ''));
+      if (!page?.html || !read(page.html)) break;
     }
     const episodes = [...found.values()].sort((a, b) => a.episode - b.episode);
     return episodes.length ? [{ title: 'Episodios', episodes }] : [];

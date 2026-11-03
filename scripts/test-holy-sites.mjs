@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { Catalog } from './holy/catalog.mjs';
 import { SiteRegistry, cleanSite, checkSite } from './holy/site-registry.mjs';
 import { startServer } from './holy/server.mjs';
-import { onlyflix, doramasflixbeer, tmdb } from './holy/more-sources.mjs';
+import { onlyflix, doramasflixbeer, tmdb, doramasflix, animeyt } from './holy/more-sources.mjs';
 
 // The window «Webs»: moving a site keeps its parsers and saved titles working. No Internet.
 const dir = mkdtempSync(join(tmpdir(), 'holy-sites-'));
@@ -96,5 +96,32 @@ await check('Catálogo público: títulos, series con temporadas y servidores po
   assert.deepEqual(seasons.map(season => [season.number, season.episodes.map(episode => episode.episode)]), [[1, [1, 2]], [2, [1]]]);
   assert.equal((await tmdb.resolve({ url: seasons[1].episodes[0].url })).url, 'https://vidfast.vc/tv/tt2/2/1');
   assert.equal((await tmdb.search('x', async url => (/movie/.test(url) ? list : '{}'))).length, 2);
+});
+await check('Series largas: los capítulos que el sitio carga al bajar también salen', async () => {
+  // DoramasFlix trae 8 en la página y dice cuántos tiene cada temporada.
+  const page = `<script>self.__next_f.push([1,${JSON.stringify('{"serie_id":"x","seasons":[{"season_number":1,"number_of_episodes":20},{"season_number":2,"number_of_episodes":3}],"initialEpisodes":[' + [1, 2, 3, 4, 5, 6, 7, 8].map(n => `{"slug":"the-heirs-1x${n}","href":"/capitulos/the-heirs-1x${n}"}`).join(',') + ']}')}])</script>`;
+  const seasons = await doramasflix.episodes('https://doramasflix.io/doramas/the-heirs', async () => page);
+  assert.deepEqual(seasons.map(season => season.episodes.length), [20, 3]);
+  assert.equal(seasons[0].episodes[19].url, 'https://doramasflix.io/capitulos/the-heirs-1x20');
+  // AnimeYT: la página trae el bloque más nuevo; los anteriores se piden hasta uno vacío.
+  const card = n => `<a href="https://animeyt.cc/1/anime/serie-capitulo-${n}/">`;
+  const show = `<section data-anime-id="7" data-blocks="4" data-endpoint="https://animeyt.cc/wp-json/aniyt/v1/anime-episode-browser">${[151, 152].map(card).join('')}`;
+  const asked = [];
+  const blocks = { 2: [101, 150], 1: [51, 100], 0: [] };
+  const list = await animeyt.episodes('https://animeyt.cc/tv/serie/', async url => {
+    if (!url.includes('block=')) return show;
+    const block = Number(/block=(\d+)/.exec(url)[1]); asked.push(block);
+    const [from, to] = blocks[block];
+    return JSON.stringify({ html: from ? Array.from({ length: to - from + 1 }, (_, i) => card(from + i)).join('') : '' });
+  });
+  assert.deepEqual(asked, [2, 1, 0]);
+  assert.deepEqual([list[0].episodes.length, list[0].episodes[0].episode, list[0].episodes.at(-1).episode], [102, 51, 152]);
+  // Más de 60 en una temporada: filas de 50 para poder moverse con el control.
+  const dir = mkdtempSync(join(tmpdir(), 'holy-long-'));
+  const catalog = new Catalog({ file: join(dir, 'c.json'), detailsFile: join(dir, 'd.json'), knownLists: null,
+    connectors: [{ id: 'larga', name: 'Larga', site: 'https://larga.test/', parseHome: () => [], episodes: async () => [{ title: 'Temporada 1', episodes: Array.from({ length: 120 }, (_, i) => ({ url: 'https://larga.test/' + (i + 1), episode: i + 1 })) }] }] });
+  const rows = await catalog.episodes('larga', 'https://larga.test/serie');
+  assert.deepEqual(rows.map(row => [row.title, row.episodes.length]), [['Temporada 1 · 1–50', 50], ['Temporada 1 · 51–100', 50], ['Temporada 1 · 101–120', 20]]);
+  rmSync(dir, { recursive: true, force: true });
 });
 console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix, .beer y catálogo público correctas.`);
