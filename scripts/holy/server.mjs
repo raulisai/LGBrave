@@ -17,7 +17,7 @@ import { packHome } from '../../src/holy.js';
 // only fetches from the sites' own image hosts.
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.json': 'application/json' };
 // Every connector's image hosts (test-holy-robust checks the catalogue's images are all covered).
-export const IMAGE_HOSTS = /(^|\.)(anilist\.co|image\.tmdb\.org|jkdesa\.com|jkanime\.net|wp\.com|repelishd\.blog|cuevana3c\.pro|doramasmp4\.cyou|animeyt\.cc|asialiveaction\.com|doramasflix\.(io|in)|doramasia\.com|mytsumi\.com|onlyflix\.to|metahub\.space)$/;
+export const IMAGE_HOSTS = /(^|\.)(anilist\.co|image\.tmdb\.org|jkdesa\.com|jkanime\.net|wp\.com|repelishd\.blog|cuevana3c\.pro|doramasmp4\.cyou|animeyt\.cc|asialiveaction\.com|doramasflix\.(io|in)|doramasia\.com|mytsumi\.com|onlyflix\.to|metahub\.space|ytimg\.com)$/;
 const loopback = ip => ip === '::1' || (isIP(ip || '') === 4 && ip.startsWith('127.'));
 const local = ip => {
   if (ip === '::1') return true;
@@ -199,12 +199,14 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
         const found = await catalog.resolvePlayable(item, { version: version ? String(version) : undefined, kind: askedKind }).catch(error => ({ failed: error.message }));
         if (!found || found.failed) { res.end(JSON.stringify({ ok: false, error: found?.failed || 'No se encontró un reproductor para este título en tus sitios.' })); return; }
         const progress=playback.begin(found.item);
-        res.end(JSON.stringify({ ok: true, url: found.target.url, playback:progress, versions: found.target.versions || [], version: found.target.version || '', versionKind: found.target.versionKind || '',
+        // A target may carry its own in-page address (YouTube's embed player) for this page;
+        // `embed: ''` means the uploader forbids embedding, so it opens in a tab like below.
+        res.end(JSON.stringify({ ok: true, url: found.target.embed || found.target.url, playback:progress, versions: found.target.versions || [], version: found.target.version || '', versionKind: found.target.versionKind || '',
           matched: found.target.matched !== false, site: catalog.connector(found.item.source)?.name || found.item.source,
           // The site needs a Referer from its own address to start the video; a sandboxed iframe
           // from this page cannot fake that (only the TV's CDP navigation can), so the web page
           // opens it in a new tab instead of trying to embed it.
-          needsReferrer: !!found.target.referrer }));
+          needsReferrer: !!found.target.referrer || found.target.embed === '' }));
       } else if(url.pathname==='/holy-api/progress'&&req.method==='POST'){
         try{const token=/^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization||'')?.[1]||'';const result=playback.update(token,await body(req,2048));sendJSON(req,res,result);}
         catch(error){res.writeHead(error.status||400,{'Content-Type':'application/json'}).end(JSON.stringify({ok:false,error:error.message}));}

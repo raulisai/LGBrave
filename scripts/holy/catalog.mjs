@@ -131,6 +131,8 @@ export class Catalog {
   }
   async run() {
     const lists = await Promise.all(this.connectors.map(async connector => {
+      // A search-only site (YouTube) has no listing to read: nothing to refresh, nothing failing.
+      if (connector.searchOnly) return [];
       try {
         const { items, ms, extra } = await deadline(this.readSite(connector), SITE_DEADLINE, 'tardó demasiado en responder');
         if (!items.length) throw Error('no se encontraron títulos (¿cambió el sitio?)');

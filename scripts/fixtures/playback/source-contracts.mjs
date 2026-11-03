@@ -66,4 +66,8 @@ export const SOURCE_CONTRACTS = [
  {source:'tmdb',byId:true,identity:{"title":"Contrato Público","kind":"movie","url":"https://www.imdb.com/title/tt0000001/"},declaredLanguage:"Inglés",home:JSON.stringify({metas:[{imdb_id:'tt0000001',type:'movie',name:'Contrato Público',releaseInfo:'2026',genres:['Comedy']}]}),
   expected:{url:'https://vidfast.vc/movie/tt0000001',referrer:'https://onlyflix.to/',alternatives:['https://vidapi.xyz/embed/movie/tt0000001','https://share.cdnm.ink/embed/imdb/tt0000001','https://sv2.nontongo.stream/soap/movie/tt0000001']},
   responses:[]},
+ {source:'youtube',identity:{"title":"Contrato YouTube","kind":"movie","language":"Latino","url":"https://www.youtube.com/watch?v=fixture0001"},declaredLanguage:null,
+  home:'<script>var ytInitialData = '+JSON.stringify({contents:[{videoRenderer:{videoId:'fixture0001',title:{runs:[{text:'Contrato YouTube | Película Completa en Español Latino'}]},lengthText:{simpleText:'1:30:00'},ownerText:{runs:[{text:'Canal'}]}}},{videoRenderer:{videoId:'fixture0002',title:{runs:[{text:'Contrato YouTube | Tráiler en Español'}]},lengthText:{simpleText:'2:10'}}}]})+';</script>',
+  expected:{url:'https://www.youtube.com/watch?v=fixture0001',embed:'https://www.youtube-nocookie.com/embed/fixture0001?autoplay=1&rel=0'},
+  responses:[{url:'https://www.youtube.com/oembed?format=json&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dfixture0001',referrer:'https://www.youtube.com/',body:'{"type":"video","title":"Contrato YouTube"}'}]},
 ];

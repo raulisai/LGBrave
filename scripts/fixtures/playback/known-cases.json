@@ -142,6 +142,22 @@
       ]
     },
     {
+      "id": "source-youtube",
+      "scope": "controlled",
+      "sources": [
+        "youtube"
+      ],
+      "description": "YouTube como búsqueda: solo películas y capítulos completos en español del título buscado (sin cortos, tráileres, reseñas ni «películas del juego»), la TV abre la página de YouTube y la web su reproductor incrustable si el canal lo permite; sin Internet.",
+      "evidence": [
+        "scripts/test-holy-youtube.mjs",
+        "scripts/fixtures/playback/source-contracts.mjs"
+      ],
+      "tests": [
+        "scripts/test-holy-youtube.mjs",
+        "scripts/test-playback-sources.mjs"
+      ]
+    },
+    {
       "id": "between-steps-spanish",
       "scope": "tv-user-confirmed",
       "sources": [

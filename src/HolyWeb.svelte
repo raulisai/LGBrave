@@ -538,6 +538,7 @@
   </div>
 {/if}
 
+<!-- Other sites get no Referer at all; YouTube's embed refuses to play without one (its «Error 153»), so it gets just this page's origin. -->
 {#if theater}
   <div class="theater">
     <div class="theater-bar">
@@ -546,7 +547,7 @@
       {#if !theater.item.isShow && hasVersions(theater.item)}
         <button type="button" class="change-lang" onclick={() => openLanguagePicker(theater.item)}>🌐 Cambiar idioma</button>
       {/if}
-      <a class="new-tab" href={theater.url} target="_blank" rel="noopener noreferrer">Abrir en pestaña nueva ↗</a>
+      <a class="new-tab" href={theater.url.replace(/^https:\/\/www\.youtube-nocookie\.com\/embed\/([\w-]{11}).*$/, 'https://www.youtube.com/watch?v=$1')} target="_blank" rel="noopener noreferrer">Abrir en pestaña nueva ↗</a>
     </div>
     <iframe
       class="theater-frame"
@@ -555,7 +556,7 @@
       sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock"
       allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
       allowfullscreen
-      referrerpolicy="no-referrer"
+      referrerpolicy={/^https:\/\/www\.youtube(-nocookie)?\.com\//.test(theater.url) ? 'strict-origin-when-cross-origin' : 'no-referrer'}
     ></iframe>
   </div>
 {/if}
