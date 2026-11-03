@@ -170,13 +170,32 @@ export async function getJSON(url, { timeout = 12000, retries = 1, ...options } 
     const timer = setTimeout(() => controller.abort(), timeout);
     try {
       const response = await fetch(url, { cache: 'no-store', ...options, signal: controller.signal });
-      if (!response.ok) throw Error('HTTP ' + response.status);
+      if (!response.ok) {
+        // The computer's own reason («origen no permitido», «Ese título…») travels with the error.
+        const detail = await response.json().then(data => data?.error, () => '');
+        const error = Error(detail || 'HTTP ' + response.status);
+        error.status = response.status;
+        throw error;
+      }
       return await response.json();
     } catch (error) {
       if (attempt >= retries) throw error;
       await new Promise(resolve => setTimeout(resolve, 800));
     } finally { clearTimeout(timer); }
   }
+}
+
+// Why a request to the computer failed, in words for the owner (shown after «No se guardó…: »).
+export function whyFailed(error) {
+  if (error?.status) return `la computadora respondió «${error.message}»`;
+  if (error?.name === 'AbortError') return 'la computadora tardó demasiado en responder';
+  return 'no hubo conexión con la computadora';
+}
+// Leaves the failure in the computer's log (diagnostics), so it can be traced later. Best effort.
+export function reportFailure(base, phase, error, url = '') {
+  if (!base) return;
+  fetch(base + '/holy-api/client-error', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phase, error: `${error?.status ? 'HTTP ' + error.status + ' ' : ''}${error?.name || 'Error'}: ${error?.message || error} · ${base}${url ? ' · ' + url : ''}`.slice(0, 1600) }) }).catch(() => {});
 }
 
 export function clock(seconds) {

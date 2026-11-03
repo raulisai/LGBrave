@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte';
   import Icon from './Icon.svelte';
   import NavigationFeedback from './NavigationFeedback.svelte';
-  import { SECTIONS, categoryRows, sectionRows, withLayout, episodeRows, kindLabel, languageTag, clock, remaining, matchTone, getJSON, bestResults, searchScore, unpackHome, latestRequest } from './holy.js';
+  import { SECTIONS, categoryRows, sectionRows, withLayout, episodeRows, kindLabel, languageTag, clock, remaining, matchTone, getJSON, whyFailed, reportFailure, bestResults, searchScore, unpackHome, latestRequest } from './holy.js';
 
   let apiBase = $state(/^https?:/.test(location.protocol) ? location.origin : '');
   // The home is always replaced whole, never edited in place: no deep reactivity over ~800 titles.
@@ -290,7 +290,7 @@
       const result = pending.value;
       tasteRows = Array.isArray(result?.rows) ? result.rows : [];
       taste = result?.taste || null;
-    } catch { if (apiBase === base) notice = 'No se pudo leer tus gustos de la computadora.'; }
+    } catch (error) { if (apiBase === base) notice = `No se pudo leer tus gustos: ${whyFailed(error)}.`; reportFailure(base, 'taste-read', error); }
     finally { if (apiBase === base) tasteLoading = false; }
   }
   // OK: «me gusta» (again: quitar). Rojo: «no me gusta». The profile updates at once.
@@ -311,7 +311,8 @@
     const current = sheet;
     const base = apiBase;
     sheet = null;
-    if (!current || !apiBase || value === undefined) return;
+    if (!current || value === undefined) return;
+    if (!apiBase) { notice = 'No se guardó tu calificación: Holy todavía no sabe qué computadora usar. Abre Holy y Luma en la computadora.'; return; }
     try {
       if (value === null) { if (current.prompt) await post({ dismiss: plainItem(current.item) }, base); return; }
       const result = await post({ item: plainItem(current.item), vote: value }, base);
@@ -320,7 +321,7 @@
       markVote(current.item, value);
       notice = value ? `Guardado: «${RATINGS.find(entry => entry.value === value)?.label}». Tus porcentajes se actualizan.` : 'Calificación quitada.';
       load();
-    } catch { if (apiBase === base) notice = 'No se guardó tu calificación. Revisa la conexión con la computadora.'; }
+    } catch (error) { if (apiBase === base) notice = `No se guardó tu calificación: ${whyFailed(error)}.`; reportFailure(base, 'rating', error); }
   }
   // «Gustos» chips: a genre, producer/studio or country you like (OK) or not (rojo).
   async function togglePref(chip, value) {
@@ -332,10 +333,11 @@
       if (apiBase !== base) return;
       taste = result.taste;
       load();
-    } catch { if (apiBase === base) { notice = 'No se guardó ese gusto. Revisa la conexión con la computadora.'; tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === chip.url ? { ...other, value: chip.value } : other)) })); } }
+    } catch (error) { if (apiBase === base) { notice = `No se guardó ese gusto: ${whyFailed(error)}.`; reportFailure(base, 'pref', error); tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === chip.url ? { ...other, value: chip.value } : other)) })); } }
   }
   async function rate(item, value) {
-    if (!item?.url || !apiBase) return;
+    if (!item?.url) return;
+    if (!apiBase) { notice = 'No se guardó tu voto: Holy todavía no sabe qué computadora usar. Abre Holy y Luma en la computadora.'; return; }
     if (item.chip) return togglePref(item, value);
     const base = apiBase;
     const vote = item.vote === value ? 0 : value;
@@ -350,7 +352,7 @@
       if (apiBase !== base) return;
       const matches = new Map((fresh?.rows || []).flatMap(row => row.items).map(entry => [entry.url, entry.match]));
       if (matches.size) tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (matches.has(other.url) ? { ...other, match: matches.get(other.url) } : other)) }));
-    } catch { if (apiBase === base) { notice = 'No se guardó tu voto. Revisa la conexión con la computadora.'; markVote(item, item.vote || 0); } }
+    } catch (error) { if (apiBase === base) { notice = `No se guardó tu voto: ${whyFailed(error)}.`; reportFailure(base, 'vote', error); markVote(item, item.vote || 0); } }
   }
   async function resetTaste() {
     if (Date.now() - resetArmed > 4000) { resetArmed = Date.now(); notice = 'Pulsa el botón amarillo otra vez para borrar tus gustos calibrados.'; return; }
@@ -361,7 +363,7 @@
       if (apiBase !== base) return;
       notice = 'Gustos calibrados borrados. Lo que ves sigue contando.';
       await loadTaste(); load();
-    } catch { if (apiBase === base) notice = 'No se pudieron borrar. Revisa la conexión con la computadora.'; }
+    } catch (error) { if (apiBase === base) notice = `No se pudieron borrar tus gustos: ${whyFailed(error)}.`; reportFailure(base, 'taste-reset', error); }
   }
   function focusSearch() {
     inNav = false; inSearch = true;

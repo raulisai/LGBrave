@@ -9,7 +9,7 @@
   // TV's CDP-driven session cleans them.
   import { onMount, tick } from 'svelte';
   import Icon from './Icon.svelte';
-  import { SECTIONS, categoryRows, sectionRows, withLayout, episodeRows, kindLabel, languageTag, clock, matchTone, getJSON, bestResults, searchScore, unpackHome, latestRequest } from './holy.js';
+  import { SECTIONS, categoryRows, sectionRows, withLayout, episodeRows, kindLabel, languageTag, clock, matchTone, getJSON, whyFailed, reportFailure, bestResults, searchScore, unpackHome, latestRequest } from './holy.js';
 
   const apiBase = location.origin;
   const PREFERRED = { anime: 'jkanime' };
@@ -189,7 +189,7 @@
       const result = pending.value;
       tasteRows = Array.isArray(result?.rows) ? result.rows : [];
       taste = result?.taste || null;
-    } catch { notice = 'No se pudo leer tus gustos de la computadora.'; }
+    } catch (error) { notice = `No se pudo leer tus gustos: ${whyFailed(error)}.`; reportFailure(apiBase, 'taste-read', error); }
     finally { tasteLoading = false; }
   }
   const post = payload => getJSON(apiBase + '/holy-api/vote', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload), retries: 0 });
@@ -204,7 +204,7 @@
     const next = chip.value === value ? 0 : value;
     tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === chip.url ? { ...other, value: next } : other)) }));
     try { const result = await post({ pref: { type: chip.type, name: chip.name, value: next } }); taste = result.taste; load(); }
-    catch { notice = 'No se guardó ese gusto. Revisa la conexión con la computadora.'; tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === chip.url ? { ...other, value: chip.value } : other)) })); }
+    catch (error) { notice = `No se guardó ese gusto: ${whyFailed(error)}.`; reportFailure(apiBase, 'pref', error); tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (other.url === chip.url ? { ...other, value: chip.value } : other)) })); }
   }
   async function rate(item, value) {
     if (!item?.url) return;
@@ -216,12 +216,12 @@
       const fresh = await getJSON(apiBase + '/holy-api/taste', { retries: 0 }).catch(() => null);
       const matches = new Map((fresh?.rows || []).flatMap(row => row.items).map(entry => [entry.url, entry.match]));
       if (matches.size) tasteRows = tasteRows.map(row => ({ ...row, items: row.items.map(other => (matches.has(other.url) ? { ...other, match: matches.get(other.url) } : other)) }));
-    } catch { notice = 'No se guardó tu voto. Revisa la conexión con la computadora.'; markVote(item, item.vote || 0); }
+    } catch (error) { notice = `No se guardó tu voto: ${whyFailed(error)}.`; reportFailure(apiBase, 'vote', error); markVote(item, item.vote || 0); }
   }
   async function resetTaste() {
     if (!confirm('¿Borrar los gustos calibrados? Lo que ves sigue contando igual.')) return;
     try { await post({ vote: 'reset' }); notice = 'Gustos calibrados borrados.'; await loadTaste(); load(); }
-    catch { notice = 'No se pudieron borrar. Revisa la conexión con la computadora.'; }
+    catch (error) { notice = `No se pudieron borrar tus gustos: ${whyFailed(error)}.`; reportFailure(apiBase, 'taste-reset', error); }
   }
   async function importTastes(event) {
     const input = event.currentTarget, file = input.files?.[0];

@@ -9,7 +9,7 @@ const where = value => {
 };
 
 export class FlightRecorder {
-  constructor(file = '.local/logs/flight.log') { this.file = file; this.lastHeap = 0; }
+  constructor(file = (process.env.HOLY_LOG_DIR || '.local/logs') + '/flight.log') { this.file = file; this.lastHeap = 0; }
   write(kind, detail = '') {
     try {
       mkdirSync(dirname(this.file), { recursive: true });

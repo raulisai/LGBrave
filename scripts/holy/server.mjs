@@ -296,7 +296,9 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
         res.end(readFileSync(path));
       } else res.writeHead(404).end();
     } catch (error) {
-      diagnostics.event('http','request-error',{error,action:url.pathname},'error');
+      // Images: which site's picture failed, so a broken image host can be told apart from a slow one.
+      const imageHost = url.pathname === '/holy-api/img' ? (() => { try { return new URL(url.searchParams.get('u') || '').hostname; } catch { return ''; } })() : '';
+      diagnostics.event('http','request-error',{error,action:url.pathname,...(imageHost?{host:imageHost}:{})},'error');
       const code = error.message === 'host' ? 403 : ['json', 'body'].includes(error.message) || /dirección válida|gusto no es válido|archivo de gustos no es compatible/.test(error.message) ? 400 : 404;
       if (!res.headersSent) res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }).end(JSON.stringify({ ok: false, error: code === 400 ? error.message : 'no disponible' }));
       else res.end();

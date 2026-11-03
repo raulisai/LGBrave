@@ -32,7 +32,8 @@ export const monthlyFile = (file, kind, at = new Date().toISOString()) => join(d
 // The same problem repeated within ten minutes is one line with a count.
 const REPEAT_WINDOW = 600000, MONTH_LIMIT = 50 * 1024 * 1024;
 export class DiagnosticLog {
-  constructor({ file = '.local/logs/diagnostics.jsonl', maxBytes = 1024 * 1024, backups = 4, now = () => new Date().toISOString() } = {}) {
+  // HOLY_LOG_DIR: the tests send their events to a scratch folder, never to the owner's log.
+  constructor({ file = join(process.env.HOLY_LOG_DIR || '.local/logs', 'diagnostics.jsonl'), maxBytes = 1024 * 1024, backups = 4, now = () => new Date().toISOString() } = {}) {
     Object.assign(this, { file, maxBytes, backups, now }); this.runId = randomUUID(); this.sequence = 0;
     this.device = createHash('sha256').update(hostname()).digest('hex').slice(0, 12);
   }

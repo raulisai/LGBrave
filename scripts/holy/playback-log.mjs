@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 
 // Fixed fields only: never persist player URLs, query tokens, cookies or raw exceptions.
 export class PlaybackLog {
-  constructor(file = '.local/logs/holy-playback.jsonl', maxBytes = 1024 * 1024) { this.file = file; this.maxBytes = maxBytes; }
+  constructor(file = (process.env.HOLY_LOG_DIR || '.local/logs') + '/holy-playback.jsonl', maxBytes = 1024 * 1024) { this.file = file; this.maxBytes = maxBytes; }
   write(event, session, detail = {}) {
     try {
       const item = session?.item || {};
