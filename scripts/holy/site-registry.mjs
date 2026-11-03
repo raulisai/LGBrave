@@ -7,10 +7,7 @@ import { isIP } from 'node:net';
 // came from the original one, so saved titles and history stay valid.
 // A new site needs its own reader in code, so it waits here as «por integrar».
 const KNOWN_PENDING = [
-  { name: 'AnimeOnline Ninja', url: 'https://ww3.animeonline.ninja/', reason: 'Cloudflare responde 403 a la computadora' },
-  { name: 'FrameTV', url: 'https://framextv.cc/', reason: 'La página se arma solo con scripts' },
-  { name: 'OnlyFlix', url: 'https://onlyflix.to/', reason: 'Catálogo en inglés' },
-  { name: 'DoramasFlix .beer', url: 'https://doramasflix.beer/', reason: 'Los reproductores no vienen en la página' }
+  { name: 'AnimeOnline Ninja', url: 'https://ww3.animeonline.ninja/', reason: 'Cloudflare responde 403 a la computadora' }
 ];
 const hostOf = url => new URL(url).hostname;
 export function cleanSite(value) {

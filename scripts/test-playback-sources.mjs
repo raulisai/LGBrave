@@ -39,6 +39,8 @@ try {
    for(const [key,value] of Object.entries(fixture.expected))assert.deepEqual(target[key],value,fixture.source+': '+key);
    for(const address of [target.url,...(target.alternatives||[])])assert.equal(new URL(address).protocol,'https:',fixture.source+': HTTPS only');
    assert.ok(![target.url,...(target.alternatives||[])].some(url=>url.startsWith('javascript:')||/mega\.nz|dr0pstream\.com|ignored\.example/.test(url)),fixture.source+': unsupported unsafe links excluded');
+   // A source that plays by identifier (no page to read) has no fetch path, nothing to malform and nothing to fail.
+   if(fixture.byId){assert.equal(requests.length,0);passed++;console.log(fixture.source+': parser, servidores por identificador, alternativas y caché correctos.');continue;}
    assert.ok(requests.length,fixture.source+': real connector fetch path exercised');
    // Resolve cache must preserve language / Referer and not ask the source again.
    const before=requests.length;assert.deepEqual(await catalog.resolve(item,fixture.choice||{}),target);assert.equal(requests.length,before);
@@ -53,5 +55,5 @@ try {
    console.log(fixture.source+': parser, resolución, metadatos de idioma, Referer, alternativas, caché y fallos correctos.');
   }finally{catalog.stop();}
  }
- console.log(passed+'/7 contratos de fuentes correctos (replay offline; sin TV ni Internet).');
+ console.log(passed+'/'+SOURCE_CONTRACTS.length+' contratos de fuentes correctos (replay offline; sin TV ni Internet).');
 }finally{globalThis.fetch=nativeFetch;rmSync(directory,{recursive:true,force:true});}

@@ -321,3 +321,157 @@ export const animeyt = {
     return episodes.length ? [{ title: 'Episodios', episodes }] : [];
   }
 };
+
+// ---------------------------------------------------------------- OnlyFlix
+// English catalogue (WordPress). Cards carry their data in attributes; each title or episode
+// asks the site's own «available players» call, like the page does when Play is pressed.
+const onlyflixURL = 'https://onlyflix.to/';
+const onlyflixCard = block => {
+  const url = decode(attr(block, 'data-url')), show = /\/series\//.test(url);
+  const backdrop = decode(attr(block, 'data-backdrop'));
+  return item({ source: 'onlyflix', kind: show ? 'series' : 'movie', url, title: decode(attr(block, 'data-title')), isShow: show, ...(show ? { show: url } : {}), language: 'Inglés',
+    year: attr(block, 'data-year'), rating: attr(block, 'data-rating'), overview: decode(attr(block, 'data-overview')), backdrop,
+    poster: attr(/<img class="of-title-card-v2__poster"[^>]*>/.exec(block)?.[0] || '', 'src'),
+    genres: unique(decode(attr(block, 'data-genres')).split(',').map(name => genre(name.trim()))).filter(Boolean) });
+};
+// Lists use three card styles: search (attributes), home and «best» pages.
+const onlyflixEntry = (url, title, fields) => item({ source: 'onlyflix', kind: /\/series\//.test(url) ? 'series' : 'movie', url, title, language: 'Inglés', ...(/\/series\//.test(url) ? { isShow: true, show: url } : {}), ...fields });
+const onlyflixCards = html => {
+  const page = String(html), cards = [...page.matchAll(/<article class="of-title-card-v2"[\s\S]*?<\/a>/g)].map(match => onlyflixCard(match[0]));
+  for (const [block] of page.matchAll(/<article class="ofb-card">[\s\S]*?<\/article>/g)) {
+    const link = /class="ofb-card-link" href="([^"]+)" aria-label="([^"]*)"/.exec(block);
+    if (link) cards.push(onlyflixEntry(link[1], decode(link[2]), { poster: attr(/<img[^>]*>/.exec(block)?.[0] || '', 'src') }));
+  }
+  for (const [block] of page.matchAll(/<article class="of-media-card[\s\S]*?<\/article>/g)) {
+    const url = /class="of-media-card__link" href="([^"]+)"/.exec(block)?.[1] || '';
+    cards.push(onlyflixEntry(url, text(/class="of-media-card__name">([\s\S]*?)<\/span>/.exec(block)?.[1]), { backdrop: attr(/<article[^>]*>/.exec(block)?.[0] || '', 'data-of-lazy-bg'),
+      genres: unique(text(/class="of-media-card__genres">([\s\S]*?)<\/span>/.exec(block)?.[1]).split(',').map(name => genre(name.trim()))).filter(Boolean) }));
+  }
+  return [...new Map(cards.filter(entry => entry.title && entry.url.startsWith(onlyflixURL)).map(entry => [entry.url, entry])).values()];
+};
+export const onlyflix = {
+  id: 'onlyflix', name: 'OnlyFlix', site: onlyflixURL, language: 'Inglés',
+  parseHome: html => onlyflixCards(html),
+  more(load) {
+    const year = new Date().getFullYear();
+    return genrePages(load, [year, year - 1].flatMap(value => [[`${onlyflixURL}best/movies/${value}/`, ''], [`${onlyflixURL}best/tv-shows/${value}/`, '']]), onlyflixCards);
+  },
+  parseSearch: html => onlyflixCards(html),
+  searchURL: query => onlyflixURL + '?s=' + encodeURIComponent(query),
+  async episodes(show, load) {
+    const html = await load(show);
+    const id = /\bpostid-(\d+)/.exec(html)?.[1], nonce = /data-player-nonce="([^"]+)"/.exec(html)?.[1] || '';
+    if (!id) return [];
+    const body = new URLSearchParams({ action: 'mcs_home_hero_tv_episodes', nonce, show_id: id }).toString();
+    const answer = json(await load(onlyflixURL + 'wp-admin/admin-ajax.php', { method: 'POST', body, referrer: show, headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } }));
+    return (answer?.data?.seasons || []).map(season => ({ title: 'Temporada ' + season.season, number: Number(season.season),
+      episodes: (season.episodes || []).filter(episode => /^https:\/\/onlyflix\.to\/episodes\//.test(episode.permalink)).map(episode => ({ url: episode.permalink, season: Number(season.season), episode: Number(episode.episode), label: 'Episodio ' + episode.episode })) }))
+      .filter(season => season.episodes.length).sort((a, b) => a.number - b.number);
+  },
+  async resolve(entry, load) {
+    const html = await load(entry.url);
+    const value = name => attr(/class="player-frame[\s\S]*?>/.exec(html)?.[0] || '', name);
+    const post = value('data-player-post-id');
+    if (!post) throw Error('OnlyFlix no muestra reproductor para este título.');
+    const body = new URLSearchParams({ action: 'mcp_get_available_players', nonce: value('data-player-nonce'), post_id: post, type: value('data-player-content-type') || 'movie' }).toString();
+    const answer = json(await load(onlyflixURL + 'wp-admin/admin-ajax.php', { method: 'POST', body, referrer: entry.url, headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } }));
+    const players = (answer?.data?.players || []).filter(player => /^https:\/\//.test(player.url) && ['EN', ''].includes(String(player.language || '').toUpperCase()));
+    if (!players.length) throw Error('OnlyFlix todavía no tiene servidores para este título.');
+    return { url: players[0].url, referrer: entry.url, alternatives: players.slice(1).map(player => player.url) };
+  }
+};
+
+// ---------------------------------------------------------------- DoramasFlix .beer
+// A WordPress site with its own list of servers: every option of an episode carries its
+// player address in base64. Many episodes still say «NO SERVERS AVAILABLE»; those fail with
+// a clear message and Holy tries the same title on the other sites.
+const beerURL = 'https://doramasflix.beer/';
+const beerCards = (html, base = beerURL) => [...String(html).matchAll(/<a href="(https:\/\/doramasflix\.beer\/series\/[a-z0-9-]+\/)" class="v6-arch-card">([\s\S]*?)<\/a>/g)].map(([, url, block]) =>
+  item({ source: 'doramasflixbeer', kind: 'dorama', url, show: url, isShow: true, language: 'Subtitulado', title: decode(text(/class="v6-arch-text-title">([\s\S]*?)<\/h3>/.exec(block)?.[1]).replace(/\s*\(\d{4}\)$/, '')),
+    year: /\((\d{4})\)<\/h3>/.exec(block)?.[1] || '', poster: attr(/<img[^>]*>/.exec(block)?.[0] || '', 'src'), rating: /⭐\s*([\d.]+)/.exec(block)?.[1] || '' })).filter(entry => entry.title);
+export const doramasflixbeer = {
+  id: 'doramasflixbeer', name: 'DoramasFlix .beer', site: beerURL, language: 'Subtitulado',
+  parseHome: html => beerCards(html),
+  more(load) { return genrePages(load, [2, 3, 4].map(page => [`${beerURL}series/page/${page}/`, '']), html => beerCards(html), `${beerURL}series/`); },
+  parseSearch: html => beerCards(html),
+  searchURL: query => beerURL + '?s=' + encodeURIComponent(query),
+  async detail(entry, load) {
+    const html = await load(entry.show || entry.url);
+    return { show: entry.show || entry.url, genres: unique([...html.matchAll(/href="https:\/\/doramasflix\.beer\/generos\/[a-z0-9-]+\/">([^<]+)</g)].map(match => genre(match[1]))).filter(Boolean),
+      overview: decode(/og:description" content="([^"]*)"/.exec(html)?.[1] || ''), poster: attr(/<meta property="og:image"[^>]*>/.exec(html)?.[0], 'content') };
+  },
+  async episodes(show, load) {
+    const html = await load(show);
+    const seasons = [...html.matchAll(/id="season-content-\d+"([\s\S]*?)(?=id="season-content-\d+"|<\/section|$)/g)].map((match, index) => {
+      const episodes = [...new Map([...match[1].matchAll(/href="(https:\/\/doramasflix\.beer\/episodios\/[a-z0-9-]*?-(\d+)x(\d+)\/)"/g)].map(link => [Number(link[3]), { url: link[1], season: Number(link[2]), episode: Number(link[3]), label: 'Capítulo ' + Number(link[3]) }]))]
+        .sort((a, b) => a[0] - b[0]).map(([, episode]) => episode);
+      return { title: 'Temporada ' + (episodes[0]?.season || index + 1), number: episodes[0]?.season || index + 1, episodes };
+    }).filter(season => season.episodes.length);
+    return seasons;
+  },
+  async resolve(entry, load) {
+    const html = await load(entry.url);
+    if (/NO SERVERS AVAILABLE/.test(html)) throw Error('DoramasFlix .beer todavía no tiene servidores para este capítulo.');
+    const options = [...html.matchAll(/<option value="([A-Za-z0-9+/=]{16,})"[^>]*>\s*([^<(]*)/g)].map(match => {
+      let url = ''; try { url = Buffer.from(match[1], 'base64').toString('utf8'); } catch { /* Not an address. */ }
+      return { url, name: match[2].trim() };
+    }).filter(option => /^https:\/\/[^\s"'<>]+$/.test(option.url));
+    // Same order the other DoramasFlix uses: ok.ru and Mixdrop are proven on this TV.
+    const rank = option => (/ok\.ru/.test(option.url) ? 0 : /mixdrop|mxdrop/.test(option.url) ? 1 : 2);
+    const sorted = options.sort((a, b) => rank(a) - rank(b));
+    if (!sorted.length) throw Error('DoramasFlix .beer no mostró servidores para este capítulo.');
+    const first = new URL(sorted[0].url);
+    if (/(^|\.)ok\.ru$/.test(first.hostname)) first.searchParams.set('autoplay', '1');
+    return { url: first.href, referrer: entry.url, alternatives: sorted.slice(1).map(option => option.url) };
+  }
+};
+
+// ---------------------------------------------------------------- Catálogo público (IMDb / TMDB)
+// The public catalogue behind sites like FrameTV: Cinemeta serves every IMDb title with its TMDB
+// id, no key needed. Each title is played by the same id-based servers OnlyFlix uses. Everything
+// is English. The home shows the best and the newest; search reaches the whole catalogue.
+const cinemetaURL = 'https://v3-cinemeta.strem.io/';
+const imdbURL = id => `https://www.imdb.com/title/${id}/`;
+const metaList = value => { try { const data = typeof value === 'string' ? JSON.parse(value) : value; return Array.isArray(data?.metas) ? data.metas : []; } catch { return []; } };
+const metaItem = meta => /^tt\d+$/.test(String(meta?.imdb_id || meta?.id)) && ['movie', 'series'].includes(meta.type) && meta.name ? item({
+  source: 'tmdb', kind: meta.type === 'series' ? 'series' : 'movie', url: imdbURL(meta.imdb_id || meta.id), ...(meta.type === 'series' ? { show: imdbURL(meta.imdb_id || meta.id), isShow: true } : {}), language: 'Inglés',
+  title: decode(meta.name), year: String(meta.releaseInfo || meta.year || '').slice(0, 4), rating: meta.imdbRating || '', overview: decode(meta.description || ''), poster: meta.poster || '', backdrop: meta.background || '',
+  genres: unique((meta.genres || meta.genre || []).map(name => genre(String(name)))).filter(Boolean) }) : null;
+export const tmdb = {
+  id: 'tmdb', name: 'Catálogo público (IMDb/TMDB)', site: cinemetaURL, language: 'Inglés',
+  parseHome: value => metaList(value).map(metaItem).filter(Boolean),
+  async home(load) {
+    const year = new Date().getFullYear();
+    const pages = ['movie/top', 'movie/top/skip=50', 'series/top', 'series/top/skip=50', `movie/year/genre=${year}`, `series/year/genre=${year}`];
+    const lists = await Promise.all(pages.map(page => load(`${cinemetaURL}catalog/${page}.json`).then(text => this.parseHome(text)).catch(() => [])));
+    return [...new Map(lists.flat().map(entry => [entry.url, entry])).values()];
+  },
+  async search(query, load) {
+    const q = encodeURIComponent(query);
+    const lists = await Promise.all(['movie', 'series'].map(type => load(`${cinemetaURL}catalog/${type}/top/search=${q}.json`).then(text => this.parseHome(text)).catch(() => [])));
+    return lists.flat().slice(0, 40);
+  },
+  async episodes(show, load) {
+    const id = /tt\d+/.exec(show)?.[0];
+    const meta = json(await load(`${cinemetaURL}meta/series/${id}.json`))?.meta;
+    const seasons = new Map();
+    for (const video of meta?.videos || []) {
+      const season = Number(video.season), number = Number(video.episode ?? video.number);
+      if (!season || !number) continue;
+      if (!seasons.has(season)) seasons.set(season, []);
+      seasons.get(season).push({ url: `${imdbURL(id)}episode-${season}x${number}`, season, episode: number, label: video.name ? `${number}. ${video.name}` : 'Episodio ' + number });
+    }
+    return [...seasons].sort((a, b) => a[0] - b[0]).map(([number, episodes]) => ({ title: 'Temporada ' + number, number, episodes: episodes.sort((a, b) => a.episode - b.episode) }));
+  },
+  // The players are chosen by id (no page to read): the first answers best in this lab's tests.
+  async resolve(entry) {
+    const id = /tt\d+/.exec(entry.url)?.[0];
+    if (!id) throw Error('Título sin identificador IMDb.');
+    const episode = /episode-(\d+)x(\d+)\/?$/.exec(entry.url);
+    // Measured 2026-10-31: vidfast and vidapi always answer; CDNM only knows some titles (404 otherwise) and Nontongo often fails.
+    const urls = episode
+      ? [`https://vidfast.vc/tv/${id}/${episode[1]}/${episode[2]}`, `https://vidapi.xyz/embed/tv/${id}/${episode[1]}/${episode[2]}`, `https://share.cdnm.ink/embed/imdb/${id}?season=${episode[1]}&episode=${episode[2]}`, `https://sv2.nontongo.stream/soap/tv/${id}/${episode[1]}/${episode[2]}`]
+      : [`https://vidfast.vc/movie/${id}`, `https://vidapi.xyz/embed/movie/${id}`, `https://share.cdnm.ink/embed/imdb/${id}`, `https://sv2.nontongo.stream/soap/movie/${id}`];
+    return { url: urls[0], referrer: 'https://onlyflix.to/', alternatives: urls.slice(1) };
+  }
+};
