@@ -348,9 +348,9 @@ export class Catalog {
     const copy = candidate => ({ ...candidate, title: item.title, poster: item.poster || candidate.poster, backdrop: item.backdrop || candidate.backdrop, genres: item.genres?.length ? item.genres : candidate.genres });
     const preference = await this.preference(item).catch(() => null);
     if (preference?.site && !tried.has(preference.site)) {
-      const candidates = await this.elsewhere(item, new Set(tried), { only: preference.site, kind: preference.kind }).catch(() => []);
+      const candidates = await this.elsewhere(item, new Set([...tried, ...(preference.skip || [])]), { only: preference.any ? undefined : preference.site, kind: preference.kind }).catch(() => []);
       tried.add(preference.site);
-      for (const candidate of candidates.slice(0, 2)) {
+      for (const candidate of candidates.slice(0, preference.any ? 4 : 2)) {
         const target = await this.resolve(candidate, options).catch(() => null);
         if (targetMatchesLanguage(target, candidate, options) && target) return { item: copy(candidate), target };
       }
@@ -358,6 +358,7 @@ export class Catalog {
     let target = await this.resolve(item, options).catch(() => null);
     if (!target && this.pageFallback(item) && targetMatchesLanguage({}, item, options)) target = { url: this.liveURL(item.url), versions: [] };
     if (target && targetMatchesLanguage(target, item, options)) return { item, target };
+    if (preference?.any) return null;
     for (const candidate of (await this.elsewhere(item, tried).catch(() => [])).slice(0, 4)) {
       const found = await this.resolve(candidate, options).catch(() => null);
       if (found && targetMatchesLanguage(found, candidate, options)) return { item: copy(candidate), target: found };
@@ -432,6 +433,10 @@ export class Catalog {
   // Where to look first: anime on JKAnime, also anime that a site files as a series
   // (Cuevana's One Piece carries the genre «Anime»; LEGO ONE PIECE only «Animación»).
   async preference(item) {
+    // The public catalogue's id players never played on this TV (2026-11-02/03: vidfast froze, vidapi
+    // and nontongo went blank under the inspector): the same title on the owner's other sites first
+    // (not OnlyFlix, which opens those same players), its own players stay as the last option.
+    if (item.source === 'tmdb') return { site: 'tmdb-elsewhere', any: true, skip: ['onlyflix'], kind: item.kind === 'movie' ? 'movie' : 'series', label: 'tus otros sitios' };
     let kind = item.kind;
     if (kind === 'series') {
       const genres = item.genres?.length ? item.genres : await this.genresOf(item).catch(() => []);

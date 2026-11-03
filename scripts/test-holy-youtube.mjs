@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { youtube, parseSearch, cleanTitle, seconds, embedURL, watchURL } from './holy/youtube.mjs';
+import { youtube, parseSearch, cleanTitle, seconds, embedURL, watchURL, episodeNames } from './holy/youtube.mjs';
 import { Catalog } from './holy/catalog.mjs';
 import { Library } from './holy/library.mjs';
 import { startServer, IMAGE_HOSTS } from './holy/server.mjs';
@@ -124,6 +124,40 @@ try {
       const tab = await play();
       assert.deepEqual([tab.url, tab.needsReferrer], [watchURL('aaaaaaaaaa2'), true]);
     } finally { server.close(); catalog.stop(); }
+  });
+  await check('Series de canales (RCN, Super Campeones): «Capítulo 3» basta como español; se agrupan en una serie', () => {
+    const owner = path => ({ ownerText: { runs: [{ text: path === '/@canalrcn' ? 'Canal RCN' : 'Otro', navigationEndpoint: { browseEndpoint: { canonicalBaseUrl: path } } }] } });
+    const episode = (id, title, path = '/@canalrcn') => ({ videoRenderer: { ...video(id, title, '45:20').videoRenderer, ...owner(path) } });
+    const found = parseSearch(page([
+      episode('rcnrcnrcn01', 'Alfredo Ferro y Mercedes Ramos inician una relación | Dr. Mata | Capítulo 1'),
+      episode('rcnrcnrcn02', 'Mercedes Ramos busca respuestas | Capítulo 3 | Dr. Mata'),
+      episode('otrootro001', 'Matallana escapa | Capítulo 4 | Dr. Mata', '/@otro'),
+      episode('rcnrcnrcn03', 'Dr. Mata: el abogado psicópata colombiano')
+    ]), 'dr mata');
+    assert.deepEqual(found.map(item => [item.title, !!item.isShow, item.kind]), [['Dr. Mata', true, 'series'], ['Dr. Mata', false, 'series']]);
+    assert.equal(found[0].show, 'https://www.youtube.com/@canalrcn/search?query=Dr.%20Mata');
+    assert.deepEqual(episodeNames('Nosotros los guapos | Capítulo 3 | Distrito Comedia', 'Distrito Comedia'), { series: 'Nosotros los guapos', episode: '' });
+    assert.deepEqual(episodeNames('Momento de tensión | Capítulo 53 Completo en Español Latino | Super Campeones'), { series: 'Super Campeones', episode: 'Momento de tensión' });
+    assert.equal(parseSearch(page([video('scscscscs01', 'Super Campeones   Cap 61 Latino', '24:24')]), 'supercampeones')[0]?.title, 'Super Campeones');
+  });
+
+  await check('Capítulos de una serie de canal: búsqueda del canal, páginas siguientes y, si faltan, sus vídeos (formato nuevo)', async () => {
+    const lockup = (id, title, length) => ({ lockupViewModel: { contentType: 'LOCKUP_CONTENT_TYPE_VIDEO', contentId: id, metadata: { lockupMetadataViewModel: { title: { content: title } } },
+      contentImage: { thumbnailViewModel: { overlays: [{ thumbnailBottomOverlayViewModel: { badges: [{ thumbnailBadgeViewModel: { text: length } }] } }] } } } });
+    const cap = n => lockup(('cap' + n).padEnd(11, 'x'), `El partido ${n} | Capítulo ${n} Completo en Español Latino | Super Campeones`, '21:10');
+    const channel = { channelMetadataRenderer: { title: 'Super Campeones | Oficial', vanityChannelUrl: 'http://www.youtube.com/@supercampeones_oficial' } };
+    const tagged = (items, token) => `<script>var ytInitialData = ${JSON.stringify({ metadata: channel, contents: [...items, ...(token ? [{ continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token } } } }] : [])] })};</script>"INNERTUBE_CLIENT_VERSION":"2.1"`;
+    const asked = [];
+    const seasons = await youtube.episodes('https://www.youtube.com/@supercampeones_oficial/search?query=Super%20Campeones', async (url, options) => {
+      asked.push(url.replace('https://www.youtube.com/', ''));
+      if (url.includes('/search?')) return tagged([cap(3), cap(1), lockup('clipclipcl1', 'La trampa del fuera de lugar | Super Campeones', '5:13')], 'next-search');
+      if (url.endsWith('/videos')) return tagged([cap(2), cap(5)], 'next-videos');
+      const token = JSON.parse(options.body).continuation;
+      return JSON.stringify({ items: token === 'next-search' ? [cap(4)] : token === 'next-videos' ? [cap(6)] : [] });
+    });
+    assert.deepEqual(seasons[0].episodes.map(entry => entry.episode), [1, 2, 3, 4, 5, 6]);
+    assert.equal(seasons[0].episodes[0].label, 'Capítulo 1 · El partido 1');
+    assert.deepEqual(asked.filter(url => url.startsWith('youtubei')).length, 2);
   });
 } finally { rmSync(directory, { recursive: true, force: true }); }
 console.log(`${checks.length} comprobaciones de YouTube (películas y capítulos completos) correctas.`);

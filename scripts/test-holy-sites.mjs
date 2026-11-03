@@ -124,4 +124,16 @@ await check('Series largas: los capítulos que el sitio carga al bajar también 
   assert.deepEqual(rows.map(row => [row.title, row.episodes.length]), [['Temporada 1 · 1–50', 50], ['Temporada 1 · 51–100', 50], ['Temporada 1 · 101–120', 20]]);
   rmSync(dir, { recursive: true, force: true });
 });
+await check('Catálogo público: se reproduce primero desde otro sitio (no OnlyFlix) y sus servidores quedan al final', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'holy-public-'));
+  const site = (id, url) => ({ id, name: id, site: `https://${id}.test/`, parseHome: () => [], search: async () => [{ source: id, kind: 'movie', title: 'Gladiator', url }], resolve: async () => ({ url: url + 'player' }) });
+  const catalog = new Catalog({ file: join(dir, 'c.json'), detailsFile: join(dir, 'd.json'), knownLists: null,
+    connectors: [site('cuevana', 'https://cuevana.test/gladiator/'), site('onlyflix', 'https://onlyflix.test/gladiator/'), { ...site('repelishd', ''), search: async () => [] }, { ...site('doramasflix', ''), search: async () => [] }, { ...tmdb, resolve: async () => ({ url: 'https://vidfast.vc/movie/tt1' }) }] });
+  const film = { source: 'tmdb', kind: 'movie', title: 'Gladiator', url: 'https://www.imdb.com/title/tt1/' };
+  assert.deepEqual(await catalog.preference(film), { site: 'tmdb-elsewhere', any: true, skip: ['onlyflix'], kind: 'movie', label: 'tus otros sitios' });
+  const found = await catalog.resolvePlayable(film);
+  assert.equal(found.item.source, 'cuevana');
+  assert.equal(found.target.url, 'https://cuevana.test/gladiator/player');
+  rmSync(dir, { recursive: true, force: true });
+});
 console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix, .beer y catálogo público correctas.`);

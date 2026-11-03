@@ -50,16 +50,35 @@ export function cleanTitle(raw) {
 }
 
 // The videos of a results page (ytInitialData), as they come.
-export function results(html) {
+export function pageData(html) {
+  // Two shapes seen (2026-11-03): `var ytInitialData = {…};` and, on channel pages, a JSON script tag.
+  const tag = /<script[^>]*id="yt-initial-data"[^>]*>([\s\S]*?)<\/script>/.exec(html)?.[1];
   const start = html.indexOf('var ytInitialData = ');
   const end = start < 0 ? -1 : html.indexOf(';</script>', start);
-  if (start < 0 || end < 0) throw Error('YouTube no entregó resultados (¿cambió su página?)');
-  let data;
-  try { data = JSON.parse(html.slice(start + 'var ytInitialData = '.length, end)); } catch { throw Error('YouTube cambió su página de resultados'); }
+  if (!tag && (start < 0 || end < 0)) throw Error('YouTube no entregó resultados (¿cambió su página?)');
+  try { return JSON.parse(tag || html.slice(start + 'var ytInitialData = '.length, end)); } catch { throw Error('YouTube cambió su página de resultados'); }
+}
+// A lockup card in the videoRenderer shape toItem reads; on a channel page the channel is the page's.
+function fromLockup(card, channel) {
+  const badges = [];
+  const walk = node => { if (!node || typeof node !== 'object') return; if (node.thumbnailBadgeViewModel) badges.push(node.thumbnailBadgeViewModel.text); for (const value of Object.values(node)) walk(value); };
+  walk(card.contentImage);
+  const length = badges.find(text => /^\d{1,2}(:\d{2}){1,2}$/.test(String(text || ''))) || '';
+  const parts = (card.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel?.metadataRows || []).flatMap(row => row.metadataParts || []).map(part => part.text?.content || '');
+  return { videoId: card.contentId, title: { simpleText: card.metadata?.lockupMetadataViewModel?.title?.content || '' }, lengthText: { simpleText: length },
+    badges: badges.filter(text => text !== length).map(label => ({ metadataBadgeRenderer: { label } })),
+    ownerText: channel ? { runs: [{ text: channel.title, navigationEndpoint: { browseEndpoint: { canonicalBaseUrl: channel.path } } }] } : undefined,
+    viewCountText: { simpleText: parts.find(text => /vistas|views|\d\s*(k|m|mil)\b/i.test(text)) || '' } };
+}
+export function results(html, data = typeof html === 'string' ? pageData(html) : html) {
   const found = [];
+  const own = data?.metadata?.channelMetadataRenderer;
+  const channel = own?.title ? { title: own.title, path: /\/(@[\w.-]+)$/.exec(own.vanityChannelUrl || '')?.[0] || '' } : null;
   const walk = node => {
     if (!node || typeof node !== 'object') return;
     if (node.videoRenderer) { found.push(node.videoRenderer); return; }
+    // The newer card (channel pages and some searches) carries the same facts in other places.
+    if (node.lockupViewModel?.contentType === 'LOCKUP_CONTENT_TYPE_VIDEO') { found.push(fromLockup(node.lockupViewModel, channel)); return; }
     for (const value of Object.values(node)) walk(value);
   };
   walk(data);
@@ -76,9 +95,11 @@ export function toItem(video, query = '') {
   const length = seconds(video.lengthText?.simpleText);
   const labels = (video.badges || []).map(badge => fold(badge.metadataBadgeRenderer?.label)).join(' ');
   if (!title || !length || /miembros|members|en vivo|live/.test(labels) || NOT_WHOLE.test(title) || LOW_QUALITY.test(title)) return null;
-  if (!SPANISH.test(title)) return null;
+  // Spanish TV channels (RCN, Caracol…) only say «Capítulo 3»: that word is Spanish enough.
+  if (!SPANISH.test(title) && !/\b(capitulo|episodio|temporada)\b/.test(title)) return null;
   const wanted = fold(query).replace(/[^a-z0-9ñ]+/g, ' ').split(' ').filter(word => word && !FILLER.has(word));
-  if (wanted.some(word => !title.replace(/[^a-z0-9ñ]+/g, ' ').split(' ').includes(word))) return null;
+  const words = title.replace(/[^a-z0-9ñ]+/g, ' ').split(' '), joined = words.join('');
+  if (wanted.some(word => !words.includes(word) && !(word.length >= 6 && joined.includes(word)))) return null;
   const episode = EPISODE.exec(title);
   const whole = WHOLE_SERIES.test(title);
   // A film: 1 to 4 hours. An episode: 18 minutes to 2 h 30. A whole series in one upload: up to a day.
@@ -88,21 +109,57 @@ export function toItem(video, query = '') {
   else if (episode && length >= 1080 && length <= 9000) kind = 'series';
   else if (!episode && length >= 3600 && length <= 14400) kind = 'movie';
   else return null;
-  const channel = video.ownerText?.runs?.[0]?.text || video.longBylineText?.runs?.[0]?.text || '';
+  const owner = video.ownerText?.runs?.[0] || video.longBylineText?.runs?.[0] || {};
+  const channel = owner.text || '';
+  const channelPath = /^\/@[\w.-]+$/.test(owner.navigationEndpoint?.browseEndpoint?.canonicalBaseUrl || '') ? owner.navigationEndpoint.browseEndpoint.canonicalBaseUrl : '';
+  const names = kind === 'series' && !whole ? episodeNames(raw, channel) : null;
   const verified = (video.ownerBadges || []).some(badge => /VERIFIED/.test(badge.metadataBadgeRenderer?.style || ''));
   const quality = /\b4k\b|2160p/.test(labels + ' ' + title) ? '4K' : /\b(hd|1080p|720p|full hd|blu-?ray)\b/.test(labels + ' ' + title) ? 'HD' : '';
   const language = /\blatino\b/.test(title) ? 'Latino' : /\bcastellano\b/.test(title) ? 'Castellano' : /subtitulad|sub esp|subs? espanol/.test(title) ? 'Subtitulado' : '';
   const hours = Math.floor(length / 3600), minutes = Math.round(length % 3600 / 60);
   const number = Number(episode?.[2] || episode?.[3] || episode?.[4]) || null;
   return {
-    source: 'youtube', kind, url: watchURL(id), title: cleanTitle(raw),
+    source: 'youtube', kind, url: watchURL(id), title: names?.series || cleanTitle(raw), ...(names ? { series: names.series, episodeTitle: names.episode } : {}),
     subtitle: [kind === 'series' ? (whole ? 'Serie completa' : number ? 'Capítulo ' + number : 'Episodio') : '', channel, hours ? `${hours} h ${String(minutes).padStart(2, '0')} min` : `${minutes} min`].filter(Boolean).join(' · '),
     year: /\((19|20)\d{2}\)/.exec(raw)?.[0].slice(1, 5) || '', language, badge: quality,
     poster: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, backdrop: `https://i.ytimg.com/vi/${id}/hq720.jpg`,
     // Genres only from the words around the name («El libro de la vida» is no «Vida cotidiana»).
     genres: genresFromWords(fold(decode(raw)).replace(fold(cleanTitle(raw)), ' ')), overview: decode(raw), episode: number,
-    duration: length, channel, verified, views: views(video.viewCountText?.simpleText)
+    duration: length, channel, channelPath, verified, views: views(video.viewCountText?.simpleText)
   };
+}
+
+// «Mercedes Ramos busca respuestas | Capítulo 3 | Dr. Mata» → series «Dr. Mata», episode «Mercedes
+// Ramos busca respuestas»; «Super Campeones   Cap 61 Latino» → series «Super Campeones».
+// channel: a last part that is just the channel's name («… | Capítulo 3 | Distrito Comedia») is not the series.
+export function episodeNames(raw, channel = '') {
+  const parts = decode(raw).replace(/[\u{1F000}-\u{1FFFF}☀-➿️]/gu, ' ').split(/\s[|│•·\/–—-]\s|\s?\|\s?|[\[\]]/).map(part => part.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const marked = part => EPISODE.test(fold(part)) || WHOLE_SERIES.test(fold(part));
+  const plain = value => fold(value).replace(/[^a-z0-9ñ]+/g, '');
+  const named = parts.filter(part => !marked(part) && !BOILERPLATE.test(part) && !(channel && plain(part) === plain(channel)));
+  if (named.length >= 2) return { series: cleanTitle(named.at(-1)), episode: named[0] };
+  if (named.length === 1) return { series: cleanTitle(named[0]), episode: '' };
+  const part = parts.find(marked) || decode(raw);
+  const before = part.slice(0, EPISODE.exec(fold(part))?.index ?? part.length).replace(/[\s,.:;(-]+$/, '').trim();
+  return { series: cleanTitle(before || part), episode: '' };
+}
+const seriesKey = item => (item.channelPath || item.channel) + '|' + fold(item.series).replace(/[^a-z0-9ñ]+/g, '');
+// Two or more episodes of one series from one channel become that series: its card opens the
+// episode list (the channel's own search for the series name), like any other site's show.
+export function groupSeries(items) {
+  const groups = new Map();
+  for (const item of items) if (item.series && item.channelPath) groups.set(seriesKey(item), [...(groups.get(seriesKey(item)) || []), item]);
+  const shown = new Set();
+  return items.flatMap(item => {
+    const group = item.series && item.channelPath ? groups.get(seriesKey(item)) : null;
+    if (!group || group.length < 2) return [item];
+    if (shown.has(seriesKey(item))) return [];
+    shown.add(seriesKey(item));
+    const first = [...group].sort((a, b) => (a.episode || 1e9) - (b.episode || 1e9))[0];
+    const show = `${SITE}${item.channelPath.slice(1)}/search?query=${encodeURIComponent(item.series)}`;
+    return [{ ...first, kind: 'series', isShow: true, show, url: show, title: item.series, episode: null,
+      subtitle: [item.channel, 'Serie en YouTube'].filter(Boolean).join(' · '), overview: `${item.series} · capítulos completos en ${item.channel || 'YouTube'}` }];
+  });
 }
 
 // Verified channels and 4K/HD uploads first, then the most watched; each video once.
@@ -111,7 +168,7 @@ export function rank(items) {
   const seen = new Set();
   return items.filter(item => item && !seen.has(item.url) && seen.add(item.url)).sort((a, b) => score(b) - score(a));
 }
-const pick = (videos, query) => rank(videos.map(video => toItem(video, query))).slice(0, 24);
+const pick = (videos, query) => groupSeries(rank(videos.map(video => toItem(video, query)))).slice(0, 24);
 // Like every site reader, garbage in gives an empty list, never an exception.
 export function parseSearch(html, query = '') {
   try { return pick(results(String(html || '')), query); } catch { return []; }
@@ -126,6 +183,48 @@ export const youtube = {
   searchURL: query => `${SITE}results?search_query=${encodeURIComponent(/complet[ao]/i.test(query) ? query : query + ' completa')}&sp=${LONG}`,
   // A page that is not a results page fails loudly here, so search says «sin respuesta», not «nada».
   async search(query, load) { return pick(results(await load(this.searchURL(query))), query); },
+  // A grouped series: the channel's own search for its name, plus the next pages YouTube would load
+  // on scroll (its browse call), until a page brings no new episode of that series.
+  async episodes(show, load) {
+    const match = /^https:\/\/www\.youtube\.com\/(@[\w.-]+)\/search\?query=([^&]+)$/.exec(show || '');
+    if (!match) return [];
+    const series = fold(decodeURIComponent(match[2])).replace(/[^a-z0-9ñ]+/g, '');
+    const html = await load(show);
+    const found = new Map();
+    const read = data => {
+      let added = 0;
+      for (const video of results(null, data)) {
+        const item = toItem(video);
+        if (!item?.episode || !item.series || fold(item.series).replace(/[^a-z0-9ñ]+/g, '') !== series || found.has(item.episode)) continue;
+        found.set(item.episode, { url: item.url, episode: item.episode, label: `Capítulo ${item.episode}${item.episodeTitle ? ' · ' + item.episodeTitle : ''}`, still: item.backdrop });
+        added++;
+      }
+      return added;
+    };
+    // One listing (search or uploads) and the pages that follow it.
+    const walk = async (pageHTML, pages) => {
+      const first = pageData(pageHTML);
+      read(first);
+      const version = /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/.exec(pageHTML)?.[1];
+      let token = /"continuationCommand":\{"token":"([^"]+)"/.exec(JSON.stringify(first))?.[1];
+      let empty = 0;
+      for (let page = 0; version && token && page < pages; page++) {
+        const text = await load(`${SITE}youtubei/v1/browse?prettyPrint=false`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion: version, hl: 'es-419' } }, continuation: token }) }).catch(() => '');
+        let data;
+        try { data = JSON.parse(text); } catch { break; }
+        // One page without this series can sit between two with it (other uploads in between).
+        empty = read(data) ? 0 : empty + 1;
+        if (empty >= 2) break;
+        token = /"continuationCommand":\{"token":"([^"]+)"/.exec(text)?.[1];
+      }
+    };
+    await walk(html, 12);
+    // Some channels' search stops at 15 videos (Super Campeones, 2026-11-03): then its uploads too.
+    if (found.size < 30) await walk(await load(`${SITE}${match[1]}/videos`).catch(() => ''), 10).catch(() => {});
+    const episodes = [...found.values()].sort((a, b) => a.episode - b.episode);
+    return episodes.length ? [{ title: 'Capítulos', episodes }] : [];
+  },
   // Everything shown comes from the results page itself: no page to read per title.
   async detail(entry) { return { genres: entry.genres || genresFromWords(entry.overview || entry.title), overview: entry.overview || '', poster: entry.poster || '', backdrop: entry.backdrop || '', show: '' }; },
   // The TV opens YouTube's own watch page (its player, its quality menu). The web page embeds it

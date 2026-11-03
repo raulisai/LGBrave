@@ -274,7 +274,7 @@ export class HolyBridge extends BrowserBridge {
     this.preparing = (async () => {
       const preference = this.catalog.preference ? await this.catalog.preference(value).catch(() => null) : null;
       if (preference?.site && value.source !== preference.site && this.catalog.elsewhere) {
-        const copies = await this.catalog.elsewhere(value, new Set([value.source]), { only: preference.site, kind: preference.kind }).catch(() => []);
+        const copies = await this.catalog.elsewhere(value, new Set([value.source, ...(preference.skip || [])]), { only: preference.any ? undefined : preference.site, kind: preference.kind }).catch(() => []);
         if (copies[0] && await this.catalog.resolve(copies[0]).catch(() => null)) return;
       }
       await this.catalog.resolve(value).catch(() => null);
@@ -310,14 +310,16 @@ export class HolyBridge extends BrowserBridge {
     if (preferred && item.source !== preferred && this.catalog.elsewhere) {
       session.tried = new Set([preferred]);
       session.candidates = [];
-      await this.curtain(`window.__holyCurtain&&__holyCurtain.say('Buscando en JKAnime…')`);
+      await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify('Buscando en ' + (preference.label || this.catalog.connector?.(preferred)?.name || 'JKAnime') + '…')})`);
       if (this.session !== session) return;
-      const copies = await this.catalog.elsewhere(item, new Set([item.source]), { only: preferred, kind: preference.kind }).catch(() => []);
-      for (const copy of copies.slice(0, 2)) {
+      // any: the same title on whichever of the owner's sites has it (the public catalogue's own players fail here).
+      const copies = await this.catalog.elsewhere(item, new Set([item.source, ...(preference.skip || [])]), { only: preference.any ? undefined : preferred, kind: preference.kind }).catch(() => []);
+      for (const copy of copies.slice(0, preference.any ? 4 : 2)) {
         if (this.session !== session) return;
+        if (preference.any) session.tried.add(copy.source);
         target = await this.catalog.resolve(copy, session.choice).catch(() => null);
         if (target && !targetMatchesLanguage(target, copy, session.choice)) target = null;
-        if (target) { session.item = { ...copy, title: item.title, poster: item.poster || copy.poster, backdrop: item.backdrop || copy.backdrop, genres: item.genres?.length ? item.genres : copy.genres }; session.site = this.catalog.connector?.(preferred)?.name || preferred; break; }
+        if (target) { session.item = { ...copy, title: item.title, poster: item.poster || copy.poster, backdrop: item.backdrop || copy.backdrop, genres: item.genres?.length ? item.genres : copy.genres }; session.site = this.catalog.connector?.(preference.any ? copy.source : preferred)?.name || copy.source; break; }
       }
       if (this.session !== session) return;
       // The picked copy is the next choice if JKAnime fails, then the other sites.
