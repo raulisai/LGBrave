@@ -26,7 +26,11 @@ Gate final correcto: suite completa (incluye6regresiones nuevas,9de logging y11d
 
 HTTP real:8/10fuentes dieron al menos un enlace; DoramasMP4 agotó12s y .beer devolvió0títulos en esa lectura. Between Steps5 resolvió español/Streamtape. No son pruebas de vídeo.
 
-Windows activado0.9.22 conservando página/servidor de Amadeus (7679→7692s), con guardia observada en root e iframe. Posteriormente ocurrió el segundo cierre descrito. El usuario volvió a abrir Amadeus a las23:03: esta vez la guardia estaba registrada antes de cargar la página. Observación de esta sesión y CI remota en curso. No equivale a terminar ambas obras ni acredita solución definitiva.
+Windows activado0.9.22 conservando página/servidor de Amadeus (7679→7692s), con guardia observada en root e iframe. Posteriormente ocurrió el segundo cierre descrito. El usuario volvió a abrir Amadeus a las23:03: esta vez la guardia estaba registrada antes de cargar la página. La nueva sesión fue observada19min04s, hasta23:22 México: mismo hash de página,8867.775588/10825.606s, paused=false, readyState4 y error0. Se dejó reproduciendo. El relevo y la activación final conservaron8186→8223s, sin recargar TV. No equivale a terminar ambas obras ni acredita solución definitiva.
+
+Muestreo nativo:36lecturas durante~12min,131–194MB disponibles y209–295MB de RSS del renderer; el consumo subió y bajó. Sin confirmación de OOM. El muestreador temporal terminó; quedó solo el servicio habitual. Evidencia sin URLs privadas: evidence/holy/tv/exit-observation-20261102.json.
+
+CI de código5133c40 correcta en Windows y macOS: https://github.com/raulisai/LGBrave/actions/runs/41582366855. No se probó físicamente la guardia en la Mac; debe actualizar y reiniciar su servicio.
 
 ## Mac
 
