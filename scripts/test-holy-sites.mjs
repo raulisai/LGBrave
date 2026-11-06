@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { Catalog } from './holy/catalog.mjs';
 import { SiteRegistry, cleanSite, checkSite } from './holy/site-registry.mjs';
 import { startServer } from './holy/server.mjs';
-import { onlyflix, doramasflixbeer, tmdb, doramasflix, animeyt } from './holy/more-sources.mjs';
+import { onlyflix, doramasflixbeer, tmdb, doramasflix, animeyt, pelisflix } from './holy/more-sources.mjs';
 
 // The window «Webs»: moving a site keeps its parsers and saved titles working. No Internet.
 const dir = mkdtempSync(join(tmpdir(), 'holy-sites-'));
@@ -135,5 +135,19 @@ await check('Catálogo público: se reproduce primero desde otro sitio (no OnlyF
   assert.equal(found.item.source, 'cuevana');
   assert.equal(found.target.url, 'https://cuevana.test/gladiator/player');
   rmSync(dir, { recursive: true, force: true });
+});
+await check('PelisFlix: tarjetas, capítulos por temporada y versiones con servidores en base64; RePelis24 queda pendiente', async () => {
+  const card = (url, title, extra = '') => `<li class="TPostMv"><article class="TPost B"><a href="${url}"><img class="imglazy" data-src="//cnddim.xyz/sys/poster/x.jpg"><h2 class="Title"${extra}>${title}</h2></a><div class="TPMvCn"><span class="Date">2023</span><p class="Genre"><a href="https://pelisflix1.kim/genero/accion/">Acción, </a><a href="https://pelisflix1.kim/genero/series-tv/">Series</a></p></div></article></li>`;
+  const items = pelisflix.parseHome(card('https://pelisflix1.kim/pelicula/silent-night/', 'Silent Night') + card('https://pelisflix1.kim/serie/yaga-2/', 'YAGA') + card('https://pelisflix1.kim/episodio/yaga-2-1x3/', 'YAGA', ' data-subtitle="Episodio 1x3"') + card('https://otro.example/pelicula/x/', 'Fuera'));
+  assert.deepEqual(items.map(entry => [entry.title, entry.kind, !!entry.isShow, entry.show || '', entry.episode || null]), [['Silent Night', 'movie', false, '', null], ['YAGA', 'series', true, 'https://pelisflix1.kim/serie/yaga-2/', null], ['YAGA', 'series', false, 'https://pelisflix1.kim/serie/yaga-2/', 3]]);
+  assert.deepEqual([items[0].year, items[0].genres, items[0].poster], ['2023', ['Acción'], 'https://cnddim.xyz/sys/poster/x.jpg']);
+  const pages = { 'https://pelisflix1.kim/serie/yaga-2/': '<a href="https://pelisflix1.kim/temporada/yaga-2-1/">Temporada 1</a><a href="https://pelisflix1.kim/temporada/yaga-2-2/">2</a>',
+    'https://pelisflix1.kim/temporada/yaga-2-1/': ['1x2', '1x1', '2x9'].map(n => `<a href="https://pelisflix1.kim/episodio/yaga-2-${n}/">`).join(''), 'https://pelisflix1.kim/temporada/yaga-2-2/': '<a href="https://pelisflix1.kim/episodio/yaga-2-2x1/">' };
+  const seasons = await pelisflix.episodes('https://pelisflix1.kim/serie/yaga-2/', async url => pages[url]);
+  assert.deepEqual(seasons.map(season => [season.title, season.episodes.map(entry => entry.episode)]), [['Temporada 1', [1, 2]], ['Temporada 2', [1]]]);
+  const b64 = url => Buffer.from(url).toString('base64');
+  const versions = await pelisflix.versions({ url: 'https://pelisflix1.kim/pelicula/silent-night/' }, async () => `<div class="drpdn"><span>CASTELLANO<span>Idioma</span></span><div data-url="${b64('https://nupload.my/watch/a')}"></div><div data-url="${b64('https://voe.sx/e/b')}"></div></div><div class="drpdn"><span>SUBTITULADO<span>Idioma</span></span><div data-url="${b64('http://inseguro.example/')}"></div></div>`);
+  assert.deepEqual(versions, [{ id: 'castellano', label: 'Español (España)', kind: 'dub', target: { url: 'https://nupload.my/watch/a', referrer: 'https://pelisflix1.kim/pelicula/silent-night/', alternatives: ['https://voe.sx/e/b'] } }]);
+  assert.ok(registry().pending().some(entry => entry.name === 'RePelis24' && entry.known));
 });
 console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix, .beer y catálogo público correctas.`);

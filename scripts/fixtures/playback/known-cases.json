@@ -128,6 +128,20 @@
       ]
     },
     {
+      "id": "source-pelisflix",
+      "scope": "controlled",
+      "sources": [
+        "pelisflix"
+      ],
+      "description": "Formato conocido de PelisFlix: tarjetas, temporadas, versiones Latino/Castellano/Subtitulado con servidores en base64, Referer y alternativas, sin Internet.",
+      "evidence": [
+        "scripts/test-holy-sites.mjs"
+      ],
+      "tests": [
+        "scripts/test-holy-sites.mjs"
+      ]
+    },
+    {
       "id": "source-tmdb",
       "scope": "controlled",
       "sources": [
