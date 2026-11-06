@@ -12,7 +12,13 @@
     "sources": 12,
     "builds": 3,
     "inputHash": "34c2c47643c4d366354fd977eca3dffc7b87102efb38aeb5684ec7c303a31ddc",
-    "outputHash": "34c2c47643c4d366354fd977eca3dffc7b87102efb38aeb5684ec7c303a31ddc"
+    "outputHash": "34c2c47643c4d366354fd977eca3dffc7b87102efb38aeb5684ec7c303a31ddc",
+    "remoteCI": {
+      "commit": "56051f9",
+      "windows": "success",
+      "macOS": "success",
+      "run": "https://github.com/raulisai/LGBrave/actions/runs/42304214732"
+    }
   },
   "tv": {
     "installedVersion": "0.9.24",
