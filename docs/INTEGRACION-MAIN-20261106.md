@@ -20,7 +20,7 @@ Gate local final correcto:33casos,12contratos offline, suite completa y builds L
 - En pantalla: inicio conectado, Películas→Terror (141títulos; recomendadas, nuevas, vistas locales, AFI, valoradas y clásicas), Anime→Top100 clásico, Gustos con historial y preferencias.
 - TVfile://: reenvío del voto existente de Between Steps sin cambiar su valor y reenvío de la preferencia de idioma existente: ambos HTTP200/ok. La consulta de versiones de la muestra del catálogo vino vacía en esta lectura; eso no acredita reproducción en español de ese capítulo.
 - Cerrar Holy con el SDK deja Windows waiting con el mismo worker; reapertura sin vincular de nuevo. Un solo runtime de asistencia; Mac en respaldo mediante relevo normal.
-- Shin Tennis, capítulo6: reanudado, vídeo readyState4/MediaError0. Pausa79.6s:118.264456s antes/después y mismo hash de página, sin cambiar servidor. Al terminar se volvió al minuto original68s y avanzó a110s; quedó reproduciéndose. Sin verificar audio por usuario.
+- Shin Tennis, capítulo6: reanudado, vídeo readyState4/MediaError0. Pausa79.6s:118.264456s antes/después y mismo hash de página, sin cambiar servidor. Al terminar se volvió al minuto original68s y avanzó a110s; quedó reproduciéndose. El usuario confirmó imagen y audio correctos; vídeo1920×1080 con fotogramas decodificados.
 - Evidencia sanitizada: evidence/holy/tv/main-unified-20261106.json. CI remoto de esta revisión pendiente al publicar.
 
 ## Límites

@@ -60,7 +60,8 @@
         "paused": false,
         "error": 0,
         "ready": 4
-      }
+      },
+      "audioAndImageConfirmedByUser": true
     },
     "pause": {
       "seconds": 79.633,
@@ -76,7 +77,6 @@
     "outsideStoreApp": true
   },
   "limits": [
-    "Sin comprobar audio por usuario en esta prueba.",
     "No se reprodujeron todos los proveedores ni una película completa.",
     "Cierre nativo de Amadeus/Dragon Ball no confirmado como resuelto.",
     "Mac física pendiente de actualizar."
