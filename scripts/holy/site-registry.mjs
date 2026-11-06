@@ -7,7 +7,9 @@ import { isIP } from 'node:net';
 // came from the original one, so saved titles and history stay valid.
 // A new site needs its own reader in code, so it waits here as «por integrar».
 const KNOWN_PENDING = [
-  { name: 'AnimeOnline Ninja', url: 'https://ww3.animeonline.ninja/', reason: 'Cloudflare responde 403 a la computadora' }
+  { name: 'AnimeOnline Ninja', url: 'https://ww3.animeonline.ninja/', reason: 'Cloudflare responde 403 a la computadora' },
+  // Its home answers, but every film, series, list and search page asks for Cloudflare's check (2026-11-06).
+  { name: 'RePelis24', url: 'https://repelis24.shop/', reason: 'Cloudflare responde 403 a la computadora en fichas y búsqueda' }
 ];
 const hostOf = url => new URL(url).hostname;
 export function cleanSite(value) {

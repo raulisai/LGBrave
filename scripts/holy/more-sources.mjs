@@ -1,6 +1,6 @@
 // More of the owner's sites. Same contract as sources.mjs; these also define
 // home()/detail()/search() when the site needs more than one page or a JSON call.
-import { decode, attr, text, absolute, between, genre, country, item, genrePages } from './sources.mjs';
+import { decode, attr, text, absolute, between, genre, country, item, genrePages, fold } from './sources.mjs';
 import { dedupe } from './versions.mjs';
 
 const tmdbPath = (path, size) => (/^\/[\w-]+\.(jpg|png|webp)$/.test(path || '') ? `https://image.tmdb.org/t/p/${size}${path}` : '');
@@ -505,5 +505,70 @@ export const tmdb = {
       ? [`https://vidfast.vc/tv/${id}/${episode[1]}/${episode[2]}`, `https://vidapi.xyz/embed/tv/${id}/${episode[1]}/${episode[2]}`, `https://share.cdnm.ink/embed/imdb/${id}?season=${episode[1]}&episode=${episode[2]}`, `https://sv2.nontongo.stream/soap/tv/${id}/${episode[1]}/${episode[2]}`]
       : [`https://vidfast.vc/movie/${id}`, `https://vidapi.xyz/embed/movie/${id}`, `https://share.cdnm.ink/embed/imdb/${id}`, `https://sv2.nontongo.stream/soap/movie/${id}`];
     return { url: urls[0], referrer: 'https://onlyflix.to/', alternatives: urls.slice(1) };
+  }
+};
+
+// ---------------------------------------------------------------- PelisFlix
+// WordPress (Toroplay theme): films, series by season, latest episodes. The page lists one menu
+// per version (LATINO, CASTELLANO, SUBTITULADO); each option carries its player address in
+// base64 (`data-url`). Nupload is the site's main player; its «Waaw» option was the same dead
+// voe.sx video on every title seen (2026-11-06), so the probe skips it.
+const pelisflixURL = 'https://pelisflix1.kim/';
+const pelisflixHost = /^https:\/\/pelisflix\d*\.[a-z]+\//;
+const pelisflixCards = (html, base = pelisflixURL) => String(html).split('<li class="TPostMv').slice(1).map(block => {
+  const url = absolute(/<a href="([^"]+)"/.exec(block)?.[1] || '', base);
+  const kind = /\/pelicula\//.test(url) ? 'movie' : /\/(serie|episodio)\//.test(url) ? 'series' : '';
+  if (!kind || !pelisflixHost.test(url)) return null;
+  const episode = /\/episodio\/([\w-]+?)-(\d+)x(\d+)\/?$/.exec(url);
+  const image = attr(/<img[^>]*>/.exec(block)?.[0] || '', 'data-src') || attr(/<img[^>]*>/.exec(block)?.[0] || '', 'src');
+  const poster = image ? absolute(image.replace(/^\/\//, 'https://'), base) : '';
+  return item({ source: 'pelisflix', kind, url, title: text(/<h2 class="Title"[^>]*>([\s\S]*?)<\/h2>/.exec(block)?.[1]),
+    ...(episode ? { show: absolute(`/serie/${episode[1]}/`, base), episode: Number(episode[3]), subtitle: `T${episode[2]} · Episodio ${Number(episode[3])}`, badge: `${episode[2]}x${episode[3]}`, backdrop: poster }
+      : kind === 'series' ? { show: url, isShow: true } : {}),
+    year: text(/class="Date">([^<]*)/.exec(block)?.[1] || /class="Qlty Yr">([^<]*)/.exec(block)?.[1]), poster,
+    overview: text(/class="Description">\s*<p>([\s\S]*?)<\/p>/.exec(block)?.[1]).replace(/\.\.\.$/, '…'),
+    genres: unique([...block.matchAll(/genero\/[\w-]+\/">([^<,]+)/g)].map(match => genre(match[1]))).filter(name => name && !/^(Series|Estrenos)$/.test(name)) });
+}).filter(entry => entry?.title);
+const PELISFLIX_VERSIONS = { latino: { id: 'latino', label: 'Español latino', kind: 'dub' }, castellano: { id: 'castellano', label: 'Español (España)', kind: 'dub' }, subtitulado: { id: 'subtitulado', label: 'Subtitulado en español', kind: 'sub' } };
+export const pelisflix = {
+  id: 'pelisflix', name: 'PelisFlix', site: pelisflixURL,
+  parseHome: html => pelisflixCards(html),
+  more(load) {
+    const slugs = [['accion', 'Acción'], ['comedia', 'Comedia'], ['drama', 'Drama'], ['terror', 'Terror'], ['animacion', 'Animación'], ['ciencia-ficcion', 'Ciencia ficción'], ['romance', 'Romance'], ['suspense', 'Suspenso']];
+    return genrePages(load, [[`${pelisflixURL}peliculas-online/page/2/`, ''], [`${pelisflixURL}series-online/`, ''], ...slugs.map(([slug, name]) => [`${pelisflixURL}genero/${slug}/`, name])], html => pelisflixCards(html), `${pelisflixURL}peliculas-online/`);
+  },
+  searchURL: query => pelisflixURL + '?s=' + encodeURIComponent(query),
+  parseSearch: html => pelisflixCards(html),
+  async detail(entry, load) {
+    const html = await load(entry.show || entry.url);
+    return { show: entry.show || '', genres: unique([...between(html, 'class="Genre"', '</p>').matchAll(/genero\/[\w-]+\/">([^<,]+)/g)].map(match => genre(match[1]))).filter(name => name && !/^(Series|Estrenos)$/.test(name)),
+      overview: text(/<div class="Description">\s*<p>([\s\S]*?)<\/p>/.exec(html)?.[1]), backdrop: absolute((attr(/<img class="TPostBg"[^>]*>/.exec(html)?.[0] || '', 'src') || '').replace(/^\/\//, 'https://'), pelisflixURL), poster: '' };
+  },
+  // Seasons are pages of their own (`/temporada/yaga-2-1/`), each listing its episodes.
+  async episodes(show, load) {
+    const html = await load(show);
+    const seasons = unique([...html.matchAll(/href="(https:\/\/pelisflix\d*\.[a-z]+\/temporada\/[\w-]+?-(\d+)\/)"/g)].map(match => match[1])).slice(0, 30);
+    const lists = await Promise.all(seasons.map(async url => {
+      const number = Number(/-(\d+)\/$/.exec(url)[1]);
+      const page = await load(url).catch(() => '');
+      const episodes = [...new Map([...String(page).matchAll(/href="(https:\/\/pelisflix\d*\.[a-z]+\/episodio\/[\w-]+?-(\d+)x(\d+)\/)"/g)].filter(match => Number(match[2]) === number)
+        .map(match => [Number(match[3]), { url: match[1], season: number, episode: Number(match[3]), label: `T${number} · Episodio ${Number(match[3])}` }])).values()].sort((a, b) => a.episode - b.episode);
+      return { title: 'Temporada ' + number, number, episodes };
+    }));
+    return lists.filter(list => list.episodes.length).sort((a, b) => a.number - b.number);
+  },
+  // One menu per version, each with its players (Nupload first, as the site orders them).
+  async versions(entry, load) {
+    const html = await load(entry.url);
+    const menus = html.split('<div class="drpdn">').slice(1).map(block => {
+      const name = fold(text(/<span>([A-ZÁÉÍÓÚÑ ]+)<span>Idioma/.exec(block)?.[1] || ''));
+      const urls = [...block.matchAll(/data-url="([A-Za-z0-9+/=]{16,})"/g)].map(match => { try { return Buffer.from(match[1], 'base64').toString('utf8'); } catch { return ''; } })
+        .filter(url => /^https:\/\/[^\s"'<>]+$/.test(url));
+      return { name, urls: unique(urls) };
+    }).filter(menu => menu.urls.length);
+    return menus.map(menu => {
+      const version = PELISFLIX_VERSIONS[Object.keys(PELISFLIX_VERSIONS).find(key => menu.name.includes(key))] || { id: menu.name.replace(/[^a-z0-9]+/g, '') || 'x', label: menu.name || 'Original', kind: 'orig' };
+      return { ...version, target: { url: menu.urls[0], referrer: entry.url, alternatives: menu.urls.slice(1) } };
+    });
   }
 };
