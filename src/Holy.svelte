@@ -830,7 +830,7 @@
                 {#if item.chip}
                 <button class="card chip" data-rc={r + ':' + c} class:liked={item.value === 1} class:disliked={item.value === -1} aria-label={item.title + (item.value === 1 ? ', te gusta' : item.value === -1 ? ', no te gusta' : '')}
                   onmouseenter={() => hover(r, c)} onmouseleave={unhover} onclick={() => pick(r, c, item)}>
-                  <span class="chip-art"><strong>{item.title}</strong><small>{item.count} títulos</small>
+                  <span class="chip-art"><strong>{item.title}</strong><small>{item.note || item.count + ' títulos'}</small>
                     {#if item.value === 1}<span class="vote like"><Icon name="check" size={22} stroke={3} /></span>{:else if item.value === -1}<span class="vote dislike"><Icon name="minus" size={22} stroke={3} /></span>{/if}
                   </span>
                 </button>

@@ -5,7 +5,8 @@ import { CONNECTORS, connectorFor } from './connectors.mjs';
 import { genreShelves } from '../../src/holy.js';
 import { entryKey, titleKey, nextEpisode } from './library.mjs';
 import { matchVersion, publicVersion, targetMatchesLanguage } from './versions.mjs';
-import { KnownLists } from './known-lists.mjs';
+import { KnownLists, BEST } from './known-lists.mjs';
+import { Credits } from './credits.mjs';
 
 // The newest titles from the owner's sites, refreshed on the Mac every half hour.
 // Details (genres, synopsis, show page) are cached per page: they rarely change.
@@ -96,15 +97,25 @@ export async function playerGone(url, referrer) {
   if ([404, 410].includes(response.status)) return true;
   return response.ok && GONE_PAGE.test(await response.text());
 }
+// What the taste profile learns about any title: its people (credits) and how acclaimed it is
+// (awards and critics' lists), plus the catalogue's average acclaim. `withId` adds the IMDb id a
+// site's page gave, for titles (watched or listed) that do not carry it.
+export function factsFor(items, { credits, lists, withId = item => item }) {
+  const acclaim = lists ? item => lists.acclaimOf(item) : null;
+  const sample = (Array.isArray(items) ? items : []).slice(0, 2000);
+  return { people: credits ? item => credits.people(withId(item)) : null, acclaim,
+    base: acclaim && sample.length ? sample.reduce((sum, item) => sum + acclaim(item), 0) / sample.length : 0 };
+}
 export class Catalog {
-  // knownLists: award and chart lists (null in tests that do not want them).
-  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics, knownLists, sites = null, probe = fetch === fetchText ? playerGone : null } = {}) {
+  // knownLists: award and chart lists; credits: who is in each title (both null in tests that do not want them).
+  constructor({ file = '.local/holy-catalog.json', detailsFile = '.local/holy-details.json', connectors = CONNECTORS, fetch = fetchText, log = () => {}, diagnostics, knownLists, credits, sites = null, probe = fetch === fetchText ? playerGone : null } = {}) {
     this.probe = probe;
     // A site that moved is asked at its new address and read as the original (site-registry.mjs).
     this.sites = sites?.attach(connectors) || null;
     if (this.sites) { const read = fetch; fetch = async (url, options = {}) => this.sites.toCanonical(await read(this.sites.toLive(url), options.referrer ? { ...options, referrer: this.sites.toLive(options.referrer) } : options)); }
     Object.assign(this, { file, detailsFile, connectors, fetch, log, diagnostics });
     this.knownLists = knownLists === undefined ? (file === '.local/holy-catalog.json' ? new KnownLists({ log }) : null) : knownLists;
+    this.credits = credits === undefined ? (file === '.local/holy-catalog.json' ? new Credits({ log }) : null) : credits;
     const data = load(file) || {};
     this.items = (Array.isArray(data.items) ? data.items : []).filter(valid).map(cleanItem);
     this.updatedAt = Number(data.updatedAt) || 0;
@@ -194,7 +205,8 @@ export class Catalog {
   }
   start(log = this.log) {
     const tick = () => {
-      this.refresh().catch(error => log('Holy: catálogo: ' + error.message));
+      // After the sites, who is in their titles (a round at a time; it chooses the people rows).
+      this.refresh().catch(error => log('Holy: catálogo: ' + error.message)).finally(() => this.fillCredits().catch(() => {}));
       // Award and chart lists change slowly: each one is read again when its time to live ends.
       this.knownLists?.refresh().then(read => { if (read) this.version++; return this.findListTitles(); }).catch(() => {});
     };
@@ -204,6 +216,21 @@ export class Catalog {
     return this;
   }
   stop() { clearInterval(this.timer); }
+  // The IMDb id a site's page gave (RePelisHD), for a title that does not carry it.
+  withId(item) { return item?.imdb ? item : { ...item, imdb: this.details.get(this.detailURL(item))?.imdb || '' }; }
+  // Who is in each title (Cinemeta, Wikidata), one round at a time: what the owner watched first,
+  // then the catalogue and the lists' titles found on the sites.
+  async fillCredits(limit = 80) {
+    if (!this.credits || this.fillingCredits) return 0;
+    this.fillingCredits = true;
+    try {
+      const watched = this.library ? [...this.library.entries, ...this.library.votes] : [];
+      const added = await this.credits.fill([...watched, ...this.items, ...(this.knownLists?.foundItems() || [])].map(item => this.withId(item)), { limit });
+      if (added) this.version++;
+      return added;
+    } finally { this.fillingCredits = false; }
+  }
+  facts() { return factsFor(this.items, { credits: this.credits, lists: this.knownLists, withId: item => this.withId(item) }); }
   // Award/chart titles missing from the catalogue are searched on the owner's sites (a few per
   // round, three at a time); a copy with the same title (and year when known) becomes playable
   // in its list row. Not found is remembered for a week.
@@ -495,9 +522,16 @@ export class Catalog {
     const distance = other => (Number(item.year) > 1900 ? Math.abs(year(other) - Number(item.year)) : -year(other));
     return found.sort((a, b) => exact(b) - exact(a) || distance(a) - distance(b));
   }
-  // Rows for the home: «Continuar viendo», «Para ti», then the latest by kind, each title with its match.
+  // Rows for the home: «Continuar viendo», «Para ti», «Porque viste…», the owner's people, then the
+  // latest by kind, the lists and the genres, each title with its match. `best`: the «Lo mejor» page
+  // (Holy's consensus, awards, critics, decades and countries). The TV and the web show each title
+  // once per page (`dedupeRows` in src/holy.js), so rows here may share titles.
   home(library) {
     library.learnCatalogue?.(this.items, this.version);
+    library.learnFacts?.(this.facts(), this.version + ':' + (this.credits?.version || 0) + ':' + (this.knownLists?.stamp || 0));
+    this.library = library;
+    // The owner's favourite people get their own rows; their films are read once from Wikidata.
+    if (this.knownLists?.setPeople(library.favouritePeople?.(2) || [])) this.knownLists.refresh().then(read => { if (read) { this.version++; return this.findListTitles(); } }).catch(() => {});
     const by = kind => this.items.filter(item => item.kind === kind);
     const interleave = (...lists) => {
       const out = [];
@@ -521,36 +555,46 @@ export class Catalog {
     const watching = new Set(continuing.map(entry => entry.show).filter(Boolean));
     const airing = best(by('anime').filter(item => item.airing).sort((a, b) => (b.latest || 0) - (a.latest || 0)))
       .sort((a, b) => watching.has(b.show) - watching.has(a.show));
-    // Well-known lists (awards, AniList charts) over this catalogue; titles on them get a small
-    // nudge in «Recomendado para ti» when they also fit the owner's tastes.
+    // Well-known lists (awards, critics, AniList charts, the owner's people) over this catalogue;
+    // how acclaimed a title is already counts in its match (`Library.learnFacts`).
     const listRows = this.knownLists ? this.knownLists.rows(score(this.items)) : [];
-    const acclaimed = new Set(listRows.flatMap(row => row.items.filter(item => !item.discover).map(item => item.show || item.url)));
-    const nudge = list => list.map(item => (acclaimed.has(item.show || item.url) ? { ...item, acclaimed: true } : item));
-    const forYou = library.recommend(nudge(once(interleave(movies, perSite('anime'), perSite('dorama'), by('series')))), 30);
+    const forYou = library.recommend(once(interleave(movies, perSite('anime'), perSite('dorama'), by('series'))), 30);
+    // «Porque viste…»: what is most like two titles the owner recently enjoyed (genres, saga, people),
+    // among the catalogue and the lists' titles found on the sites.
+    const found = this.knownLists?.foundItems() || [];
+    const pool = once([...this.items, ...found.filter(item => !this.items.some(other => other.url === item.url))]).filter(item => !continuing.some(entry => entry.key === entryKey(item)));
+    const because = personal ? (library.anchors?.(2) || []).map((anchor, index) => ({ id: 'because-' + index, title: 'Porque viste ' + anchor.title, kind: anchor.kind,
+      items: library.similarTo(anchor, score(pool), 30).map(item => ({ ...item, vote: library.voteOf(item) })) })).filter(row => row.items.length >= 6) : [];
+    const people = listRows.filter(row => row.group === 'people' && row.owned >= 3);
     const rows = [
       { id: 'continue', title: 'Continuar viendo', items: score(continuing) },
       { id: 'foryou', title: 'Recomendado para ti', items: forYou.map(item => ({ ...item, vote: library.voteOf(item) })) },
+      ...because, ...people,
       { id: 'movies', title: 'Películas recién llegadas', items: score(movies.slice(0, 40)) },
       { id: 'anime', title: 'Anime · nuevos episodios', items: score(once(playable(perSite('anime'))).slice(0, 40)) },
       { id: 'anime-airing', title: 'Anime en emisión', items: airing.slice(0, 40) },
       { id: 'doramas', title: 'Doramas · nuevos capítulos', items: score(once(playable(perSite('dorama'))).slice(0, 40)) }
     ];
     // Genre rows over everything (films, series, anime, doramas), the owner's favourite genres first.
+    // They carry more titles than they show: a title already seen higher on the page leaves its place.
     const genreRows = GENRE_ROWS.map(([name, title], order) => {
       const items = once(this.items.filter(item => item.genres?.includes(name) && !continuing.some(entry => entry.key === entryKey(item))));
       const affinity = profile.genres.get(name) || 0;
-      return { genre: name, id: 'genre-' + name, title: personal && affinity > 0.3 ? 'Porque te gusta: ' + title : title, items: best(items).slice(0, 30), affinity, order };
+      return { genre: name, id: 'genre-' + name, title: personal && affinity > 0.3 ? 'Porque te gusta: ' + title : title, items: best(items).slice(0, 60), affinity, order };
     }).filter(row => row.items.length >= 6).sort((a, b) => (personal ? b.affinity - a.affinity : 0) || a.order - b.order);
     rows.push(...genreRows.map(({ affinity, order, ...row }) => row));
     const knownGenres = new Set(genreRows.map(row => row.genre));
     // Smaller genres get a row only with enough titles (8, or 1 % of a small catalogue): one-title rows are noise.
     const shelfMinimum = Math.min(8, Math.ceil(this.items.length / 100));
-    rows.push(...genreShelves(this.items).filter(row => !knownGenres.has(row.title) && once(row.items).length >= shelfMinimum).map(row => ({ ...row, items: best(once(row.items)).slice(0, 30) })));
-    // Lists with something to play go right after the newest rows; lists of titles still to
-    // find, after the genres.
+    rows.push(...genreShelves(this.items).filter(row => !knownGenres.has(row.title) && once(row.items).length >= shelfMinimum).map(row => ({ ...row, items: best(once(row.items)).slice(0, 60) })));
+    // Inicio's lists (Óscar, Clásicos imprescindibles, Baeksang, anime charts): those with something
+    // to play right after the newest rows, those with titles still to find after the genres. The
+    // other lists live in their section and in «Lo mejor».
+    const home = listRows.filter(row => (row.place || 'home') === 'home' && row.group !== 'people');
     const after = Math.max(...['movies', 'anime', 'anime-airing', 'doramas'].map(id => rows.findIndex(row => row.id === id))) + 1;
-    rows.splice(after || rows.length, 0, ...listRows.filter(row => row.owned >= 3).map(({ owned, ...row }) => row));
-    rows.push(...listRows.filter(row => row.owned < 3).map(({ owned, ...row }) => row));
+    rows.splice(after || rows.length, 0, ...home.filter(row => row.owned >= 3));
+    rows.push(...home.filter(row => row.owned < 3));
+    const bestRows = BEST.map(id => listRows.find(row => row.id === 'list-' + id)).filter(Boolean);
     rows.push(
       { id: 'anime-shows', title: 'Anime para descubrir', items: best(once(shows(perSite('anime')).filter(item => !item.airing))).slice(0, 30) },
       { id: 'dorama-shows', title: 'Doramas para descubrir', items: best(once(shows(perSite('dorama')))).slice(0, 30) },
@@ -560,6 +604,7 @@ export class Catalog {
     return {
       updatedAt: this.updatedAt, refreshing: !!this.refreshing, hero: hero && score([hero])[0],
       rows: rows.filter(row => row.items.length).map(row => ({ ...row, items: row.items.map(slim) })), items: score(this.items).map(slim), taste: library.summary(),
+      best: bestRows.map(row => ({ ...row, items: row.items.map(slim) })),
       askRating: library.pendingRating?.() || null, preferred: PREFERRED,
       sources: this.sources()
     };
@@ -593,8 +638,17 @@ export class Catalog {
     const tally = values => { const counts = new Map(); for (const value of values) if (value) counts.set(value, (counts.get(value) || 0) + 1); return counts; };
     const chips = (type, counts, minimum, limit) => [...counts].filter(([, count]) => count >= minimum).sort((a, b) => b[1] - a[1]).slice(0, limit)
       .map(([name, count]) => ({ chip: true, type, name, title: name, count, value: library.prefOf(type, name), url: `holy:gusto:${type}:${name}` }));
+    // Actors and directors: the ones chosen, then the owner's own (from what they watched), then
+    // those in most titles of the catalogue.
+    const cast = this.credits ? this.credits.tally([...library.entries, ...library.votes, ...this.items].map(item => this.withId(item))) : new Map();
+    const fondness = name => profile.people?.get(name) || 0;
+    const people = [...new Set([...library.prefs.filter(pref => pref.type === 'person').map(pref => pref.name),
+      ...[...cast.values()].filter(person => person.count >= 2 || fondness(person.name) > 0.3).sort((a, b) => fondness(b.name) - fondness(a.name) || b.count - a.count).map(person => person.name)])].slice(0, 24)
+      .map(name => ({ chip: true, type: 'person', name, title: name, count: cast.get(name)?.count || 0, value: library.prefOf('person', name), url: `holy:gusto:person:${name}`,
+        note: (cast.get(name)?.role === 'director' ? 'Director' : 'Actor') + (cast.get(name)?.count ? ' · ' + cast.get(name).count + ' títulos' : '') }));
     const chipRows = [
       { id: 'pref-genre', title: 'Géneros', items: chips('genre', tally(this.items.flatMap(item => item.genres || [])), 3, 20) },
+      { id: 'pref-person', title: 'Actores y directores', items: people },
       { id: 'pref-studio', title: 'Productoras y estudios', items: chips('studio', tally(this.items.flatMap(item => item.studios || [])), 2, 20) },
       { id: 'pref-country', title: 'Países', items: chips('country', tally(this.items.map(item => item.country)), 2, 12) }
     ].filter(row => row.items.length);

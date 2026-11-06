@@ -190,9 +190,11 @@ try {
     assert.deepEqual(new Library(join(directory, 'empty.json')).recommend(fresh), []);
   });
   await check('Secciones del inicio y formatos de tiempo', () => {
-    const data = { rows: [{ id: 'continue', title: 'Continuar viendo', items: [{ ...anime, backdrop: 'b' }] }], items: [movie, anime, { ...movie, url: 'u2' }, { ...movie, url: 'u3' }, { ...movie, url: 'u4' }], sources: [{ id: 'cuevana', name: 'Cuevana 3' }] };
+    const films = [['Uno', ['Acción']], ['Dos', ['Acción']], ['Tres', ['Acción']], ['Cuatro', ['Fantasía']], ['Cinco', ['Fantasía']]].map(([title, genres]) => ({ ...movie, title, genres, url: 'https://c/' + title }));
+    const data = { rows: [{ id: 'continue', title: 'Continuar viendo', items: [{ ...anime, backdrop: 'b' }] }], items: [movie, anime, ...films], sources: [{ id: 'cuevana', name: 'Cuevana 3' }] };
     assert.equal(sectionRows(data, 'inicio')[0].layout, 'landscape');
-    assert.deepEqual(sectionRows(data, 'movie').map(row => row.title), ['Acción', 'Fantasía', 'Lo nuevo en Cuevana 3']);
+    // Each title once per page: under its rarest genre (Street Fighter in Fantasía), and not again in «Lo nuevo en…».
+    assert.deepEqual(sectionRows(data, 'movie').map(row => [row.title, row.items.map(item => item.title)]), [['Acción', ['Uno', 'Dos', 'Tres']], ['Fantasía', ['Street Fighter', 'Cuatro', 'Cinco']]]);
     assert.equal(sectionRows(data, 'anime')[0].title, 'Continuar viendo');
     assert.equal(clock(3725), '1:02:05'); assert.equal(clock(65), '1:05'); assert.equal(remaining(600, 6000), 'Quedan 1 h 30 min');
   });

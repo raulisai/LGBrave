@@ -8,7 +8,8 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSy
 import { isIP } from 'node:net';
 import { resolve, extname, join, dirname } from 'node:path';
 import { HOME_PATH, PORT } from './config.mjs';
-import {safePath} from '../desktop-config.mjs';
+import {safePath,tvAddress} from '../desktop-config.mjs';
+import {publicHttpsURL,publicTarget} from './public-url.mjs';
 import {WebPlayback} from './web-playback.mjs';
 import { packHome } from '../../src/holy.js';
 
@@ -27,24 +28,68 @@ const local = ip => {
 };
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
+// The TV's address, read from the saved settings (cached a few seconds: it is asked per request).
+let tvCache = { at: 0, host: '' };
+function currentTV() {
+  if (Date.now() - tvCache.at > 5000) { try { tvCache = { at: Date.now(), host: tvAddress().host || '' }; } catch { tvCache = { at: Date.now(), host: '' }; } }
+  return tvCache.host;
+}
+
+// The packaged TV app is a file:// page, whose requests carry «Origin: null». So does any
+// sandboxed iframe on any web page, so «null» is only believed when it comes from the TV itself
+// and never for the few actions that change what this computer reads or runs (`strict`).
+const trustedNull = (ip, tv) => !!tv && ip === tv;
+
+// Names a browser may use to reach this server: addresses, `localhost`, a bare computer name
+// (`djoker`) or a LAN-only suffix. A public domain here means DNS rebinding: a website whose name
+// was re-pointed at this computer so the page can read the server as if it were its own.
+const LOCAL_SUFFIX = /\.(localhost|local|lan|internal|localdomain|home\.arpa)$/i;
+export function hostAllowed(req) {
+  const raw = String(req.headers.host || '');
+  if (!raw) return true;
+  // A Host is «name[:port]»: anything with credentials, paths or spaces is not one.
+  if (!/^[^\s/\\@?#]+$/.test(raw)) return false;
+  try {
+    const host = new URL('http://' + raw).hostname.replace(/^\[|\]$/g, '');
+    return isIP(host) !== 0 || host === 'localhost' || !host.includes('.') || LOCAL_SUFFIX.test(host);
+  } catch { return false; }
+}
+
+// A page on this network (any port) may read answers; the same pages may also write on Holy's own port.
+function localOrigin(origin) {
+  try {
+    const url = new URL(origin), host = url.hostname.replace(/^\[|\]$/g, '');
+    return ['http:', 'https:'].includes(url.protocol) && url.origin === origin && !url.username && !url.password &&
+      (local(host) || host === 'localhost' || /^[a-z0-9-]+\.local$/i.test(host)) ? url : null;
+  } catch { return null; }
+}
+
+// Which origin may read an answer: '*' for the TV's own app, the page's origin for pages on this
+// network, nothing for any other website (so it cannot read tastes, history or addresses).
+export function readOrigin(req, tv = currentTV()) {
+  const origin = req.headers.origin;
+  if (origin === undefined) return '';
+  if (origin === 'null') return trustedNull(req.socket.remoteAddress?.replace('::ffff:', ''), tv) ? '*' : '';
+  return localOrigin(origin) ? origin : '';
+}
+
 // Reading the catalogue is public within the LAN; changing tastes or asking the
 // doctor to act is reserved to the packaged app, Holy homes and local controls.
-export function mutationAllowed(req, port = PORT) {
+export function mutationAllowed(req, port = PORT, { tv = currentTV(), strict = false } = {}) {
   const origin = req.headers.origin;
   const ip = req.socket.remoteAddress?.replace('::ffff:', '');
   if (origin === undefined) return req.headers['sec-fetch-site'] !== 'cross-site' && loopback(ip);
-  if (origin === 'null') return true;
-  try {
-    const url = new URL(origin), host = url.hostname.replace(/^\[|\]$/g, '');
-    const originPort = Number(url.port || (url.protocol === 'https:' ? 443 : 80));
-    // A bare «.local» name (mDNS/Bonjour, e.g. this Mac renamed to serve Holy at a friendly
-    // address) only ever resolves inside this LAN by design (RFC 6762) — as safe a sign as a
-    // private IP, and the only way a browser gets here by that name in the first place.
-    const localName = /^[a-z0-9-]+\.local$/i.test(host);
-    return ['http:', 'https:'].includes(url.protocol) && url.origin === origin && !url.username && !url.password && (local(host) || host === 'localhost' || localName) &&
-      (originPort === port || originPort === PORT);
-  } catch { return false; }
+  if (origin === 'null') return !strict && trustedNull(ip, tv);
+  // A bare «.local» name (mDNS/Bonjour, e.g. this Mac renamed to serve Holy at a friendly
+  // address) only ever resolves inside this LAN by design (RFC 6762) — as safe a sign as a
+  // private IP, and the only way a browser gets here by that name in the first place.
+  const url = localOrigin(origin);
+  if (!url) return false;
+  const originPort = Number(url.port || (url.protocol === 'https:' ? 443 : 80));
+  return originPort === port || originPort === PORT;
 }
+// Actions that change which sites are read or that restart services: never from an opaque origin.
+const STRICT = new Set(['/holy-api/sites', '/holy-api/doctor']);
 
 // Small JSON bodies only (votes).
 function body(req, limit = 16384) {
@@ -64,7 +109,7 @@ function body(req, limit = 16384) {
   });
 }
 
-export function startServer({ catalog, library, doctor, peerSync, port = PORT, root = 'dist-holy', webRoot = 'dist-holy-web', imageDir = '.local/holy-images', log = console.log, status = () => ({}), fetchImage = fetch, diagnostics = new DiagnosticLog() } = {}) {
+export function startServer({ catalog, library, doctor, peerSync, port = PORT, root = 'dist-holy', webRoot = 'dist-holy-web', imageDir = '.local/holy-images', log = console.log, status = () => ({}), fetchImage = fetch, diagnostics = new DiagnosticLog(), resolveHost } = {}) {
   const started = Date.now();
   const playback=new WebPlayback({library,file:join(dirname(imageDir),'web-playback-sessions.json')});
   mkdirSync(imageDir, { recursive: true });
@@ -91,7 +136,17 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
       }
     }
     if (!pending.has(key)) pending.set(key, (async () => {
-      const response = await fetchImage(catalog?.liveURL?.(url) || url, { headers: { 'User-Agent': UA, Referer: parsed.origin + '/' }, signal: AbortSignal.timeout(15000) });
+      // Redirects are followed here, one hop at a time, so an image host can never bounce the
+      // request to this computer or the home network.
+      let target = catalog?.liveURL?.(url) || url, response;
+      for (let hop = 0; ; hop++) {
+        if (!publicTarget(target)) { diagnostics.event('http', 'image-redirect-refused', { host: new URL(target).hostname }, 'warn'); throw Error('host'); }
+        response = await fetchImage(target, { headers: { 'User-Agent': UA, Referer: parsed.origin + '/' }, signal: AbortSignal.timeout(15000), redirect: 'manual' });
+        const next = response.status >= 300 && response.status < 400 && response.headers.get('location');
+        if (!next) break;
+        if (hop >= 4) throw Error('image redirects');
+        target = new URL(next, target).href;
+      }
       const type = response.headers.get('content-type') || 'image/jpeg';
       if (!response.ok || !type.startsWith('image/')) throw Error('image ' + response.status);
       const body = Buffer.from(await response.arrayBuffer());
@@ -123,30 +178,45 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
   };
   let clientErrors=0, clientWindow=Date.now();
   // A title from the query string: the catalogue's own copy when known, else just its addresses.
-  const versionItem = params => {
-    const address = value => (/^https:\/\/[^\s]{4,500}$/.test(String(value || '')) ? String(value) : '');
-    const link = address(params.get('url'));
+  // Only a public https address goes on to be downloaded; anything aimed at a private
+  // network (or not a plain https link) is dropped here, before the sites' readers see it.
+  const address = value => (/^https:\/\/[^\s]{4,500}$/.test(String(value || '')) ? String(value) : '');
+  const publicAddress = async value => {
+    const link = address(value);
+    if (!link) return '';
+    if (await publicHttpsURL(link, { resolve: resolveHost })) return link;
+    diagnostics.event('http', 'private-address-refused', { host: (() => { try { return new URL(link).hostname; } catch { return ''; } })() }, 'warn');
+    return '';
+  };
+  const versionItem = async params => {
+    const link = await publicAddress(params.get('url'));
     if (!link || !catalog.connector(String(params.get('source') || ''))) return null;
-    return catalog.find(link) || { source: String(params.get('source')), url: link, show: address(params.get('show')), kind: 'dorama', title: '' };
+    return catalog.find(link) || { source: String(params.get('source')), url: link, show: await publicAddress(params.get('show')), kind: 'dorama', title: '' };
   };
   const server = http.createServer(async (req, res) => {
     const requestedAt=Date.now();
     res.once('finish',()=>{if(res.statusCode>=400||Date.now()-requestedAt>2000)diagnostics.event('http','response',{method:req.method,action:String(req.url||'').split('?')[0].slice(0,160),status:res.statusCode,durationMs:Date.now()-requestedAt},res.statusCode>=400?'warn':'info');});
     const ip = req.socket.remoteAddress?.replace('::ffff:', '');
     if (!local(ip)) { res.writeHead(403).end(); return; }
+    if (!hostAllowed(req)) { diagnostics.event('http', 'host-refused', { host: String(req.headers.host || '').slice(0, 80) }, 'warn'); res.writeHead(403).end(); return; }
+    // Never sniffed into another type, never shown inside another site's frame.
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     const url = new URL(req.url, 'http://holy.local');
     if (/^\/(favicon\.ico|apple-touch-icon.*\.png)$/.test(url.pathname)) { res.writeHead(204).end(); return; }
     if(url.pathname==='/holy-api/profile-sync'){if(peerSync)await peerSync.handle(req,res);else res.writeHead(404).end();return;}
     const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh', '/holy-api/resolve', '/holy-api/forget', '/holy-api/sites'].includes(url.pathname) &&
       (req.method === 'POST' || (req.method === 'OPTIONS' && req.headers['access-control-request-method'] === 'POST'));
-    if (mutation && !mutationAllowed(req, server.address()?.port || port)) {
+    if (mutation && !mutationAllowed(req, server.address()?.port || port, { strict: STRICT.has(url.pathname) })) {
       diagnostics.event('http', 'origin-refused', { action: url.pathname, origin: String(req.headers.origin || req.headers.referer || 'sin origen').slice(0, 120) }, 'warn');
       res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' }).end('{"ok":false,"error":"origen no permitido"}');
       return;
     }
-    // The packaged home (file://) reads these too.
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' }).end(); return; }
+    // Answers can be read by pages of this network and by the TV's packaged home (file://, a
+    // «null» origin believed only from the TV); no other website may read them.
+    const reader = readOrigin(req);
+    if (reader) { res.setHeader('Access-Control-Allow-Origin', reader); if (reader !== '*') res.setHeader('Vary', 'Origin'); }
+    if (req.method === 'OPTIONS') { res.writeHead(204, reader ? { 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' } : {}).end(); return; }
     try {
       if (url.pathname === '/holy-api/home') {
         res.setHeader('Cache-Control', 'no-store');
@@ -163,19 +233,20 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
         res.end(JSON.stringify(Array.isArray(items) ? { source, ms: Date.now() - started, items: library.scored(items) } : { source, ms: Date.now() - started, items: [], error: items.error }));
       } else if (url.pathname === '/holy-api/episodes') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
-        const seasons = await catalog.episodes(url.searchParams.get('source') || '', url.searchParams.get('show') || '').catch(error => ({ error: error.message }));
+        const show = await publicAddress(url.searchParams.get('show'));
+        const seasons = show ? await catalog.episodes(url.searchParams.get('source') || '', show).catch(error => ({ error: error.message })) : [];
         res.end(JSON.stringify(Array.isArray(seasons) ? { seasons } : { seasons: [], error: seasons.error }));
       } else if (url.pathname === '/holy-api/versions') {
         // The versions (audio / subtitles) a title offers and the one remembered for its series.
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
-        const item = versionItem(url.searchParams);
+        const item = await versionItem(url.searchParams);
         const versions = item ? await catalog.versionsOf(item).catch(() => []) : [];
         res.end(JSON.stringify({ versions, remembered: item ? library.languageOf(item) : null }));
       } else if (url.pathname === '/holy-api/language' && req.method === 'POST') {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         const { item: sent, version } = await body(req);
-        const item = versionItem(new URLSearchParams({ source: sent?.source || '', url: sent?.url || '', show: sent?.show || '' }));
+        const item = await versionItem(new URLSearchParams({ source: sent?.source || '', url: sent?.url || '', show: sent?.show || '' }));
         if (!item) throw Error('Esa serie no tiene una dirección válida.');
         const kind = ['dub', 'sub', 'orig'].includes(version?.kind) ? version.kind : null;
         const saved = library.setLanguage(item, version && kind && version.id ? { id: String(version.id), kind, label: String(version.label || '') } : null);
@@ -187,11 +258,10 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
         const { item: sent, version, kind } = await body(req);
-        const address = value => (/^https:\/\/[^\s]{4,500}$/.test(String(value || '')) ? String(value) : '');
-        const link = address(sent?.url);
+        const link = await publicAddress(sent?.url);
         const connector = link && catalog.connector(String(sent?.source || ''));
         if (!link || !connector) { res.end(JSON.stringify({ ok: false, error: 'Título no válido.' })); return; }
-        const item = { ...catalog.find(link), source: String(sent.source), url: link, show: address(sent.show), kind: String(sent.kind || 'movie').slice(0, 20),
+        const item = { ...catalog.find(link), source: String(sent.source), url: link, show: await publicAddress(sent.show), kind: String(sent.kind || 'movie').slice(0, 20),
           title: String(sent.title || '').slice(0, 200), subtitle: String(sent.subtitle || '').slice(0, 200), poster: address(sent.poster), backdrop: address(sent.backdrop),
           episode: Number.isFinite(Number(sent.episode)) ? Number(sent.episode) : null,
           genres: Array.isArray(sent.genres) ? sent.genres.filter(name => typeof name === 'string').slice(0, 8) : [] };
@@ -278,7 +348,8 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
         res.end('{"ok":true}');
       } else if (url.pathname === '/holy-api/img') {
         const { body, type } = await image(url.searchParams.get('u') || '');
-        res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'public, max-age=604800, immutable' }).end(body);
+        // «sandbox» keeps a script inside a hostile SVG from running if someone opens the picture itself.
+        res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'public, max-age=604800, immutable', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox" }).end(body);
       } else if (url.pathname.startsWith(HOME_PATH)) {
         const base = resolve(root);
         const path = safePath(base, url.pathname.slice(HOME_PATH.length) || 'index.html');

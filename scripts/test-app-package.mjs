@@ -70,8 +70,8 @@ try{
  });
  await check('Waking from sleep is told apart from a stuck worker',()=>{
   let time=0;const resumed=createSleepClock({now:()=>time});
-  time=1000;assert.equal(resumed(),false);time=2000;assert.equal(resumed(),false);
-  time=3600000;assert.equal(resumed(),true);time=3601000;assert.equal(resumed(),false);
+  time=1000;assert.equal(resumed(),0);time=2000;assert.equal(resumed(),0);
+  time=3600000;assert.equal(resumed(),3598000);time=3601000;assert.equal(resumed(),0);
  });
  assert.equal(existsSync(join(local,'HolyLuma','peer-sync.json.tmp')),false);
  console.log(passed+' comprobaciones de apps de Tienda: datos privados, perfil cifrado, ajustes y arranque fuera de la app.');

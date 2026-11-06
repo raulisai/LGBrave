@@ -62,6 +62,25 @@ try {
     assert.equal(after(mark).at(-1).method, 'Fetch.continueRequest');
   });
 
+  // A page from the Internet cannot ask Holy's server or the router for anything; opening such an address can.
+  mark = calls.length;
+  const blockedBefore = bridge.blocked;
+  await bridge.event(paused('lan1', 'http://192.168.1.65:43190/holy-api/taste-profile', 'Fetch'));
+  const askedLan = after(mark).at(-1);
+  await bridge.event(paused('lan2', 'http://localhost:43190/holy-api/health', 'Script'));
+  const askedLocalhost = after(mark).at(-1);
+  await bridge.event(paused('lan3', 'http://192.168.1.1/', 'Document'));
+  const openedRouter = after(mark).at(-1);
+  await bridge.event(paused('lan4', 'https://cdn.example/app.js', 'Script'));
+  const askedInternet = after(mark).at(-1);
+  await check('Una página de Internet no puede pedir cosas a la red local (abrir una dirección local sí)', () => {
+    for (const call of [askedLan, askedLocalhost]) { assert.equal(call.method, 'Fetch.fulfillRequest'); assert.ok(call.params.responseHeaders.some(header => header.name === 'X-Luma-Blocked')); }
+    assert.equal(openedRouter.method, 'Fetch.continueRequest');
+    assert.equal(askedInternet.method, 'Fetch.continueRequest');
+  });
+  // The list engine may block some of these by itself; the figure below is about the ad checks that follow.
+  bridge.blocked = blockedBefore;
+
   mark = calls.length;
   await bridge.command({ action: 'navigate', value: 'https://news.example/story' });
   await check('Dirección escrita: filtros registrados antes de navegar', () => {

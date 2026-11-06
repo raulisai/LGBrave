@@ -32,10 +32,10 @@ export class PeerSync{
    const link=this.links.get(host)||{host,state:'pending',ack:''};const before=link.state;this.links.set(host,link);
    try{
     const request=this.protocol.request(link.ack),envelope=seal(request,this.settings.key);const response=await this.fetcher('http://'+host+':'+this.port+'/holy-api/profile-sync',{method:'POST',headers:{'Content-Type':'application/json','X-Holy-Signature':sign(envelope,this.settings.key)},body:JSON.stringify(envelope),signal:AbortSignal.any([AbortSignal.timeout(3000),this.abort.signal])});
-    if(!response.ok){link.state=response.status===404?'needs-update':'offline';link.error=response.status===404?'El otro equipo necesita actualizar Holy.':'No se pudo sincronizar con el equipo.';return;}
-    const text=await limitedResponse(response);const box=JSON.parse(text);if(this.stopping)return;if(!authentic(box,response.headers.get('x-holy-signature'),this.settings.key))throw Error('Firma inválida.');const value=unseal(box,this.settings.key);link.ack=this.protocol.receive(request,value,sign(value,this.settings.key));link.state='synced';link.updated=this.now();link.error='';
-   }catch{link.state='offline';link.error='Equipo sin conexión; se conserva la copia local y se reintentará.';}
-   finally{if(before!==link.state)this.diagnostics?.event('profile-sync','peer-state',{source:host,state:link.state},link.state==='offline'?'warn':'info');}
+    if(!response.ok){link.code=String(response.status);link.state=response.status===404?'needs-update':'offline';link.error=response.status===404?'El otro equipo necesita actualizar Holy.':'No se pudo sincronizar con el equipo.';return;}
+    const text=await limitedResponse(response);const box=JSON.parse(text);if(this.stopping)return;if(!authentic(box,response.headers.get('x-holy-signature'),this.settings.key))throw Error('Firma inválida.');const value=unseal(box,this.settings.key);link.ack=this.protocol.receive(request,value,sign(value,this.settings.key));link.state='synced';link.updated=this.now();link.error='';link.code='';
+   }catch(error){link.code=String(error?.cause?.code||error?.code||error?.name||'').slice(0,40);link.state='offline';link.error='Equipo sin conexión; se conserva la copia local y se reintentará.';}
+   finally{if(before!==link.state)this.diagnostics?.event('profile-sync','peer-state',{source:host,state:link.state,code:link.code||''},link.state==='offline'?'warn':'info');}
   }));
  }
  async handle(req,res){
@@ -48,7 +48,9 @@ export class PeerSync{
    this.lastInbound=this.now();this.lastInboundHash=reply.hash;
   }catch(error){res.writeHead(error.status||400,{'Content-Type':'application/json'}).end(JSON.stringify({ok:false,error:'No se aceptó la sincronización.'}));}
  }
- status(){const records=[...this.links.values()],hash=this.replica.hash();const links=records.map(({host,state,updated,error})=>({host,state,updated:updated||null,error:error||''}));const pending=records.length?records.some(p=>p.ack!==hash):!!this.lastInboundHash&&this.lastInboundHash!==hash;const synced=!pending&&(links.some(p=>p.state==='synced')||this.lastInbound&&this.now()-this.lastInbound<15000);
+ status(){const records=[...this.links.values()],hash=this.replica.hash();const links=records.map(({host,state,updated,error})=>({host,state,updated:updated||null,error:error||''}));// An address that never answered (a computer's old IP) does not hold the state at «pending» forever.
+  const known=records.filter(p=>p.updated),watched=known.length?known:records;
+  const pending=watched.length?watched.some(p=>p.ack!==hash):!!this.lastInboundHash&&this.lastInboundHash!==hash;const synced=!pending&&(links.some(p=>p.state==='synced')||this.lastInbound&&this.now()-this.lastInbound<15000);
   return{paired:!!this.settings.key,state:synced?'synced':links.some(p=>p.state==='needs-update')?'needs-update':this.settings.key?'pending':'unpaired',updated:Math.max(this.lastInbound||0,...links.map(p=>p.updated||0))||null,peers:links,pending,transport:'Red local cifrada y autenticada; copias persistentes en cada equipo',discovery:this.discoveryError||''};}
 
  start(){if(this.started)return this;this.started=true;this.stopping=false;if(this.abort.signal.aborted)this.abort=new AbortController();const run=async()=>{try{await this.tick();}catch(error){this.diagnostics?.event('profile-sync','error',{error},'warn');}finally{if(!this.stopping){this.timer=setTimeout(run,5000);this.timer.unref();}}};run();return this;}

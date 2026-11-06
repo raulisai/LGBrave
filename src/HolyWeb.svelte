@@ -459,11 +459,12 @@
     {#each rows as shelf (section + '|' + shelf.id)}
       <section class="row" class:landscape-row={shelf.layout === 'landscape'}>
         <h2>{#if shelf.genre}<button class="genre-link" onclick={() => openCategory(shelf)}>{shelf.title} <span>Ver todas ›</span></button>{:else}{shelf.title}{/if}</h2>
+        {#if shelf.note}<p class="shelf-note">{shelf.note}</p>{/if}
         <div class="track">
           {#each shelf.items as item (item.url || item.id)}
             {#if item.chip}
               <div class="card chip" class:liked={item.value === 1} class:disliked={item.value === -1}>
-                <strong>{item.title}</strong><small>{item.count} títulos</small>
+                <strong>{item.title}</strong><small>{item.note || item.count + ' títulos'}</small>
                 <div class="chip-actions">
                   <button type="button" aria-label="Me gusta" onclick={() => togglePref(item, 1)}><Icon name="check" size={16} stroke={3} /></button>
                   <button type="button" aria-label="No me gusta" onclick={() => togglePref(item, -1)}><Icon name="minus" size={16} stroke={3} /></button>
@@ -641,6 +642,7 @@
   .rows{display:flex;flex-direction:column;gap:22px;padding-top:4px}
   .empty{margin:30px 16px;font-size:15px;color:var(--secondary)}
   .row h2{margin:0 0 8px 16px;font-size:17px;font-weight:700;color:#e8e8e8}
+  .shelf-note{margin:-4px 16px 8px;font-size:12px;color:var(--tertiary)}
   .genre-link{display:inline-flex;align-items:baseline;gap:8px;color:inherit;font:inherit;padding:0}
   .genre-link span{font-size:12px;opacity:.6}
   .track{display:flex;gap:10px;overflow-x:auto;padding:2px 16px 8px;scroll-snap-type:x proximity;scrollbar-width:none}

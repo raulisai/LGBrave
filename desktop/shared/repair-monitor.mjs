@@ -1,9 +1,10 @@
-// The supervisor invokes this even when the tray is closed.
 // A suspended computer stops every timer: the silence it leaves is not a stuck worker.
+// Returns how long the computer slept (ms), or 0.
 export function createSleepClock({now=Date.now,gap=10000}={}) {
  let last=now();
- return ()=>{const time=now(),slept=time-last>gap;last=time;return slept;};
+ return ()=>{const time=now(),slept=time-last>gap?time-last:0;last=time;return slept;};
 }
+// The supervisor invokes this even when the tray is closed.
 export function createRepairMonitor({readState,repair,now=Date.now}) {
  let pending,nextAt=0,signature='';
  return {tick(){

@@ -2,7 +2,9 @@ import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Library, titleKey, FINISHED } from './holy/library.mjs';
-import { Catalog } from './holy/catalog.mjs';
+import { Catalog, factsFor } from './holy/catalog.mjs';
+import { KnownLists } from './holy/known-lists.mjs';
+import { Credits } from './holy/credits.mjs';
 
 // `npm run holy:taste-eval [biblioteca.json] [catalogo.json]`: how well Holy's match predicts
 // what the owner really watched. Leave one out: each title the owner finished, liked or left
@@ -19,7 +21,8 @@ export function labelOf(entry, vote) {
   return null;
 }
 
-export function evaluate(data, catalogItems, { now = Date.now(), Model = Library } = {}) {
+// facts: who is in each title and how acclaimed it is (`Library.learnFacts`), as Holy gives them.
+export function evaluate(data, catalogItems, { now = Date.now(), Model = Library, facts = null } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'holy-taste-'));
   try {
     const all = new Model(join(dir, 'all.json'), () => now);
@@ -36,6 +39,7 @@ export function evaluate(data, catalogItems, { now = Date.now(), Model = Library
     for (const [key, { item, label }] of cases) {
       const without = new Model(join(dir, 'one.json'), () => now);
       without.learnCatalogue(pool, 'eval');
+      if (facts) without.learnFacts(facts, 'eval');
       without.entries = all.entries.filter(entry => titleKey(entry) !== key);
       without.votes = all.votes.filter(vote => titleKey(vote) !== key);
       without.prefs = all.prefs; without.profileCache = null;
@@ -65,7 +69,8 @@ export function evaluate(data, catalogItems, { now = Date.now(), Model = Library
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 
-if (process.argv[1]?.endsWith('/eval-holy-taste.mjs')) {
+// Run as a command (either slash: Windows passes «scripts\eval-holy-taste.mjs»), not when imported.
+if (/[\\/]eval-holy-taste\.mjs$/.test(process.argv[1] || '')) {
   const [libraryFile = '.local/holy-library.json', catalogFile = '.local/holy-catalog.json'] = process.argv.slice(2).filter(arg => !arg.startsWith('--'));
   const data = JSON.parse(readFileSync(libraryFile, 'utf8'));
   // The catalogue as Holy loads it (one genre vocabulary), from a copy: the real files stay untouched.
@@ -80,8 +85,16 @@ if (process.argv[1]?.endsWith('/eval-holy-taste.mjs')) {
     console.log('Géneros encontrados:', await library.fillGenres(item => catalog.genresFor(item)));
   }
   const items = catalog.items;
+  // People and awards as the server knows them: the saved lists (no refresh) and the credits cache.
+  // --fetch also asks Cinemeta/Wikidata for the people of what was watched (saved in the shared cache).
+  const lists = new KnownLists({ file: '.local/holy-known-lists.json' });
+  const credits = new Credits({ file: '.local/holy-credits.json' });
+  if (process.argv.includes('--fetch')) {
+    console.log('Repartos nuevos:', await credits.fill([...data.entries, ...(data.votes || []), ...items].map(item => catalog.withId(item)), { limit: 400 }));
+  }
   rmSync(copy, { recursive: true, force: true });
-  const result = evaluate(data, items);
+  const facts = factsFor(items, { credits, lists, withId: item => catalog.withId(item) });
+  const result = evaluate(data, items, { facts: process.argv.includes('--plain') ? null : facts });
   if (process.argv.includes('--save-genres')) writeFileSync(join(tmpdir(), 'holy-taste-library.json'), JSON.stringify(data));
   console.table(result.rows.map(row => ({ título: row.title.slice(0, 34), tipo: row.kind, real: row.label ? 'gustó' : 'no gustó', afinidad: row.match, puesto: row.percentile + ' %', géneros: row.genres })));
   const { rows, ...summary } = result;

@@ -13,6 +13,7 @@ import { FlightRecorder } from './flight-recorder.mjs';
 import { cleanerSource, decideCleaning, CleanerRules } from './ad-cleaner.mjs';
 import { dirname, join } from 'node:path';
 import {lumaOrigin} from './desktop-config.mjs';
+import { intoPrivateNetwork } from './private-network.mjs';
 
 export const packagedHome = 'file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html';
 export const home = lumaOrigin() + '/luma-home/';
@@ -292,10 +293,13 @@ export class BrowserBridge {
             result = { should_block: true, filter: { raw_line: 'Luma: salida automática de la página de reproducción' } };
           }
         }
+        // Holy's server, the router and the rest of the home network are not for web pages to ask.
+        if (!result.should_block && intoPrivateNetwork(request.url, source, resourceType)) result = { should_block: true, lan: true, filter: { raw_line: 'Luma: una página de Internet no puede pedir cosas a la red local' } };
       }
       const record = { url: request.url.split('?')[0], source: source.split('?')[0], type: resourceType, blocked: !!result.should_block, rule: result.filter?.raw_line || null, exception: result.exception?.raw_line || null, redirect: !!result.redirect };
       this.records.push(record);
-      if (record.blocked) this.blocked++;
+      // Not an ad: kept out of the «blocked» figure the owner sees.
+      if (record.blocked && !result.lan) this.blocked++;
       if (this.records.length > 12000) this.records.splice(0, 2000);
       if (result.should_block && mainDocument) {
         // Abort a top navigation as a user cancellation. A synthetic 204 keeps

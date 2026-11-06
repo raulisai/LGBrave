@@ -1,5 +1,5 @@
 import {genreLabel} from '../../src/holy-genres.js';
-import { tasteKey, prefKey, publicTasteURL, cleanTasteMeta, cleanLanguages, mergeLibraryState } from './taste-state.mjs';
+import { tasteKey, prefKey, publicTasteURL, cleanTasteMeta, cleanLanguages, mergeLibraryState, normalizeTaste } from './taste-state.mjs';
 import { readFileSync, mkdirSync, writeFileSync, renameSync, copyFileSync, existsSync } from 'node:fs';
 import { dirname } from 'node:path';
 
@@ -44,8 +44,32 @@ function cleanVote(vote) {
     genres: strings(vote.genres), studios: strings(vote.studios), country: String(vote.country || ''), poster: publicTasteURL(vote.poster || ''), backdrop: publicTasteURL(vote.backdrop || ''),
     year: String(vote.year || ''), vote: vote.vote, at: number(vote.at) };
 }
-// Explicit tastes chosen in «Gustos»: a genre, a producer/studio or a country, liked (1) or not (−1).
-export const PREF_TYPES = ['genre', 'studio', 'country'];
+// Explicit tastes chosen in «Gustos»: a genre, a producer/studio, a country or a person (actor or
+// director), liked (1) or not (−1).
+export const PREF_TYPES = ['genre', 'studio', 'country', 'person'];
+// The saga a title belongs to: its main title, before «:» or « - » («One Piece» for «One Piece:
+// Heroínas»). `sequel` when the title goes on after it: two bare titles alike are remakes, not a saga.
+export function sagaOf(item) {
+  const title = String(item?.title || '');
+  const name = normalizeTaste(title.split(/\s*:\s*|\s+[-–—]\s+|\s*\(/)[0]);
+  return name.replace(/\s+/g, '').length >= 4 ? { key: name, sequel: /:|\s[-–—]\s/.test(title) } : null;
+}
+// How much two titles have in common (0…1): rarer shared genres count more, a shared saga or
+// person a lot, the same kind a little. Used for variety and for «Porque viste…».
+export function likeness(a, b, { people = () => [], rarity = null } = {}) {
+  const weight = name => rarity?.get(name) ?? 1;
+  const [x, y] = [a, b].map(item => new Set(strings(item?.genres).map(genreLabel)));
+  const union = [...new Set([...x, ...y])];
+  const genres = union.length ? union.filter(name => x.has(name) && y.has(name)).reduce((sum, name) => sum + weight(name), 0) / union.reduce((sum, name) => sum + weight(name), 0) : 0;
+  const [sa, sb] = [sagaOf(a), sagaOf(b)];
+  const saga = sa && sb && sa.key === sb.key && (sa.sequel || sb.sequel || a.kind !== b.kind) ? 1 : 0;
+  const names = new Set(people(a).map(person => person.name));
+  const shared = people(b).filter(person => names.has(person.name)).length;
+  return Math.min(1, 0.55 * genres + 0.5 * saga + 0.25 * Math.min(2, shared) + (a.kind === b.kind ? 0.1 : 0));
+}
+const saturate = value => (value >= 0 ? 1 : -1) * (1 - Math.exp(-Math.abs(value) / 1.5));
+const BILLING = [1, 0.7, 0.5];
+const billing = person => (person.role === 'director' ? 0.8 : BILLING[person.order] ?? 0.4);
 const cleanPref = pref => (record(pref) && PREF_TYPES.includes(pref.type) && typeof pref.name === 'string' && pref.name.trim() && [1, -1].includes(pref.value)
   ? { type: pref.type, name: pref.name.trim().slice(0, 60), value: pref.value, at: number(pref.at) } : null);
 
@@ -228,15 +252,29 @@ export class Library {
     this.rarity = list.length ? new Map([...counts].map(([name, count]) => [name, Math.log((list.length + 1) / (count + 1)) / mean])) : null;
     this.rarityVersion = version; this.profileCache = null;
   }
+  // Facts the catalogue knows about any title, watched or not: who is in it (`people(item)` →
+  // [{ name, role, order }]) and how acclaimed it is (`acclaim(item)` → 0…1, from awards and critics'
+  // lists); `base`: the share of acclaimed titles in the catalogue. A new version rebuilds the profile.
+  learnFacts({ people = null, acclaim = null, base = 0 } = {}, version) {
+    if (this.factsVersion === version) return;
+    Object.assign(this, { peopleOf: people, acclaimOf: acclaim, acclaimBase: base, factsVersion: version, profileCache: null });
+  }
+  peopleIn(item) { try { return this.peopleOf?.(item) || []; } catch { return []; } }
+  // Without the lists (tests, first start) a title the catalogue marked `acclaimed` still counts.
+  acclaimIn(item) { try { return this.acclaimOf ? this.acclaimOf(item) || 0 : item?.acclaimed ? 0.6 : 0; } catch { return 0; } }
   // ---- Taste profile. Each signal spreads its weight over its genres (weighted by rarity):
   //   watched: observed playback only (>=120 s), bounded weight, half every 21 days; retries add no weight.
   //   «me gusta» +1.5 / «no me gusta» −1.5, fading slowly (half every 180 days).
   // Affinities are scaled to 0…1 (by the strongest like) and −1…0 (by the strongest dislike).
+  // People (top-billed actors weigh more than the third one; directors) and sagas saturate instead:
+  // one loved film already counts, a second one makes it sure. `acclaim`: how much more than the
+  // catalogue offers them the owner goes for acclaimed titles (log of the ratio, −0.5…1).
   profile(scope = '') {
     if (this.profileCache?.[scope || 'global']) return this.profileCache[scope || 'global'];
     const votes = this.votes.filter(item => !scope || item.kind === scope);
-    const genres = new Map(), kinds = new Map(), decades = new Map(), studios = new Map(), countries = new Map();
+    const genres = new Map(), kinds = new Map(), decades = new Map(), studios = new Map(), countries = new Map(), people = new Map(), sagas = new Map(), roles = new Map(), support = new Map();
     const add = (map, key, value) => key && map.set(key, (map.get(key) || 0) + value);
+    let positive = 0, prized = 0;
     const signal = (item, weight) => {
       const list = [...new Set(strings(item.genres).map(genreLabel))];
       for (const name of list) add(genres, name, weight / Math.sqrt(list.length) * (this.rarity?.get(name) ?? 1));
@@ -245,6 +283,14 @@ export class Library {
       add(kinds, item.kind, weight);
       const year = Number(String(item.year || '').slice(0, 4));
       if (year > 1900) add(decades, Math.floor(year / 10) * 10, weight * 0.5);
+      for (const person of this.peopleIn(item)) {
+        add(people, person.name, weight * billing(person));
+        add(roles, person.name + '|' + person.role, Math.abs(weight));
+        if (weight > 0) add(support, person.name, 1);
+      }
+      const saga = sagaOf(item);
+      if (saga) sagas.set(saga.key, { weight: (sagas.get(saga.key)?.weight || 0) + weight, title: sagas.get(saga.key)?.title || item.title, sequel: saga.sequel || !!sagas.get(saga.key)?.sequel, kind: item.kind });
+      if (weight > 0) { positive += weight; prized += weight * this.acclaimIn(item); }
     };
     const observed = this.entries.filter(entry => (!scope || entry.kind === scope) && entry.watched >= 120 && !this.voteOf(entry));
     const distinct = new Map();
@@ -256,14 +302,22 @@ export class Library {
     }
     for (const vote of votes) signal(vote, RATING_WEIGHT[vote.vote] * Math.pow(0.5, Math.max(0, this.now() - vote.at) / DAY / 180));
     // Chosen tastes weigh like a couple of ratings each, and never fade.
-    for (const pref of this.prefs) add({ genre: genres, studio: studios, country: countries }[pref.type], pref.type === 'genre' ? genreLabel(pref.name) : pref.name, pref.value * 3);
+    for (const pref of this.prefs) {
+      add({ genre: genres, studio: studios, country: countries, person: people }[pref.type], pref.type === 'genre' ? genreLabel(pref.name) : pref.name, pref.value * 3);
+      if (pref.type === 'person' && pref.value > 0) { add(support, pref.name, 2); add(roles, pref.name + '|cast', 0.1); }
+    }
     // Likes and dislikes are scaled separately, so one «no me gusta» never dims the favourites.
     const scale = map => {
       const top = Math.max(0, ...map.values()), bottom = Math.min(0, ...map.values());
       return new Map([...map].map(([key, value]) => [key, value > 0 ? value / top : value < 0 ? -value / bottom : 0]).sort((a, b) => b[1] - a[1]));
     };
     const liked = votes.filter(vote => vote.vote > 0).length;
+    const role = name => ((roles.get(name + '|director') || 0) > (roles.get(name + '|cast') || 0) ? 'director' : 'cast');
+    const base = this.acclaimBase || 0;
     const result = { genres: scale(genres), kinds: scale(kinds), decades: scale(decades), studios: scale(studios), countries: scale(countries), liked, disliked: votes.length - liked,
+      people: new Map([...people].map(([name, value]) => [name, saturate(value)]).sort((a, b) => b[1] - a[1])), roles: new Map([...people.keys()].map(name => [name, role(name)])), support,
+      sagas: new Map([...sagas].map(([name, saga]) => [name, { ...saga, value: saturate(saga.weight * 1.5) }])),
+      acclaim: positive && this.acclaimOf ? Math.max(-0.5, Math.min(1, Math.log((prized / positive + 0.03) / (base + 0.03)) / Math.log(4))) : 0,
       loved: votes.filter(vote => vote.vote === 2).length, watched: this.entries.filter(entry=>entry.watched>=120).length, prefs: this.prefs.length, signals: distinct.size + votes.length + this.prefs.length };
     this.profileCache ||= {}; this.profileCache[scope || 'global'] = result;
     return result;
@@ -275,28 +329,71 @@ export class Library {
     if (!item) return { percent: null, reason: '' };
     const direct = this.voteOf(item);
     if (direct) return { percent: direct === 2 ? 99 : direct === 1 ? 90 : 5, reason: direct === 2 ? 'Lo marcaste: me encanta' : direct === 1 ? 'Lo marcaste: me gusta' : 'Lo marcaste: no es para mí' };
+    const global = profile;
     const scoped = item.kind ? this.profile(item.kind) : null;
     if (scoped?.signals >= 2) profile = scoped;
     if (profile.signals < 2) return { percent: null, reason: '' };
+    // Genres, kind and decade from what was seen of this kind, with a little of everything else
+    // (an anime fan's taste for action says something about action films too).
+    const mixed = (field, key) => (profile === global ? global[field].get(key) || 0 : 0.8 * (profile[field].get(key) || 0) + 0.2 * (global[field].get(key) || 0));
     const list = [...new Set(strings(item.genres).map(genreLabel))];
-    const affinities = list.map(name => profile.genres.get(name) || 0);
+    const affinities = list.map(name => mixed('genres', name));
     const genre = affinities.length ? affinities.reduce((sum, value) => sum + value, 0) / affinities.length + 0.5 * Math.max(...affinities) : 0;
     const kind = profile.kinds.get(item.kind) || 0;
     const year = Number(String(item.year || '').slice(0, 4));
-    const decade = year > 1900 ? (profile.decades.get(Math.floor(year / 10) * 10) || 0) : 0;
+    const decade = year > 1900 ? mixed('decades', Math.floor(year / 10) * 10) : 0;
     const rating = Number(item.rating) > 0 ? Math.max(-1, Math.min(1, (Number(item.rating) - 6) / 4)) : 0;
     const studioList = strings(item.studios).map(name => profile.studios.get(name) || 0);
     const studio = studioList.length ? Math.max(...studioList.map(Math.abs)) * Math.sign(studioList.reduce((sum, value) => sum + value, 0)) : 0;
     const place = profile.countries.get(item.country) || 0;
+    // People and sagas count from every kind: the actor of a film, the anime of a film's saga.
+    const cast = this.peopleIn(item).map(person => ({ ...person, value: (global.people.get(person.name) || 0) * billing(person) }));
+    const fan = cast.filter(person => person.value > 0).sort((a, b) => b.value - a.value)[0];
+    const person = (fan?.value || 0) + Math.min(0, ...cast.map(entry => entry.value));
+    const sagaKey = sagaOf(item), seen = sagaKey && global.sagas.get(sagaKey.key);
+    const saga = seen && (seen.sequel || sagaKey.sequel || seen.kind !== item.kind) && normalizeTaste(seen.title) !== normalizeTaste(item.title) ? seen.value : 0;
+    // Awards and critics: a small edge for any acclaimed title, more for an owner who goes for them.
+    const prized = this.acclaimIn(item);
+    const acclaim = prized * (0.2 + 0.8 * global.acclaim);
     // Neutral genres ≈ 50 %, every genre loved ≈ 95 %, disliked ones ≈ 5 %; studio and country nudge it.
-    const z = 1.9 * genre + 0.35 * kind + 0.3 * decade + 0.35 * rating + 0.6 * studio + 0.5 * place - 0.35 - (list.length ? 0 : 0.4);
+    const z = 1.9 * genre + 0.35 * kind + 0.3 * decade + 0.35 * rating + 0.6 * studio + 0.5 * place + 1.1 * person + 1.4 * saga + 0.9 * acclaim - 0.35 - (list.length ? 0 : 0.4);
     // Few signals → stay near 50 %; the scale opens as the owner watches and rates more.
     const confidence = profile.signals / (profile.signals + 4);
     const percent = Math.max(5, Math.min(99, Math.round(50 + (100 / (1 + Math.exp(-z)) - 50) * confidence)));
-    const best = list.map(name => [name, profile.genres.get(name) || 0]).filter(([, value]) => value > 0.25).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([name]) => name);
+    const best = list.map(name => [name, mixed('genres', name)]).filter(([, value]) => value > 0.25).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([name]) => name);
     const studioName = strings(item.studios).find(name => (profile.studios.get(name) || 0) > 0.25);
-    const reason = [best.length ? 'Te gusta ' + best.join(' y ') : '', studioName || '', place > 0.25 ? 'de ' + item.country : ''].filter(Boolean).join(' · ');
+    const reason = [saga > 0.3 ? 'Porque viste ' + seen.title : '', fan?.value > 0.3 ? (fan.role === 'director' ? 'De ' : 'Con ') + fan.name : '',
+      best.length ? 'Te gusta ' + best.join(' y ') : '', prized >= 0.5 && global.acclaim > 0.3 ? 'Premiada, como las que te gustan' : '', studioName || '', place > 0.25 ? 'de ' + item.country : ''].filter(Boolean).slice(0, 2).join(' · ');
     return { percent, reason };
+  }
+  // The most telling people for the owner (≥ 2 titles, or chosen in «Gustos»), to give them a row.
+  favouritePeople(limit = 2) {
+    const profile = this.profile();
+    return [...profile.people].filter(([name, value]) => value > 0.45 && (profile.support.get(name) || 0) >= 2).slice(0, limit)
+      .map(([name]) => ({ name, role: profile.roles.get(name) || 'cast', note: this.prefOf('person', name) > 0 ? 'Lo elegiste en Gustos' : 'Porque te gustan sus películas' }));
+  }
+  // Recent titles the owner clearly enjoyed («Porque viste…» anchors): rated well, finished, or watched
+  // most of; one per saga, newest first.
+  anchors(limit = 2) {
+    const sagas = new Set(), out = [];
+    const liked = [...this.entries.filter(entry => this.voteOf(entry) >= 0 && (this.voteOf(entry) > 0 || entry.finished || (entry.duration && entry.watched / entry.duration >= 0.6) || (entry.kind !== 'movie' && entry.watched >= 2400))),
+      ...this.votes.filter(vote => vote.vote > 0).map(vote => ({ ...vote, updatedAt: vote.at }))].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    for (const entry of liked) {
+      const key = sagaOf(entry)?.key || tasteKey(entry);
+      if (!entry.genres?.length || sagas.has(key)) continue;
+      sagas.add(key); out.push(entry);
+      if (out.length >= limit) break;
+    }
+    return out;
+  }
+  // Titles most like `anchor` (genres, saga, people), the owner's match breaking ties; unseen only.
+  similarTo(anchor, items, limit = 30) {
+    const seen = new Set([...this.entries, ...this.votes].map(titleKey));
+    const options = { people: item => this.peopleIn(item), rarity: this.rarity };
+    return (Array.isArray(items) ? items : []).filter(item => item && !seen.has(titleKey(item)) && this.voteOf(item) >= 0)
+      .map(item => ({ item, near: likeness(anchor, item, options) })).filter(entry => entry.near >= 0.4)
+      .sort((a, b) => b.near + (b.item.match || 50) / 400 - (a.near + (a.item.match || 50) / 400)).slice(0, limit)
+      .map(({ item }) => ({ ...item, reason: 'Porque viste ' + anchor.title }));
   }
   // Copies of the items with their match, vote and a short reason.
   scored(items, profile = this.profile()) {
@@ -319,16 +416,26 @@ export class Library {
       if (percent === null || percent < 55) return;
       const because = this.entries.filter(entry => entry.watched >= 120 && this.voteOf(entry) >= 0).map(entry => ({ entry, shared: entry.genres.filter(name => item.genres?.includes(name)).length }))
         .filter(candidate => candidate.shared).sort((a, b) => b.shared - a.shared || b.entry.updatedAt - a.entry.updatedAt)[0];
-      // Titles on award or chart lists (acclaimed) get a small nudge, never past the owner's tastes.
-      scored.push({ ...item, match: percent, matchReason: reason, score: percent + 6 / (1 + index / 40) + (item.acclaimed ? 4 : 0), reason: because ? 'Porque viste ' + because.entry.title : item.acclaimed ? 'Premiada o muy popular, y va con tus gustos' : reason });
+      // The match's own reason when it names a saga or a person; else the watched title it echoes.
+      const strong = /^(Porque viste|Con |De )/.test(reason), prized = this.acclaimIn(item);
+      // Titles on award or critics' lists (acclaimed) get a small nudge, never past the owner's tastes.
+      scored.push({ ...item, match: percent, matchReason: reason, score: percent + 6 / (1 + index / 40) + 6 * prized,
+        reason: strong ? reason : because ? 'Porque viste ' + because.entry.title : prized >= 0.5 ? 'Premiada y va con tus gustos' : reason });
     });
-    // Variety: at most 3 titles led by the same genre until every genre had its turn (else one
-    // strong taste, e.g. horror films, fills the whole row); then the rest by score.
-    const ranked = scored.sort((a, b) => b.score - a.score), picked = [], led = new Map();
-    const lead = item => [...new Set(strings(item.genres).map(genreLabel))].sort((a, b) => (profile.genres.get(b) || 0) - (profile.genres.get(a) || 0))[0] || '';
-    for (const item of ranked) { const name = lead(item); if ((led.get(name) || 0) < 3) { picked.push(item); led.set(name, (led.get(name) || 0) + 1); } }
-    for (const item of ranked) if (!picked.includes(item)) picked.push(item);
-    return picked.slice(0, limit);
+    // Variety by maximal marginal relevance (Carbonell y Goldstein, 1998): each next title is the best
+    // match minus how much it repeats the ones already picked (genres, saga, people, kind), so one
+    // strong taste (horror films, a long anime) never fills the whole row.
+    const pool = scored.sort((a, b) => b.score - a.score).slice(0, limit * 4), picked = [];
+    const options = { people: item => this.peopleIn(item), rarity: this.rarity };
+    const repeats = new Map(pool.map(item => [item, 0]));
+    while (picked.length < limit && pool.length) {
+      let at = 0;
+      for (let index = 1; index < pool.length; index++) if (pool[index].score - 30 * repeats.get(pool[index]) > pool[at].score - 30 * repeats.get(pool[at])) at = index;
+      const [next] = pool.splice(at, 1);
+      picked.push(next);
+      for (const item of pool) repeats.set(item, Math.max(repeats.get(item), likeness(item, next, options)));
+    }
+    return picked;
   }
   favouriteGenres(limit = 3) { return [...this.profile().genres].filter(([, value]) => value > 0.3).slice(0, limit).map(([name]) => name); }
   // For the «Gustos» screen.
@@ -338,7 +445,7 @@ export class Library {
     const top = map => [...map].filter(([, value]) => value > 0.05).slice(0, 5).map(([name, value]) => ({ name, value: Math.round(value * 100) }));
     return { model: 2, confidence: profile.signals >= 20 ? 'alta' : profile.signals >= 6 ? 'media' : 'inicial', scoreMeaning: 'Afinidad estimada; no es una probabilidad comprobada', liked: profile.liked, disliked: profile.disliked, loved: profile.loved, watched: profile.watched, prefs: profile.prefs, signals: profile.signals,
       genres: list.filter(entry => entry.value > 5).slice(0, 8), avoid: list.filter(entry => entry.value < -5).sort((a, b) => a.value - b.value).slice(0, 5),
-      studios: top(profile.studios), countries: top(profile.countries),
+      studios: top(profile.studios), countries: top(profile.countries), people: top(profile.people), acclaim: Math.round(profile.acclaim * 100),
       kinds: [...profile.kinds].map(([name, value]) => ({ name, value: Math.round(value * 100) })) };
   }
 }

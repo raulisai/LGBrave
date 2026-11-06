@@ -470,7 +470,8 @@ try {
     assert.deepEqual(row('anime-airing'), ['Psyren', 'One Piece']);
     const anime = sectionRows(data, 'anime');
     assert.deepEqual(anime.map(entry => entry.id).slice(0, 3), ['continue', 'anime-airing', 'anime-classics-top100']);
-    assert.ok(!anime.find(entry => entry.id === 'source-jkanime').items.some(item => item.airing));
+    // «Lo nuevo en JKAnime» never lists airing shows (here it is gone: its titles are already shown above).
+    assert.ok(!anime.find(entry => entry.id === 'source-jkanime')?.items.some(item => item.airing));
     assert.deepEqual(catalog.searchLocal('onepiece').map(item => item.title), ['One Piece']);
     // Cuevana files the One Piece anime as a series (genre «Anime»): JKAnime first, its episode by address, no list needed.
     const cuevanaOP = { source: 'cuevana', kind: 'series', title: 'One Piece', show: 'https://cuevana.example/serie/one-piece', url: 'https://cuevana.example/serie/one-piece/episodio-15x642', episode: 642, genres: [] };
@@ -889,14 +890,18 @@ try {
       assert.equal((await post('doctor', { 'Sec-Fetch-Site': 'cross-site' })).status, 403);
       assert.deepEqual([prescribed, refreshed, library.votes.length], [0, 0, 0]);
       assert.equal((await fetch(base + '/holy-api/doctor', { method: 'OPTIONS', headers: { Origin: 'https://evil.example', 'Access-Control-Request-Method': 'POST' } })).status, 403);
-      for (const origin of [base, 'null', `http://192.168.1.102:${PORT}`, `http://localhost:${server.address().port}`]) assert.equal((await post('doctor', { Origin: origin })).status, 200, origin);
+      // «null» (file:// pages, but also any sandboxed iframe on any website) is never enough for Doctor.
+      assert.equal((await post('doctor', { Origin: 'null' })).status, 403);
+      for (const origin of [base, `http://192.168.1.102:${PORT}`, `http://localhost:${server.address().port}`]) assert.equal((await post('doctor', { Origin: origin })).status, 200, origin);
       assert.equal((await post('doctor')).status, 200);
-      assert.equal(prescribed, 5);
+      assert.equal(prescribed, 4);
       const req = (ip, headers = {}) => ({ headers, socket: { remoteAddress: ip } });
       assert.equal(mutationAllowed(req('192.168.1.134')), false);
       assert.equal(mutationAllowed(req('::ffff:127.0.0.1')), true);
       assert.equal(mutationAllowed(req('::1', { 'sec-fetch-site': 'cross-site' })), false);
-      assert.equal(mutationAllowed(req('192.168.1.134', { origin: 'null' })), true);
+      // The TV's packaged app sends «null»; only the TV is believed (see test-holy-security).
+      assert.equal(mutationAllowed(req('192.168.1.134', { origin: 'null' }), PORT, { tv: '192.168.1.134' }), true);
+      assert.equal(mutationAllowed(req('192.168.1.134', { origin: 'null' }), PORT, { tv: '192.168.1.99' }), false);
       assert.equal(mutationAllowed(req('192.168.1.134', { origin: `https://192.168.evil.com:${PORT}` })), false);
       // A bare «.local» name (the Mac renamed itself to serve Holy by a friendly address,
       // e.g. holy-mac.local) only ever resolves on this LAN, as safe a sign as a private IP.

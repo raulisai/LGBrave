@@ -7,6 +7,7 @@ import { genreList } from './holy/sources.mjs';
 import { genreLabel } from '../src/holy-genres.js';
 import { evaluate, labelOf } from './eval-holy-taste.mjs';
 import { mergeLibraryState } from './holy/taste-state.mjs';
+import { Credits } from './holy/credits.mjs';
 
 const dir = mkdtempSync(join(tmpdir(), 'holy-taste-'));
 let passed = 0;
@@ -56,6 +57,84 @@ try {
     assert.equal(result.liked, 2);
     assert.equal(result.disliked, 1);
     assert.ok(result.likedPercentile > result.dislikedPercentile);
+  });
+  const seen = (title, genres, extra = {}) => film(title, genres, { watched: 5000, t: 5900, finished: true, ...extra });
+  await check('Sagas: gustar del anime sube sus películas; dos títulos iguales sin subtítulo son remakes, no saga', () => {
+    const library = new Library(join(dir, 's.json'), () => NOW);
+    library.votes = [{ key: 'https://x.test/op', url: 'https://x.test/op', title: 'One Piece', kind: 'anime', genres: ['Acción', 'Aventura'], studios: [], vote: 2, at: NOW },
+      { key: 'https://x.test/crash', url: 'https://x.test/crash', title: 'Crash', kind: 'movie', year: '2005', genres: ['Drama'], studios: [], vote: 1, at: NOW }];
+    const saga = library.match({ title: 'One Piece: Red', kind: 'movie', genres: ['Animación'], url: 'https://x.test/red' });
+    const other = library.match({ title: 'Otra animada', kind: 'movie', genres: ['Animación'], url: 'https://x.test/otra' });
+    // Two signals only (Holy keeps scores near 50 % until it knows more): still ten points up.
+    assert.ok(saga.percent >= other.percent + 8, `${saga.percent} >= ${other.percent} + 8`);
+    assert.equal(saga.reason.split(' · ')[0], 'Porque viste One Piece');
+    assert.ok(!library.match({ title: 'Crash', kind: 'movie', year: '1996', genres: ['Drama'], url: 'https://x.test/crash96' }).reason.includes('Porque viste'));
+  });
+  await check('Actores: el que más ves sube sus otras películas y lo dice; elegir a alguien en Gustos también cuenta', () => {
+    const cast = { Click: ['Adam Sandler', 'Kate Beckinsale'], 'Grown Ups': ['Adam Sandler', 'Kevin James'], Blended: ['Adam Sandler', 'Drew Barrymore'], Otra: ['Nadie Conocido'] };
+    const facts = { people: item => (cast[item.title] || []).map((name, order) => ({ name, role: 'cast', order })) };
+    const library = new Library(join(dir, 'p.json'), () => NOW);
+    library.learnFacts(facts, 1);
+    library.entries = [seen('Click', ['Comedia']), seen('Grown Ups', ['Comedia'])];
+    const sandler = library.match({ title: 'Blended', kind: 'movie', genres: ['Comedia'], url: 'https://x.test/blended' });
+    const plain = library.match({ title: 'Otra', kind: 'movie', genres: ['Comedia'], url: 'https://x.test/otra' });
+    assert.ok(sandler.percent > plain.percent, `${sandler.percent} > ${plain.percent}`);
+    assert.ok(sandler.reason.includes('Con Adam Sandler'));
+    assert.deepEqual(library.favouritePeople().map(person => [person.name, person.role]), [['Adam Sandler', 'cast']]);
+    const chosen = new Library(join(dir, 'p2.json'), () => NOW);
+    chosen.learnFacts(facts, 1);
+    chosen.entries = [seen('Uno', ['Comedia']), seen('Dos', ['Comedia'])];
+    assert.equal(chosen.prefer('person', 'Drew Barrymore', 1), 1);
+    assert.ok(chosen.match({ title: 'Blended', kind: 'movie', genres: ['Comedia'], url: 'https://x.test/blended' }).percent > chosen.match({ title: 'Otra', kind: 'movie', genres: ['Comedia'], url: 'https://x.test/otra' }).percent);
+    assert.deepEqual(chosen.favouritePeople().map(person => [person.name, person.note]), [['Drew Barrymore', 'Lo elegiste en Gustos']]);
+  });
+  await check('Premiadas: a quien ve películas premiadas le suben las premiadas; a quien nunca, apenas', () => {
+    const prized = new Set(['Amadeus', 'Gladiator', 'Coda', 'Ganadora']);
+    const facts = { acclaim: item => (prized.has(item.title) ? 1 : 0), base: 0.05 };
+    const fan = new Library(join(dir, 'a1.json'), () => NOW), casual = new Library(join(dir, 'a2.json'), () => NOW);
+    for (const [library, titles] of [[fan, ['Amadeus', 'Gladiator', 'Coda']], [casual, ['Uno', 'Dos', 'Tres']]]) { library.learnFacts(facts, 1); library.entries = titles.map(title => seen(title, ['Drama'])); }
+    const gap = library => library.match({ title: 'Ganadora', kind: 'movie', genres: ['Misterio'], url: 'https://x.test/g' }).percent - library.match({ title: 'Cualquiera', kind: 'movie', genres: ['Misterio'], url: 'https://x.test/c' }).percent;
+    assert.ok(fan.profile().acclaim > 0.9 && casual.profile().acclaim < 0);
+    assert.ok(gap(fan) > gap(casual) + 3, `${gap(fan)} > ${gap(casual)} + 3`);
+  });
+  await check('Recomendado para ti con variedad: una saga no llena la fila', () => {
+    const library = new Library(join(dir, 'v.json'), () => NOW);
+    library.entries = [seen('Terror 1', ['Terror']), seen('Comedia 1', ['Comedia'])];
+    const items = [...[...Array(8)].map((_, i) => ({ title: 'Saw: parte ' + (i + 1), kind: 'movie', genres: ['Terror'], url: 'https://x.test/saw' + i })),
+      ...[...Array(4)].map((_, i) => ({ title: 'Risa ' + i, kind: 'movie', genres: ['Comedia'], url: 'https://x.test/risa' + i }))];
+    const top = library.recommend(items, 6).map(item => item.title);
+    assert.ok(top.filter(title => title.startsWith('Saw')).length < 6, top.join());
+    assert.ok(top.some(title => title.startsWith('Risa')));
+  });
+  await check('Porque viste…: lo más parecido a lo que te gustó (géneros raros, saga, personas), sin lo ya visto', () => {
+    const library = new Library(join(dir, 'b.json'), () => NOW);
+    library.learnCatalogue([...Array(20)].map((_, i) => ({ genres: i < 2 ? ['Música'] : ['Drama'] })), 1);
+    library.entries = [seen('Amadeus', ['Drama', 'Música', 'Historia'], { year: '1984' }), film('Apenas', ['Drama'], { watched: 200 })];
+    const [anchor] = library.anchors();
+    assert.equal(anchor.title, 'Amadeus');
+    const near = library.similarTo(anchor, [{ title: 'Whiplash', kind: 'movie', genres: ['Drama', 'Música'], url: 'u1' }, { title: 'Otro drama', kind: 'movie', genres: ['Drama'], url: 'u2' }, { title: 'Amadeus', kind: 'movie', genres: ['Drama', 'Música'], url: 'u3' }]);
+    assert.deepEqual(near.map(item => [item.title, item.reason]), [['Whiplash', 'Porque viste Amadeus']]);
+  });
+  await check('Reparto: el IMDb de la página o el de Wikidata (mismo nombre, tipo y año), luego Cinemeta; un nombre dudoso no se adivina', async () => {
+    const asked = [];
+    const work = (label, id, imdb, first, kind) => ({ label: { value: label }, work: { value: 'http://www.wikidata.org/entity/' + id }, imdb: { value: imdb }, first: { value: first }, classes: { value: kind } });
+    const fake = async url => {
+      asked.push(url.includes('wikidata') ? 'wikidata' : /tt\d+/.exec(url)[0]);
+      if (url.includes('wikidata')) return Response.json({ results: { bindings: [work('El rito', 'Q1', 'tt1161864', '2011', 'Q11424'), work('El rito', 'Q2', 'tt0064897', '1969', 'Q506240'),
+        work('City Hunter', 'Q3', 'tt1982229', '2011', 'Q5398426'), work('City Hunter', 'Q4', 'tt0159208', '1987', 'Q63952888 Q5398426'), work('Amadeus', 'Q5', 'nm0023741', '', 'Q5')] } });
+      return Response.json({ meta: { name: 'X', cast: ['Colin O&apos;Donoghue', 'Anthony Hopkins', 'Ciarán Hinds', 'Cuarto'], director: ['Mikael Håfström'], imdbRating: '6.0' } });
+    };
+    const credits = new Credits({ file: join(dir, 'credits.json'), fetch: fake, now: () => NOW });
+    const rito = { title: 'El rito', kind: 'movie', year: '2011', url: 'https://x.test/rito' }, hunter = { title: 'City Hunter', kind: 'dorama', url: 'https://x.test/ch' };
+    const gladiator = { title: 'Gladiator', kind: 'movie', year: '2000', imdb: 'tt0172495', url: 'https://x.test/g' }, anime = { title: 'One Piece', kind: 'anime', url: 'https://x.test/op' };
+    assert.equal(await credits.fill([rito, hunter, gladiator, anime]), 2);
+    assert.deepEqual([credits.idOf(rito), credits.idOf(hunter)], ['tt1161864', ''], 'dos series con ese nombre y sin año: ninguna');
+    assert.deepEqual(credits.people(rito).map(person => [person.name, person.role, person.order]), [["Colin O'Donoghue", 'cast', 0], ['Anthony Hopkins', 'cast', 1], ['Ciarán Hinds', 'cast', 2], ['Mikael Håfström', 'director', 0]]);
+    assert.deepEqual(credits.people(anime), []);
+    asked.length = 0;
+    assert.equal(await credits.fill([rito, hunter, gladiator]), 0);
+    assert.deepEqual(asked, [], 'lo ya sabido no se vuelve a pedir');
+    assert.equal(new Credits({ file: join(dir, 'credits.json') }).people(gladiator)[0].name, "Colin O'Donoghue");
   });
   console.log(`Gustos de Holy: ${passed} pruebas correctas.`);
 } finally { rmSync(dir, { recursive: true, force: true }); }

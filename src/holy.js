@@ -13,19 +13,20 @@ const same = (a, b) => {
 export function packHome(home) {
   const items = (home.items || []).map(trimmed);
   const index = new Map(items.map((item, at) => [item.url, at]));
-  const rows = (home.rows || []).map(({ items: list, ...row }) => ({ ...row, refs: (list || []).map(item => {
+  const pack = list => (list || []).map(({ items: entries, ...row }) => ({ ...row, refs: (entries || []).map(item => {
     const small = trimmed(item);
     const at = index.get(small.url);
     return at !== undefined && same(small, items[at]) ? at : small;
   }) }));
-  return { ...home, v: 2, items, rows };
+  // «Lo mejor» travels packed the same way (older TVs simply leave it unread).
+  return { ...home, v: 2, items, rows: pack(home.rows), ...(home.best ? { best: pack(home.best) } : {}) };
 }
 const filled = item => ({ genres: [], ...item });
 export function unpackHome(packed) {
   if (packed?.v !== 2) return packed;
   const items = (packed.items || []).map(filled);
-  const rows = (packed.rows || []).map(({ refs, ...row }) => ({ ...row, items: (refs || []).map(ref => (typeof ref === 'number' ? items[ref] : filled(ref))).filter(Boolean) }));
-  return { ...packed, items, rows };
+  const unpack = list => (list || []).map(({ refs, ...row }) => ({ ...row, items: (refs || []).map(ref => (typeof ref === 'number' ? items[ref] : filled(ref))).filter(Boolean) }));
+  return { ...packed, items, rows: unpack(packed.rows), best: unpack(packed.best) };
 }
 
 // Shelves for each section of Holy's home, built from the Mac's catalogue.
@@ -35,6 +36,7 @@ export const SECTIONS = [
   { id: 'anime', name: 'Anime' },
   { id: 'dorama', name: 'Doramas' },
   { id: 'series', name: 'Series' },
+  { id: 'mejor', name: 'Lo mejor' },
   { id: 'gustos', name: 'Gustos' },
   { id: 'buscar', name: 'Buscar' }
 ];
@@ -50,25 +52,49 @@ export function withLayout(row) {
   return { ...row, layout: wide ? 'landscape' : 'poster' };
 }
 
+// Each title once per page, as the big services do: a title already shown higher up leaves the rows
+// below (two versions of one film may still share a row). «Continuar viendo», the airing schedule
+// and «Todos los títulos» keep every title. A row the repeats left too short goes: lists and
+// personal rows need 3 titles, the others `least` (5); each row shows at most `limit`.
+const KEEP = new Set(['continue', 'anime-airing', 'category-all']);
+const identity = item => genreKey(item.title) + '|' + (item.kind === 'movie' ? 'movie|' + (item.year || '') : 'show');
+export function dedupeRows(rows, { limit = 40, least = 5 } = {}) {
+  const shown = new Set(), out = [];
+  for (const row of rows) {
+    const items = KEEP.has(row.id) ? row.items : row.items.filter(item => !shown.has(identity(item)));
+    const minimum = /^(list-|foryou|because-|category-recommended)/.test(row.id || '') ? Math.min(3, least) : least;
+    if (!items.length || (items.length < row.items.length && items.length < minimum)) continue;
+    const kept = items.slice(0, limit);
+    for (const item of kept) shown.add(identity(item));
+    out.push(kept.length === row.items.length ? row : { ...row, items: kept });
+  }
+  return out;
+}
 export function sectionRows(data, section) {
   const rows = Array.isArray(data?.rows) ? data.rows : [];
-  if (section === 'inicio') return rows.filter(row => row.items?.length).map(withLayout);
+  const best = Array.isArray(data?.best) ? data.best : [];
+  if (section === 'inicio') return dedupeRows(rows.filter(row => row.items?.length)).map(withLayout);
+  if (section === 'mejor') return dedupeRows(best.filter(row => row.items?.length)).map(withLayout);
   const items = (Array.isArray(data?.items) ? data.items : rows.flatMap(row => row.items)).filter(item => item.kind === section);
   const out = [];
   const pick = id => rows.find(row => row.id === id)?.items.filter(item => item.kind === section) || [];
   if (pick('continue').length) out.push({ id: 'continue', title: 'Continuar viendo', items: pick('continue') });
   if (pick('foryou').length) out.push({ id: 'foryou', title: 'Recomendado para ti', items: pick('foryou') });
+  // «Porque viste…» and the owner's actors and directors, with this kind's titles.
+  out.push(...rows.filter(row => row.id?.startsWith('because-') || row.group === 'people').map(row => ({ ...row, items: row.items.filter(item => item.kind === section) })));
   if (pick('anime-airing').length) out.push({ id: 'anime-airing', title: 'Anime en emisión', items: pick('anime-airing') });
-  // Award and chart lists of this kind (the Mac matched them with the catalogue).
-  out.push(...rows.filter(row => row.id?.startsWith('list-') && row.kind === section && row.items?.length));
+  // Award, critics' and chart lists of this kind (the computer matched them with the catalogue):
+  // Inicio's own, then those of «Lo mejor» with something here to play.
+  const lists = [...rows.filter(row => row.id?.startsWith('list-') && row.group !== 'people'), ...best.filter(row => (row.owned ?? 3) >= 3)];
+  out.push(...new Map(lists.filter(row => row.kind === section && row.items?.length).map(row => [row.id, row])).values());
   if(section==='anime')out.push(classicAnimeRow(items));
-  // Recommendations first, then genres; small catalogues still expose every genre.
-  out.push(...genreShelves(items));
+  // Recommendations first, then genres (each title under its most telling genre); small catalogues still expose every genre.
+  out.push(...genreShelves(items, { assign: true }));
   for (const source of data?.sources || []) {
     const list = items.filter(item => item.source === source.id && !item.airing);
     if (list.length) out.push({ id: 'source-' + source.id, title: 'Lo nuevo en ' + source.name, items: list });
   }
-  return out.map(withLayout);
+  return dedupeRows(out.filter(row => row.items?.length)).map(withLayout);
 }
 
 // Accent/case aliases from different sites share the same category.
@@ -83,9 +109,13 @@ const uniqueTitles = items => {
     return !seen.has(key) && seen.add(key);
   });
 };
-export function genreShelves(items) {
-  const groups = new Map();
-  for (const item of items) for (const key of new Set((item.genres || []).map(canonical).filter(Boolean))) {
+// `assign`: each title only under its rarest genre here («Amadeus» in Música, not in Drama), so the
+// shelves of a page do not repeat each other; «Ver todas» still opens the whole genre.
+export function genreShelves(items, { assign = false } = {}) {
+  const groups = new Map(), counts = new Map();
+  const keys = item => [...new Set((item.genres || []).map(canonical).filter(Boolean))];
+  if (assign) for (const item of items) for (const key of keys(item)) counts.set(key, (counts.get(key) || 0) + 1);
+  for (const item of items) for (const key of assign ? keys(item).sort((a, b) => counts.get(a) - counts.get(b)).slice(0, 1) : keys(item)) {
     if (!groups.has(key)) groups.set(key, { id: 'genre-' + key, genre: key, title: genreNames[key] || item.genres.find(name => canonical(name) === key), items: [] });
     groups.get(key).items.push(item);
   }
@@ -106,6 +136,7 @@ export function categoryRows(data, section, genre, year = new Date().getFullYear
     { id: 'category-classics', title: 'Clásicas · hace 20 años o más', items: items.filter(item => Number(item.year) > 1900 && Number(item.year) <= year - 20).sort((a, b) => rating(b) - rating(a) || Number(a.year) - Number(b.year)) },
     { id: 'category-all', title: 'Todos los títulos · ' + items.length, items }
   ];
+  // A genre's page keeps its repeats: each row is another order of the same titles (match, year, rating…).
   return rows.filter(row => row.items.length).map(withLayout);
 }
 
