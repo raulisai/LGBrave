@@ -210,6 +210,19 @@ export class HolyBridge extends BrowserBridge {
   async request(params, sessionId) {
     try {
       const url = new URL(params.request.url);
+      // WAM can omit Origin for the packaged app. Only this owned top frame may
+      // identify itself to its own API; external players/iframes never receive it.
+      const ownedHome = params.frameId === this.mainFrame && this.isHome(this.frames.get(params.frameId) || '');
+      if (ownedHome && url.pathname.startsWith('/holy-api/') &&
+          (url.origin === new URL(this.apiBase).origin || this.homeAliases.has(url.origin))) {
+        const destination = new URL(url.pathname + url.search, this.apiBase);
+        const headers = Object.entries(params.request.headers || {}).filter(([name]) => name.toLowerCase() !== 'origin')
+          .map(([name,value]) => ({name,value:String(value)}));
+        headers.push({name:'Origin',value:new URL(this.apiBase).origin});
+        await this.cdp.call('Fetch.continueRequest', {requestId:params.requestId,url:destination.href,headers},sessionId).catch(() => {});
+        return;
+      }
+
       // Do not redirect arbitrary LAN requests or website/player resources.
       // Only the origin observed on Holy's own home may retain an old address.
       if (this.homeAliases.has(url.origin) && url.origin !== new URL(this.apiBase).origin &&

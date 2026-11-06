@@ -74,7 +74,7 @@ export class Credits {
     const unnamed = wanted.filter(item => !imdbOf(item) && !fresh(this.ids[creditKey(item)], this.ids[creditKey(item)]?.imdb ? KEEP : RETRY)).slice(0, limit);
     let added = 0;
     for (let index = 0; index < unnamed.length; index += 40) {
-      try { added += await this.name(unnamed.slice(index, index + 40)); }
+      try { await this.name(unnamed.slice(index, index + 40)); }
       catch (error) { this.log('Holy: reparto (Wikidata): ' + error.message); break; }
     }
     const ids = [...new Map(wanted.map(item => [this.idOf(item), item])).entries()].filter(([id]) => id && !fresh(this.titles[id], this.titles[id]?.missing ? RETRY : KEEP)).slice(0, limit);

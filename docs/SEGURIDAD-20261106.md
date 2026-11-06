@@ -46,3 +46,7 @@ Los cambios del servidor valen cuando se reinicie el servicio (`npm run desktop:
 1. Desde la TV: dar «Me gusta» y cambiar idioma. Si falla, `npm run desktop:log` o el registro mostrará `origin-refused` con `null`: significa que la IP de la TV guardada (`.local/desktop-config.json`, `tvIp`) no coincide con la real.
 2. Desde un teléfono: abrir `http://<computadora>:43190/` por IP y por nombre; un nombre de Internet apuntando a la computadora ya no responde.
 3. Opcional: ejecutar `windows/Firewall-LAN.ps1 -WhatIf`, luego sin `-WhatIf` como administrador.
+
+## Aplicación y corrección física0.9.24 · 06/11
+
+Windows reiniciado y Holy0.9.24 instalado en la LG. La TV real file:// omitía Origin: votos e idioma daban403. Se corrigió en HolyBridge: solo el frame principal del inicio propio recibe Origin del API propio, antes de reenviar la petición; se excluyen jugadores externos, iframes, frames desconocidos y destinos ajenos. El servidor mantiene sus reglas estrictas. Test de seguridad nuevo con estos límites y gate completo correctos. Repetición real desde LG: voto existente y preferencia de idioma existentes200/ok. Sin cambiar gustos efectivos, firewall ni llaves. Detalle: docs/INTEGRACION-MAIN-20261106.md.

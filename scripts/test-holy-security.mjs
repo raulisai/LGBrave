@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import {HolyBridge} from './holy/holy-bridge.mjs';
+import {BrowserBridge} from './browser-bridge.mjs';
 import http from 'node:http';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -20,6 +22,22 @@ const req = (ip, headers = {}) => ({ headers, socket: { remoteAddress: ip } });
 const resolveHost = async host => ({ 'intranet.example.com': ['10.0.0.5'], 'rebind.example.com': ['93.184.216.34', '127.0.0.1'], 'v6.example.com': ['fd00::1'] })[host] || ['93.184.216.34'];
 
 try {
+  await check('LG sin Origin: solo el inicio propio identifica su API; jugadores y marcos externos no', async () => {
+    const b=Object.create(HolyBridge.prototype),calls=[],fallback=[];
+    b.mainFrame='root';b.home='http://192.168.1.65:43190/holy/';b.packagedHome='file:///media/developer/apps/usr/palm/applications/com.lgapp.holy/index.html';
+    b.apiBase='http://192.168.1.65:43190';b.homeAliases=new Set(['http://192.168.1.102:43190']);b.frames=new Map([['root',b.packagedHome],['child','https://player.example/']]);
+    b.cdp={call:async(method,params)=>calls.push({method,params})};
+    const original=BrowserBridge.prototype.request;BrowserBridge.prototype.request=async p=>fallback.push(p);
+    const request=(frameId,url=b.apiBase+'/holy-api/vote')=>({frameId,requestId:'test',request:{url,headers:{'Content-Type':'application/json'}}});
+    try {
+      await b.request(request('root'));assert.equal(calls.length,1);assert.deepEqual(calls[0].params.headers.find(h=>h.name==='Origin'),{name:'Origin',value:b.apiBase});
+      await b.request(request('root','http://192.168.1.102:43190/holy-api/language'));assert.equal(calls[1].params.url,b.apiBase+'/holy-api/language');
+      for(const p of [request('child'),request('missing'),request('root','http://router.lan/holy-api/vote')])await b.request(p);
+      b.frames.set('root','https://player.example/');await b.request(request('root'));
+      assert.equal(calls.length,2);assert.equal(fallback.length,4);
+    }finally{BrowserBridge.prototype.request=original;}
+  });
+
   await check('Direcciones privadas: IPv4, IPv6 y IPv4 escondida en IPv6', () => {
     for (const bad of ['127.0.0.1', '10.1.2.3', '172.16.0.1', '172.31.255.255', '192.168.1.65', '169.254.169.254', '100.64.0.1', '0.0.0.0', '224.0.0.1', '::1', '::', 'fd00::1', 'fe80::1', '::ffff:192.168.1.1', '::ffff:7f00:1', 'no-es-ip'])
       assert.equal(privateAddress(bad), true, bad);

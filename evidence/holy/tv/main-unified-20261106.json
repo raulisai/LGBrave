@@ -1,0 +1,84 @@
+{
+  "v": 1,
+  "at": "2026-11-06T22:20:54.603Z",
+  "version": "0.9.24",
+  "scope": "TV física LG y Windows; prueba representativa, no cobertura de todos los títulos ni cierre nativo resuelto.",
+  "branches": {
+    "unmergedIntoMain": []
+  },
+  "controlled": {
+    "gate": true,
+    "cases": 33,
+    "sources": 12,
+    "builds": 3,
+    "inputHash": "34c2c47643c4d366354fd977eca3dffc7b87102efb38aeb5684ec7c303a31ddc",
+    "outputHash": "34c2c47643c4d366354fd977eca3dffc7b87102efb38aeb5684ec7c303a31ddc"
+  },
+  "tv": {
+    "installedVersion": "0.9.24",
+    "ui": {
+      "home": true,
+      "movies": true,
+      "terrorCategory": true,
+      "terrorTitles": 141,
+      "animeClassicTop100": true,
+      "tastes": true
+    },
+    "api": {
+      "protocol": "file:",
+      "vote": {
+        "status": 200,
+        "ok": true,
+        "value": 1,
+        "sameValue": true
+      },
+      "versions": {
+        "status": 200,
+        "labels": [],
+        "remembered": "dub"
+      },
+      "language": {
+        "status": 200,
+        "ok": true
+      }
+    },
+    "closedApp": {
+      "before": "connected",
+      "closed": "waiting",
+      "sameWorker": true
+    },
+    "restored": {
+      "title": "Shin Tennis no Oujisama: U-17 World Cup Kesshou Me...",
+      "episode": 6,
+      "originalPosition": {
+        "t": 68,
+        "d": 1420
+      },
+      "after": {
+        "t": 109.589123,
+        "d": 1420.0021849999994,
+        "paused": false,
+        "error": 0,
+        "ready": 4
+      }
+    },
+    "pause": {
+      "seconds": 79.633,
+      "positionBefore": 118.264456,
+      "positionAfter": 118.264456,
+      "sameRoot": true,
+      "paused": true,
+      "error": 0
+    }
+  },
+  "windows": {
+    "connected": true,
+    "outsideStoreApp": true
+  },
+  "limits": [
+    "Sin comprobar audio por usuario en esta prueba.",
+    "No se reprodujeron todos los proveedores ni una película completa.",
+    "Cierre nativo de Amadeus/Dragon Ball no confirmado como resuelto.",
+    "Mac física pendiente de actualizar."
+  ]
+}

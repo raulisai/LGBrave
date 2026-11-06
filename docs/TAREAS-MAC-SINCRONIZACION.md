@@ -1,4 +1,4 @@
-# Tareas en la Mac · sincronización Holy 0.9.13
+# Tareas en la Mac · sincronización Holy0.9.24
 
 El lado Windows está preparado. Este archivo puede ejecutarlo el otro agente de Codex en la Mac. El activador listo para usuario está en mac/Activar-sincronizacion.command.
 
@@ -80,3 +80,7 @@ Traer main conservando cambios, ejecutar npm run playback:check y reiniciar back
 Traer main que incluya la integración de las3fuentes y el arreglo de aislamiento Windows. Ejecutar npm ci y npm run playback:check antes de reiniciar desde el menú. La guardia close/open y el Doctor se aplican en la computadora activa; actualizar la Mac evita volver a una implementación anterior tras un relevo. No reinstalar menú/IPK para este cambio de backend, ni cambiar llaves.
 
 Investigar Dragon Ball con npm run holy:errors en esta Mac: no se encontró en los registros locales de Windows. Conservar título exacto, capítulo, fuente, hora y motivo nativo de cierre. No atribuir target_closed a falta de memoria o red sin evidencia. Ver docs/CIERRES-REPRODUCCION-20261102.md.
+
+## Actualización unificada06/11 ·0.9.24
+
+Windows y LG ya tienen0.9.24. Traer origin/main conservando biblioteca y cambios locales; npm ci, npm run playback:check y reiniciar el servicio desde el menú Mac. No repetir vinculación si el perfil ya funciona. Todas las ramas revisadas quedaron integradas en main. Ver docs/INTEGRACION-MAIN-20261106.md. Esta revisión no se activó físicamente en la Mac.
