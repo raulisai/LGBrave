@@ -31,25 +31,30 @@ export const monthlyFile = (file, kind, at = new Date().toISOString()) => join(d
 // Failures must outlive rotation: warnings and errors also go, forever, to a monthly file.
 // The same problem repeated within ten minutes is one line with a count.
 const REPEAT_WINDOW = 600000, MONTH_LIMIT = 50 * 1024 * 1024;
+// The connection's whole life (states, stops, restarts, sleeps, profile and peer sync, Doctor) is
+// small and is what explains a lost TV days later: keep all of it monthly, not only the warnings.
+const LIFECYCLE = new Set(['connection', 'service', 'profile', 'profile-sync', 'doctor']);
 export class DiagnosticLog {
   // HOLY_LOG_DIR: the tests send their events to a scratch folder, never to the owner's log.
   constructor({ file = join(process.env.HOLY_LOG_DIR || '.local/logs', 'diagnostics.jsonl'), maxBytes = 1024 * 1024, backups = 4, now = () => new Date().toISOString() } = {}) {
     Object.assign(this, { file, maxBytes, backups, now }); this.runId = randomUUID(); this.sequence = 0;
     this.device = createHash('sha256').update(hostname()).digest('hex').slice(0, 12);
   }
-  incident(row) {
+  incident(row, kind = 'incidents') {
     try {
-      const key = [row.component, row.event, row.state, row.error?.message, row.action, row.source].join('|');
-      const seen = (this.seen ||= new Map()), last = seen.get(key), now = Date.parse(row.at) || Date.now();
+      const key = [row.component, row.event, row.state, row.error?.message, row.action, row.source, row.code, row.reason].join('|');
+      const seen = ((this.seen ||= {})[kind] ||= new Map()), last = seen.get(key), now = Date.parse(row.at) || Date.now();
       if (last && now - last.at < REPEAT_WINDOW) { last.repeats++; return; }
       seen.set(key, { at: now, repeats: 0 });
-      const file = monthlyFile(this.file, 'incidents', row.at);
+      const file = monthlyFile(this.file, kind, row.at);
+      mkdirSync(dirname(file), { recursive: true });
       let size = 0; try { size = statSync(file).size; } catch { /* First of the month. */ }
       if (size < MONTH_LIMIT) appendFileSync(file, JSON.stringify(last?.repeats ? { ...row, repeats: last.repeats } : row) + '\n', { mode: 0o600 });
     } catch { /* A log problem cannot break the service. */ }
   }
   event(component, event, detail = {}, level = 'info') {
     if (level === 'warn' || level === 'error') this.incident({ at: this.now(), runId: this.runId, build, component, event, level, ...safeDetail(detail) });
+    if (LIFECYCLE.has(component)) this.incident({ at: this.now(), runId: this.runId, build, component, event, level, ...safeDetail(detail) }, 'connection');
     try {
       mkdirSync(dirname(this.file), { recursive: true });
       let size = 0; try { size = statSync(this.file).size; } catch { /* First entry. */ }

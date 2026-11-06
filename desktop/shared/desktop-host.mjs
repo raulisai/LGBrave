@@ -78,7 +78,7 @@ const startedAddress = lanAddress();
 const doctorBudget=new RepairJournal({file:join(ROOT,'.local','doctor-state.json')});
 const doctor = createDoctor({catalog, library, runtime, playbackIncident:()=>latestPlaybackExit(join(ROOT,'.local/logs/holy-playback.jsonl')), tv:tvAddress,profile:{inspect:recovery.inspect,restore:()=>{const unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));try{return recovery.restore();}finally{unlock();}}},
   reserveRepair:(action,code)=>{let unlock;try{unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));return doctorBudget.reserve(action,code);}catch{return{allowed:false,reason:'repair-busy'};}finally{unlock?.();}}, startedAddress, currentAddress:lanAddress,
-  supervised:!!process.send, restart:() => { finish().then(() => process.exit(1)); },
+  supervised:!!process.send, restart:() => { finish('doctor-restart').then(() => process.exit(1)); },
   autostart:createAutostart()});
 const server = startServer({catalog, library, doctor, diagnostics, peerSync,
   status:() => ({tv:runtime.state || 'starting', computer:lanAddress(),profile:profiles.status(),peerSync:peerSync?.status()||null})});
@@ -86,9 +86,10 @@ await import('../../scripts/fixture-server.mjs');
 const updates = process.env.LUMA_OFFLINE_TEST === '1' ? null : new FilterUpdates().start();
 const abort = new AbortController();
 let finishing;
-function finish() {
+// Why the service stopped is in the log: a sleep, a request, the supervisor leaving or a new address.
+function finish(reason = 'stopped') {
   if (finishing) return finishing;
-  diagnostics.event('service','stopping');
+  diagnostics.event('service','stopping',{reason});
   abort.abort(); clearInterval(statusTimer); clearInterval(genresTimer); updates?.stop();peerSync?.stop(); catalog.stop(); server.close();
   finishing = profiles.flush().catch(()=>{}).then(()=>runtime.close()).finally(() => {profiles.disconnect();release();});
   return finishing;
@@ -99,27 +100,28 @@ const report = () => {
   const status = {state,context:userDataContext(), app:runtime.cdp?.target.description || '', host:lanAddress(), tv:tvAddress(),
     error:runtime.lastError || '', holder:runtime.holder || '', paused:Math.max(0, Math.round((runtime.pausedUntil - Date.now()) / 1000)),
     profile:profiles.status(),peerSync:peerSync?.status()||null, updated:Date.now(), pid:process.pid, appPackage};
-  const stateKey=[state,status.app,status.error,status.profile.state].join('|');
-  if(stateKey!==reportedState){reportedState=stateKey;diagnostics.event('connection','state',{state,error:status.error,phase:status.profile.state},status.error?'warn':'info');}
+  const code=runtime.lastCause||'';
+  const stateKey=[state,status.app,status.error,status.profile.state,code].join('|');
+  if(stateKey!==reportedState){reportedState=stateKey;diagnostics.event('connection','state',{state,error:status.error,phase:status.profile.state,code,source:status.app},status.error?'warn':'info');}
   process.send?.({type:'status', status});
   mkdirSync('.local', {recursive:true});
   writeFileSync('.local/lab-status.json', JSON.stringify(status));
 };
 const statusTimer = setInterval(report, 2000); statusTimer.unref();
-for (const signal of ['SIGINT','SIGTERM']) process.once(signal, () => finish().finally(() => process.exit(0)));
+for (const signal of ['SIGINT','SIGTERM']) process.once(signal, () => finish('signal').finally(() => process.exit(0)));
 let wakeLoop = () => {};
 process.on('message', message => {
-  if (message === 'stop') finish().finally(() => process.exit(0));
+  if (message === 'stop') finish('stop-request').finally(() => process.exit(0));
   // «Usar esta computadora»: drop the pause after yielding and try right away.
   if (message === 'wake') { runtime.wake(); wakeLoop(); }
 });
-process.on('disconnect', () => finish().finally(() => process.exit(0)));
+process.on('disconnect', () => finish('supervisor-gone').finally(() => process.exit(0)));
 // Start SSH discovery only after lifecycle hooks exist; SDK cleanup must retain them.
 peerSync?.start();
 try {
   report();
   while (!runtime.stopping) {
-    if(lanAddress()!==startedAddress){await finish();process.exit(1);}
+    if(lanAddress()!==startedAddress){await finish('network-changed');process.exit(1);}
     if (process.env.LUMA_OFFLINE_TEST === '1') runtime.setState('waiting','Prueba local sin TV ni Internet.');
     else if (!tvAddress().configured||tvAddress().needsUpdate) {
       try{recovery.restore();}catch(error){diagnostics.event('profile','recovery-error',{error},'error');}
@@ -134,4 +136,4 @@ try {
     await Promise.race([delay(['offline','standby','setup'].includes(runtime.state) ? 5000 : 1500, undefined, {signal:abort.signal}).catch(() => {}),
       new Promise(resolve => { wakeLoop = resolve; })]);
   }
-} finally { await finish(); }
+} finally { await finish('loop-ended'); }

@@ -1,6 +1,6 @@
 {
   "name": "lg-tv-lab",
-  "version": "0.9.22",
+  "version": "0.9.23",
   "private": true,
   "type": "module",
   "scripts": {
@@ -30,6 +30,7 @@
     "desktop:doctor": "node scripts/desktop-control.mjs doctor",
     "desktop:repair": "node scripts/desktop-control.mjs repair",
     "desktop:handoff": "node scripts/desktop-control.mjs handoff",
+    "desktop:log": "node scripts/connection-report.mjs",
     "build:holy": "vite build --mode holy",
     "build:holy-web": "vite build --mode holy-web",
     "build:all": "npm run build && npm run build:holy && npm run build:holy-web",

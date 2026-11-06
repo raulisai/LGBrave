@@ -478,6 +478,19 @@
         "scripts/test-player-safety.mjs",
         "scripts/test-holy-logging.mjs"
       ]
+    },
+    {
+      "id": "windows-inspector-closed-wait",
+      "scope": "controlled",
+      "sources": [],
+      "description": "TV encendida con Holy/Luma cerrado: espera con la misma sesión SSH y reserva en vez de reconectar cada pocos segundos; causas, paradas, salidas y suspensiones en registro mensual permanente; IP antigua de otro equipo no deja la sincronización en pendiente. Sin navegar TV.",
+      "evidence": [
+        "scripts/lab-runtime.mjs",
+        "docs/CONEXION-TV-20261106.md"
+      ],
+      "tests": [
+        "scripts/test-connection-log.mjs"
+      ]
     }
   ],
   "caveats": [

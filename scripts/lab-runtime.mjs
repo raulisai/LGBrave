@@ -7,6 +7,12 @@ const bounded = async (operation, ms) => {
   try { return await Promise.race([operation, new Promise(resolve => { timer = setTimeout(resolve, ms); })]); }
   finally { clearTimeout(timer); }
 };
+// The TV's inspector only listens while a developer app is open: with Holy and Luma closed (another
+// app or input in front) the forwarded socket is reset. That is a wait, not a lost connection.
+const INSPECTOR_CLOSED = new Set(['ECONNRESET', 'ECONNREFUSED', 'EPIPE', 'UND_ERR_SOCKET', 'UND_ERR_CLOSED']);
+export const inspectorClosed = error => error?.name === 'TypeError' && /fetch failed/i.test(error.message) && INSPECTOR_CLOSED.has(error.cause?.code);
+// A short, stable reason for the logs: the user-facing message alone («fetch failed») hides it.
+export const failureCode = error => String(error?.cause?.code || error?.code || error?.name || '').slice(0, 40);
 const stopBridge = bridge => bridge ? bounded(Promise.resolve().then(() => bridge.stop()).catch(() => {}), 1500) : Promise.resolve();
 
 export class LabRuntime {
@@ -71,10 +77,10 @@ export class LabRuntime {
           if (this.tunnel !== tunnel) return;
           if (reason?.type === 'handoff') {
             this.pausedUntil = this.now() + this.handoffPause;
-            this.lastError = `${reason.by || 'Otra computadora'} pidió la TV: se la cedió esta computadora, que espera ${Math.round(this.handoffPause / 60000)} min antes de volver a intentarlo.`;
+            this.lastCause = 'handoff'; this.lastError = `${reason.by || 'Otra computadora'} pidió la TV: se la cedió esta computadora, que espera ${Math.round(this.handoffPause / 60000)} min antes de volver a intentarlo.`;
             this.setState('standby', this.lastError);
           } else {
-            this.lastError = 'Se perdió la conexión con la TV; se reintentará automáticamente.';
+            this.lastCause = reason?.type || 'lost'; this.lastError = 'Se perdió la conexión con la TV; se reintentará automáticamente.';
             this.setState('offline', this.lastError);
           }
           this.disconnect().catch(() => {});
@@ -83,14 +89,27 @@ export class LabRuntime {
       if (!current()) return;
       const tunnel = this.tunnel;
       tunnel.assertActive?.();
-      const target = this.selectTarget(await this.targets(tunnel.endpoint));
+      let targets;
+      try { targets = await this.targets(tunnel.endpoint); }
+      catch (error) {
+        if (!current() || !inspectorClosed(error)) throw error;
+        // Keep the SSH session and its reservation: rebuilding them every few seconds only
+        // churned the TV and let another computer slip in between attempts.
+        tunnel.assertActive?.();
+        await this.detach();
+        if (!current()) return;
+        this.lastError = null; this.lastCause = 'inspector-closed';
+        this.setState('waiting', 'En espera: la TV responde, pero Holy o Luma no está abierto. No se abrirá automáticamente.');
+        return;
+      }
+      const target = this.selectTarget(targets);
       if (!current()) return;
       tunnel.assertActive?.();
       if (!target) {
         await this.detach();
         if (!current()) return;
         this.sessionTabs = null; this.sessionTargetId = null;
-        this.lastError = null;
+        this.lastError = null; this.lastCause = 'app-not-open';
         this.setState('waiting', 'En espera: abre Holy o Luma con el control de la TV. No se abrirá automáticamente.');
         return;
       }
@@ -109,7 +128,7 @@ export class LabRuntime {
         if (!current()) { await stopBridge(bridge); connection.close(); return; }
         tunnel.assertActive?.();
         if (this.connectionClosed) throw Error('La conexión con la TV se cerró durante el inicio.');
-        this.lastError = null; this.holder = '';
+        this.lastError = null; this.holder = ''; this.lastCause = '';
         this.setState('connected', `Conexión pasiva: ${target.description || 'Luma'} · ${tunnel.endpoint}`);
       } else {
         await this.bridge.refreshFilters?.();
@@ -119,6 +138,7 @@ export class LabRuntime {
     } catch (error) {
       if (!current()) return;
       this.lastError = String(error?.message || error).slice(0, 240);
+      this.lastCause = error?.code === 'TV_BUSY' ? 'tv-' + (error.reason || 'busy') : failureCode(error);
       this.holder = error?.holder || '';
       await this.disconnect();
       if (!this.stopping) this.setState(error.code === 'TV_BUSY' ? 'standby' : 'offline', this.lastError);

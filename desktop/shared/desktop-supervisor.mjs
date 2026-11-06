@@ -17,17 +17,19 @@ let release;
 try { release = acquireRuntimeLock('.local/desktop-supervisor.lock'); }
 catch (error) { console.error(error.message); process.exit(2); }
 const token = randomUUID();
-let child, timer, watchdog, lastHeartbeat=Date.now(), stopping = false, failures = [], latest = {state:'starting'};
+let child, timer, watchdog, startedAt=Date.now(), lastHeartbeat=Date.now(), stopping = false, failures = [], latest = {state:'starting'};
 const ownerFile = join(ROOT, '.local', 'desktop-owner.json');
 function start() {
   if (stopping) return;
-  lastHeartbeat=Date.now();
+  lastHeartbeat=Date.now(); startedAt=Date.now();
   child = spawn(process.execPath, [process.env.LUMA_HOST_SCRIPT || join(ROOT, 'scripts', 'desktop-host.mjs')],
     {cwd:ROOT, windowsHide:true, stdio:['ignore','inherit','inherit','ipc'], env:{...process.env,HOLY_SUPERVISED:'1'}});
   child.on('message', message => { if (message?.type === 'status') {latest = message.status;lastHeartbeat=Date.now();} });
   child.on('error', error => { latest = {state:'error',error:error.message}; });
-  child.on('exit', code => {
+  child.on('exit', (code, signal) => {
     child = null;
+    // Every end of the worker is in the log, with how long it lived and what it was doing.
+    repairDiagnostics.event('service','worker-exit',{code:String(code ?? signal ?? ''),durationMs:Date.now()-startedAt,state:latest.state||''},code===0||stopping?'info':'warn');
     if (stopping) return done();
     // A conflict (another local runtime, or a program on the ports) may clear on its own: try again.
     if (code === 2) {
@@ -89,6 +91,6 @@ server.listen(0,'127.0.0.1', () => {
   writeFileSync(ownerFile, JSON.stringify({pid:process.pid,token,port:server.address().port}), {mode:0o600});
   start();
   const resumed=createSleepClock();
-  watchdog=setInterval(()=>{if(resumed())lastHeartbeat=Date.now();if(!stopping&&child)monitor.tick().catch(()=>{});},1000);watchdog.unref();
+  watchdog=setInterval(()=>{const slept=resumed();if(slept){lastHeartbeat=Date.now();repairDiagnostics.event('service','resumed',{durationMs:slept});}if(!stopping&&child)monitor.tick().catch(()=>{});},1000);watchdog.unref();
 });
 for (const signal of ['SIGINT','SIGTERM','SIGHUP']) process.once(signal, stop);
