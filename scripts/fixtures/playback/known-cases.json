@@ -142,14 +142,13 @@
       ]
     },
     {
-      "id": "source-tmdb",
+      "id": "source-tmdb-retired",
       "scope": "controlled",
-      "sources": [
-        "tmdb"
-      ],
-      "description": "Formato conocido de Catálogo público IMDb/TMDB: listas, búsqueda, temporadas y servidores por identificador, sin Internet.",
+      "sources": [],
+      "description": "Catálogo público IMDb/TMDB retirado: sin fuente ni búsqueda, caché/detalles/salud descartados al cargar, y un título guardado de ella solo se reproduce desde los sitios del dueño, nunca con sus servidores por identificador. Sin Internet.",
       "evidence": [
-        "scripts/test-holy-sites.mjs"
+        "scripts/holy/connectors.mjs",
+        "docs/CATALOGO-PUBLICO-RETIRADO-20261106.md"
       ],
       "tests": [
         "scripts/test-holy-sites.mjs"

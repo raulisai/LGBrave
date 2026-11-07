@@ -9,6 +9,7 @@
 // covers the first start without Internet. Titles not in the catalogue become «search your sites» cards.
 import { readFileSync, writeFileSync, mkdirSync, renameSync, existsSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { RETIRED_SOURCES } from './connectors.mjs';
 
 const UA = 'HolyLab/0.9 (personal TV catalogue; github.com/raulisai/LGBrave)';
 const DAY = 24 * 3600 * 1000;
@@ -357,6 +358,8 @@ export class KnownLists {
     }
     // Finds were kept per list («oscar|Q123»); a Wikidata work is now looked up once for every list it is on.
     for (const [id, found] of Object.entries(this.data.finds)) { const work = /^[^|]+\|(Q\d+)$/.exec(id)?.[1]; if (work && !this.data.finds['wd|' + work]) this.data.finds['wd|' + work] = found; }
+    // A match found on a retired source cannot be played: drop it, so the title is looked up again on the sites left.
+    for (const [id, found] of Object.entries(this.data.finds)) if (RETIRED_SOURCES.has(found?.item?.source)) delete this.data.finds[id];
   }
   // Every list shown: the people the owner likes first, then the public lists, then Holy's own.
   all() { return [...this.people, ...this.lists, ...this.derived]; }

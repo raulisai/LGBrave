@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Catalog } from './holy/catalog.mjs';
 import { SiteRegistry, cleanSite, checkSite } from './holy/site-registry.mjs';
 import { startServer } from './holy/server.mjs';
-import { onlyflix, doramasflixbeer, tmdb, doramasflix, animeyt, pelisflix } from './holy/more-sources.mjs';
+import { onlyflix, doramasflixbeer, doramasflix, animeyt, pelisflix } from './holy/more-sources.mjs';
 
 // The window «Webs»: moving a site keeps its parsers and saved titles working. No Internet.
 const dir = mkdtempSync(join(tmpdir(), 'holy-sites-'));
@@ -88,14 +88,34 @@ await check('DoramasFlix .beer: capítulos por temporada y capítulo sin servido
   assert.deepEqual(seasons.map(season => [season.number, season.episodes.map(episode => episode.episode)]), [[1, [1, 2]], [2, [1]]]);
   await assert.rejects(() => doramasflixbeer.resolve({ url: 'https://doramasflix.beer/episodios/x-1x01/' }, async () => '<div>NO SERVERS AVAILABLE</div>'), /todavía no tiene servidores/);
 });
-await check('Catálogo público: títulos, series con temporadas y servidores por identificador', async () => {
-  const list = JSON.stringify({ metas: [{ imdb_id: 'tt1', type: 'movie', name: 'Peli', releaseInfo: '1999', genres: ['Sci-Fi'] }, { imdb_id: 'tt2', type: 'series', name: 'Serie' }, { imdb_id: 'x', type: 'movie', name: 'Mala' }, { imdb_id: 'tt3', type: 'person', name: 'Otro' }] });
-  const items = tmdb.parseHome(list);
-  assert.deepEqual(items.map(entry => [entry.title, entry.kind, !!entry.isShow, entry.language, entry.url]), [['Peli', 'movie', false, 'Inglés', 'https://www.imdb.com/title/tt1/'], ['Serie', 'series', true, 'Inglés', 'https://www.imdb.com/title/tt2/']]);
-  const seasons = await tmdb.episodes('https://www.imdb.com/title/tt2/', async () => JSON.stringify({ meta: { videos: [{ season: 2, episode: 1 }, { season: 1, episode: 2, name: 'B' }, { season: 1, episode: 1 }, { season: 0, episode: 1 }] } }));
-  assert.deepEqual(seasons.map(season => [season.number, season.episodes.map(episode => episode.episode)]), [[1, [1, 2]], [2, [1]]]);
-  assert.equal((await tmdb.resolve({ url: seasons[1].episodes[0].url })).url, 'https://vidfast.vc/tv/tt2/2/1');
-  assert.equal((await tmdb.search('x', async url => (/movie/.test(url) ? list : '{}'))).length, 2);
+await check('Catálogo público retirado: sin fuente, y su caché, detalles y salud se descartan al cargar', async () => {
+  const { CONNECTORS, RETIRED_SOURCES, connectorFor } = await import('./holy/connectors.mjs');
+  assert.ok(RETIRED_SOURCES.has('tmdb'));
+  assert.equal(connectorFor('tmdb'), undefined);
+  assert.ok(!CONNECTORS.some(entry => entry.id === 'tmdb'));
+  const retired = mkdtempSync(join(tmpdir(), 'holy-retired-'));
+  const file = join(retired, 'c.json'), detailsFile = join(retired, 'd.json');
+  const item = (source, url, title) => ({ source, kind: 'movie', title, url, poster: '', genres: [] });
+  writeFileSync(file, JSON.stringify({ updatedAt: 1, items: [item('tmdb', 'https://www.imdb.com/title/tt1/', 'Inglesa'), item('cuevana', 'https://cuevana.test/peli/', 'Propia')],
+    errors: { tmdb: 'x', cuevana: 'y' }, health: { tmdb: { ok: false }, cuevana: { ok: true } } }));
+  writeFileSync(detailsFile, JSON.stringify({ 'https://www.imdb.com/title/tt1/': { overview: 'a' }, 'https://cuevana.test/peli/': { overview: 'b' }, 'https://www.imdb.com.example/title/x/': { overview: 'c' } }));
+  // Every site the lookup may ask is a local fake: nothing here reaches the Internet.
+  const site = (id, found) => ({ id, name: id, site: `https://${id}.test/`, parseHome: () => [], search: async () => (found ? [{ source: id, kind: 'movie', title: 'Gladiator', url: 'https://cuevana.test/gladiator/' }] : []),
+    resolve: async entry => ({ url: entry.url + 'player', referrer: entry.url, alternatives: [] }) });
+  const catalog = new Catalog({ file, detailsFile, knownLists: null, credits: null, probe: null,
+    connectors: [site('cuevana', true), site('repelishd'), site('pelisflix'), site('doramasflix'), site('onlyflix')] });
+  assert.deepEqual(catalog.items.map(entry => entry.source), ['cuevana']);
+  assert.deepEqual([...catalog.details.keys()].sort(), ['https://cuevana.test/peli/', 'https://www.imdb.com.example/title/x/']);
+  assert.deepEqual([Object.keys(catalog.errors), Object.keys(catalog.health)], [['cuevana'], ['cuevana']]);
+  // It can no longer be searched; a title saved from it still plays when the owner's sites have it, and never from its own players.
+  assert.deepEqual(await catalog.search('tmdb', 'Gladiator'), []);
+  const saved = { source: 'tmdb', kind: 'movie', title: 'Gladiator', url: 'https://www.imdb.com/title/tt1/' };
+  const found = await catalog.resolvePlayable(saved);
+  assert.equal(found.item.source, 'cuevana');
+  assert.equal(found.target.url, 'https://cuevana.test/gladiator/player');
+  assert.ok(!JSON.stringify(found).includes('vidfast'));
+  assert.equal(await catalog.resolvePlayable({ ...saved, title: 'Otro título' }), null, 'Un título que ningún sitio tiene no se reproduce con los servidores de la fuente retirada');
+  rmSync(retired, { recursive: true, force: true });
 });
 await check('Series largas: los capítulos que el sitio carga al bajar también salen', async () => {
   // DoramasFlix trae 8 en la página y dice cuántos tiene cada temporada.
@@ -124,18 +144,6 @@ await check('Series largas: los capítulos que el sitio carga al bajar también 
   assert.deepEqual(rows.map(row => [row.title, row.episodes.length]), [['Temporada 1 · 1–50', 50], ['Temporada 1 · 51–100', 50], ['Temporada 1 · 101–120', 20]]);
   rmSync(dir, { recursive: true, force: true });
 });
-await check('Catálogo público: se reproduce primero desde otro sitio (no OnlyFlix) y sus servidores quedan al final', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'holy-public-'));
-  const site = (id, url) => ({ id, name: id, site: `https://${id}.test/`, parseHome: () => [], search: async () => [{ source: id, kind: 'movie', title: 'Gladiator', url }], resolve: async () => ({ url: url + 'player' }) });
-  const catalog = new Catalog({ file: join(dir, 'c.json'), detailsFile: join(dir, 'd.json'), knownLists: null,
-    connectors: [site('cuevana', 'https://cuevana.test/gladiator/'), site('onlyflix', 'https://onlyflix.test/gladiator/'), { ...site('repelishd', ''), search: async () => [] }, { ...site('doramasflix', ''), search: async () => [] }, { ...tmdb, resolve: async () => ({ url: 'https://vidfast.vc/movie/tt1' }) }] });
-  const film = { source: 'tmdb', kind: 'movie', title: 'Gladiator', url: 'https://www.imdb.com/title/tt1/' };
-  assert.deepEqual(await catalog.preference(film), { site: 'tmdb-elsewhere', any: true, skip: ['onlyflix'], kind: 'movie', label: 'tus otros sitios' });
-  const found = await catalog.resolvePlayable(film);
-  assert.equal(found.item.source, 'cuevana');
-  assert.equal(found.target.url, 'https://cuevana.test/gladiator/player');
-  rmSync(dir, { recursive: true, force: true });
-});
 await check('PelisFlix: tarjetas, capítulos por temporada y versiones con servidores en base64; RePelis24 queda pendiente', async () => {
   const card = (url, title, extra = '') => `<li class="TPostMv"><article class="TPost B"><a href="${url}"><img class="imglazy" data-src="//cnddim.xyz/sys/poster/x.jpg"><h2 class="Title"${extra}>${title}</h2></a><div class="TPMvCn"><span class="Date">2023</span><p class="Genre"><a href="https://pelisflix1.kim/genero/accion/">Acción, </a><a href="https://pelisflix1.kim/genero/series-tv/">Series</a></p></div></article></li>`;
   const items = pelisflix.parseHome(card('https://pelisflix1.kim/pelicula/silent-night/', 'Silent Night') + card('https://pelisflix1.kim/serie/yaga-2/', 'YAGA') + card('https://pelisflix1.kim/episodio/yaga-2-1x3/', 'YAGA', ' data-subtitle="Episodio 1x3"') + card('https://otro.example/pelicula/x/', 'Fuera'));
@@ -150,4 +158,4 @@ await check('PelisFlix: tarjetas, capítulos por temporada y versiones con servi
   assert.deepEqual(versions, [{ id: 'castellano', label: 'Español (España)', kind: 'dub', target: { url: 'https://nupload.my/watch/a', referrer: 'https://pelisflix1.kim/pelicula/silent-night/', alternatives: ['https://voe.sx/e/b'] } }]);
   assert.ok(registry().pending().some(entry => entry.name === 'RePelis24' && entry.known));
 });
-console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix, .beer y catálogo público correctas.`);
+console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix, .beer y catálogo público retirado correctas.`);

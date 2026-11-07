@@ -194,5 +194,14 @@ try {
     assert.deepEqual(rows[0].items.map(item => [item.title, !!item.discover]), [['Click', false], ['Un papá genial', true]]);
     assert.equal(known.pending([film('Click', 2006)])[0].entry.original, 'Big Daddy');
   });
+  await check('Fuente retirada: sus coincidencias guardadas se descartan al cargar y el título se busca de nuevo en los sitios que quedan', () => {
+    const file = join(directory, 'retired.json');
+    const card = (source, url, title) => ({ at: 1, item: { source, kind: 'movie', url, title, genres: [] } });
+    writeFileSync(file, JSON.stringify({ lists: {}, finds: {
+      'oscar|Q1': card('tmdb', 'https://www.imdb.com/title/tt1/', 'Inglesa'), 'oscar|Q2': card('cuevana', 'https://cuevana.test/b/', 'Propia'), 'oscar|Q3': { at: 1, item: null } } }));
+    const known = new KnownLists({ file, snapshot: join(directory, 'nope.json'), lists: [] });
+    assert.deepEqual(Object.keys(known.data.finds).sort(), ['oscar|Q2', 'oscar|Q3', 'wd|Q2', 'wd|Q3']);
+    assert.deepEqual(known.foundItems().map(item => item.source), ['cuevana', 'cuevana']);
+  });
 } finally { rmSync(directory, { recursive: true, force: true }); }
 console.log(`${checks.length} comprobaciones de listas conocidas y premios correctas.`);

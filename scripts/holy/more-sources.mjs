@@ -451,63 +451,6 @@ export const doramasflixbeer = {
   }
 };
 
-// ---------------------------------------------------------------- Catálogo público (IMDb / TMDB)
-// The public catalogue behind sites like FrameTV: Cinemeta serves every IMDb title with its TMDB
-// id, no key needed. Each title is played by the same id-based servers OnlyFlix uses. Everything
-// is English. The home shows the best and the newest; search reaches the whole catalogue.
-const cinemetaURL = 'https://v3-cinemeta.strem.io/';
-const imdbURL = id => `https://www.imdb.com/title/${id}/`;
-const metaList = value => { try { const data = typeof value === 'string' ? JSON.parse(value) : value; return Array.isArray(data?.metas) ? data.metas : []; } catch { return []; } };
-const metaItem = meta => /^tt\d+$/.test(String(meta?.imdb_id || meta?.id)) && ['movie', 'series'].includes(meta.type) && meta.name ? item({
-  source: 'tmdb', kind: meta.type === 'series' ? 'series' : 'movie', url: imdbURL(meta.imdb_id || meta.id), ...(meta.type === 'series' ? { show: imdbURL(meta.imdb_id || meta.id), isShow: true } : {}), language: 'Inglés',
-  title: decode(meta.name), year: String(meta.releaseInfo || meta.year || '').slice(0, 4), rating: meta.imdbRating || '', overview: decode(meta.description || ''), poster: meta.poster || '', backdrop: meta.background || '',
-  genres: unique((meta.genres || meta.genre || []).map(name => genre(String(name)))).filter(Boolean) }) : null;
-export const tmdb = {
-  id: 'tmdb', name: 'Catálogo público (IMDb/TMDB)', site: cinemetaURL, language: 'Inglés',
-  parseHome: value => metaList(value).map(metaItem).filter(Boolean),
-  async home(load) {
-    const year = new Date().getFullYear();
-    const pages = ['movie/top', 'series/top',`movie/year/genre=${year}`, `series/year/genre=${year}`];
-    const lists = await Promise.all(pages.map(page => load(`${cinemetaURL}catalog/${page}.json`).then(text => this.parseHome(text)).catch(() => [])));
-    return [...new Map(lists.flat().map(entry => [entry.url, entry])).values()];
-  },
-  async search(query, load) {
-    const q = encodeURIComponent(query);
-    const lists = await Promise.all(['movie', 'series'].map(type => load(`${cinemetaURL}catalog/${type}/top/search=${q}.json`).then(text => this.parseHome(text)).catch(() => [])));
-    return lists.flat().slice(0, 40);
-  },
-  // Genres and synopsis of one title (for what the owner watched from a search result).
-  async detail(entry, load) {
-    const id = /tt\d+/.exec(entry.show || entry.url)?.[0];
-    const meta = id && json(await load(`${cinemetaURL}meta/${entry.kind === 'movie' ? 'movie' : 'series'}/${id}.json`))?.meta;
-    const found = meta && metaItem({ ...meta, type: entry.kind === 'movie' ? 'movie' : 'series' });
-    return { show: entry.show || '', genres: found?.genres || [], overview: found?.overview || '', poster: found?.poster || '', backdrop: found?.backdrop || '' };
-  },
-  async episodes(show, load) {
-    const id = /tt\d+/.exec(show)?.[0];
-    const meta = json(await load(`${cinemetaURL}meta/series/${id}.json`))?.meta;
-    const seasons = new Map();
-    for (const video of meta?.videos || []) {
-      const season = Number(video.season), number = Number(video.episode ?? video.number);
-      if (!season || !number) continue;
-      if (!seasons.has(season)) seasons.set(season, []);
-      seasons.get(season).push({ url: `${imdbURL(id)}episode-${season}x${number}`, season, episode: number, label: video.name ? `${number}. ${video.name}` : 'Episodio ' + number });
-    }
-    return [...seasons].sort((a, b) => a[0] - b[0]).map(([number, episodes]) => ({ title: 'Temporada ' + number, number, episodes: episodes.sort((a, b) => a.episode - b.episode) }));
-  },
-  // The players are chosen by id (no page to read): the first answers best in this lab's tests.
-  async resolve(entry) {
-    const id = /tt\d+/.exec(entry.url)?.[0];
-    if (!id) throw Error('Título sin identificador IMDb.');
-    const episode = /episode-(\d+)x(\d+)\/?$/.exec(entry.url);
-    // Measured 2026-10-31: vidfast and vidapi always answer; CDNM only knows some titles (404 otherwise) and Nontongo often fails.
-    const urls = episode
-      ? [`https://vidfast.vc/tv/${id}/${episode[1]}/${episode[2]}`, `https://vidapi.xyz/embed/tv/${id}/${episode[1]}/${episode[2]}`, `https://share.cdnm.ink/embed/imdb/${id}?season=${episode[1]}&episode=${episode[2]}`, `https://sv2.nontongo.stream/soap/tv/${id}/${episode[1]}/${episode[2]}`]
-      : [`https://vidfast.vc/movie/${id}`, `https://vidapi.xyz/embed/movie/${id}`, `https://share.cdnm.ink/embed/imdb/${id}`, `https://sv2.nontongo.stream/soap/movie/${id}`];
-    return { url: urls[0], referrer: 'https://onlyflix.to/', alternatives: urls.slice(1) };
-  }
-};
-
 // ---------------------------------------------------------------- PelisFlix
 // WordPress (Toroplay theme): films, series by season, latest episodes. The page lists one menu
 // per version (LATINO, CASTELLANO, SUBTITULADO); each option carries its player address in

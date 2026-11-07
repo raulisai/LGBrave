@@ -1,7 +1,7 @@
 import { readFileSync, mkdirSync, writeFileSync, renameSync, existsSync, copyFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fetchText, country, languageLabel, genreList } from './sources.mjs';
-import { CONNECTORS, connectorFor } from './connectors.mjs';
+import { CONNECTORS, RETIRED_SOURCES, connectorFor } from './connectors.mjs';
 import { genreShelves } from '../../src/holy.js';
 import { entryKey, titleKey, nextEpisode } from './library.mjs';
 import { matchVersion, publicVersion, targetMatchesLanguage } from './versions.mjs';
@@ -57,7 +57,9 @@ const slim = item => (item.overview && item.overview.length > 280 ? { ...item, o
 const RESOLVE_TTL = 150000;
 export const PREFERRED = { anime: 'jkanime' };
 // Which of the owner's sites carry each kind of title (for finding a title elsewhere).
-const KIND_SITES = { movie: ['cuevana', 'repelishd', 'pelisflix', 'doramasflix', 'onlyflix', 'tmdb'], series: ['cuevana', 'pelisflix', 'onlyflix', 'tmdb'], anime: ['jkanime', 'animeyt'], dorama: ['doramasflix', 'doramasmp4', 'asialiveaction', 'doramasflixbeer'] };
+// Pages of the retired public catalogue (its titles lived at imdb.com): their cached details go too.
+const imdbPage = key => key.startsWith('https://www.imdb.com/title/');
+const KIND_SITES = { movie: ['cuevana', 'repelishd', 'pelisflix', 'doramasflix', 'onlyflix'], series: ['cuevana', 'pelisflix', 'onlyflix'], anime: ['jkanime', 'animeyt'], dorama: ['doramasflix', 'doramasmp4', 'asialiveaction', 'doramasflixbeer'] };
 const plain = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, ' y ').replace(/[^a-z0-9]+/g, ' ').trim();
 // Same work on two sites: same title (or the same main title before «:»), and close years when both say.
 export function sameTitle(a, b) {
@@ -117,11 +119,12 @@ export class Catalog {
     this.knownLists = knownLists === undefined ? (file === '.local/holy-catalog.json' ? new KnownLists({ log }) : null) : knownLists;
     this.credits = credits === undefined ? (file === '.local/holy-catalog.json' ? new Credits({ log }) : null) : credits;
     const data = load(file) || {};
-    this.items = (Array.isArray(data.items) ? data.items : []).filter(valid).map(cleanItem);
+    this.items = (Array.isArray(data.items) ? data.items : []).filter(valid).filter(item => !RETIRED_SOURCES.has(item.source)).map(cleanItem);
     this.updatedAt = Number(data.updatedAt) || 0;
-    this.errors = record(data.errors) ? data.errors : {};
-    this.health = record(data.health) ? data.health : {};
-    this.details = new Map(Object.entries(load(detailsFile) || {}).filter(([, value]) => record(value)).map(([key, value]) => [key, { ...value, genres: strings(value.genres), studios: strings(value.studios), overview: String(value.overview || '') }]));
+    const live = value => Object.fromEntries(Object.entries(record(value) ? value : {}).filter(([id]) => !RETIRED_SOURCES.has(id)));
+    this.errors = live(data.errors);
+    this.health = live(data.health);
+    this.details = new Map(Object.entries(load(detailsFile) || {}).filter(([key, value]) => record(value) && !imdbPage(key)).map(([key, value]) => [key, { ...value, genres: strings(value.genres), studios: strings(value.studios), overview: String(value.overview || '') }]));
     this.version = 1;
     this.refreshing = null;
   }
@@ -375,9 +378,9 @@ export class Catalog {
     const copy = candidate => ({ ...candidate, title: item.title, poster: item.poster || candidate.poster, backdrop: item.backdrop || candidate.backdrop, genres: item.genres?.length ? item.genres : candidate.genres });
     const preference = await this.preference(item).catch(() => null);
     if (preference?.site && !tried.has(preference.site)) {
-      const candidates = await this.elsewhere(item, new Set([...tried, ...(preference.skip || [])]), { only: preference.any ? undefined : preference.site, kind: preference.kind }).catch(() => []);
+      const candidates = await this.elsewhere(item, tried, { only: preference.site, kind: preference.kind }).catch(() => []);
       tried.add(preference.site);
-      for (const candidate of candidates.slice(0, preference.any ? 4 : 2)) {
+      for (const candidate of candidates.slice(0, 2)) {
         const target = await this.resolve(candidate, options).catch(() => null);
         if (targetMatchesLanguage(target, candidate, options) && target) return { item: copy(candidate), target };
       }
@@ -385,7 +388,6 @@ export class Catalog {
     let target = await this.resolve(item, options).catch(() => null);
     if (!target && this.pageFallback(item) && targetMatchesLanguage({}, item, options)) target = { url: this.liveURL(item.url), versions: [] };
     if (target && targetMatchesLanguage(target, item, options)) return { item, target };
-    if (preference?.any) return null;
     for (const candidate of (await this.elsewhere(item, tried).catch(() => [])).slice(0, 4)) {
       const found = await this.resolve(candidate, options).catch(() => null);
       if (found && targetMatchesLanguage(found, candidate, options)) return { item: copy(candidate), target: found };
@@ -460,10 +462,6 @@ export class Catalog {
   // Where to look first: anime on JKAnime, also anime that a site files as a series
   // (Cuevana's One Piece carries the genre «Anime»; LEGO ONE PIECE only «Animación»).
   async preference(item) {
-    // The public catalogue's id players never played on this TV (2026-11-02/03: vidfast froze, vidapi
-    // and nontongo went blank under the inspector): the same title on the owner's other sites first
-    // (not OnlyFlix, which opens those same players), its own players stay as the last option.
-    if (item.source === 'tmdb') return { site: 'tmdb-elsewhere', any: true, skip: ['onlyflix'], kind: item.kind === 'movie' ? 'movie' : 'series', label: 'tus otros sitios' };
     let kind = item.kind;
     if (kind === 'series') {
       const genres = item.genres?.length ? item.genres : await this.genresOf(item).catch(() => []);
