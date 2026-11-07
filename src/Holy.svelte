@@ -651,10 +651,20 @@
 
   onMount(() => {
     try {
-      const cached = unpackHome(JSON.parse(localStorage.getItem('holy-home') || 'null'));
-      if (cached?.rows) data = cached;
       if (!apiBase) apiBase = localStorage.getItem('holy-api') || '';
     } catch { /* No cache yet. */ }
+    // Paint navigation first; parsing the large local catalogue used to block
+    // the very first menu frame while coming back from a player.
+    let cacheRead;
+    const cacheFrame = requestAnimationFrame(() => {
+      cacheRead = setTimeout(() => {
+        if (data.items.length) return; // A fresh network answer already won.
+        try {
+          const cached = unpackHome(JSON.parse(localStorage.getItem('holy-home') || 'null'));
+          if (cached?.rows) data = cached;
+        } catch { /* Invalid local cache; keep the visible shell and network read. */ }
+      }, 0);
+    });
     // webOS says when the Magic Remote pointer hides (after a key): back to the keys' focus.
     const clientError=event=>{
       if(!apiBase)return;
@@ -691,7 +701,7 @@
     const heartbeat = setInterval(() => { if (connected && Date.now() - lastHeartbeat > 6500) connected = false; }, 2000);
     window.addEventListener('lg-lab-status', update);
     window.__lumaReady = true;
-    return () => { window.removeEventListener('error',clientError);window.removeEventListener('unhandledrejection',clientError);window.removeEventListener('lg-lab-status', update); clearInterval(heartbeat); clearInterval(macTimer); document.removeEventListener('cursorStateChange', cursor); window.removeEventListener('hashchange', episodesFromAddress); clearTimeout(previewTimer); clearTimeout(openingTimer); clearTimeout(cacheTimer); clearTimeout(prepareTimer); clearTimeout(searchTimer); };
+    return () => { cancelAnimationFrame(cacheFrame);clearTimeout(cacheRead);window.removeEventListener('error',clientError);window.removeEventListener('unhandledrejection',clientError);window.removeEventListener('lg-lab-status', update); clearInterval(heartbeat); clearInterval(macTimer); document.removeEventListener('cursorStateChange', cursor); window.removeEventListener('hashchange', episodesFromAddress); clearTimeout(previewTimer); clearTimeout(openingTimer); clearTimeout(cacheTimer); clearTimeout(prepareTimer); clearTimeout(searchTimer); };
   });
 </script>
 

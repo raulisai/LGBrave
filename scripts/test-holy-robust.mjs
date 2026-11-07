@@ -834,13 +834,18 @@ try {
     video = { ...video, paused: true }; await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 40)); await bridge.watch();
     await key(38); await key(39); await key(39); await key(13);
     assert.equal(bridge.session.item.episode, 1179);
-    // Back from an episode: its series' episode list on that episode (the home reads it from the address).
+    // Explicit «Ver capítulos» keeps the list; Back itself goes straight home.
     bridge.frames.set(bridge.mainFrame, 'https://p.example/');
-    await bridge.command({ action: 'back' });
+    const currentEpisode = bridge.session.item;
+    await bridge.toEpisodes(currentEpisode);
     const back = navigated();
     assert.ok(back.startsWith(home + '#episodes='));
     const view = JSON.parse(decodeURIComponent(back.split('#episodes=')[1]));
     assert.deepEqual([view.show, view.at, view.isShow, view.source], [show, show + '1179/', true, 'jkanime']);
+    assert.equal(bridge.session, null);
+    await start(currentEpisode);
+    await bridge.command({ action:'back' });
+    assert.equal(navigated(), home);
     assert.equal(bridge.session, null);
     // A film: Back goes home and a pause shows nothing.
     await start({ source: 'cuevana', kind: 'movie', title: 'F', url: 'https://c.example/f' });
@@ -1005,6 +1010,7 @@ try {
     eval(heartbeatSource('w2').replace('document.documentElement', 'root').replace('document.documentElement', 'root'));
     press();
     assert.deepEqual([sent, assigned], [['w2 {"action":"back"}'], '']);
+    current.win.__holyBackHandled();
     // No live connection (stamp too old): the page goes home itself, once.
     root.dataset.holyBridge = 'w2|' + (Date.now() - 20000);
     const event = press();

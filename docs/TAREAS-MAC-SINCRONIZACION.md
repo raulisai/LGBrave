@@ -1,4 +1,4 @@
-# Tareas en la Mac · sincronización Holy0.9.25
+# Tareas en la Mac · sincronización Holy0.9.26
 
 El lado Windows está preparado. Este archivo puede ejecutarlo el otro agente de Codex en la Mac. El activador listo para usuario está en mac/Activar-sincronizacion.command.
 
@@ -87,4 +87,14 @@ Windows y LG ya tienen0.9.24. Traer origin/main conservando biblioteca y cambios
 
 ## YouTube0.9.25 · 06/11/2026
 
-Traer main conservando cambios, npm ci, npm run playback:check y npm run desktop:restart. No volver a emparejar ni reinstalar menú/IPK. Windows comprobó147 vídeos RCN y LG49 directo en1080p con imagen/audio confirmados. Actualizar también Mac evita usar la implementación anterior al atender la TV. Esta actualización no se ejecutó físicamente en la Mac desde Windows. Ver docs/YOUTUBE-20261106.md.
+Traer main conservando cambios, npm ci, npm run playback:check y npm run desktop:restart. No volver a emparejar ni reinstalar menú/IPK. Necesario para que la Mac use la lista oficial paginada y abra el reproductor directo cuando atienda la TV. Windows ya comprobó147 vídeos RCN y el capítulo49 a pantalla completa en LG; usuario confirmó imagen/audio. Ver docs/YOUTUBE-20261106.md. La actualización no se ejecutó físicamente en la Mac desde Windows.
+
+## Atrás0.9.26 · 06/11/2026
+
+Esta actualización incorpora también la salida directa al inicio, la animación
+entre documentos hasta que el menú esté pintado y la lectura de caché después
+del primer frame. Traer main y ejecutar el gate/reiniciar como en el paso
+anterior; preservar `.local` y el emparejamiento. No necesita un IPK nuevo.
+Windows ya carga el código nuevo; segunda confirmación de rapidez en LG
+pendiente después del negro15–30s que aún tuvo el primer ensayo.
+Ver docs/ATRAS-RAPIDO-20261106.md. No se actualizó físicamente esta Mac.

@@ -7,6 +7,7 @@ import { entryKey } from './library.mjs';
 import { PREFERRED } from './catalog.mjs';
 import { KIND_LABEL, targetMatchesLanguage } from './versions.mjs';
 import { curtainSource, remoteSource, autoplaySource, theaterSource, seekSource, resumeSource, heartbeatSource, endCardSource, cardFlagSource } from './page-scripts.mjs';
+import {homeBootSource} from './home-boot.mjs';
 import {playbackDescriptor,validDescriptor,readDescriptorSource,writeDescriptorSource,clearDescriptorSource} from './handoff.mjs';
 
 // Luma's engine (filters, guards, navigation) plus Holy's playback: a title is
@@ -75,6 +76,7 @@ export class HolyBridge extends BrowserBridge {
   }
   async start() {
     await super.start();
+    this.homeBootScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', {source:homeBootSource([this.home,this.packagedHome,...[...this.homeAliases].map(alias=>new URL(HOME_PATH,alias).href)]),worldName:this.toolbarWorld})).identifier;
     this.safetyScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: playerSafetySource([this.home, this.packagedHome]) })).identifier;
     this.remoteScript = (await this.cdp.call('Page.addScriptToEvaluateOnNewDocument', { source: remoteSource([this.home, this.packagedHome], this.home, this.toolbarWorld), worldName: this.toolbarWorld })).identifier;
     // The page already open (e.g. a film when the Mac reconnects) gets the Back handler too.
@@ -93,6 +95,12 @@ export class HolyBridge extends BrowserBridge {
     return this;
   }
   async setupContext(id, context) {
+    if (this.isHome(this.frames.get(context.auxData?.frameId))) {
+      await this.cdp.call('Runtime.addBinding', {name:'__lgLabCommand',executionContextId:id});
+      this.uiContexts.add(id);
+      this.status().catch(()=>{});
+      return;
+    }
     // Also arm documents that were already playing when this computer took over.
     await this.cdp.evaluate(playerSafetySource([this.home, this.packagedHome]), id).catch(() => {});
     return super.setupContext(id, context);
@@ -145,6 +153,12 @@ export class HolyBridge extends BrowserBridge {
   }
   async event(message) {
     const { method, params = {}, sessionId } = message;
+    if (!sessionId && method === 'Page.javascriptDialogOpening' && params.type === 'beforeunload' && this.exitingPlayer) {
+      // The viewer explicitly requested Home. A site's leave-page prompt must
+      // not hold that navigation, but normal dialogs remain untouched.
+      await this.cdp.call('Page.handleJavaScriptDialog', {accept:true}).catch(() => {});
+      return;
+    }
     if (this.session && (this.session.networkErrors || 0) < 10) {
       if (method === 'Network.loadingFailed' && params.type === 'Media' && !params.canceled) {
         this.session.networkErrors = (this.session.networkErrors || 0) + 1;
@@ -169,9 +183,10 @@ export class HolyBridge extends BrowserBridge {
       this.cdp.evaluate(heartbeatSource(this.toolbarWorld), params.context.id).catch(() => {});
     }
     // Back on a page may also reach the home on its own: close the playback session there.
+    if (method === 'Page.frameNavigated' && !sessionId && !params.frame.parentId && this.isHome(params.frame.url)) this.exitingPlayer = false;
     if (method === 'Page.frameNavigated' && !sessionId && !params.frame.parentId && this.session && this.session.phase !== 'resolving' &&
         this.isHome(params.frame.url)) {
-      await this.endSession().catch(() => {});
+      this.endSession(true, {waitForPage:false}).catch(() => {});
     }
     if (method === 'Runtime.executionContextDestroyed') this.remoteContexts.delete(params.executionContextId);
     if (method === 'Runtime.executionContextsCleared' && !sessionId) this.remoteContexts.clear();
@@ -208,11 +223,20 @@ export class HolyBridge extends BrowserBridge {
     } catch { /* A packaged home has no HTTP origin to translate. */ }
   }
   async request(params, sessionId) {
+    if (!sessionId && params.resourceType === 'Document' && this.isHome(params.request.url) && this.exitingPlayer) {
+      // The return has actually started. Keep feedback, cancel the local retry
+      // so it cannot abort this healthy request and restart loading the menu.
+      for (const id of this.remoteContexts) this.cdp.evaluate('window.__holyBackHandled&&window.__holyBackHandled(true)',id).catch(()=>{});
+    }
     try {
       const url = new URL(params.request.url);
       // WAM can omit Origin for the packaged app. Only this owned top frame may
       // identify itself to its own API; external players/iframes never receive it.
       const ownedHome = params.frameId === this.mainFrame && this.isHome(this.frames.get(params.frameId) || '');
+      if (ownedHome && url.origin === new URL(this.apiBase).origin && url.pathname.startsWith(HOME_PATH)) {
+        await this.cdp.call('Fetch.continueRequest',{requestId:params.requestId},sessionId).catch(()=>{});
+        return;
+      }
       if (ownedHome && url.pathname.startsWith('/holy-api/') &&
           (url.origin === new URL(this.apiBase).origin || this.homeAliases.has(url.origin))) {
         const destination = new URL(url.pathname + url.search, this.apiBase);
@@ -248,31 +272,49 @@ export class HolyBridge extends BrowserBridge {
     if (action === 'prepare') { this.prepare(value); return; }
     if (action === 'refresh-catalog') { this.catalog.refresh().then(() => this.status()).catch(() => {}); return this.status(); }
     if (action === 'forget') { this.library.remove(String(value ?? '')); return this.status(); }
-    // Holy has no tabs or page history: Back from an episode goes to its series' episode list,
-    // from anything else home; on the home it does nothing.
+    // Back leaves a player in one press. «Ver capítulos» remains an explicit action.
     if (action === 'back' || action === 'forward') {
       const current = this.frames.get(this.mainFrame) || '';
       const onHome = this.isHome(current);
       if (action === 'forward' || (onHome && !this.session)) return;
-      if (this.session?.card?.kind === 'versions') { const open = this.session; await this.hideEndCard(open); await this.showPauseCard(open); return; }
-      if (this.session && episodic(this.session.item)) return this.toEpisodes(this.session.item);
+      if (this.session?.card?.kind === 'versions') {
+        const open = this.session; await this.hideEndCard(open); await this.showPauseCard(open);
+        if (this.session === open) for (const id of this.remoteContexts) this.cdp.evaluate('window.__holyBackHandled&&window.__holyBackHandled()', id).catch(() => {});
+        return;
+      }
       command = { action: 'home' };
     }
     if (command.action === 'home') {
-      await this.endSession();
-      return super.command({ action: 'home' });
+      return this.leavePlayer();
     }
     return super.command(command);
   }
+  leavePlayer(url = this.home) {
+    if (this.returning?.url === url) return this.returning.promise;
+    const session = this.session;
+    this.recordPlayback('exit-requested', session);
+    this.exitingPlayer = true;
+    // Cancel and persist immediately. Player JS, status delivery and script
+    // removal must never hold navigation behind their 15-second CDP timeouts.
+    this.endSession(true, {waitForPage:false}).catch(error => this.errors.push({phase:'exit-save',error:error.message}));
+    this.showSettings = false;
+    this.explicitNavigationURL = url;
+    this.beginNavigation(url);
+    this.cdp.call('Page.stopLoading').catch(() => {});
+    const returning = {url};
+    this.returning = returning;
+    returning.promise = this.cdp.call('Page.navigate', {url}).then(result => {
+      if (result?.errorText) throw Error(result.errorText);
+    }).finally(() => { if (this.returning === returning) this.returning = null; });
+    this.status().catch(() => {});
+    return returning.promise;
+  }
   // Home, opening the series' episode list on that episode (the home reads it from the address).
   async toEpisodes(item) {
-    await this.endSession();
     const show = { source: item.source, kind: item.kind, title: item.title, show: item.show, url: item.show, isShow: true,
       poster: item.poster || '', backdrop: item.backdrop || '', genres: (item.genres || []).slice(0, 4), episode: item.episode || null, at: item.url };
     const url = this.home + '#episodes=' + encodeURIComponent(JSON.stringify(show));
-    this.showSettings = false;
-    this.beginNavigation(url); await this.status();
-    await this.cdp.call('Page.navigate', { url });
+    return this.leavePlayer(url);
   }
   // The owner rests on a card: find its player now (JKAnime copy first for anime), so OK
   // opens it at once. Runs in the background, one at a time, never for the same title twice
@@ -299,6 +341,8 @@ export class HolyBridge extends BrowserBridge {
     // A whole series opens its episode list on the TV; only episodes and films are played.
     if (value.isShow) throw Error('Elige un episodio de la serie.');
     const token = this.sessionToken = (this.sessionToken || 0) + 1;
+    this.returning = null;
+    this.exitingPlayer = false;
     await this.endSession(false);
     if (this.sessionToken !== token || this.stopped) return;
     const known = this.catalog?.find(value.url);
@@ -310,7 +354,7 @@ export class HolyBridge extends BrowserBridge {
     const choice = askedVersion || askedKind ? { version: askedVersion, kind: askedKind } : remembered ? { version: remembered.id, kind: remembered.kind } : {};
     const session = this.session = { token, item, choice, key: entryKey(item), phase: 'resolving', started: Date.now(), resumeAt: this.library.resumeAt(item), lastSave: 0 };
     // The curtain is registered before navigating so it covers the site's first paint.
-    if (!await this.installCurtain(session, curtainSource({ title: item.title, subtitle: item.subtitle || (item.year ? String(item.year) : ''), backdrop: item.backdrop || item.poster || '', message: session.resumeAt ? 'Volviendo a donde te quedaste…' : 'Preparando el vídeo…' }))) return;
+    if (!await this.installCurtain(session, curtainSource({ homes:[this.home,this.packagedHome,...this.homeAliases], title: item.title, subtitle: item.subtitle || (item.year ? String(item.year) : ''), backdrop: item.backdrop || item.poster || '', message: session.resumeAt ? 'Volviendo a donde te quedaste…' : 'Preparando el vídeo…' }))) return;
     await this.status();
     if (this.session !== session) return;
     session.tried = new Set([item.source]);
@@ -399,7 +443,7 @@ export class HolyBridge extends BrowserBridge {
     session.versionsTried.add(next.id);
     if (!this.curtainScript) {
       const item = session.item;
-      if (!await this.installCurtain(session, curtainSource({ title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Probando otro idioma…' }))) return false;
+      if (!await this.installCurtain(session, curtainSource({ homes:[this.home,this.packagedHome,...this.homeAliases], title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Probando otro idioma…' }))) return false;
     }
     await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify(`${current?.label || 'Ese idioma'} no se pudo abrir: probando ${next.label}…`)})`);
     if (this.session !== session) return true;
@@ -445,7 +489,7 @@ export class HolyBridge extends BrowserBridge {
     if (this.session !== session || this.stopped) return false;
     if (!this.curtainScript) {
       const item = session.item;
-      if (!await this.installCurtain(session, curtainSource({ title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Buscando en otro sitio…' }))) return false;
+      if (!await this.installCurtain(session, curtainSource({ homes:[this.home,this.packagedHome,...this.homeAliases], title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Buscando en otro sitio…' }))) return false;
     }
     const target = await this.findElsewhere(session);
     if (!target || this.session !== session) return false;
@@ -480,7 +524,7 @@ export class HolyBridge extends BrowserBridge {
     // After a start the curtain script was dropped: cover the next server's page again.
     if (!this.curtainScript) {
       const item = session.item;
-      if (!await this.installCurtain(session, curtainSource({ title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Probando otro servidor…' }))) return;
+      if (!await this.installCurtain(session, curtainSource({ homes:[this.home,this.packagedHome,...this.homeAliases], title: item.title, subtitle: item.subtitle || '', backdrop: item.backdrop || item.poster || '', message: 'Probando otro servidor…' }))) return;
     }
     await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify('Probando otro servidor (' + session.servers + ')…')})`);
     await this.openServer(session, url);
@@ -841,15 +885,17 @@ export class HolyBridge extends BrowserBridge {
     return this.command({ action: 'home' });
   }
   // Saves the last position before leaving the player.
-  async endSession(cancelPending = true) {
+  async endSession(cancelPending = true, {waitForPage = true} = {}) {
     if (cancelPending) this.sessionToken = (this.sessionToken || 0) + 1;
     const session = this.session;
     this.session = null;
-    if(session&&!this.preservePlayback)await this.cdp.evaluate(clearDescriptorSource(this.toolbarWorld)).catch(()=>{});
-    await this.dropCurtainScript();
-    if (!session) return;
-    clearTimeout(session.card?.timer);
-    if (session.position && session.phase === 'playing') this.library.progress(session.key, session.item.url, session.position.t, session.position.d);
+    if (session) {
+      clearTimeout(session.card?.timer);
+      if (session.position && session.phase === 'playing') this.library.progress(session.key, session.item.url, session.position.t, session.position.d);
+    }
+    const cleanup = [this.dropCurtainScript()];
+    if(session&&!this.preservePlayback&&(waitForPage||this.mainContext))cleanup.push(this.cdp.evaluate(clearDescriptorSource(this.toolbarWorld), this.mainContext || undefined).catch(()=>{}));
+    if (waitForPage) await Promise.all(cleanup);
   }
   async stop() {
     await this.publishPlayback();
@@ -861,6 +907,7 @@ export class HolyBridge extends BrowserBridge {
     for (const [sessionId, child] of this.childSessions) if (child.safetyScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: child.safetyScript }, sessionId).catch(() => {});
     if (this.safetyScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.safetyScript }).catch(() => {});
     if (this.remoteScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.remoteScript }).catch(() => {});
+    if (this.homeBootScript) await this.cdp.call('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.homeBootScript }).catch(() => {});
     await super.stop();
   }
 }

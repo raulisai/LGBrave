@@ -14,6 +14,7 @@ import { cleanerSource, decideCleaning, CleanerRules } from './ad-cleaner.mjs';
 import { dirname, join } from 'node:path';
 import {lumaOrigin} from './desktop-config.mjs';
 import { intoPrivateNetwork } from './private-network.mjs';
+import {homeAddressMatches} from './holy/home-address.mjs';
 
 export const packagedHome = 'file:///media/developer/apps/usr/palm/applications/com.lgapp.lab/index.html';
 export const home = lumaOrigin() + '/luma-home/';
@@ -73,6 +74,7 @@ export class BrowserBridge {
     this.toolbarWorld = 'luma-toolbar-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
   }
   isHome(url) {
+    if (homeAddressMatches(url,this.packagedHome)) return true;
     if (url?.startsWith(this.packagedHome)) return true;
     try {
       const page = new URL(url), own = new URL(this.home);

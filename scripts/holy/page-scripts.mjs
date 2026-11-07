@@ -4,8 +4,10 @@
 // Holy's curtain: covers the site while the player is found and started. It is
 // drawn in the bridge's isolated world, never takes clicks (pointer-events:none)
 // and uses no innerHTML (Trusted Types on some players).
-export function holyCurtain(data) {
-  if (window.top !== window || window.__holyCurtain) return;
+import {homeAddressMatches} from './home-address.mjs';
+
+export function holyCurtain(data, matches=homeAddressMatches) {
+  if (window.top !== window || window.__holyCurtain || data.homes?.some(home => matches(location.href,home))) return;
   let host = null, message = null;
   const draw = () => {
     if (host || !document.documentElement) return !!host;
@@ -55,16 +57,41 @@ export function holyCurtain(data) {
 // takes the page to Holy's home itself. Back never does nothing.
 // A player iframe may not navigate the top page (cross-origin Location, sandbox), so
 // it asks the top page's own handler to leave and also tries directly.
-export function holyRemote(homes = [], home = '', world = '') {
+export function holyRemote(homes = [], home = '', world = '', matches=homeAddressMatches) {
   // Holy's own home handles its keys itself.
-  if (window.__holyRemote || homes.some(entry => location.href.startsWith(entry))) return;
+  if (window.__holyRemote || homes.some(entry => matches(location.href,entry))) return;
   Object.defineProperty(window, '__holyRemote', { value: true });
+  let exitTimer = null, pendingBack = false, returning = null;
+  const showReturning = () => {
+    if (window.top !== window) {
+      try { window.top.postMessage({holyReturning:home}, '*'); } catch {}
+      return;
+    }
+    if (returning || !document.documentElement || typeof document.createElement !== 'function') return;
+    returning = document.createElement('holy-returning');
+    returning.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:block;pointer-events:none';
+    const root = returning.attachShadow({mode:'closed'});
+    const style = document.createElement('style');
+    style.textContent = '.w{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:24px;background:#101013;color:#fff;font:500 32px system-ui,Arial,sans-serif}.r{width:42px;height:42px;border:4px solid #ffffff30;border-top-color:#e50914;border-radius:50%;animation:holy-return-spin .8s linear infinite}@keyframes holy-return-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.r{animation:none}}';
+    const wrap = document.createElement('div'); wrap.className = 'w'; wrap.setAttribute('role','status');
+    const ring = document.createElement('span'); ring.className = 'r'; ring.setAttribute('aria-hidden','true');
+    const label = document.createElement('span'); label.textContent = 'Volviendo al inicio…';
+    wrap.append(ring,label); root.append(style,wrap); document.documentElement.append(returning);
+  };
+  const handled = (keepFeedback=false) => { clearTimeout(exitTimer); exitTimer = null; pendingBack = keepFeedback; if(!keepFeedback){returning?.remove();returning=null;} };
+  Object.defineProperty(window, '__holyBackHandled', {value:handled});
   const leave = () => {
     if (!home) return;
+    clearTimeout(exitTimer); exitTimer = null;
+    if (window.__holyLeaving || homes.some(entry => matches(location.href,entry))) return;
+    window.__holyLeaving = true;
     if (window.top !== window) try { window.top.postMessage({ holyHome: home }, '*'); } catch { /* Try directly below. */ }
     try { window.top.location.href = home; } catch { /* The top page leaves on the message. */ }
   };
   addEventListener('message', event => {
+    const [owner, at] = String(document.documentElement?.dataset.holyBridge || '').split('|');
+    if (Date.now() - Number(at || 0) < 6000 && owner !== world) return;
+    if (window.top === window && event.data?.holyReturning === home) { showReturning(); return; }
     if (window.top !== window || event.data?.holyHome !== home || window.__holyLeaving) return;
     window.__holyLeaving = true;
     location.href = home;
@@ -88,7 +115,14 @@ export function holyRemote(homes = [], home = '', world = '') {
     if (root?.dataset.holyBack === String(event.timeStamp)) return;
     if (root) root.dataset.holyBack = String(event.timeStamp);
     event.preventDefault(); event.stopImmediatePropagation();
+    if (pendingBack) return;
+    pendingBack = true;
+    showReturning();
     if (live && typeof window.__lgLabCommand === 'function') {
+      // Heartbeat proves a connection exists, not that the player can answer.
+      // Navigate locally if CDP is still stuck on the old page after one press.
+      exitTimer = setTimeout(leave, 800);
+      exitTimer.unref?.();
       try { window.__lgLabCommand(JSON.stringify({ action: 'back' })); return; } catch { /* Go home directly below. */ }
     }
     leave();
@@ -326,8 +360,8 @@ export async function holyResume(expectedDuration = 0) {
 
 export const seekSource = (seconds, expectedDuration = 0) => `(${holySeek.toString()})(${Number(seconds) || 0},${Number(expectedDuration) || 0})`;
 export const resumeSource = expectedDuration => `(${holyResume.toString()})(${Number(expectedDuration) || 0})`;
-export const curtainSource = data => `(${holyCurtain.toString()})(${JSON.stringify(data)});`;
-export const remoteSource = (homes, home = '', world = '') => `(${holyRemote.toString()})(${JSON.stringify(homes)},${JSON.stringify(home)},${JSON.stringify(world)});`;
+export const curtainSource = data => `(${holyCurtain.toString()})(${JSON.stringify(data)},${homeAddressMatches.toString()});`;
+export const remoteSource = (homes, home = '', world = '') => `(${holyRemote.toString()})(${JSON.stringify(homes)},${JSON.stringify(home)},${JSON.stringify(world)},${homeAddressMatches.toString()});`;
 // The live connection stamps each page every couple of seconds.
 export const heartbeatSource = world => `document.documentElement&&(document.documentElement.dataset.holyBridge=${JSON.stringify(world)}+'|'+Date.now())`;
 export const autoplaySource = options => `(${holyAutoplay.toString()})(${JSON.stringify(options || {})})`;

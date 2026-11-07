@@ -1,0 +1,57 @@
+{
+  "version": "0.9.26",
+  "capturedAt": "2026-11-07T02:57:54.606Z",
+  "scope": "controlled",
+  "platform": "win32",
+  "node": "v24.21.0",
+  "inputHash": "ad3ac6c9452953a1988327313dd12fd74e916197503b16b6d7aef94657176241",
+  "outputHash": "ad3ac6c9452953a1988327313dd12fd74e916197503b16b6d7aef94657176241",
+  "matrix": {
+    "cases": 35,
+    "sources": 12,
+    "scopes": {
+      "controlled": 21,
+      "tv-user-confirmed": 1,
+      "tv-metrics": 11,
+      "desktop-http": 1,
+      "navigation-only": 1
+    }
+  },
+  "checks": [
+    {
+      "name": "suite completa",
+      "ok": true,
+      "exitCode": 0,
+      "durationMs": 62571
+    },
+    {
+      "name": "build Luma",
+      "ok": true,
+      "exitCode": 0,
+      "durationMs": 2225
+    },
+    {
+      "name": "build Holy TV",
+      "ok": true,
+      "exitCode": 0,
+      "durationMs": 2354
+    },
+    {
+      "name": "build Holy web",
+      "ok": true,
+      "exitCode": 0,
+      "durationMs": 2512
+    }
+  ],
+  "fastBackChecks": 23,
+  "deployed": {
+    "computer": "Windows",
+    "workerPid": 14748,
+    "app": "com.lgapp.holy",
+    "state": "connected"
+  },
+  "physical": {
+    "firstAttempt": "El usuario vio animación seguida de negro15–30s. No resuelto.",
+    "secondAttempt": "Pendiente de confirmación; no se navegó el vídeo del usuario."
+  }
+}
