@@ -46,6 +46,14 @@ confirmación del usuario. No se navega ni se interrumpe su vídeo para ejecutar
 esta suite. El cambio es del backend que inyecta el control: no necesita un IPK
 nuevo. Ambos equipos deben actualizarlo para usarlo cuando atiendan la TV.
 
+Alcance del despliegue: el aplazamiento de caché en `src/Holy.svelte` corre en el
+inicio HTTP `/holy/` servido por el build0.9.26. El IPK instalado sigue0.9.24:
+si webOS reabre el inicio `file://…`, sus assets empaquetados conservan la lectura
+de caché anterior. El indicador inyectado sí cubre documentos nuevos mientras
+el runtime esté conectado, pero no sustituye los assets del IPK. Cubrir también
+ese primer arranque con el nuevo Svelte requerirá empaquetar/instalar0.9.26 y
+validarlo aparte. No se instaló ni se interrumpió la sesión para hacerlo.
+
 ## Segunda demora de inicio
 
 El usuario precisó que, tras desaparecer la animación, continuaban 15–30s de

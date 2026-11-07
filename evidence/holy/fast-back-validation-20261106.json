@@ -48,7 +48,9 @@
     "computer": "Windows",
     "workerPid": 14748,
     "app": "com.lgapp.holy",
-    "state": "connected"
+    "state": "connected",
+    "installedIPK": "0.9.24",
+    "cacheDefer": "Solo inicio HTTP /holy/ nuevo; los assets file empaquetados mantienen versión0.9.24."
   },
   "physical": {
     "firstAttempt": "El usuario vio animación seguida de negro15–30s. No resuelto.",

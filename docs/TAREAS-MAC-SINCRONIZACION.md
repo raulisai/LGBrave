@@ -94,7 +94,9 @@ Traer main conservando cambios, npm ci, npm run playback:check y npm run desktop
 Esta actualización incorpora también la salida directa al inicio, la animación
 entre documentos hasta que el menú esté pintado y la lectura de caché después
 del primer frame. Traer main y ejecutar el gate/reiniciar como en el paso
-anterior; preservar `.local` y el emparejamiento. No necesita un IPK nuevo.
+anterior; preservar `.local` y el emparejamiento. El retorno HTTP no necesita
+un IPK nuevo; el aplazamiento de caché en el inicio `file://` empaquetado requiere
+actualizar el IPK0.9.24 instalado. No se ha hecho esa instalación.
 Windows ya carga el código nuevo; segunda confirmación de rapidez en LG
 pendiente después del negro15–30s que aún tuvo el primer ensayo.
 Ver docs/ATRAS-RAPIDO-20261106.md. No se actualizó físicamente esta Mac.
