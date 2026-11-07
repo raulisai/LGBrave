@@ -1,7 +1,7 @@
 {
-  "checkedAt": "2026-10-26T10:33:51.733Z",
-  "mirrorCommit": "b08ef7a774397e9a24c72e8ca665f14f873ebc0e",
-  "packagerCommit": "72418b387cb1feddc614aaacb8cf166db8e80ed8",
+  "checkedAt": "2026-11-07T21:24:05.982Z",
+  "mirrorCommit": "ff2f64505c78efeb9daaa817d54c2caf5a3f7855",
+  "packagerCommit": "705bf285aa805b430349c16230ec657af5e9fc12",
   "uBlockCommit": "4dfbb048607ec4fd19c1c252fd255df6cc653720",
   "changed": true
 }
