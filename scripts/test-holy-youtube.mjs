@@ -1,10 +1,11 @@
 // YouTube in Holy's search: only whole films and episodes, in Spanish, of the title searched,
 // best first; how they play on the TV and on the web page. No TV, no Internet.
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { youtube, parseSearch, cleanTitle, seconds, embedURL, watchURL, episodeNames } from './holy/youtube.mjs';
+import { youtube, parseSearch, cleanTitle, seconds, embedURL, watchURL, episodeNames, continuation, playlistResults } from './holy/youtube.mjs';
+import { HolyBridge } from './holy/holy-bridge.mjs';
 import { Catalog } from './holy/catalog.mjs';
 import { Library } from './holy/library.mjs';
 import { startServer, IMAGE_HOSTS } from './holy/server.mjs';
@@ -80,7 +81,7 @@ try {
     await assert.rejects(youtube.search('shrek', async () => '<html>consent</html>'), /YouTube/);
   });
 
-  await check('Reproducir: la TV abre la página de YouTube; la web incrusta si el canal lo permite', async () => {
+  await check('Resolver: reproductor oficial compartido por TV y web; página si el canal no permite incrustar', async () => {
     const asked = [];
     const target = await youtube.resolve({ url: watchURL('aaaaaaaaaa2') }, async url => { asked.push(url); return '{"type":"video","title":"Shrek 2"}'; });
     assert.deepEqual(target, { url: watchURL('aaaaaaaaaa2'), embed: embedURL('aaaaaaaaaa2') });
@@ -158,6 +159,60 @@ try {
     assert.deepEqual(seasons[0].episodes.map(entry => entry.episode), [1, 2, 3, 4, 5, 6]);
     assert.equal(seasons[0].episodes[0].label, 'Capítulo 1 · El partido 1');
     assert.deepEqual(asked.filter(url => url.startsWith('youtubei')).length, 2);
+  });
+
+  await check('RCN real saneado: 147 vídeos, playlist paginada, capítulo 84 recuperado y dos 91 conservados', async () => {
+    const fixture = JSON.parse(readFileSync(new URL('./fixtures/playback/youtube-rcn.json', import.meta.url)));
+    const channel = fixture.channel, path = '/@canalrcn';
+    const lockup = v => ({ lockupViewModel: { contentId:v.id, contentType:'LOCKUP_CONTENT_TYPE_VIDEO',
+      contentImage:{thumbnailBadgeViewModel:{text:v.length}}, metadata:{lockupMetadataViewModel:{title:{content:v.title},
+        metadata:{contentMetadataViewModel:{metadataRows:[{metadataParts:[{text:{content:v.channel,onTap:{innertubeCommand:{browseEndpoint:{canonicalBaseUrl:v.path}}}}}]}]}}}}} });
+    const page = (videos, token, withChannel=false) => '<script>var ytInitialData = ' + JSON.stringify({metadata:withChannel?{channelMetadataRenderer:channel}:undefined,contents:[...videos.map(lockup),...(token?[{continuationItemRenderer:{continuationEndpoint:{commandMetadata:{webCommandMetadata:{apiUrl:'/youtubei/v1/browse'}},continuationCommand:{token}}}}]:[])]}) + ';</script>"INNERTUBE_CLIENT_VERSION":"2.test"';
+    const listCard = (id, owner=path) => ({lockupViewModel:{contentId:id,contentType:'LOCKUP_CONTENT_TYPE_PLAYLIST',metadata:{lockupMetadataViewModel:{title:{content:'La hija del mariachi | Capítulos completos'},metadata:{contentMetadataViewModel:{metadataRows:[{metadataParts:[{text:{content:'Canal RCN',onTap:{innertubeCommand:{browseEndpoint:{canonicalBaseUrl:owner}}}}}]}]}}}}}});
+    const lists = '<script>var ytInitialData = '+JSON.stringify({contents:[listCard('PLwrongchannel','/@otro'),listCard(fixture.playlist)]})+';</script>';
+    assert.deepEqual(playlistResults(lists,'La hija del mariachi',{path}),[fixture.playlist]);
+    const asked=[];
+    const load = async (url,options) => {
+      asked.push(url);
+      if(url.includes('/@canalrcn/search?')) return page(fixture.channelVideos,null,true);
+      if(url.includes('&sp=')) return lists;
+      if(url.includes('/playlist?')) return page(fixture.playlistPages[0],'next-playlist');
+      if(url.includes('/youtubei/')) { assert.equal(JSON.parse(options.body).continuation,'next-playlist');return JSON.stringify({contents:fixture.playlistPages[1].map(lockup)}); }
+      if(new URL(url).searchParams.get('search_query')?.includes('84')) return page([{...fixture.gap84[0],id:'foreign0001',path:'/@otro'},...fixture.gap84]);
+      return page([]);
+    };
+    const seasons = await youtube.episodes('https://www.youtube.com/@canalrcn/search?query=La%20Hija%20del%20Mariachi',load);
+    const episodes=seasons.flatMap(s=>s.episodes);
+    assert.equal(episodes.length,147);assert.equal(new Set(episodes.map(e=>e.url)).size,147);
+    assert.equal(episodes.filter(e=>e.episode===91).length,2);
+    assert.equal(episodes.find(e=>e.episode===84).url,watchURL('FuWzW6g0AQE'));
+    assert.equal(episodes.at(-1).episode,147);
+    assert.ok(!episodes.some(e=>e.url.includes('foreign')));
+    assert.ok(asked.length<=6,'playlist y dos huecos, sin recorrer todo el canal');
+    const grouped=parseSearch(page(fixture.channelVideos,null,true),'La hija del mariachi');
+    assert.equal(grouped[0].title,'La Hija del Mariachi');assert.equal(grouped[0].isShow,true);
+  });
+  await check('Continuaciones: API del control; token repetido no crea un bucle', async () => {
+    assert.deepEqual(continuation({continuationEndpoint:{commandMetadata:{webCommandMetadata:{apiUrl:'/youtubei/v1/search'}},continuationCommand:{token:'next'}}}),{api:'search',token:'next'});
+    const html='<script>var ytInitialData = '+JSON.stringify({contents:[video('repeat00001','Mi serie | Capítulo 1','40:00'),{continuationItemRenderer:{continuationEndpoint:{continuationCommand:{token:'same'}}}}]})+';</script>"INNERTUBE_CLIENT_VERSION":"2.test"';
+    let posts=0;await youtube.episodes('https://www.youtube.com/@canal/search?query=Mi%20serie',async(url,options)=>{if(options){posts++;return JSON.stringify({continuationCommand:{token:'same'}});}return html;});
+    assert.ok(posts<=2,'cada listado consume cada token una sola vez');
+  });
+  await check('TV: incrustado oficial directo con identidad propia; conserva minuto y fallback restringido', async () => {
+    for(const [source,embed,expected] of [
+      ['youtube',embedURL('aaaaaaaaaa2'),embedURL('aaaaaaaaaa2')],
+      ['youtube','',watchURL('aaaaaaaaaa2')],
+      ['youtube','https://www.youtube-nocookie.com.evil/embed/aaaaaaaaaa2?',watchURL('aaaaaaaaaa2')],
+      ['cuevana',embedURL('aaaaaaaaaa2'),watchURL('aaaaaaaaaa2')]
+    ]) {
+      const calls=[],bridge=Object.create(HolyBridge.prototype);
+      const session={item:{source,url:watchURL('aaaaaaaaaa2'),title:'Prueba'}};
+      Object.assign(bridge,{session,apiBase:'http://192.168.1.65:43190',library:{start(){},resumeAt:()=>927},cdp:{call:async(method,params)=>{calls.push({method,params});return {};}}});
+      for(const method of ['recordPlayback','resetStallClocks','prepareDocument','beginNavigation','status'])bridge[method]=()=>{};
+      await bridge.openTarget(session,{url:watchURL('aaaaaaaaaa2'),embed,referrer:'https://source.example/'});
+      assert.equal(session.resumeAt,927);assert.equal(session.target,expected);
+      assert.deepEqual(calls.find(c=>c.method==='Page.navigate').params,{url:expected,referrer:expected===embed?'http://192.168.1.65:43190/':'https://source.example/'});
+    }
   });
 } finally { rmSync(directory, { recursive: true, force: true }); }
 console.log(`${checks.length} comprobaciones de YouTube (películas y capítulos completos) correctas.`);

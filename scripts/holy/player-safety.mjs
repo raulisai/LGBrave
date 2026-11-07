@@ -2,6 +2,7 @@
 // timer, cookie or user input is changed; Back and the TV's native exit still work.
 export function holyPlayerSafety(homes = []) {
   if (!/^https?:$/.test(location.protocol) || location.hostname === 'challenges.cloudflare.com' ||
+      (/^https:$/.test(location.protocol) && /^(www\.)?youtube(-nocookie)?\.com$/.test(location.hostname) && /^\/embed\/[\w-]{11}$/.test(location.pathname)) ||
       homes.some(home => {
         if (location.href.startsWith(home)) return true;
         try { const own = new URL(home); return own.port === location.port && own.pathname === location.pathname &&

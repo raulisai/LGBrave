@@ -11,7 +11,7 @@ const SITE = 'https://www.youtube.com/';
 const LONG = 'EgIYAg%3D%3D';
 const fold = value => String(value || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 export const watchURL = id => `https://www.youtube.com/watch?v=${id}`;
-// The privacy-enhanced embed, for the web page's in-page player.
+// The official privacy-enhanced player, shared by TV and web.
 export const embedURL = id => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
 const validId = id => /^[\w-]{11}$/.test(String(id || ''));
 
@@ -65,9 +65,25 @@ function fromLockup(card, channel) {
   walk(card.contentImage);
   const length = badges.find(text => /^\d{1,2}(:\d{2}){1,2}$/.test(String(text || ''))) || '';
   const parts = (card.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel?.metadataRows || []).flatMap(row => row.metadataParts || []).map(part => part.text?.content || '');
+  let byline;
+  const owner = node => {
+    if (!node || typeof node !== 'object' || byline) return;
+    if (node.content) {
+      let endpoint;
+      const scan = value => {
+        if (!value || typeof value !== 'object' || endpoint) return;
+        if (value.browseEndpoint) endpoint = value.browseEndpoint;
+        for (const child of Object.values(value)) scan(child);
+      };
+      scan(node);
+      if (endpoint) { byline = { text: node.content, navigationEndpoint: { browseEndpoint: endpoint } }; return; }
+    }
+    for (const value of Object.values(node)) owner(value);
+  };
+  owner(card.metadata?.lockupMetadataViewModel?.metadata);
   return { videoId: card.contentId, title: { simpleText: card.metadata?.lockupMetadataViewModel?.title?.content || '' }, lengthText: { simpleText: length },
     badges: badges.filter(text => text !== length).map(label => ({ metadataBadgeRenderer: { label } })),
-    ownerText: channel ? { runs: [{ text: channel.title, navigationEndpoint: { browseEndpoint: { canonicalBaseUrl: channel.path } } }] } : undefined,
+    ownerText: byline ? { runs: [byline] } : channel ? { runs: [{ text: channel.title, navigationEndpoint: { browseEndpoint: { canonicalBaseUrl: channel.path } } }] } : undefined,
     viewCountText: { simpleText: parts.find(text => /vistas|views|\d\s*(k|m|mil)\b/i.test(text)) || '' } };
 }
 export function results(html, data = typeof html === 'string' ? pageData(html) : html) {
@@ -77,6 +93,7 @@ export function results(html, data = typeof html === 'string' ? pageData(html) :
   const walk = node => {
     if (!node || typeof node !== 'object') return;
     if (node.videoRenderer) { found.push(node.videoRenderer); return; }
+    if (node.playlistVideoRenderer) { const video = node.playlistVideoRenderer; found.push({ ...video, ownerText: video.shortBylineText }); return; }
     // The newer card (channel pages and some searches) carries the same facts in other places.
     if (node.lockupViewModel?.contentType === 'LOCKUP_CONTENT_TYPE_VIDEO') { found.push(fromLockup(node.lockupViewModel, channel)); return; }
     for (const value of Object.values(node)) walk(value);
@@ -112,7 +129,7 @@ export function toItem(video, query = '') {
   const owner = video.ownerText?.runs?.[0] || video.longBylineText?.runs?.[0] || {};
   const channel = owner.text || '';
   const channelPath = /^\/@[\w.-]+$/.test(owner.navigationEndpoint?.browseEndpoint?.canonicalBaseUrl || '') ? owner.navigationEndpoint.browseEndpoint.canonicalBaseUrl : '';
-  const names = kind === 'series' && !whole ? episodeNames(raw, channel) : null;
+  const names = kind === 'series' && !whole ? episodeNames(raw, channel, query) : null;
   const verified = (video.ownerBadges || []).some(badge => /VERIFIED/.test(badge.metadataBadgeRenderer?.style || ''));
   const quality = /\b4k\b|2160p/.test(labels + ' ' + title) ? '4K' : /\b(hd|1080p|720p|full hd|blu-?ray)\b/.test(labels + ' ' + title) ? 'HD' : '';
   const language = /\blatino\b/.test(title) ? 'Latino' : /\bcastellano\b/.test(title) ? 'Castellano' : /subtitulad|sub esp|subs? espanol/.test(title) ? 'Subtitulado' : '';
@@ -132,11 +149,14 @@ export function toItem(video, query = '') {
 // «Mercedes Ramos busca respuestas | Capítulo 3 | Dr. Mata» → series «Dr. Mata», episode «Mercedes
 // Ramos busca respuestas»; «Super Campeones   Cap 61 Latino» → series «Super Campeones».
 // channel: a last part that is just the channel's name («… | Capítulo 3 | Distrito Comedia») is not the series.
-export function episodeNames(raw, channel = '') {
+export function episodeNames(raw, channel = '', query = '') {
   const parts = decode(raw).replace(/[\u{1F000}-\u{1FFFF}☀-➿️]/gu, ' ').split(/\s[|│•·\/–—-]\s|\s?\|\s?|[\[\]]/).map(part => part.replace(/\s+/g, ' ').trim()).filter(Boolean);
   const marked = part => EPISODE.test(fold(part)) || WHOLE_SERIES.test(fold(part));
   const plain = value => fold(value).replace(/[^a-z0-9ñ]+/g, '');
   const named = parts.filter(part => !marked(part) && !BOILERPLATE.test(part) && !(channel && plain(part) === plain(channel)));
+  const wanted = fold(query).replace(/[^a-z0-9ñ]+/g, ' ').split(' ').filter(word => word && !FILLER.has(word) && !/^\d+$/.test(word));
+  const matching = wanted.length ? named.filter(part => wanted.every(word => fold(part).split(/[^a-z0-9ñ]+/).includes(word))) : [];
+  if (matching.length === 1) return { series: cleanTitle(matching[0]), episode: named.find(part => part !== matching[0]) || '' };
   if (named.length >= 2) return { series: cleanTitle(named.at(-1)), episode: named[0] };
   if (named.length === 1) return { series: cleanTitle(named[0]), episode: '' };
   const part = parts.find(marked) || decode(raw);
@@ -174,6 +194,54 @@ export function parseSearch(html, query = '') {
   try { return pick(results(String(html || '')), query); } catch { return []; }
 }
 
+
+// Continuations stay on YouTube's public browse/search endpoints.
+export function continuation(data) {
+  let next = null;
+  const walk = node => {
+    if (!node || typeof node !== 'object' || next) return;
+    if (node.continuationCommand?.token) {
+      const api = node.commandMetadata?.webCommandMetadata?.apiUrl;
+      if (!api || ['/youtubei/v1/browse', '/youtubei/v1/search'].includes(api))
+        next = { token: node.continuationCommand.token, api: api?.endsWith('/search') ? 'search' : 'browse' };
+      return;
+    }
+    for (const value of Object.values(node)) walk(value);
+  };
+  walk(data);
+  return next;
+}
+export function playlistResults(html, name, owner) {
+  let data;
+  try { data = pageData(html); } catch { return []; }
+  const words = fold(name).replace(/[^a-z0-9ñ]+/g, ' ').split(' ').filter(word => word && !FILLER.has(word));
+  const found = [];
+  const pick = (card, modern) => {
+    const id = modern ? card.contentId : card.playlistId;
+    const title = modern ? card.metadata?.lockupMetadataViewModel?.title?.content : card.title?.simpleText || card.title?.runs?.map(run => run.text).join('');
+    if (!/^[\w-]{10,80}$/.test(id || '') || !words.length ||
+        words.some(word => !fold(title).split(/[^a-z0-9ñ]+/).includes(word)) ||
+        /canciones|imperdibles|mejores momentos|trailer/i.test(title)) return;
+    const identities = [];
+    const scan = node => {
+      if (!node || typeof node !== 'object') return;
+      if (node.browseEndpoint) identities.push(node.browseEndpoint);
+      for (const value of Object.values(node)) scan(value);
+    };
+    scan(modern ? card.metadata?.lockupMetadataViewModel : card);
+    if (identities.some(identity => identity.canonicalBaseUrl?.toLowerCase() === owner.path.toLowerCase() ||
+        owner.id && identity.browseId === owner.id)) found.push(id);
+  };
+  const walk = node => {
+    if (!node || typeof node !== 'object') return;
+    if (node.playlistRenderer) { pick(node.playlistRenderer, false); return; }
+    if (node.lockupViewModel?.contentType === 'LOCKUP_CONTENT_TYPE_PLAYLIST') { pick(node.lockupViewModel, true); return; }
+    for (const value of Object.values(node)) walk(value);
+  };
+  walk(data);
+  return [...new Set(found)];
+}
+
 export const youtube = {
   id: 'youtube', name: 'YouTube · completas', site: SITE,
   // Not refreshed into the catalogue: its «listing» is only ever a results page for a search.
@@ -183,52 +251,81 @@ export const youtube = {
   searchURL: query => `${SITE}results?search_query=${encodeURIComponent(/complet[ao]/i.test(query) ? query : query + ' completa')}&sp=${LONG}`,
   // A page that is not a results page fails loudly here, so search says «sin respuesta», not «nada».
   async search(query, load) { return pick(results(await load(this.searchURL(query))), query); },
-  // A grouped series: the channel's own search for its name, plus the next pages YouTube would load
-  // on scroll (its browse call), until a page brings no new episode of that series.
+  // Prefer the channel's complete playlist: channel-search ranking omits real episodes.
   async episodes(show, load) {
     const match = /^https:\/\/www\.youtube\.com\/(@[\w.-]+)\/search\?query=([^&]+)$/.exec(show || '');
     if (!match) return [];
-    const series = fold(decodeURIComponent(match[2])).replace(/[^a-z0-9ñ]+/g, '');
-    const html = await load(show);
+    const name = decodeURIComponent(match[2]), key = value => fold(value).replace(/[^a-z0-9ñ]+/g, '');
+    const html = await load(show), first = pageData(html), owner = first.metadata?.channelMetadataRenderer;
+    const expires = Date.now() + 20000;
     const found = new Map();
-    const read = data => {
+    const read = (data, preserveDuplicates = false, wanted = null) => {
       let added = 0;
       for (const video of results(null, data)) {
-        const item = toItem(video);
-        if (!item?.episode || !item.series || fold(item.series).replace(/[^a-z0-9ñ]+/g, '') !== series || found.has(item.episode)) continue;
-        found.set(item.episode, { url: item.url, episode: item.episode, label: `Capítulo ${item.episode}${item.episodeTitle ? ' · ' + item.episodeTitle : ''}`, still: item.backdrop });
+        const item = toItem(video, name);
+        if (!item?.episode || key(item.series) !== key(name) || found.has(item.url)) continue;
+        if (wanted && (item.channelPath.toLowerCase() !== ('/' + match[1]).toLowerCase() || !wanted.has(item.episode))) continue;
+        if (!preserveDuplicates && [...found.values()].some(entry => entry.episode === item.episode)) continue;
+        found.set(item.url, { url: item.url, episode: item.episode, label: 'Capítulo ' + item.episode + (item.episodeTitle ? ' · ' + item.episodeTitle : ''), still: item.backdrop });
         added++;
       }
       return added;
     };
-    // One listing (search or uploads) and the pages that follow it.
-    const walk = async (pageHTML, pages) => {
-      const first = pageData(pageHTML);
-      read(first);
+    const walk = async (pageHTML, pages, skipEmpty = false, preserveDuplicates = false) => {
+      const initial = pageData(pageHTML); read(initial, preserveDuplicates);
       const version = /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/.exec(pageHTML)?.[1];
-      let token = /"continuationCommand":\{"token":"([^"]+)"/.exec(JSON.stringify(first))?.[1];
-      let empty = 0;
-      for (let page = 0; version && token && page < pages; page++) {
-        const text = await load(`${SITE}youtubei/v1/browse?prettyPrint=false`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion: version, hl: 'es-419' } }, continuation: token }) }).catch(() => '');
+      let next = continuation(initial), empty = 0;
+      const seen = new Set();
+      for (let page = 0; version && next && page < pages && Date.now() < expires && !seen.has(next.token); page++) {
+        seen.add(next.token);
+        const text = await load(SITE + 'youtubei/v1/' + next.api + '?prettyPrint=false', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion: version, hl: 'es-419' } }, continuation: next.token }),
+          timeout: Math.max(250, Math.min(5000, expires - Date.now())) }).catch(() => '');
         let data;
         try { data = JSON.parse(text); } catch { break; }
-        // One page without this series can sit between two with it (other uploads in between).
-        empty = read(data) ? 0 : empty + 1;
-        if (empty >= 2) break;
-        token = /"continuationCommand":\{"token":"([^"]+)"/.exec(text)?.[1];
+        empty = read(data, preserveDuplicates) ? 0 : empty + 1;
+        if (skipEmpty && empty >= 2) break;
+        next = continuation(data);
       }
     };
-    await walk(html, 12);
-    // Some channels' search stops at 15 videos (Super Campeones, 2026-11-03): then its uploads too.
-    if (found.size < 30) await walk(await load(`${SITE}${match[1]}/videos`).catch(() => ''), 10).catch(() => {});
+    read(first);
+    let playlist = false;
+    // Use the same channel identity, never somebody else's similarly named playlist.
+    if (owner?.title) {
+      const query = name + ' ' + owner.title;
+      const listing = await load(SITE + 'results?search_query=' + encodeURIComponent(query) + '&sp=EgIQAw%3D%3D').catch(() => '');
+      const lists = playlistResults(listing, name, { path: '/' + match[1], id: owner.externalId });
+      for (const list of lists.slice(0, 2)) {
+        const before = found.size;
+        await load(SITE + 'playlist?list=' + encodeURIComponent(list)).then(h => walk(h, 24, false, true)).catch(() => {});
+        playlist ||= found.size > before;
+      }
+    }
+    const gaps = () => {
+      const numbers = new Set([...found.values()].map(entry => entry.episode)), max = Math.max(0, ...numbers);
+      return max <= 2000 ? Array.from({ length: max }, (_, index) => index + 1).filter(number => !numbers.has(number)) : [];
+    };
+    // Public playlists can omit a published upload. Fill small gaps only with the exact
+    // episode from this channel; never manufacture URLs or renumber the publisher's titles.
+    const missing = gaps();
+    if (playlist && missing.length <= 12) {
+      for (const number of missing) {
+        if (Date.now() >= expires) break;
+        const query = name + ' capítulo ' + number + ' ' + owner.title;
+        const extra = await load(SITE + 'results?search_query=' + encodeURIComponent(query), { timeout: Math.max(250, Math.min(4000, expires - Date.now())) }).catch(() => '');
+        try { read(pageData(extra), false, new Set([number])); } catch { /* Keep the confirmed playlist. */ }
+      }
+    }
+    if (!playlist) await walk(html, 12);
+    // Search is not exhaustive even when it found more than 30. Uploads are a bounded fallback.
+    if (!playlist && (found.size < 30 || gaps().length)) await load(SITE + match[1] + '/videos').then(h => walk(h, 10, true)).catch(() => {});
     const episodes = [...found.values()].sort((a, b) => a.episode - b.episode);
     return episodes.length ? [{ title: 'Capítulos', episodes }] : [];
   },
   // Everything shown comes from the results page itself: no page to read per title.
   async detail(entry) { return { genres: entry.genres || genresFromWords(entry.overview || entry.title), overview: entry.overview || '', poster: entry.poster || '', backdrop: entry.backdrop || '', show: '' }; },
-  // The TV opens YouTube's own watch page (its player, its quality menu). The web page embeds it
-  // when the uploader allows embedding (YouTube's oEmbed says so); otherwise it opens a tab.
+  // TV and web use YouTube's official player when embedding is allowed. Keep the watch
+  // address for the explicit fallback when the uploader restricts embedding.
   async resolve(entry, load) {
     const id = /[?&]v=([\w-]{11})/.exec(entry.url || '')?.[1];
     if (!validId(id)) throw Error('Dirección de YouTube no válida.');

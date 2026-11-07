@@ -366,7 +366,8 @@ export class HolyBridge extends BrowserBridge {
     // After a rescue the second comes from the stalled server, whatever site plays next.
     session.resumeAt = session.forceResume || this.library.resumeAt(session.item);
     session.queue = [...(target.alternatives || [])];
-    session.referrer = target.referrer;
+    const youtubeEmbed = session.item.source === 'youtube' && /^https:\/\/www\.youtube-nocookie\.com\/embed\/[\w-]{11}\?/.test(target.embed || '');
+    session.referrer = youtubeEmbed ? this.apiBase + '/' : target.referrer;
     // Languages of this episode (when the site offers several) and the one being played.
     session.versions = Array.isArray(target.versions) ? target.versions : [];
     session.version = target.version || '';
@@ -381,7 +382,7 @@ export class HolyBridge extends BrowserBridge {
       await this.curtain(`window.__holyCurtain&&__holyCurtain.say(${JSON.stringify(`Sin «${asked}» en este episodio: se abre en ${now?.label || 'otro idioma'}`)})`);
       if (this.session !== session || this.stopped) return;
     }
-    await this.openServer(session, target.url);
+    await this.openServer(session, youtubeEmbed ? target.embed : target.url);
   }
   // Every server of this language failed: the same episode in its other languages (the same
   // kind first) before another site. The remembered language stays the owner's choice.

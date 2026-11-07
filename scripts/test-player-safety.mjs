@@ -29,6 +29,14 @@ await check('Inicio propio y verificación humana conservan sus funciones', () =
     const f=fixture(url); f.window.close();f.window.open();assert.deepEqual(f.calls,['close','open']);
   }
 });
+await check('YouTube oficial conserva controles y enlaces; sin exención para imitaciones ni páginas watch', () => {
+  for(const url of ['https://www.youtube-nocookie.com/embed/aaaaaaaaaa2?autoplay=1','https://www.youtube.com/embed/aaaaaaaaaa2']) {
+    const f=fixture(url);f.window.open();f.window.close();assert.deepEqual(f.calls,['open','close']);
+  }
+  for(const url of ['https://www.youtube-nocookie.com.evil/embed/aaaaaaaaaa2','https://www.youtube.com/watch?v=aaaaaaaaaa2','https://www.youtube.com/embed/bad']) {
+    const f=fixture(url);f.window.open();f.window.close();assert.deepEqual(f.calls,[]);
+  }
+});
 await check('La protección no toca vídeo, pausa, ubicación ni controles del usuario', () => {
   const f=fixture('https://embed.example/play');
   assert.equal(f.context.location.href,'https://embed.example/play');

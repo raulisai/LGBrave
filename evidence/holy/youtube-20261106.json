@@ -1,0 +1,93 @@
+{
+  "at": "2026-11-06T23:00:43.053Z",
+  "scope": "LG física: capítulo49 en reproductor oficial directo, imagen/audio confirmados por usuario; no acredita otros vídeos ni episodio completo.",
+  "before": {
+    "path": "/embed/w-Q8fwV9tWk",
+    "referrer": "http://192.168.1.65:43190/",
+    "viewport": {
+      "w": 1920,
+      "h": 1080
+    },
+    "sidebar": false,
+    "video": {
+      "t": 319.886233,
+      "d": 2469.161,
+      "paused": false,
+      "ready": 4,
+      "error": 0,
+      "w": 1920,
+      "h": 1080,
+      "frames": 2539,
+      "rect": {
+        "w": 1920,
+        "h": 1080
+      }
+    }
+  },
+  "held": {
+    "path": "/embed/w-Q8fwV9tWk",
+    "referrer": "http://192.168.1.65:43190/",
+    "viewport": {
+      "w": 1920,
+      "h": 1080
+    },
+    "sidebar": false,
+    "video": {
+      "t": 319.9196,
+      "d": 2469.161,
+      "paused": true,
+      "ready": 4,
+      "error": 0,
+      "w": 1920,
+      "h": 1080,
+      "frames": 2539,
+      "rect": {
+        "w": 1920,
+        "h": 1080
+      }
+    }
+  },
+  "after": {
+    "path": "/embed/w-Q8fwV9tWk",
+    "referrer": "http://192.168.1.65:43190/",
+    "viewport": {
+      "w": 1920,
+      "h": 1080
+    },
+    "sidebar": false,
+    "video": {
+      "t": 322.6223,
+      "d": 2469.161,
+      "paused": false,
+      "ready": 4,
+      "error": 0,
+      "w": 1920,
+      "h": 1080,
+      "frames": 2620,
+      "rect": {
+        "w": 1920,
+        "h": 1080
+      }
+    }
+  },
+  "userConfirmedImageAudio": true,
+  "catalog": {
+    "source": "Canal RCN",
+    "uniqueVideos": 147,
+    "rows": [
+      50,
+      50,
+      47
+    ],
+    "duplicatePublisherEpisode": 91,
+    "missingPublisherLabel": 92,
+    "recoveredEpisode": 84
+  },
+  "resume": {
+    "saved": 376.7764,
+    "observed": 390.5902,
+    "readyState": 4,
+    "error": 0,
+    "automatic": true
+  }
+}

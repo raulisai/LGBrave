@@ -10,7 +10,7 @@ async function check(connector){
  const loader=(url,options={})=>{const left=45000-(Date.now()-started);if(left<=0)throw Error('Plazo agotado de45s.');return fetchText(url,{referrer:connector.site,...options,timeout:Math.min(12000,left)});};
  const catalog=new Catalog({file:join(directory,connector.id+'.json'),detailsFile:join(directory,connector.id+'-details.json'),connectors:[connector],knownLists:null,fetch:loader});
  try{
-  const items=await(connector.home?connector.home(loader):loader(connector.site).then(html=>connector.parseHome(html,connector.site)));
+  const items=await(connector.searchOnly?connector.search('La hija del mariachi',loader):connector.home?connector.home(loader):loader(connector.site).then(html=>connector.parseHome(html,connector.site)));
   row.titles=items.length;let samples=items.filter(i=>!i.isShow).slice(0,connector.id==='doramasmp4'?2:1);
   if(!samples.length){const show=items.find(i=>i.show&&connector.episodes);if(show){const seasons=await connector.episodes(show.show,loader),episode=seasons.flatMap(s=>s.episodes)[0];if(episode)samples=[{...show,...episode,isShow:false}];}}
   if(connector.id==='doramasflix')samples=[{source:connector.id,title:'Between Steps5 español',kind:'dorama',show:'https://doramasflix.io/doramas/between-steps',url:'https://doramasflix.io/capitulos/between-steps-1x5',episode:5}];

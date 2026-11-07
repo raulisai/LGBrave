@@ -1,0 +1,1091 @@
+{
+  "captured": "2026-11-06",
+  "scope": "Datos públicos mínimos; sin seguimiento, cookies ni tokens. RCN titula dos vídeos distintos como Capítulo 91; no se renumeran.",
+  "channel": {
+    "title": "Canal RCN",
+    "vanityChannelUrl": "https://www.youtube.com/@canalrcn",
+    "externalId": "UCSCAJJ1RJ4rfRTVW4gjYTpQ"
+  },
+  "playlist": "PLCHczc0wdeEgi00nlgeTJWPKTXh0w3x5R",
+  "channelVideos": [
+    {
+      "id": "qKjSDb5xq8w",
+      "title": "La Hija del Mariachi | Capítulo 143 | Emiliano y Rosario se reencuentran en Plaza Garibaldi",
+      "length": "41:08",
+      "channel": "Canal RCN",
+      "path": "/@canalrcn"
+    },
+    {
+      "id": "kjRpw4HVXKY",
+      "title": "La Hija del Mariachi | Capítulo 1 | La vida de Emiliano Sánchez cambiará para siempre",
+      "length": "53:50",
+      "channel": "Canal RCN",
+      "path": "/@canalrcn"
+    },
+    {
+      "id": "5GopWBdrCCk",
+      "title": "Échame a mí la culpa (Rosario Guerrero) – La hija del mariachi",
+      "length": "3:31",
+      "channel": "Canal RCN",
+      "path": "/@canalrcn"
+    },
+    {
+      "id": "D9xcaFAjLag",
+      "title": "La Hija del Mariachi | Capítulo 144 | Emiliano y Lucía tramaron un nuevo plan",
+      "length": "40:39",
+      "channel": "Canal RCN",
+      "path": "/@canalrcn"
+    },
+    {
+      "id": "6xYIN-pjUuk",
+      "title": "La Hija del Mariachi | Capítulo 106 | Leti descubre una dolorosa verdad",
+      "length": "40:56",
+      "channel": "Canal RCN",
+      "path": "/@canalrcn"
+    },
+    {
+      "id": "EckMNniH1qs",
+      "title": "La Hija del Mariachi | Capítulo 3 | Emiliano se presenta como Francisco Lara ante Rosario",
+      "length": "48:56",
+      "channel": "Canal RCN",
+      "path": "/@canalrcn"
+    }
+  ],
+  "playlistPages": [
+    [
+      {
+        "id": "kjRpw4HVXKY",
+        "title": "La Hija del Mariachi | Capítulo 1 | La vida de Emiliano Sánchez cambiará para siempre",
+        "length": "53:50",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "2MFFTYlesRc",
+        "title": "La Hija del Mariachi | Capítulo 2 | Emiliano llega a Bogotá y ve por primera vez a Rosario",
+        "length": "28:36",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "EckMNniH1qs",
+        "title": "La Hija del Mariachi | Capítulo 3 | Emiliano se presenta como Francisco Lara ante Rosario",
+        "length": "48:56",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "R2_eLnJanMM",
+        "title": "La Hija del Mariachi | Capítulo 4 | Rosario le ofrece ayuda a Francisco Lara y le presenta a su mamá",
+        "length": "35:04",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "3LYxPz5k6YU",
+        "title": "La Hija del Mariachi | Capítulo 5 | Francisco extenderá su estadía en Bogotá y pide ayuda a Rosario",
+        "length": "32:15",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "TRg9jw-oubE",
+        "title": "La Hija del Mariachi | Capítulo 6 | Rosario y Francisco se acercan cada vez más",
+        "length": "41:28",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "3ILW3F7Z8uI",
+        "title": "La Hija del Mariachi | Capítulo 7 | Francisco pedirá trabajo en Plaza Garibaldi",
+        "length": "41:23",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "_pADcPXVKic",
+        "title": "La Hija del Mariachi | Capítulo 8 | Francisco canta por primera vez en Plaza Garibaldi",
+        "length": "43:21",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "OTwpMCajbjg",
+        "title": "La Hija del Mariachi | Capítulo 9 | El Coloso no se la pondrá tan fácil a Francisco",
+        "length": "43:02",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "I4Zmn50BhMw",
+        "title": "La Hija del Mariachi | Capítulo 10 | La familia de Emiliano duda de su inocencia",
+        "length": "44:13",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "12S4cz7kna8",
+        "title": "La Hija del Mariachi | Capítulo 11 | Rosario quiere prestarle a Francisco el traje de su papá",
+        "length": "43:25",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "B3PlKnlrURA",
+        "title": "La Hija del Mariachi | Capítulo 12 | Fernando sospecha sobre los senitmientos de Francisco",
+        "length": "42:39",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "PiT1NdYI74c",
+        "title": "La Hija del Mariachi | Capítulo 13 |  Rosario defiende a Francisco del Coloso",
+        "length": "42:28",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "00qDq8PAzKc",
+        "title": "La Hija del Mariachi | Capítulo 14 |  Francisco deslumbra con su voz en Plaza Garibaldi",
+        "length": "45:05",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "Qahl0-IAu_E",
+        "title": "La Hija del Mariachi | Capítulo 15 | Raquel cree que Francisco no le conviene a Rosario",
+        "length": "41:14",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "I7KGDIhiqlM",
+        "title": "La Hija del Mariachi | Capítulo 16 | Francisco confiesa sus sentimientos",
+        "length": "42:45",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "oZH0b6dTfDs",
+        "title": "La Hija del Mariachi | Capítulo 17 |  Fernando descubre la identidad de Francisco",
+        "length": "40:03",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "BhdxA3pNuxY",
+        "title": "La Hija del Mariachi | Capítulo 18 | Fernando decide escuchar las explicaciones de Emiliano",
+        "length": "42:53",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "7zxFkc_OAB8",
+        "title": "La Hija del Mariachi | Capítulo 19 | Virginia planea una trampa para Francisco",
+        "length": "42:36",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "aLkvM87_ehs",
+        "title": "La Hija del Mariachi | Capítulo 20 | Rosario y francisco caen en la trampa de Virginia",
+        "length": "42:48",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "XzWb1232Mxk",
+        "title": "La Hija del Mariachi | Capítulo 21 | Emiliano conoce la noticia de la declaración de sus amigos",
+        "length": "42:53",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "km7AeOIOUsY",
+        "title": "La Hija del Mariachi | Capítulo 22 | La esposa de Macías descubre que el abogado estaba con Rosario",
+        "length": "45:01",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "bamlx0ssrQA",
+        "title": "La Hija del Mariachi | Capítulo 23 | Virginia quiere interponerse entre Rosario y Francisco",
+        "length": "43:29",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "k7sewt7mZwI",
+        "title": "La Hija del Mariachi | Capítulo 24 | Nora intentará ridiculizar a Rosario",
+        "length": "42:49",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "PeQcfwh_EwA",
+        "title": "La Hija del Mariachi | Capítulo 25 | Rosario rechazó el trabajo que le ofreció Macías",
+        "length": "42:58",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "hBvJzJTpTOQ",
+        "title": "La Hija del Mariachi | Capítulo 26 | Lucía le contó a Francisco la conversación de Rosario y Raquel",
+        "length": "43:55",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "w7yaMXmLq0k",
+        "title": "La Hija del Mariachi | Capítulo 27 | El Coloso sigue desafíando a Francisco",
+        "length": "44:01",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "30tedQJnb7g",
+        "title": "La Hija del Mariachi | Capítulo 28 | Virginia planea otra trampa en contra de Francisco",
+        "length": "43:10",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "bOl99q35ITY",
+        "title": "La Hija del Mariachi | Capítulo 29 | Rosario encuentra a Francisco junto a Virginia",
+        "length": "43:05",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "oq_3VhdKRl4",
+        "title": "La Hija del Mariachi | Capítulo 30 | Francisco le pide perdón a Rosario",
+        "length": "43:20",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "oXBJwoJZ-vE",
+        "title": "La Hija del Mariachi | Capítulo 31 | Francisco sigue metido en problemas con Rosario",
+        "length": "42:33",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "L-KU8g07gCw",
+        "title": "La Hija del Mariachi | Capítulo 32 | Francisco y Rosario se dedican canciones de desamor",
+        "length": "43:55",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "-9LV6N1dqAs",
+        "title": "La Hija del Mariachi | Capítulo 33 | Francisco le dice a Rosario que se regresa para México",
+        "length": "38:52",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "VWG2otTiSVg",
+        "title": "La Hija del Mariachi | Capítulo 34 | Francisco cuestiona a Macías",
+        "length": "38:14",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "Kzg_KB2hmvc",
+        "title": "La Hija del Mariachi | Capítulo 35 | Francisco no se siente seguro con Macías cerca de Rosario",
+        "length": "40:38",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "w2IMB6UvQRk",
+        "title": "La Hija del Mariachi | Capítulo 36 | Francisco le revela a Rosario que volverá a México",
+        "length": "40:33",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "IOCqk3bHI8Q",
+        "title": "La Hija del Mariachi | Capítulo 37 | Francisco quiere revelarle su verdadera identidad a Rosario",
+        "length": "40:03",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "6DlRLnY16dM",
+        "title": "La Hija del Mariachi | Capítulo 38 | Francisco quiere entregarse a las autoridades",
+        "length": "38:59",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "dRFNSSVhy-s",
+        "title": "La Hija del Mariachi | Capítulo 39 | La diferencia entre Francisco y el Coloso llega al límite",
+        "length": "37:54",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "o1rn1jjo6M8",
+        "title": "La Hija del Mariachi | Capítulo 40 | Duelo de voces entre Francisco y El Coloso",
+        "length": "38:40",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "orFZGhPk02w",
+        "title": "La Hija del Mariachi | Capítulo 41| Macías le revela a Francisco lo que siente por Rosario",
+        "length": "45:00",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "BRgEa2QtJcI",
+        "title": "La Hija del Mariachi | Capítulo 42 | Francisco y Rosario se distancian por culpa de Virginia",
+        "length": "42:25",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "Vq82MYpPZp8",
+        "title": "La Hija del Mariachi | Capítulo 43 | Rosario le canta Francisco con despecho",
+        "length": "38:56",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "_U3S2OLT9ec",
+        "title": "La Hija del Mariachi | Capítulo 44 | Rosario le da una serenata a Francisco",
+        "length": "34:34",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "BeopPpIHM3k",
+        "title": "La Hija del Mariachi | Capítulo 45 | Francisco y Rosario están juntos por primera vez",
+        "length": "35:01",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "YcKzg8_sCog",
+        "title": "La Hija del Mariachi | Capítulo 46 | El Coloso confiesa que quiere casarse con Rosario",
+        "length": "42:01",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "e1MJ4iFebEQ",
+        "title": "La Hija del Mariachi | Capítulo 47 | Rosario discute con su madre por Francisco",
+        "length": "42:10",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "x9qVox7id-o",
+        "title": "La Hija del Mariachi | Capítulo 48 | Francisco y Rosario cantan juntos en Plaza Garibaldi",
+        "length": "40:53",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "w-Q8fwV9tWk",
+        "title": "La Hija del Mariachi | Capítulo 49 | Los mariachis de Plaza Garibaldi se enfrentan sus clientes",
+        "length": "41:10",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "WTpBOVoHWz0",
+        "title": "La Hija del Mariachi | Capítulo 50 | Francisco y el Coloso tienen un enfrentamiento",
+        "length": "41:55",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "4mOzrmY4bGw",
+        "title": "La Hija del Mariachi | Capítulo 51 |  El Coloso propone un duelo de voces con Francisco",
+        "length": "39:56",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "Z72EgJSS06Q",
+        "title": "La Hija del Mariachi | Capítulo 52 | El resultado del duelo entre Francisco y El Coloso",
+        "length": "44:11",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "uWr-vNL_P7o",
+        "title": "La Hija del Mariachi | Capítulo 53 | Francisco le dice a Rosario que volverá a México",
+        "length": "41:39",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "CRFVGhTJKa0",
+        "title": "La Hija del Mariachi | Capítulo 54 | Emiliano conoce traición de sus amigos",
+        "length": "36:27",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "CSZDxu7Zh38",
+        "title": "La Hija del Mariachi | Capítulo 55 | Francisco le pide matrimonio a Rosario",
+        "length": "43:24",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "VDRs4JFA4-g",
+        "title": "La Hija del Mariachi | Capítulo 56 | Rosario acepta casarse con Francisco",
+        "length": "42:03",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "mZ529kpbT6o",
+        "title": "La Hija del Mariachi | Capítulo 57 | La noticia del matrimonio de Francisco y Rosario llega a Macías",
+        "length": "41:53",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "FEEhBtMGfh0",
+        "title": "La Hija del Mariachi | Capítulo 58 | Mañanitas sufre una decepción amorosa",
+        "length": "41:29",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "af1Jw9hDEAY",
+        "title": "La Hija del Mariachi | Capítulo 59 | Francisco está devastado tras una mala noticia",
+        "length": "43:04",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "9bpRKNe9PgY",
+        "title": "La Hija del Mariachi | Capítulo 60 | Francisco canta 'México lindo y querido' en Plaza Garibaldi",
+        "length": "44:01",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "ovCcAItmTHY",
+        "title": "La Hija del Mariachi | Capítulo 61| Francisco podría ser sospechoso en el caso de Martín",
+        "length": "43:03",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "H8KE38jSb-M",
+        "title": "La Hija del Mariachi | Capítulo 62 | Francisco le pide perdón a Rosario",
+        "length": "43:07",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "JAaP96NNy98",
+        "title": "La Hija del Mariachi | Capítulo 63 | Francisco tiene un noble gesto con Mañanitas",
+        "length": "42:01",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "wP5koY7DAZ0",
+        "title": "La Hija del Mariachi | Capítulo 64 | El Coloso desafía a Francisco en un duelo de voces",
+        "length": "44:53",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "ytHJbV7jT9g",
+        "title": "La Hija del Mariachi | Capítulo 65 | Las autoridades están cada vez más cerca de Emiliano",
+        "length": "41:13",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "PcImo2MbqHQ",
+        "title": "La Hija del Mariachi | Capítulo 66 | Rosario nota la actitud sospechosa de Francisco",
+        "length": "43:13",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "RjY2TI853nU",
+        "title": "La Hija del Mariachi | Capítulo 67 | Fernando siente celos de ver a Leti con otro hombre",
+        "length": "43:51",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "JuR2qCHC6HY",
+        "title": "La Hija del Mariachi | Capítulo 68 | El Coloso descubre que tiene un hijo",
+        "length": "43:07",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "7T4JlV9eCG0",
+        "title": "La Hija del Mariachi | Capítulo 69 | El Coloso está feliz de ver a su hija cantar",
+        "length": "45:50",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "4gySXIfgv6E",
+        "title": "La Hija del Mariachi | Capítulo 70 | Se perdió el hijo del Coloso",
+        "length": "42:19",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "1uJkbsXITdI",
+        "title": "La Hija del Mariachi | Capítulo 71 | Rosario descubre la verdadera identidad de Francisco",
+        "length": "45:35",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "KV9qvJxJKNU",
+        "title": "La Hija del Mariachi | Capítulo 72 | Francisco de despide de Plaza Garibaldi",
+        "length": "42:01",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "61szNY3sllo",
+        "title": "La Hija del Mariachi | Capítulo 73 | Francisco abandona Plaza Garibaldi y la pensión de don Genaro",
+        "length": "45:20",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "Zul5DqSoUfo",
+        "title": "La Hija del Mariachi | Capítulo 74 | Francisco le confiesa a Sigifredo que es un fugitivo",
+        "length": "44:40",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "f5hDkOH4wHE",
+        "title": "La Hija del Mariachi | Capítulo 75 | Sigifredo no quiere saber nada de Francisco",
+        "length": "42:04",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "LZmYw0v5Iag",
+        "title": "La Hija del Mariachi | Capítulo 76 | Sigifredo no cree en la inocencia de Emiliano",
+        "length": "41:12",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "zgahrr5T4OE",
+        "title": "La Hija del Mariachi | Capítulo 77 | Macías anuncia que se divorcia",
+        "length": "31:08",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "aL9LLy8JiuA",
+        "title": "La Hija del Mariachi | Capítulo 78 | Lucía se escapa para buscar a Francisco",
+        "length": "41:11",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "cqnWwU5kmHE",
+        "title": "La Hija del Mariachi | Capítulo 79 | Rosario y Francisco se reencuentran en la Laguna",
+        "length": "41:36",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "3qSATdd13Hw",
+        "title": "La Hija del Mariachi | Capítulo 80 | Francisco le pide a Rosario que confíe en él",
+        "length": "41:27",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "eXDtobQlYJo",
+        "title": "La Hija del Mariachi | Capítulo 81 | Emiliano le confiesa su verdad a Sigifredo",
+        "length": "39:06",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "RTOwdswCDSA",
+        "title": "La Hija del Mariachi | Capítulo 82 | Francisco arremete en contra de Macías",
+        "length": "34:10",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "gJ0UOSJ6eJQ",
+        "title": "La Hija del Mariachi | Capítulo 83 | Virginia le sigue rogando atención a Francisco",
+        "length": "40:19",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "noN9XXBisB8",
+        "title": "La Hija del Mariachi | Capítulo 85 | Francisco se siente humillado por Macías y Rosario",
+        "length": "37:48",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "JTERbX0aR2s",
+        "title": "La Hija del Mariachi | Capítulo 86 | Emiliano y Rosario se vuelven a besar",
+        "length": "40:07",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "tdxYxmuWzXw",
+        "title": "La Hija del Mariachi | Capítulo 87 | Emiliano cree que Rosario ya está fuera de su alcance",
+        "length": "35:53",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "G2Aw4NczSS4",
+        "title": "La Hija del Mariachi | Capítulo 88 | Rosario está confundidad por su amor hacia Francisco/Emiliano",
+        "length": "38:55",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "JBsEDyEm7Qw",
+        "title": "La Hija del Mariachi | Capítulo 89 | Rosario y Emiliano cantan juntos en la Laguna",
+        "length": "44:14",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "ntMJchKXs9I",
+        "title": "La Hija del Mariachi | Capítulo 90 | Francisco, esta vez como Emiliano se acerca a Rosario",
+        "length": "41:50",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "F8v24uM7Mds",
+        "title": "La Hija del Mariachi | Capítulo 91 | Emiliano intenta conquistar a Rosario",
+        "length": "41:24",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "ApiNfEZuRrc",
+        "title": "La Hija del Mariachi | Capítulo 91 | Rosario le hace preguntas a Emiliano sobre su vida en México",
+        "length": "40:53",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "9RV__eMiUsc",
+        "title": "La Hija del Mariachi | Capítulo 93 | Rosario y Emiliano empiezan su relación desde cero",
+        "length": "41:06",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "DO8vgik5Uqs",
+        "title": "La Hija del Mariachi | Capítulo 94 | Doña Eulalia será la estrella de la noche en Plaza Garibaldi",
+        "length": "41:56",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "HVbXFqfE9nY",
+        "title": "La Hija del Mariachi | Capítulo 95 | El Coloso planea conquistar a Rosario",
+        "length": "35:53",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "QniSRUa-fJo",
+        "title": "La Hija del Mariachi | Capítulo 96 | Emiliano le propone matrimonio a Rosario",
+        "length": "41:35",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "Syp4O8kdiyI",
+        "title": "La Hija del Mariachi | Capítulo 97 | Emiliano conoce la verdad sobre el fallecimiento de Martín",
+        "length": "41:14",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "1mpVPIcvXL0",
+        "title": "La Hija del Mariachi | Capítulo 98 | Rosario busca la manera de sacar a Emiliano de La Laguna",
+        "length": "40:43",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "sCMCBXpqQdM",
+        "title": "La Hija del Mariachi | Capítulo 99 | Emiliano se reencuentra con su mamá",
+        "length": "40:58",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "N_eDQKt7Rg8",
+        "title": "La Hija del Mariachi | Capítulo 100 | Emiliano le confiesa a su madre que es culpable",
+        "length": "41:27",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "yylMusAB3cw",
+        "title": "La Hija del Mariachi | Capítulo 101 | Emiliano se quiere alejar de Rosario",
+        "length": "39:06",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      }
+    ],
+    [
+      {
+        "id": "CAxaNLeNG7w",
+        "title": "La Hija del Mariachi | Capítulo 102 | Emiliano presentará a Rosario como su pareja ante sus padres",
+        "length": "40:49",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "CSEfcLU1lUk",
+        "title": "La Hija del Mariachi | Capítulo 103 | Francisco regresa a Plaza Garibaldi",
+        "length": "41:54",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "vFS6TqTOf7k",
+        "title": "La Hija del Mariachi | Capítulo 104 | Rosario conoce a los papás de Emiliano",
+        "length": "41:42",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "TZKC_rY5e9Q",
+        "title": "La Hija del Mariachi | Capítulo 105 | Emiliano no le confiesa la verdad de su inocencia a sus padres",
+        "length": "36:28",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "6xYIN-pjUuk",
+        "title": "La Hija del Mariachi | Capítulo 106 | Leti descubre una dolorosa verdad",
+        "length": "40:56",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "ZhXH0o95mYI",
+        "title": "La Hija del Mariachi | Capítulo 107 | Virginia le hace una advertencia a Francisco",
+        "length": "42:41",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "oY-zIG4Prb0",
+        "title": "La Hija del Mariachi | Capítulo 108 | Llegan nuevos problemas a Plaza Garibaldi",
+        "length": "42:17",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "WMQ8fkQsnZg",
+        "title": "La Hija del Mariachi | Capítulo 109 | Rosario está dispuesta a huir con Emiliano",
+        "length": "42:39",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "PSaEmCehAmM",
+        "title": "La Hija del Mariachi | Capítulo 110 | El Coloso está en la búsqueda de Roro, su hijo",
+        "length": "41:52",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "jRxknP3yPY0",
+        "title": "La Hija del Mariachi | Capítulo 111 | Francisco interviene para salvar Plaza Garibaldi",
+        "length": "40:42",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "H8g25KaxmGs",
+        "title": "La Hija del Mariachi | Capítulo 112 | Francisco despierta sospechas con su habilidad financiera",
+        "length": "43:38",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "Exd_8eWTkOQ",
+        "title": "La Hija del Mariachi | Capítulo 113 |  Francisco es interrogado por Macías sobre su pasado",
+        "length": "42:26",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "X4LThVvVqds",
+        "title": "La Hija del Mariachi | Capítulo 114 | Los Mariachis de Plaza Garibaldi viajan para una presentación",
+        "length": "41:35",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "Rvst_LHkrcc",
+        "title": "La Hija del Mariachi | Capítulo 115 | Macías descubre la verdadera identidad de Francisco",
+        "length": "39:01",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "aPYSD5KK9kU",
+        "title": "La Hija del Mariachi | Capítulo 116 |  Macías expondrá la identidad de Francisco",
+        "length": "41:00",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "9r04tGs6IL8",
+        "title": "La Hija del Mariachi | Capítulo 117 | Don Genaro descubre que Francisco es Emiliano",
+        "length": "38:40",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "mrktE6O7q_k",
+        "title": "La Hija del Mariachi | Capítulo 118 | Rosario sorprende a Emiliano con una propuesta de matrimonio",
+        "length": "38:32",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "1mgkSeGn7mw",
+        "title": "La Hija del Mariachi | Capítulo 119 | Coloso descubre que Francisco es un fugitivo",
+        "length": "41:57",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "VmJ57W_6liY",
+        "title": "La Hija del Mariachi | Capítulo 120 | El Coloso le pide a Francisco que le cuente toda la verdad",
+        "length": "42:07",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "-3cP2vzkUR8",
+        "title": "La Hija del Mariachi | Capítulo 121 | Emiliano se reencuentra con Rosario y escapan juntos",
+        "length": "42:55",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "dxdRmrNgSmI",
+        "title": "La Hija del Mariachi | Capítulo 122 | Doña Raquel descubre que Francisco es Emiliano, un fugitivo",
+        "length": "42:42",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "ptHAocHRtB8",
+        "title": "La Hija del Mariachi | Capítulo 123 | Rosario tiene clara su decisión de no alejarse de Emiliano",
+        "length": "42:08",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "m11uJueVAXE",
+        "title": "La Hija del Mariachi | Capítulo 124 | Emiliano se sorprende con la ayuda del Coloso",
+        "length": "43:30",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "krVBmnXaHeY",
+        "title": "La Hija del Mariachi | Capítulo 125 | Emiliano le pide a Rosario que se alejen",
+        "length": "39:41",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "XT0wriwxGEA",
+        "title": "La Hija del Mariachi | Capítulo 126 | Emiliano es capturado y se despide en el aeropuerto de Rosario",
+        "length": "41:00",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "iLsbqQNkyuk",
+        "title": "La Hija del Mariachi | Capítulo 127 | Rosario y Emiliano están detenidos en prisión",
+        "length": "42:33",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "7K1xLVgGc-8",
+        "title": "La Hija del Mariachi | Capítulo 128 | Emiliano recibe una conmovedora serenata de sus amigos",
+        "length": "42:50",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "vnRSpGAQq00",
+        "title": "La Hija del Mariachi | Capítulo 129 | Emiliano le dedica un mensaje a la manada",
+        "length": "41:32",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "4cxDOc12h4Q",
+        "title": "La Hija del Mariachi | Capítulo 130 | Emiliano recuerda su despedida en el aeropuerto con Rosario",
+        "length": "43:41",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "ZHjTx9GQd7A",
+        "title": "La Hija del Mariachi | Capítulo 131 | Rosario se vuelve el blanco de los enemigos de Emiliano",
+        "length": "43:39",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "VvuMF7XhETI",
+        "title": "La Hija del Mariachi | Capítulo 132 | Emiliano recibe la visita de su madre en prisión",
+        "length": "44:55",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "1xPtxCrmAzE",
+        "title": "La Hija del Mariachi | Capítulo 133 | Rosario organiza su viaje a México para visitar a Emiliano",
+        "length": "45:00",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "jug7U7dSyMA",
+        "title": "La Hija del Mariachi | Capítulo 134 | Rosario no puede reencontrarse con Emiliano",
+        "length": "45:37",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "eGfssVLEgg0",
+        "title": "La Hija del Mariachi | Capítulo 135 | Emiliano le pide a Rosario que lo olvide",
+        "length": "38:13",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "f8H39_Li28w",
+        "title": "La Hija del Mariachi | Capítulo 136 | Don Carlos informa que se cerrará Plaza Garibaldi",
+        "length": "42:02",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "TgpxFPt0TQ8",
+        "title": "La Hija del Mariachi | Capítulo 137 | Los mariachis intentan salvar Plaza Garibaldi",
+        "length": "43:47",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "GcklahgdK1E",
+        "title": "La Hija del Mariachi | Capítulo 138 | Coloso le dedica una canción a Emiliano",
+        "length": "43:03",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "SdxHcaYH0Po",
+        "title": "La Hija del Mariachi | Capítulo 139 | Emiliano no asimila que plaza Garibaldi cerró para siempre",
+        "length": "42:11",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "GrwGyBdx4RY",
+        "title": "La Hija del Mariachi | Capítulo 140 | Emiliano se sorprende con una noticia sobre su libertad",
+        "length": "37:25",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "80tGvVWluAE",
+        "title": "La Hija del Mariachi | Capítulo 141 | Plaza Garibaldi vuelve a abrir sus puertas",
+        "length": "40:39",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "7BVEJ_i67tA",
+        "title": "La Hija del Mariachi | Capítulo 142 | Los mariachis esperan la reapertura de Plaza Garibaldi",
+        "length": "43:19",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "qKjSDb5xq8w",
+        "title": "La Hija del Mariachi | Capítulo 143 | Emiliano y Rosario se reencuentran en Plaza Garibaldi",
+        "length": "41:08",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "D9xcaFAjLag",
+        "title": "La Hija del Mariachi | Capítulo 144 | Emiliano y Lucía tramaron un nuevo plan",
+        "length": "40:39",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "M-V-Cb0WRvg",
+        "title": "La Hija del Mariachi | Capítulo 145 | Rosario recibe las disculpas de sus suegros",
+        "length": "41:58",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "PYPL22Yl1mk",
+        "title": "La Hija del Mariachi | Capítulo 146 | El matrimonio de Emiliano y Rosario está en riesgo",
+        "length": "40:12",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      },
+      {
+        "id": "sRLlCKXD65Y",
+        "title": "La Hija del Mariachi | Capítulo 147 - FINAL | Emiliano y Rosario se casan",
+        "length": "41:34",
+        "channel": "Canal RCN",
+        "path": "/@canalrcn"
+      }
+    ]
+  ],
+  "gap84": [
+    {
+      "id": "FuWzW6g0AQE",
+      "title": "La Hija del Mariachi | Capítulo 84 | Francisco le lleva serenata a Rosario en su universidad",
+      "length": "36:55",
+      "channel": "Canal RCN",
+      "path": "/@canalrcn"
+    }
+  ]
+}

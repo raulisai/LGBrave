@@ -505,6 +505,22 @@
       "tests": [
         "scripts/test-connection-log.mjs"
       ]
+    },
+    {
+      "id": "youtube-complete-official-playlist",
+      "scope": "controlled",
+      "sources": [
+        "youtube"
+      ],
+      "description": "RCN:147 vídeos públicos,100+46 de playlist y84 recuperado; dos91 distintos conservados; reproductor oficial directo, Referer propio y restricciones respetadas.",
+      "evidence": [
+        "scripts/fixtures/playback/youtube-rcn.json",
+        "docs/YOUTUBE-20261106.md"
+      ],
+      "tests": [
+        "scripts/test-holy-youtube.mjs",
+        "scripts/test-player-safety.mjs"
+      ]
     }
   ],
   "caveats": [

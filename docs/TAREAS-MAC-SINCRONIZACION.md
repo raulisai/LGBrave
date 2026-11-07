@@ -1,4 +1,4 @@
-# Tareas en la Mac · sincronización Holy0.9.24
+# Tareas en la Mac · sincronización Holy0.9.25
 
 El lado Windows está preparado. Este archivo puede ejecutarlo el otro agente de Codex en la Mac. El activador listo para usuario está en mac/Activar-sincronizacion.command.
 
@@ -84,3 +84,7 @@ Investigar Dragon Ball con npm run holy:errors en esta Mac: no se encontró en l
 ## Actualización unificada06/11 ·0.9.24
 
 Windows y LG ya tienen0.9.24. Traer origin/main conservando biblioteca y cambios locales; npm ci, npm run playback:check y reiniciar el servicio desde el menú Mac. No repetir vinculación si el perfil ya funciona. Todas las ramas revisadas quedaron integradas en main. Ver docs/INTEGRACION-MAIN-20261106.md. Esta revisión no se activó físicamente en la Mac.
+
+## YouTube0.9.25 · 06/11/2026
+
+Traer main conservando cambios, npm ci, npm run playback:check y npm run desktop:restart. No volver a emparejar ni reinstalar menú/IPK. Windows comprobó147 vídeos RCN y LG49 directo en1080p con imagen/audio confirmados. Actualizar también Mac evita usar la implementación anterior al atender la TV. Esta actualización no se ejecutó físicamente en la Mac desde Windows. Ver docs/YOUTUBE-20261106.md.

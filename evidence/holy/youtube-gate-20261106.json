@@ -1,0 +1,49 @@
+{
+  "v": 1,
+  "started": "2026-11-07T02:53:37.881Z",
+  "scope": "Pruebas controladas offline y compilación. No acredita disponibilidad externa ni reproducción física.",
+  "node": "v24.21.0",
+  "platform": "win32",
+  "commit": "67a4abc2ce00022fd38a614ad0dce48e83bb0c14",
+  "checks": [
+    {
+      "name": "suite completa",
+      "ok": true,
+      "exitCode": 0,
+      "durationMs": 60518
+    },
+    {
+      "name": "build Luma",
+      "ok": true,
+      "exitCode": 0,
+      "durationMs": 2292
+    },
+    {
+      "name": "build Holy TV",
+      "ok": true,
+      "exitCode": 0,
+      "durationMs": 2171
+    },
+    {
+      "name": "build Holy web",
+      "ok": true,
+      "exitCode": 0,
+      "durationMs": 1891
+    }
+  ],
+  "ok": true,
+  "matrix": {
+    "cases": 34,
+    "sources": 12,
+    "scopes": {
+      "controlled": 20,
+      "tv-user-confirmed": 1,
+      "tv-metrics": 11,
+      "desktop-http": 1,
+      "navigation-only": 1
+    }
+  },
+  "inputHash": "6144a64a99f2c7db8f5b7e43daca96fabcfd84cbc25382dffd97710ab4054204",
+  "outputHash": "6144a64a99f2c7db8f5b7e43daca96fabcfd84cbc25382dffd97710ab4054204",
+  "finished": "2026-11-07T02:54:45.668Z"
+}
