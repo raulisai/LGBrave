@@ -534,6 +534,19 @@
         "scripts/test-holy-fast-back.mjs",
         "scripts/test-holy-robust.mjs"
       ]
+    },
+    {
+      "id": "home-asset-document-race",
+      "scope": "controlled",
+      "sources": [],
+      "description": "El primer Script de Holy puede llegar antes de frameNavigated o de su identidad Network: usar documentURL correlacionado o el Document raíz propio observado por Fetch solo para assets públicos, preservando guardia para Internet/iframes/API/red local ajena.",
+      "evidence": [
+        "docs/ATRAS-RAPIDO-20261106.md"
+      ],
+      "tests": [
+        "scripts/test-holy-fast-back.mjs",
+        "scripts/test-holy-security.mjs"
+      ]
     }
   ],
   "caveats": [

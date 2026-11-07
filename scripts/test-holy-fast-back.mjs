@@ -150,6 +150,62 @@ await check('Home context and assets do not wait for old JavaScript or go throug
   await bridge.request({frameId:'main',resourceType:'Script',requestId:'asset',request:{url:home+'assets/menu.js'}});
   assert.equal(calls.at(-1).method,'Fetch.continueRequest');
 });
+function requestFixture(){
+  const f=bridgeFixture();Object.assign(f.bridge,{apiBase:new URL(home).origin,homeAliases:new Set(),enabled:true,engine:{check:()=>({should_block:false})},records:[],blocked:0});
+  f.bridge.cdp.call=async(method,params)=>{f.calls.push({method,params});return {};};return f;
+}
+await check('The first menu script is allowed before frameNavigated replaces the old player identity',async()=>{
+  const {bridge,calls}=requestFixture();
+  await bridge.event({method:'Network.requestWillBeSent',params:{requestId:'network-script',frameId:'main',documentURL:home,type:'Script',request:{url:home+'assets/menu.js'}}});
+  assert.equal(bridge.frames.get('main'),'https://player.example/');
+  await bridge.request({networkId:'network-script',requestId:'paused-script',frameId:'main',resourceType:'Script',request:{url:home+'assets/menu.js'}});
+  assert.equal(calls.at(-1).method,'Fetch.continueRequest');assert.equal(bridge.homeResourceDocuments.size,0);
+});
+await check('A browser-observed root Home document authorizes its first asset without networkId',async()=>{
+  const {bridge,calls}=requestFixture();
+  await bridge.request({requestId:'document',frameId:'main',resourceType:'Document',request:{url:home}});
+  await bridge.request({requestId:'script',frameId:'main',resourceType:'Script',request:{url:home+'assets/menu.js'}});
+  assert.equal(calls.at(-1).method,'Fetch.continueRequest');
+  await bridge.request({requestId:'outside',frameId:'main',resourceType:'Document',request:{url:'https://player.example/'}});
+  await bridge.request({requestId:'script2',frameId:'main',resourceType:'Script',request:{url:home+'assets/menu.js'}});
+  assert.equal(calls.at(-1).method,'Fetch.fulfillRequest');
+});
+await check('A pending root document grants neither assets to iframes nor API access',async()=>{
+  const {bridge,calls}=requestFixture();await bridge.request({requestId:'document',frameId:'main',resourceType:'Document',request:{url:home}});
+  for(const [frameId,type,url,session]of [['child','Script',home+'assets/menu.js',undefined],['main','Script',home+'assets/menu.js','iframe'],['main','Fetch',new URL('/holy-api/sites',home).href,undefined]]){
+    await bridge.request({requestId:'blocked',frameId,resourceType:type,request:{url}},session);
+    assert.equal(calls.at(-1).method,'Fetch.fulfillRequest');
+  }
+});
+await check('An external root commit without a Document request clears the Home asset grant',async()=>{
+  const {bridge,calls}=requestFixture();
+  await bridge.request({requestId:'document',frameId:'main',resourceType:'Document',request:{url:home}});
+  await bridge.event({method:'Page.frameNavigated',params:{frame:{id:'child',parentId:'main',url:'https://player.example/'}}});
+  assert.ok(bridge.ownDocumentRequest,'a child commit cannot clear the root document');
+  await bridge.event({method:'Page.frameNavigated',params:{frame:{id:'main',url:'https://player.example/'}}});
+  assert.equal(bridge.ownDocumentRequest,null);
+  await bridge.request({requestId:'script',frameId:'main',resourceType:'Script',request:{url:home+'assets/menu.js'}});
+  assert.equal(calls.at(-1).method,'Fetch.fulfillRequest');
+});
+await check('Unknown, external or iframe sources cannot use the menu asset exception',async()=>{
+  for(const mode of ['unknown','external','iframe','different-frame','forged-referer']){
+    const {bridge,calls}=requestFixture();
+    if(mode!=='unknown'&&mode!=='forged-referer')await bridge.event({method:'Network.requestWillBeSent',sessionId:mode==='iframe'?'child':undefined,params:{requestId:'network',frameId:mode==='different-frame'?'child-frame':'main',documentURL:mode==='external'?'https://evil.example/':home,type:'Script',request:{url:home+'assets/menu.js'}}});
+    await bridge.request({networkId:'network',requestId:'paused',frameId:'main',resourceType:'Script',request:{url:home+'assets/menu.js',headers:{Referer:home}}},mode==='iframe'?'child':undefined);
+    assert.equal(calls.at(-1).method,'Fetch.fulfillRequest',mode);assert.equal(calls.at(-1).params.body,'',mode);
+  }
+});
+await check('Correlated menu identity grants neither API access nor other local resources',async()=>{
+  for(const [url,type]of [[new URL('/holy-api/sites',home).href,'Fetch'],[home+'other.js','Script'],['http://192.168.1.1/holy/assets/menu.js','Script']]){
+    const {bridge,calls}=requestFixture();await bridge.event({method:'Network.requestWillBeSent',params:{requestId:'network',frameId:'main',documentURL:home,type,request:{url}}});
+    await bridge.request({networkId:'network',requestId:'paused',frameId:'main',resourceType:type,request:{url}});
+    assert.equal(calls.at(-1).method,'Fetch.fulfillRequest',url);
+  }
+});
+await check('Request identity bookkeeping remains bounded during a long episode',async()=>{
+  const {bridge}=requestFixture();for(let n=0;n<300;n++)await bridge.event({method:'Network.requestWillBeSent',params:{requestId:String(n),frameId:'main',documentURL:home,type:'Script',request:{url:home+'assets/menu.js'}}});
+  assert.equal(bridge.homeResourceDocuments.size,256);
+});
 function bootFixture() {
   const p=page({homePage:true}),frames=[];let header=null,backHandler;
   p.context.document.querySelector=()=>header;

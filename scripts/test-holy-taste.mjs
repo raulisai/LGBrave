@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Library } from './holy/library.mjs';
+import { Library, entryKey } from './holy/library.mjs';
 import { genreList } from './holy/sources.mjs';
 import { genreLabel } from '../src/holy-genres.js';
 import { evaluate, labelOf } from './eval-holy-taste.mjs';
-import { mergeLibraryState } from './holy/taste-state.mjs';
+import { mergeLibraryState, tasteKey } from './holy/taste-state.mjs';
+import { Catalog } from './holy/catalog.mjs';
+import { packHome } from '../src/holy.js';
 import { Credits } from './holy/credits.mjs';
 
 const dir = mkdtempSync(join(tmpdir(), 'holy-taste-'));
@@ -135,6 +137,66 @@ try {
     assert.equal(await credits.fill([rito, hunter, gladiator]), 0);
     assert.deepEqual(asked, [], 'lo ya sabido no se vuelve a pedir');
     assert.equal(new Credits({ file: join(dir, 'credits.json') }).people(gladiator)[0].name, "Colin O'Donoghue");
+  });
+
+  await check('Votos: primera coincidencia de dirección o título; acentos, tipo, año y objeto modificado', () => {
+    const library = new Library(join(dir, 'vote-identities.json'), () => NOW);
+    const first = { ...film('Café', ['Drama'], { url:'https://x.test/a', key:'https://x.test/a', year:'2001' }), vote:1, at:NOW };
+    const second = { ...film('Otra', ['Comedia'], { url:'https://x.test/b', key:'https://x.test/b', year:'2001' }), vote:-1, at:NOW };
+    const item = { title:'CAFE!', kind:'movie', year:'2001', url:second.url };
+    library.votes = [first, second];
+    assert.equal(library.voteOf(item),1,'título anterior gana a dirección posterior');
+    library.votes = [second, first];
+    assert.equal(library.voteOf(item),-1,'dirección anterior gana a título posterior');
+    library.votes = [first];
+    item.url='https://x.test/c';assert.equal(library.voteOf(item),1);
+    item.title='Otra';assert.equal(library.voteOf(item),0,'no memorizar un título por identidad de objeto');
+    item.title='Café';item.year='2002';assert.equal(library.voteOf(item),0);
+    item.year='2001';item.kind='anime';assert.equal(library.voteOf(item),0);
+    item.kind='movie';item.show=first.url;item.title='Otra';assert.equal(library.voteOf(item),1,'la dirección de serie también cuenta');
+  });
+  await check('Votos: cambios, borrado, importación, reemplazo y versión no conservan un índice antiguo', () => {
+    const library=new Library(join(dir,'vote-changes.json'),()=>NOW);
+    const item=film('Título', ['Drama'], {key:'https://x.test/one',url:'https://x.test/one'});
+    assert.equal(library.voteOf(item),0);
+    assert.equal(library.vote(item,1),1);assert.equal(library.voteOf(item),1);
+    assert.equal(library.vote(item,-1),-1);assert.equal(library.voteOf(item),-1);
+    library.vote(item,0);assert.equal(library.voteOf(item),0);
+    const incoming=new Library(join(dir,'vote-incoming.json'),()=>NOW+1000);
+    incoming.vote(item,2);library.mergeTastes(incoming.exportTastes());assert.equal(library.voteOf(item),2);
+    library.clearVotes();assert.equal(library.voteOf(item),0);
+    library.votes=[{...item,vote:1,at:NOW}];assert.equal(library.voteOf(item),1);
+    library.votes.push({...film('Otra',[],{key:'https://x.test/two',url:'https://x.test/two'}),vote:-1,at:NOW});
+    assert.equal(library.voteOf({title:'Otra',kind:'movie',url:'https://x.test/copy'}),-1);
+    library.votes.splice(0,1);assert.equal(library.voteOf(item),0);
+    library.votes[0]={...item,vote:2,at:NOW};library.version++;
+    assert.equal(library.voteOf(item),2);
+    library.votes=[];assert.equal(library.voteOf(item),0);
+  });
+  await check('Votos: consultas repetidas no vuelven a normalizar toda la lista', () => {
+    const library=new Library(join(dir,'vote-warm.json'),()=>NOW);let reads=0;
+    library.votes=Array.from({length:22},(_,index)=>({key:'https://x.test/v'+index,kind:'movie',vote:1,
+      get title(){reads++;return 'Película '+index;}}));
+    const item={title:'Película 21',kind:'movie',url:'https://x.test/other'};
+    assert.equal(library.voteOf(item),1);const cold=reads;
+    for(let i=0;i<100;i++)assert.equal(library.voteOf({...item}),1);
+    assert.equal(reads,cold,'cien consultas no recorren los veintidós títulos otra vez');
+    library.version++;assert.equal(library.voteOf(item),1);assert.ok(reads>cold);
+  });
+  await check('Catálogo: mismo JSON de recomendaciones, orden, afinidad y motivos que la búsqueda lineal anterior', () => {
+    const items=Array.from({length:160},(_,index)=>film('Título '+index,[index%2?'Comedia':'Drama',index%3?'Acción':'Música'],{
+      key:'https://x.test/c'+index,url:'https://x.test/c'+index,year:String(2000+index%20),
+      kind:['movie','anime','dorama','series'][index%4],source:['cuevana','jkanime','doramasflix','cuevana'][index%4]}));
+    const build=legacy=>{
+      const library=new Library(join(dir,legacy?'scan.json':'indexed.json'),()=>NOW);
+      library.entries=items.slice(0,47).map(item=>({...item,watched:5000,t:5900,finished:true}));
+      library.votes=items.slice(0,22).map((item,index)=>({...item,vote:[1,-1,2][index%3],at:NOW}));
+      if(legacy)library.voteOf=function(item){return this.votes.find(v=>v.key===entryKey(item||{})||tasteKey(v)===tasteKey(item))?.vote||0;};
+      const catalog=new Catalog({file:join(dir,'missing.json'),detailsFile:join(dir,'missing-details.json'),knownLists:null,credits:null});
+      catalog.items=structuredClone(items);catalog.updatedAt=NOW;
+      return JSON.stringify(packHome(catalog.home(library)));
+    };
+    assert.equal(build(false),build(true));
   });
   console.log(`Gustos de Holy: ${passed} pruebas correctas.`);
 } finally { rmSync(dir, { recursive: true, force: true }); }

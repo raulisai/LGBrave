@@ -153,6 +153,16 @@ export class HolyBridge extends BrowserBridge {
   }
   async event(message) {
     const { method, params = {}, sessionId } = message;
+    // A history/BFCache restore may commit without a Fetch Document request.
+    if (!sessionId && method === 'Page.frameNavigated' && !params.frame.parentId && !this.isHome(params.frame.url)) this.ownDocumentRequest = null;
+    if (method === 'Network.requestWillBeSent' && params.requestId && params.documentURL) {
+      // Subresources can be paused before frameNavigated is processed. Preserve
+      // the browser's document identity per request instead of trusting the old
+      // player URL still present in the frame map.
+      this.homeResourceDocuments ||= new Map();
+      this.homeResourceDocuments.set((sessionId||'')+':'+params.requestId, {frameId:params.frameId,url:params.documentURL});
+      if(this.homeResourceDocuments.size>256)this.homeResourceDocuments.delete(this.homeResourceDocuments.keys().next().value);
+    }
     if (!sessionId && method === 'Page.javascriptDialogOpening' && params.type === 'beforeunload' && this.exitingPlayer) {
       // The viewer explicitly requested Home. A site's leave-page prompt must
       // not hold that navigation, but normal dialogs remain untouched.
@@ -223,6 +233,12 @@ export class HolyBridge extends BrowserBridge {
     } catch { /* A packaged home has no HTTP origin to translate. */ }
   }
   async request(params, sessionId) {
+    const sourceKey=(sessionId||'')+':'+params.networkId;
+    const documentIdentity=this.homeResourceDocuments?.get(sourceKey);
+    this.homeResourceDocuments?.delete(sourceKey);
+    if(!sessionId && params.frameId===this.mainFrame && params.resourceType==='Document'){
+      this.ownDocumentRequest=this.isHome(params.request.url)?{frameId:params.frameId,url:params.request.url}:null;
+    }
     if (!sessionId && params.resourceType === 'Document' && this.isHome(params.request.url) && this.exitingPlayer) {
       // The return has actually started. Keep feedback, cancel the local retry
       // so it cannot abort this healthy request and restart loading the menu.
@@ -233,7 +249,14 @@ export class HolyBridge extends BrowserBridge {
       // WAM can omit Origin for the packaged app. Only this owned top frame may
       // identify itself to its own API; external players/iframes never receive it.
       const ownedHome = params.frameId === this.mainFrame && this.isHome(this.frames.get(params.frameId) || '');
-      if (ownedHome && url.origin === new URL(this.apiBase).origin && url.pathname.startsWith(HOME_PATH)) {
+      const browserHome=!sessionId && params.frameId===this.mainFrame && documentIdentity?.frameId===params.frameId && this.isHome(documentIdentity.url);
+      // Fetch can precede Network identity (or omit networkId) on webOS. The
+      // browser-observed top-document request also identifies its public JS/CSS,
+      // without making its API or any other LAN route available to a website.
+      const ownedDocument=!sessionId && this.ownDocumentRequest?.frameId===params.frameId && this.isHome(this.ownDocumentRequest.url);
+      const ownAsset=url.pathname.startsWith(HOME_PATH+'assets/') && ['Script','Stylesheet'].includes(params.resourceType);
+      if(ownAsset&&url.origin===new URL(this.apiBase).origin)this.recorder?.write('HOMEASSET',JSON.stringify({main:params.frameId===this.mainFrame,ownedHome,browserHome,ownedDocument,networkId:!!params.networkId,session:!!sessionId}));
+      if ((ownedHome || (ownAsset && (browserHome||ownedDocument))) && url.origin === new URL(this.apiBase).origin && url.pathname.startsWith(HOME_PATH)) {
         await this.cdp.call('Fetch.continueRequest',{requestId:params.requestId},sessionId).catch(()=>{});
         return;
       }

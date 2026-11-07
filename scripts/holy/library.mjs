@@ -200,7 +200,24 @@ export class Library {
     this.save();
     return this.voteOf(item);
   }
-  voteOf(item) { return this.votes.find(vote => vote.key === entryKey(item || {}) || tasteKey(vote) === tasteKey(item))?.vote || 0; }
+  voteOf(item) {
+    let lookup = this.voteLookup;
+    if (!lookup || lookup.version !== this.version || lookup.votes !== this.votes || lookup.length !== this.votes.length) {
+      const byKey = new Map(), byTaste = new Map();
+      this.votes.forEach((vote, index) => {
+        if (!byKey.has(vote.key)) byKey.set(vote.key, index);
+        const identity = tasteKey(vote);
+        if (!byTaste.has(identity)) byTaste.set(identity, index);
+      });
+      lookup = this.voteLookup = { version: this.version, votes: this.votes, length: this.votes.length, byKey, byTaste };
+    }
+    // The original find accepted either address or title: preserve whichever
+    // appears first, including when each identity matches a different vote.
+    const address = lookup.byKey.get(entryKey(item || {}));
+    const title = lookup.byTaste.get(tasteKey(item));
+    const index = Math.min(address ?? Infinity, title ?? Infinity);
+    return this.votes[index]?.vote || 0;
+  }
   // Calibration resets ratings and chosen tastes; what was watched keeps counting.
   clearVotes() { this.tasteMeta.resetAt = this.tasteStamp(); this.votes = []; this.prefs = []; this.save(); }
   prefer(type, name, value) {

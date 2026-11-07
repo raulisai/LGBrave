@@ -1,0 +1,90 @@
+{
+  "version": "0.9.27",
+  "environment": "Windows backend; LG webOS; controlled test authorized by user; HTTP /holy/ home, installed IPK 0.9.24",
+  "before": {
+    "menuReadyWithinMs": false,
+    "observationMs": 45500,
+    "appEmpty": true,
+    "scriptStatus": 200,
+    "scriptBlocked": true,
+    "scriptBytes": 0
+  },
+  "after": [
+    {
+      "capturedAt": "2026-11-07T03:30:38.179Z",
+      "menuReadyMs": 3390,
+      "headerVisible": true,
+      "menuMounted": true,
+      "paintConfirmed": true,
+      "scriptBytes": 171235,
+      "scriptBlocked": false
+    },
+    {
+      "capturedAt": "2026-11-07T03:33:19.111Z",
+      "menuReadyMs": 2745,
+      "headerVisible": true,
+      "menuMounted": true,
+      "paintConfirmed": true,
+      "scriptBytes": 171235,
+      "scriptBlocked": false
+    }
+  ],
+  "restoration": {
+    "sameVideo": true,
+    "sameDuration": true,
+    "savedSeconds": 1690.0884,
+    "observedSeconds": 1749.1474,
+    "advancing": true,
+    "paused": false,
+    "ready": 4
+  },
+  "limits": [
+    "One YouTube episode and two returns; not coverage of all providers or Internet.",
+    "No new IPK or EXE installed. Packaged file home retains its previous Svelte assets.",
+    "Mac offline, not physically tested with this version."
+  ],
+  "gate": {
+    "ok": true,
+    "cases": 36,
+    "sources": 12,
+    "inputHash": "b625573d5ae5a0b16eaccb628c7e2aea939f3b2f48c7f2355c4bc1ed9d88f202",
+    "outputHash": "b625573d5ae5a0b16eaccb628c7e2aea939f3b2f48c7f2355c4bc1ed9d88f202",
+    "checks": [
+      {
+        "name": "suite completa",
+        "ok": true,
+        "durationMs": 63139
+      },
+      {
+        "name": "build Luma",
+        "ok": true,
+        "durationMs": 1934
+      },
+      {
+        "name": "build Holy TV",
+        "ok": true,
+        "durationMs": 2107
+      },
+      {
+        "name": "build Holy web",
+        "ok": true,
+        "durationMs": 2002
+      }
+    ],
+    "controlledBackChecks": 30,
+    "controlledTasteChecks": 15
+  },
+  "recommendationBenchmark": {
+    "scope": "Windows local CPU, not TV",
+    "titles": 1472,
+    "history": 47,
+    "votes": 22,
+    "preferences": 8,
+    "homeBeforeMs": [
+      2161,
+      2599
+    ],
+    "homeAfterMs": 495,
+    "sameHomeAndPackJSON": true
+  }
+}
