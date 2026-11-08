@@ -546,6 +546,18 @@
         "scripts/test-holy-fast-back.mjs",
         "scripts/test-holy-security.mjs"
       ]
+    },
+    {
+      "id": "pause-panel-single-language-film",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Pausa de películas sin variantes o con un idioma muestra panel; idiomas/capítulos solo si existen; alternativa de servidor conserva progreso sin cambio automático por pausa.",
+      "evidence": [
+        "docs/PAUSA-MENU-20261108.md"
+      ],
+      "tests": [
+        "scripts/test-holy-pause.mjs"
+      ]
     }
   ],
   "caveats": [

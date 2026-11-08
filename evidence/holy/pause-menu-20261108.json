@@ -1,0 +1,79 @@
+{
+  "version": "0.9.29",
+  "scope": "LG Rain Man, Windows backend; authorized pause/resume, no navigation or server selection",
+  "before": {
+    "t": 6358.505,
+    "d": 8032.979,
+    "paused": false,
+    "ready": 4
+  },
+  "paused": {
+    "video": {
+      "t": 6358.505,
+      "d": 8032.979,
+      "paused": true,
+      "ready": 4
+    },
+    "menu": true,
+    "visible": true,
+    "fullscreen": "",
+    "card": "menu"
+  },
+  "menuMs": 3252,
+  "after": {
+    "video": {
+      "t": 6361.207,
+      "d": 8032.979,
+      "paused": false,
+      "ready": 4
+    },
+    "menu": false,
+    "visible": false,
+    "fullscreen": "",
+    "card": ""
+  },
+  "screenVerified": [
+    "EN PAUSA",
+    "Rain Man",
+    "Seguir viendo",
+    "Otro servidor"
+  ],
+  "limits": [
+    "Language/server selection and episodes tested offline, not on TV in this session",
+    "Mac backend not physically tested"
+  ],
+  "gate": {
+    "ok": true,
+    "inputHash": "6686a9d5332a47e3131e1eaff25698684621a4eb46e39b60dbf0643d2870b6b0",
+    "outputHash": "6686a9d5332a47e3131e1eaff25698684621a4eb46e39b60dbf0643d2870b6b0",
+    "matrix": {
+      "cases": 37,
+      "sources": 11,
+      "scopes": {
+        "controlled": 23,
+        "tv-user-confirmed": 1,
+        "tv-metrics": 11,
+        "desktop-http": 1,
+        "navigation-only": 1
+      }
+    },
+    "checks": [
+      {
+        "name": "suite completa",
+        "ok": true
+      },
+      {
+        "name": "build Luma",
+        "ok": true
+      },
+      {
+        "name": "build Holy TV",
+        "ok": true
+      },
+      {
+        "name": "build Holy web",
+        "ok": true
+      }
+    ]
+  }
+}

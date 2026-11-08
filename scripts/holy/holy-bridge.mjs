@@ -672,8 +672,8 @@ export class HolyBridge extends BrowserBridge {
         if (ended && session.card?.kind !== 'end') await this.showEndCard(session);
         // Rewound from the card: back to watching.
         else if (session.card?.kind === 'end' && !ended && best.t < best.d - 15) await this.hideEndCard(session);
-        // An episode paused for a moment (not at its end): the pause panel; playing again hides it.
-        if (!ended && (episodic(session.item) || (session.versions || []).length > 1)) {
+        // Every paused feature gets controls, including films with one language.
+        if (!ended) {
           if (best.paused && !best.mediaError && best.t > 1) {
             session.pausedSince ||= Date.now();
             if (!session.card && Date.now() - session.pausedSince > this.pauseDelay) await this.showPauseCard(session);
@@ -836,9 +836,24 @@ export class HolyBridge extends BrowserBridge {
     if (previous?.url) { card.options.push({ action: 'play', item: episode(item, previous) }); buttons.push({ label: 'Anterior', detail: previous.label, icon: 'previous' }); }
     if (next?.url) { card.options.push({ action: 'play', item: episode(item, next) }); buttons.push({ label: 'Siguiente', detail: next.label, icon: 'next' }); }
     if ((session.versions || []).length > 1) { card.options.push({ action: 'versions' }); buttons.push({ label: 'Idioma', detail: current?.label || '', icon: 'language' }); }
+    if (session.queue?.length) { card.options.push({ action: 'server-next' }); buttons.push({ label: 'Otro servidor', icon: 'server' }); }
     if (series) { card.options.push({ action: 'episodes' }); buttons.push({ label: 'Capítulos', icon: 'list' }); }
     await this.curtain(endCardSource({ mode: 'pause', title: item.title, next: item.subtitle || (item.episode ? 'Episodio ' + item.episode : ''), buttons }));
     await this.curtain(cardFlagSource('menu'));
+    // A backend restart/handoff retains the video, but not signed server URLs.
+    // Recover choices from its source in the background; never delay the panel.
+    if (session.adopted && !session.pauseMetadataLoading && !session.pauseMetadataLoaded && this.catalog.resolve) {
+      session.pauseMetadataLoading = true;
+      const item = session.item, target = session.target;
+      this.catalog.resolve(item, { ...session.choice, ...(session.versionKind ? {kind:session.versionKind} : {}) }).then(resolved => {
+        if (!resolved || this.session !== session || session.item !== item || session.target !== target || this.stopped) return;
+        session.pauseMetadataLoaded = true;
+        session.versions = resolved.versions || [];
+        session.version = resolved.version || '';
+        session.queue = [...new Set([resolved.url, ...(resolved.alternatives || [])].filter(url => url && url !== target))];
+        if (session.card === card) return this.showPauseCard(session);
+      }).catch(() => {}).finally(() => { session.pauseMetadataLoading = false; });
+    }
   }
   // The languages this episode has: pick one and it restarts here, at the same second.
   async showVersionsCard(session) {
@@ -904,6 +919,13 @@ export class HolyBridge extends BrowserBridge {
     if (option.action === 'resume') return this.resumeVideo(session);
     if (option.action === 'versions') { session.card = null; return this.showVersionsCard(session); }
     if (option.action === 'version') return this.switchVersion(session, option.version);
+    if (option.action === 'server-next') {
+      if (!session.queue?.length) return this.showPauseCard(session);
+      const at = session.position?.t || 0;
+      this.library.progress(session.key, session.item.url, at, session.position?.d || 0);
+      session.forceResume = session.resumeAt = at;
+      return this.nextServer(session);
+    }
     if (option.action === 'episodes' && session.item?.show) return this.toEpisodes(session.item);
     return this.command({ action: 'home' });
   }

@@ -26,5 +26,37 @@ try{
  const startup=await make();startup.bridge.session.phase='opening';startup.bridge.session.position=null;startup.set([{t:0,d:3000,paused:true,userPaused:true,ready:4,area:1920*1080,ended:false}]);await startup.bridge.watch();assert.equal(startup.bridge.session.userPaused,false,'An opening zero-time marker cannot freeze the loading curtain');startup.set([{t:1,d:3000,paused:false,userPaused:false,ready:4,area:1920*1080,ended:false}]);await startup.bridge.watch();assert.equal(startup.bridge.session.phase,'playing');
  const descriptor=playbackDescriptor({item:{source:'doramasflix',kind:'dorama',title:'Paused show',url:'https://doramasflix.io/capitulos/paused-1x4',show:'https://doramasflix.io/doramas/paused',episode:4},position:{t:1600,d:3000},userPaused:true},'old-computer');assert.equal(validDescriptor(descriptor).paused,true);await c.bridge.endSession();c.bridge.cdp.evaluate=async()=>descriptor;assert.equal(await c.bridge.adoptPlayback(),true);assert.equal(c.bridge.session.userPaused,true,'A computer handoff must retain the pause');const heldHandoff=c.navigations();await c.bridge.rescue(c.bridge.session,1600);assert.equal(c.navigations(),heldHandoff);
  await c.bridge.endSession();c.bridge.cdp.evaluate=async()=>({...descriptor,position:null,paused:true});assert.equal(await c.bridge.adoptPlayback(),true);assert.equal(c.bridge.session.phase,'opening','Reconnect to an unstarted player must keep startup automation');assert.equal(c.bridge.session.userPaused,false,'Stale pause at zero must not survive adoption');
- console.log('Pausa larga: errores, pérdida de muestras, reanudación, primeros segundos, fin, otros frames y recuperación real no pausada correctos.');
+ // Films with zero/one language used to skip the panel entirely.
+ for(const versions of [[],[{id:'es',label:'Español',kind:'dub'}]]){
+   const f=await make();f.bridge.session.versions=versions;f.bridge.session.version='es';
+   const rendered=[];f.bridge.curtain=async s=>{rendered.push(s);};
+   f.set([{...f.video(),paused:true}]);await f.bridge.watch();clock+=1500;await f.bridge.watch();
+   const s=f.bridge.session;assert.equal(s.card?.kind,'pause');
+   assert.ok(rendered.some(r=>r.includes('Seguir viendo')));
+   assert.ok(!s.card.options.some(o=>o.action==='episodes'||o.action==='versions'));
+   assert.ok(s.card.options.some(o=>o.action==='server-next'));
+   f.set([{...f.video(),paused:false}]);await f.bridge.watch();assert.equal(s.card,null,'resume removes film panel');
+   s.versions=[{id:'es',label:'Español',kind:'dub'},{id:'en',label:'Original',kind:'orig'}];
+   await f.bridge.showPauseCard(s);assert.ok(s.card.options.some(o=>o.action==='versions'));
+   s.item={...s.item,kind:'series',show:'https://source.example/show',episode:2};
+   await f.bridge.showPauseCard(s);assert.ok(s.card.options.some(o=>o.action==='episodes'));
+   s.position={t:750,d:3000};const before=f.navigations();
+   await f.bridge.chooseCard(s,s.card.options.findIndex(o=>o.action==='server-next'));
+   assert.equal(s.resumeAt,750);assert.equal(s.forceResume,750);assert.equal(f.navigations(),before+1);
+   assert.equal(s.target,'https://player.example/two');assert.equal(s.version,'es');
+   s.queue=[];await f.bridge.showPauseCard(s);assert.ok(!s.card.options.some(o=>o.action==='server-next'));
+ }
+ // After handoff, source metadata loads behind an already visible panel.
+ for(const stale of [false,true]){
+   const f=await make(),s=f.bridge.session;let finish,asked;
+   s.adopted=true;s.versionKind='dub';s.queue=[];f.bridge.curtain=async()=>{};
+   f.bridge.catalog.resolve=(_item,choice)=>{asked=choice;return new Promise(r=>{finish=r;});};
+   await f.bridge.showPauseCard(s);assert.equal(s.card.kind,'pause');assert.equal(asked.kind,'dub');
+   const card=s.card;if(stale)s.target='https://player.example/changed';
+   finish({url:'https://player.example/one',alternatives:['https://player.example/two'],version:'es',versions:[{id:'es',kind:'dub'},{id:'en',kind:'orig'}]});
+   await new Promise(r=>setImmediate(r));
+   if(stale){assert.equal(s.card,card);assert.equal(s.queue.length,0,'stale metadata cannot replace a different player');}
+   else{assert.ok(s.card.options.some(o=>o.action==='versions'));assert.ok(s.card.options.some(o=>o.action==='server-next'));}
+ }
+ console.log('Pausa larga y menú: películas sin idiomas/idioma único, series, idiomas, servidor con progreso, metadatos tras relevo, reanudación y recuperación correctos (sin TV).');
 }finally{Date.now=realNow;for(const b of bridges)await b.stop();rmSync(dir,{recursive:true,force:true});}

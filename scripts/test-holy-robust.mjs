@@ -847,10 +847,11 @@ try {
     await bridge.command({ action:'back' });
     assert.equal(navigated(), home);
     assert.equal(bridge.session, null);
-    // A film: Back goes home and a pause shows nothing.
+    // A film also gets the pause panel; Back still goes straight home.
     await start({ source: 'cuevana', kind: 'movie', title: 'F', url: 'https://c.example/f' });
     video = { ...video, t: 600, paused: true }; await bridge.watch(); await new Promise(resolve => setTimeout(resolve, 40)); await bridge.watch();
-    assert.ok(!bridge.session.card);
+    assert.equal(bridge.session.card.kind, 'pause');
+    assert.deepEqual(bridge.session.card.options.map(option => option.action), ['resume']);
     bridge.frames.set(bridge.mainFrame, 'https://p.example/');
     await bridge.command({ action: 'back' });
     assert.equal(navigated(), home);
