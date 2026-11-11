@@ -158,4 +158,9 @@ await check('PelisFlix: tarjetas, capítulos por temporada y versiones con servi
   assert.deepEqual(versions, [{ id: 'castellano', label: 'Español (España)', kind: 'dub', target: { url: 'https://nupload.my/watch/a', referrer: 'https://pelisflix1.kim/pelicula/silent-night/', alternatives: ['https://voe.sx/e/b'] } }]);
   assert.ok(registry().pending().some(entry => entry.name === 'RePelis24' && entry.known));
 });
+await check('PelisFlix: la imagen de relleno «404x» del sitio no cuenta como póster (no se pide una imagen que no existe)', () => {
+  const card = image => `<li class="TPostMv"><article class="TPost B"><a href="https://pelisflix1.kim/pelicula/sin-poster/"><img class="imglazy" data-src="${image}"><h2 class="Title">Sin póster</h2></a></article></li>`;
+  assert.equal(pelisflix.parseHome(card('//imgs.repelisplus.hair/404x.jpg'))[0].poster, '');
+  assert.equal(pelisflix.parseHome(card('//cnddim.xyz/sys/poster/x.jpg'))[0].poster, 'https://cnddim.xyz/sys/poster/x.jpg');
+});
 console.log(`${passed} comprobaciones de la ventana Webs, OnlyFlix, .beer y catálogo público retirado correctas.`);

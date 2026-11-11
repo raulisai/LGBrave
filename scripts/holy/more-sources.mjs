@@ -464,7 +464,7 @@ const pelisflixCards = (html, base = pelisflixURL) => String(html).split('<li cl
   if (!kind || !pelisflixHost.test(url)) return null;
   const episode = /\/episodio\/([\w-]+?)-(\d+)x(\d+)\/?$/.exec(url);
   const image = attr(/<img[^>]*>/.exec(block)?.[0] || '', 'data-src') || attr(/<img[^>]*>/.exec(block)?.[0] || '', 'src');
-  const poster = image ? absolute(image.replace(/^\/\//, 'https://'), base) : '';
+  const poster = image && !String(image).endsWith('/404x.jpg') ? absolute(image.replace(/^\/\//, 'https://'), base) : '';
   return item({ source: 'pelisflix', kind, url, title: text(/<h2 class="Title"[^>]*>([\s\S]*?)<\/h2>/.exec(block)?.[1]),
     ...(episode ? { show: absolute(`/serie/${episode[1]}/`, base), episode: Number(episode[3]), subtitle: `T${episode[2]} · Episodio ${Number(episode[3])}`, badge: `${episode[2]}x${episode[3]}`, backdrop: poster }
       : kind === 'series' ? { show: url, isShow: true } : {}),
