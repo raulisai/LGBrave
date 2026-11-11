@@ -24,27 +24,57 @@ export function seconds(value) {
 const views = value => Number(String(value || '').replace(/[^\d]/g, '')) || 0;
 
 // What the title says the video is not: a whole film or episode.
-const NOT_WHOLE = /\b(resena|review|revision|facts|datos|explicacion|explicada|explained|resumen|recap|reaccion|reaction|trailer|teaser|avance|analisis|en \d+ minutos|en minutos|pelicula del juego|gameplay|walkthrough|cutscenes|pc version|fan ?film|fanmade|parodia|making of|detras de camaras|behind the scenes|asmr|podcast|audiolibro|audiobook|clip|escenas?)\b/;
+const NOT_WHOLE = /\b(resumen|recap|reaccion|reaction|trailer|teaser|avance|en \d+ minutos|en minutos|pelicula del juego|gameplay|walkthrough|cutscenes|pc version|fan ?film|fanmade|fan concept|parodia|making of|detras de camaras|behind the scenes|asmr|podcast|audiolibro|audiobook|clip|escenas?|ranking|compilacion|recopilacion|mejores momentos|del peor al mejor|top \d+)\b/;
+// A commentary by itself, but uploaders of whole films add «Datos y explicación» or «Reseña» to
+// the title of a film-length upload («Mi Pobre Angelito (1990) Película Completa en Español |
+// Datos y Explicación», 1:45:20): that is still the film, shown after the clean uploads.
+const COMMENTARY = /\b(resena|review|revision|facts|datos|explicacion|explicada|explicado|explained|analisis|hechos)\b/;
+const SAYS_WHOLE = /\b(completa|completo|full movie)\b/;
 // Recordings and resolutions that are not watchable on a TV.
 const LOW_QUALITY = /\b(cam|camrip|ts|telesync|hdcam|240p|360p)\b/;
-const SPANISH = /\b(espanol|espanola|latino|castellano|doblad[oa]|subtitulad[oa]|sub esp|subs? espanol)\b/;
-const EPISODE = /\b(capitulo|cap|episodio|ep|chapter|episode)\.?\s*(\d{1,4})\b|\bs\d{1,2}\s*e(\d{1,4})\b|\b\d{1,2}x(\d{1,4})\b/;
+const SPANISH = /\b(espanol|espanola|latino|castellano|doblad[oa]|doblaje|subtitulad[oa]|sub esp|subs? espanol|subtitulos en espanol)\b/;
+// Films made in Spanish never say «en español» (Pedro Infante, El Santo, «El chico nuevo»), so a
+// title only has to read as Spanish, or as just a name, and not as another language.
+const SPANISH_WORDS = new Set(['el', 'la', 'los', 'las', 'del', 'y', 'con', 'una', 'unos', 'unas', 'al', 'mi', 'su', 'sus', 'lo', 'pero', 'cuando', 'donde', 'muy', 'hasta', 'ahora', 'quien', 'pelicula', 'peliculas', 'capitulo', 'capitulos', 'temporada', 'episodio', 'mexicana', 'mexicano', 'noche', 'senor', 'senora', 'hijo', 'hija', 'nuevo', 'nueva', 'ultimo', 'ultima', 'esta', 'este']);
+const OTHER_LANGUAGE = /\b(filme|filmes|dublado|legendado|assistir|uma|ele|nao|voce|hindi|tamil|telugu|dubbed|vostfr|deutsch|italiano|turkce|sub indo|vietsub|engsub|eng sub)\b/;
+const ENGLISH = /\b(the|of|and|with|full movie|movie|english|starring|season|episode|full episode)\b/;
+export function spanishTitle(title, raw = '') {
+  if (SPANISH.test(title)) return true;
+  const spanish = title.split(/[^a-z0-9ñ]+/).filter(word => SPANISH_WORDS.has(word)).length + (/[ñ¿¡]/.test(raw) ? 1 : 0);
+  if (OTHER_LANGUAGE.test(title)) return spanish >= 2 && !/\b(filme|dublado|legendado|dubbed)\b/.test(title);
+  return !ENGLISH.test(title) || spanish > 0;
+}
+// «Capítulo 3», «S1 E3», «1x03» and Russian/Turkish series' «(3/8)».
+const EPISODE = /\b(capitulo|cap|episodio|ep|chapter|episode)\.?\s*(\d{1,4})\b|\bs\d{1,2}\s*e(\d{1,4})\b|\b\d{1,2}x(\d{1,4})\b|\((\d{1,3})\s*\/\s*\d{1,3}\)/;
 const WHOLE_SERIES = /\b(serie completa|temporada completa|todos los capitulos|todos los episodios|toda la serie)\b/;
 // Words that say «full film / Spanish / quality», not which film: ignored when matching what was typed.
-const FILLER = new Set(['pelicula', 'peliculas', 'completa', 'completas', 'completo', 'completos', 'serie', 'series', 'capitulo', 'capitulos', 'episodio', 'episodios', 'en', 'espanol', 'latino', 'castellano', 'de', 'del', 'la', 'el', 'los', 'las', 'y', 'hd', 'full', 'movie', 'the', 'a', 'un', 'una', '4k', 'youtube']);
-const BOILERPLATE = /pel[ií]cula|completa|completo|espa[ñn]ol|latino|castellano|doblad|subtitulad|\bhd\b|\b4k\b|full movie|estreno|^\s*(drama|acci[oó]n|comedia|terror|romance|suspenso|aventura|ciencia ficci[oó]n|animaci[oó]n)\b/i;
+// Connecting words («El Santo vs las momias» answers «el santo contra las momias») are not required either.
+const FILLER = new Set(['pelicula', 'peliculas', 'completa', 'completas', 'completo', 'completos', 'serie', 'series', 'capitulo', 'capitulos', 'episodio', 'episodios', 'en', 'espanol', 'latino', 'castellano', 'de', 'del', 'la', 'el', 'los', 'las', 'y', 'hd', 'full', 'movie', 'the', 'a', 'un', 'una', '4k', 'youtube', 'contra', 'vs', 'versus', 'con', 'para', 'sin', 'al', 'o']);
+// A part of the title that says what the upload is (language, quality, genre, commentary), not its name.
+const BOILERPLATE = /pel[ií]cula|completa|completo|espa[ñn]ol|latino|castellano|doblad|subtitulad|\bhd\b|\b4k\b|full movie|estreno|\bfilme\b|\bdatos\b|explica|\bexplain|rese[ñn]a|\bhechos\b|revisi[oó]n|cine (de oro|mexicano|cl[aá]sico)|^\s*(drama|acci[oó]n|comedia|terror|romance|suspenso|aventura|ciencia ficci[oó]n|animaci[oó]n|familiar|crimen|western|thriller)\b/i;
 
-// Where the film's name ends inside one part («Hansel y Gretel Pelicula Completa Español…»).
-const TAIL = /[\s,.:;(-]+(mejor(es)? pel[ií]culas?\b|pel[ií]cula,?\s+completa|completa\b|en espa[ñn]ol|espa[ñn]ol latino|\(?\s*latino\b|doblad[ao]|subtitulad[ao]|\bhd\b|\b4k\b|full movie|estreno)/i;
+// Where the film's name ends inside one part («Hansel y Gretel Pelicula Completa Español…»,
+// «la ley de herodes una pelicula mexicana», «Mi Pobre Angelito 3 COMEDIA FAMILIAR»).
+const TAIL = /[\s,.:;(-]+(mejor(es)? pel[ií]culas?\b|((una|la|el)\s+)?pel[ií]culas?\b|(comedia|drama|terror|acci[oó]n|suspenso|romance|aventura)\s+completa\b|completa\b|en espa[ñn]ol|espa[ñn]ol latino|\(?\s*latino\b|doblad[ao]|subtitulad[ao]|\bhd\b|\b4k\b|full movie|estreno|comedia familiar|cine de oro|western mexicano|colorizad[ao]|coloread[ao]|restaurada)/i;
+// Where it starts when the boilerplate comes first («PELICULA COMPLETA DE CANTINFLAS POR MIS PISTOLAS»).
+const LEAD = /^(pel[ií]culas?\s+completas?(\s+(de|del|con))?|estreno|full movie)[\s:|-]+/i;
+// One part reduced to the name it carries: a quoted name first («Película "¡Así es mi tierra!" con…»).
+function nameOf(part) {
+  let name = (/["“«]([^"”»]{3,80})["”»]/.exec(part)?.[1] || part).replace(LEAD, '');
+  const tail = TAIL.exec(name);
+  if (tail && tail.index >= 3) name = name.slice(0, tail.index);
+  // A year cut in half by the tail («Nosotros Los Pobres (1948, Español Latino») and «(RAMBO)».
+  return name.replace(/[\s,.:;(-]*\(?\s*(19|20)\d{2}\s*,?\s*$/, '').replace(/^\((.+)\)$/, '$1').replace(/[\s,.:;|-]+$/, '').trim();
+}
 // The film's own name out of a YouTube title («TE ENSEÑARÉ A SOÑAR | Película completa en
 // Español Latino | Películas de amor» → «Te Enseñaré A Soñar»): the first part between
-// separators that is not boilerplate, cut where the boilerplate starts; shouting titles are
-// calmed down.
+// separators that still has a name once its boilerplate is cut, so «Mi Pobre Angelito (1990)
+// Película Completa | Familiar de Comedia | Datos y Explicación» is «Mi Pobre Angelito», not
+// its genre or commentary part. Shouting titles are calmed down.
 export function cleanTitle(raw) {
   const parts = decode(raw).replace(/[\u{1F000}-\u{1FFFF}☀-➿️]/gu, ' ').split(/\s[|│•·\/–—-]\s|\s?\|\s?|\s\/\s|[\[\]]/).map(part => part.replace(/\(\s*(19|20)\d{2}\s*\)/g, '').replace(/\s+/g, ' ').trim()).filter(Boolean);
-  let name = parts.find(part => !BOILERPLATE.test(part)) || parts[0] || decode(raw);
-  const tail = TAIL.exec(name);
-  if (tail && tail.index >= 3) name = name.slice(0, tail.index).trim();
+  const names = parts.map(nameOf).filter(name => /\p{L}{2}/u.test(name) && !BOILERPLATE.test(name));
+  const name = names[0] || parts[0] || decode(raw);
   const letters = name.replace(/[^\p{L}]/gu, '');
   return letters && letters === letters.toUpperCase() ? name.toLowerCase().replace(/(^|[\s¡¿("'])(\p{L})/gu, (_, before, letter) => before + letter.toUpperCase()) : name;
 }
@@ -112,8 +142,10 @@ export function toItem(video, query = '') {
   const length = seconds(video.lengthText?.simpleText);
   const labels = (video.badges || []).map(badge => fold(badge.metadataBadgeRenderer?.label)).join(' ');
   if (!title || !length || /miembros|members|en vivo|live/.test(labels) || NOT_WHOLE.test(title) || LOW_QUALITY.test(title)) return null;
+  const commentary = COMMENTARY.test(title);
+  if (commentary && !(SAYS_WHOLE.test(title) && length >= 3600)) return null;
   // Spanish TV channels (RCN, Caracol…) only say «Capítulo 3»: that word is Spanish enough.
-  if (!SPANISH.test(title) && !/\b(capitulo|episodio|temporada)\b/.test(title)) return null;
+  if (!spanishTitle(title, raw)) return null;
   const wanted = fold(query).replace(/[^a-z0-9ñ]+/g, ' ').split(' ').filter(word => word && !FILLER.has(word));
   const words = title.replace(/[^a-z0-9ñ]+/g, ' ').split(' '), joined = words.join('');
   if (wanted.some(word => !words.includes(word) && !(word.length >= 6 && joined.includes(word)))) return null;
@@ -132,17 +164,18 @@ export function toItem(video, query = '') {
   const names = kind === 'series' && !whole ? episodeNames(raw, channel, query) : null;
   const verified = (video.ownerBadges || []).some(badge => /VERIFIED/.test(badge.metadataBadgeRenderer?.style || ''));
   const quality = /\b4k\b|2160p/.test(labels + ' ' + title) ? '4K' : /\b(hd|1080p|720p|full hd|blu-?ray)\b/.test(labels + ' ' + title) ? 'HD' : '';
-  const language = /\blatino\b/.test(title) ? 'Latino' : /\bcastellano\b/.test(title) ? 'Castellano' : /subtitulad|sub esp|subs? espanol/.test(title) ? 'Subtitulado' : '';
+  const language = /\blatino\b/.test(title) ? 'Latino' : /\bcastellano\b/.test(title) ? 'Castellano' : /subtitulad|sub esp|subs? espanol|subtitulos en espanol/.test(title) ? 'Subtitulado' : '';
   const hours = Math.floor(length / 3600), minutes = Math.round(length % 3600 / 60);
-  const number = Number(episode?.[2] || episode?.[3] || episode?.[4]) || null;
+  const number = Number(episode?.[2] || episode?.[3] || episode?.[4] || episode?.[5]) || null;
   return {
     source: 'youtube', kind, url: watchURL(id), title: names?.series || cleanTitle(raw), ...(names ? { series: names.series, episodeTitle: names.episode } : {}),
     subtitle: [kind === 'series' ? (whole ? 'Serie completa' : number ? 'Capítulo ' + number : 'Episodio') : '', channel, hours ? `${hours} h ${String(minutes).padStart(2, '0')} min` : `${minutes} min`].filter(Boolean).join(' · '),
-    year: /\((19|20)\d{2}\)/.exec(raw)?.[0].slice(1, 5) || '', language, badge: quality,
+    // «(1948)», «(1948, Español…» or a part of its own («Águila o sol | 1938 | Cantinflas»).
+    year: /\((19|20)\d{2}\s*[),]|\|\s*(19|20)\d{2}\s*\|/.exec(raw)?.[0].match(/\d{4}/)[0] || '', language, badge: quality,
     poster: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, backdrop: `https://i.ytimg.com/vi/${id}/hq720.jpg`,
     // Genres only from the words around the name («El libro de la vida» is no «Vida cotidiana»).
     genres: genresFromWords(fold(decode(raw)).replace(fold(cleanTitle(raw)), ' ')), overview: decode(raw), episode: number,
-    duration: length, channel, channelPath, verified, views: views(video.viewCountText?.simpleText)
+    duration: length, channel, channelPath, verified, views: views(video.viewCountText?.simpleText), ...(commentary ? { commentary: true } : {})
   };
 }
 
@@ -182,13 +215,36 @@ export function groupSeries(items) {
   });
 }
 
-// Verified channels and 4K/HD uploads first, then the most watched; each video once.
-export function rank(items) {
-  const score = item => (item.verified ? 3 : 0) + (item.badge === '4K' ? 2 : item.badge === 'HD' ? 1 : 0) + Math.log10(item.views + 1) / 2;
+// How closely a name answers what was typed: the film called exactly that, then a sequel or
+// subtitle of it («Mi pobre angelito 3»); «El chico nuevo sufre acoso escolar pero descubre un
+// genio…» only contains the words. Only articles are ignored here («Shrek: la serie» is not «Shrek»).
+const ARTICLES = new Set(['el', 'la', 'los', 'las', 'lo', 'un', 'una', 'the', 'a', 'de', 'del', 'y']);
+const plainName = value => fold(value).split(/[^a-z0-9ñ]+/).filter(word => word && !ARTICLES.has(word));
+function relevance(item, query) {
+  const wanted = plainName(query).filter(word => !FILLER.has(word) || !['pelicula', 'peliculas', 'completa', 'completo', 'espanol', 'latino', 'castellano', 'hd', '4k'].includes(word)), name = plainName(item.title);
+  if (!wanted.length || !name.length) return 0;
+  if (name.join(' ') === wanted.join(' ')) return 8;
+  return name.slice(0, wanted.length).join(' ') === wanted.join(' ') && name.length - wanted.length <= 4 ? 3 : 0;
+}
+// The title asked for first; then verified channels and 4K/HD uploads, then the most watched;
+// each video once. A film whose title also promises «datos y explicación» goes after the clean uploads.
+export function rank(items, query = '') {
+  const score = item => relevance(item, query) + (item.verified ? 3 : 0) + (item.badge === '4K' ? 2 : item.badge === 'HD' ? 1 : 0) + Math.log10(item.views + 1) / 2 - (item.commentary ? 4 : 0);
   const seen = new Set();
   return items.filter(item => item && !seen.has(item.url) && seen.add(item.url)).sort((a, b) => score(b) - score(a));
 }
-const pick = (videos, query) => groupSeries(rank(videos.map(video => toItem(video, query)))).slice(0, 24);
+// The same film is often uploaded many times: the three best uploads of each stay (the others
+// remain a search away), so one name does not fill the whole row.
+function fewCopies(items, copies = 3) {
+  const count = new Map();
+  return items.filter(item => {
+    if (item.kind !== 'movie') return true;
+    const key = fold(item.title).replace(/[^a-z0-9ñ]+/g, '');
+    count.set(key, (count.get(key) || 0) + 1);
+    return count.get(key) <= copies;
+  });
+}
+const pick = (videos, query) => fewCopies(groupSeries(rank(videos.map(video => toItem(video, query)), query))).slice(0, 24);
 // Like every site reader, garbage in gives an empty list, never an exception.
 export function parseSearch(html, query = '') {
   try { return pick(results(String(html || '')), query); } catch { return []; }
@@ -250,7 +306,20 @@ export const youtube = {
   // Searched with «completa» so YouTube itself leans to whole films and episodes.
   searchURL: query => `${SITE}results?search_query=${encodeURIComponent(/complet[ao]/i.test(query) ? query : query + ' completa')}&sp=${LONG}`,
   // A page that is not a results page fails loudly here, so search says «sin respuesta», not «nada».
-  async search(query, load) { return pick(results(await load(this.searchURL(query))), query); },
+  // One results page holds about 20 videos; when few of them are whole films, the next page is read
+  // too (YouTube's own continuation), and a slow or missing second page keeps the first.
+  async search(query, load) {
+    const html = await load(this.searchURL(query));
+    const first = pageData(html);
+    let videos = results(null, first);
+    const next = continuation(first), version = /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/.exec(html)?.[1];
+    if (next?.api === 'search' && version && pick(videos, query).length < 12) {
+      const text = await load(SITE + 'youtubei/v1/search?prettyPrint=false', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion: version, hl: 'es-419' } }, continuation: next.token }), timeout: 5000 }).catch(() => '');
+      try { videos = [...videos, ...results(null, JSON.parse(text))]; } catch { /* Keep the first page. */ }
+    }
+    return pick(videos, query);
+  },
   // Prefer the channel's complete playlist: channel-search ranking omits real episodes.
   async episodes(show, load) {
     const match = /^https:\/\/www\.youtube\.com\/(@[\w.-]+)\/search\?query=([^&]+)$/.exec(show || '');

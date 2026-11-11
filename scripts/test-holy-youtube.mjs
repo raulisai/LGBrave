@@ -192,6 +192,85 @@ try {
     const grouped=parseSearch(page(fixture.channelVideos,null,true),'La hija del mariachi');
     assert.equal(grouped[0].title,'La Hija del Mariachi');assert.equal(grouped[0].isShow,true);
   });
+  // Real titles seen on 2026-11-11 (Spanish-language films rarely say «en español»).
+  const spanish = page([
+    video('ccccccccc01', 'El CHICO NUEVO SUFRE ACOSO ESCOLAR PERO DESCUBRE UN GENIO QUE LE DA EL PODER DE UN DIOS', '1:25:00', { badges: ['4K'], views: '2,000,000 vistas' }),
+    video('ccccccccc02', 'El chico nuevo', '1:28:33', { views: '9,000 vistas' }),
+    video('ccccccccc03', 'Nosotros Los Pobres (1948, Español Latino AC3 2.0)', '2:04:10'),
+    video('ccccccccc04', 'Nosotros los pobres película HD colorizado, Pedro Infante', '2:04:02'),
+    video('ccccccccc05', 'RAMBO 4: Ele Só Queria Paz, Mas Uma Nova Missão o Faz Voltar à Guerra | Filme Completo Dublado', '1:31:20'),
+    video('ccccccccc06', 'The Godfather Full Movie', '2:55:00'),
+    video('ccccccccc07', 'Mi Pobre Angelito (1990) Película Completa en Español | Familiar de Comedia | Datos y Explicación', '1:45:20', { badges: ['4K'], views: '3,000,000 vistas' }),
+    video('ccccccccc08', 'Mi pobre angelito película completa en español latino', '1:42:00'),
+    video('ccccccccc09', 'Mi pobre angelito reseña y datos', '1:10:00'),
+    video('ccccccccc10', 'Ranking - Los 135 episodios del Chavo animado - Del PEOR al MEJOR.', '2:56:00'),
+    video('ccccccccc11', 'Serie rusa HD ★ EL CHICO NUEVO (1/8) ★ Subtítulos en ESPAÑOL y RUSO ★ RusAmor', '49:51'),
+    video('ccccccccc12', 'El Santo vs las momias de Guanajuato', '1:19:36'),
+    video('ccccccccc13', 'Mystery Show Episode 4 full episode', '45:00')
+  ]);
+
+  await check('Películas hechas en español entran aunque el título no diga «en español»; portugués e inglés no', () => {
+    const ids = items => items.map(item => item.url.slice(-11));
+    assert.deepEqual(ids(parseSearch(spanish, 'el chico nuevo')).filter(id => id !== 'ccccccccc11'), ['ccccccccc02', 'ccccccccc01']);
+    assert.deepEqual(ids(parseSearch(spanish, 'nosotros los pobres')).sort(), ['ccccccccc03', 'ccccccccc04']);
+    assert.deepEqual(ids(parseSearch(spanish, 'rambo')), []);
+    assert.deepEqual(ids(parseSearch(spanish, 'godfather')), []);
+    assert.deepEqual(ids(parseSearch(spanish, 'mystery show')), [], 'un capítulo con título en inglés no es español');
+  });
+
+  await check('El título buscado va primero aunque otro tenga más vistas y 4K', () => {
+    const [first, second] = parseSearch(spanish, 'chico nuevo').filter(item => item.kind === 'movie');
+    assert.deepEqual([first.url.slice(-11), first.title, second.url.slice(-11)], ['ccccccccc02', 'El chico nuevo', 'ccccccccc01']);
+  });
+
+  await check('«Película completa | Datos y explicación» de duración de película entra, después de las limpias; una reseña sola no', () => {
+    const items = parseSearch(spanish, 'mi pobre angelito');
+    assert.deepEqual(items.map(item => item.url.slice(-11)), ['ccccccccc08', 'ccccccccc07']);
+    assert.deepEqual([items[1].title, items[1].year, items[1].commentary], ['Mi Pobre Angelito', '1990', true]);
+  });
+
+  await check('Rankings y recopilaciones no son películas; «(1/8)» es el capítulo 1; «contra» encuentra «vs»', () => {
+    assert.deepEqual(parseSearch(spanish, 'chavo animado'), []);
+    const episode = parseSearch(spanish, 'el chico nuevo').find(item => item.url.endsWith('ccccccccc11'));
+    assert.deepEqual([episode.kind, episode.episode, episode.language], ['series', 1, 'Subtitulado']);
+    assert.deepEqual(parseSearch(spanish, 'el santo contra las momias').map(item => item.title), ['El Santo vs las momias de Guanajuato']);
+  });
+
+  await check('Nombre limpio cuando el título empieza o acaba con relleno, citas, género o comentario', () => {
+    assert.equal(cleanTitle('Mi Pobre Angelito (1990) Película Completa en Español | Familiar de Comedia | Datos y Explicación'), 'Mi Pobre Angelito');
+    assert.equal(cleanTitle('Mi Pobre Angelito 2: Perdido en Nueva York (1992) Comedia completa en español | Datos y Explicación'), 'Mi Pobre Angelito 2: Perdido en Nueva York');
+    assert.equal(cleanTitle('PELICULA COMPLETA DE CANTINFLAS POR MIS PISTOLAS'), 'Cantinflas Por Mis Pistolas');
+    assert.equal(cleanTitle('Película "¡Así es mi tierra!" con Cantinflas y Mercedes Soler | Cine de Oro Mexicano'), '¡Así es mi tierra!');
+    assert.equal(cleanTitle('la ley de herodes una pelicula mexicana'), 'la ley de herodes');
+    assert.equal(cleanTitle('MI POBRE ANGELITO 3 COMEDIA FAMILIAR'), 'Mi Pobre Angelito 3');
+    assert.equal(cleanTitle('Nosotros Los Pobres (1948, Español Latino AC3 2.0)'), 'Nosotros Los Pobres');
+    assert.equal(cleanTitle('ESTRENO (RAMBO) MEJOR PELICULAS DE ACCION Pelicula Completa en Espanol Latino HD'), 'Rambo');
+    assert.ok(cleanTitle('Película asombrosa! Revela todas las mentiras').startsWith('Película asombrosa!'), 'una frase que empieza con «Película» no se corta');
+  });
+
+  await check('La misma película subida muchas veces: quedan las tres mejores', () => {
+    const copies = page(Array.from({ length: 5 }, (_, index) => video('dddddddd0' + index + 'x', 'La ley de Herodes película completa', '1:53:00')));
+    assert.equal(parseSearch(copies, 'la ley de herodes').length, 3);
+  });
+
+  await check('Pocas películas en la primera página: se pide la siguiente con la continuación de YouTube; si ya hay muchas, no', async () => {
+    const more = { onResponseReceivedCommands: [{ appendContinuationItemsAction: { continuationItems: [{ itemSectionRenderer: { contents: [video('eeeeeeeee01', 'El chico nuevo película completa en español', '1:30:00')] } }] } }] };
+    const withNext = videos => page([...videos, { continuationItemRenderer: { continuationEndpoint: { commandMetadata: { webCommandMetadata: { apiUrl: '/youtubei/v1/search' } }, continuationCommand: { token: 'TOKEN' } } } }]) +
+      '<script>ytcfg.set({"INNERTUBE_CLIENT_VERSION":"2.20261101.00.00"});</script>';
+    const asked = [];
+    const load = async (url, options = {}) => { asked.push([options.method || 'GET', url, options.body ? JSON.parse(options.body).continuation : '']); return options.method === 'POST' ? JSON.stringify(more) : withNext([video('ccccccccc02', 'El chico nuevo', '1:28:33')]); };
+    const items = await youtube.search('el chico nuevo', load);
+    assert.deepEqual(items.map(item => item.url.slice(-11)).sort(), ['ccccccccc02', 'eeeeeeeee01']);
+    assert.deepEqual(asked.map(([method, url, token]) => [method, new URL(url).pathname, token]), [['GET', '/results', ''], ['POST', '/youtubei/v1/search', 'TOKEN']]);
+    const many = Array.from({ length: 14 }, (_, index) => video('fffffffff' + String(index).padStart(2, '0'), 'El chico nuevo parte ' + index + ' película completa', '1:30:00'));
+    asked.length = 0;
+    await youtube.search('el chico nuevo', async (url, options = {}) => { asked.push(options.method || 'GET'); return withNext(many); });
+    assert.deepEqual(asked, ['GET']);
+    // A slow or broken second page keeps the first.
+    const kept = await youtube.search('el chico nuevo', async (url, options = {}) => { if (options.method === 'POST') throw Error('timeout'); return withNext([video('ccccccccc02', 'El chico nuevo', '1:28:33')]); });
+    assert.deepEqual(kept.map(item => item.url.slice(-11)), ['ccccccccc02']);
+  });
+
   await check('Continuaciones: API del control; token repetido no crea un bucle', async () => {
     assert.deepEqual(continuation({continuationEndpoint:{commandMetadata:{webCommandMetadata:{apiUrl:'/youtubei/v1/search'}},continuationCommand:{token:'next'}}}),{api:'search',token:'next'});
     const html='<script>var ytInitialData = '+JSON.stringify({contents:[video('repeat00001','Mi serie | Capítulo 1','40:00'),{continuationItemRenderer:{continuationEndpoint:{continuationCommand:{token:'same'}}}}]})+';</script>"INNERTUBE_CLIENT_VERSION":"2.test"';

@@ -558,6 +558,21 @@
       "tests": [
         "scripts/test-holy-pause.mjs"
       ]
+    },
+    {
+      "id": "youtube-spanish-films",
+      "scope": "controlled",
+      "sources": [
+        "youtube"
+      ],
+      "description": "Películas de YouTube hechas en español sin «en español» en el título, nombre exacto primero, subidas con «datos y explicación» al final, rankings fuera, «contra»/«vs», copias limitadas, nombres limpios y segunda página de resultados; portugués e inglés fuera. Sin Internet.",
+      "evidence": [
+        "scripts/holy/youtube.mjs",
+        "docs/YOUTUBE-PELICULAS-20261111.md"
+      ],
+      "tests": [
+        "scripts/test-holy-youtube.mjs"
+      ]
     }
   ],
   "caveats": [
