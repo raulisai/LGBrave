@@ -7,6 +7,9 @@ export function repairPlan(report, inspection={}) {
   const state=report?.state;
   const plan=(code,action,message,extra={})=>({code,action,message,...extra});
   if(state==='standby')return plan('other-owner',null,'La TV la atiende otro equipo; esta computadora permanece en respaldo.',{waiting:true});
+  // Connected over SSH, yet the TV cannot open this computer's server: a restart would not help.
+  if(report?.returnPath?.ok===false&&['connected','waiting'].includes(state))return plan('tv-cannot-reach-computer',null,
+    report.returnPath.hint||'La TV no llega a esta computadora por la red local; revisa el firewall.',{needsReview:true,verified:false});
   if(state==='connected')return plan(report.profileContext?.mismatch?'context-deferred':'healthy',null,
     report.profileContext?.mismatch?'La reproducción sigue conectada; el cambio de entorno se aplicará cuando se desconecte.':'La conexión ya está activa.',{verified:!report.profileContext?.mismatch});
   if(['starting','restarting'].includes(state))return plan('service-starting',null,'El servicio está iniciando; se comprobará de nuevo.',{pending:true});

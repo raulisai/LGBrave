@@ -34,9 +34,21 @@ try{
    [{...good,state:'error'},auth,'service-error','restart'],
    [{...good,state:'offline',tvReachable:false},auth,'tv-unreachable',null],
    [{...good,state:'waiting'},auth,'app-not-open',null],
-   [{...good,state:'offline'},auth,'connection-retry','wake']
+   [{...good,state:'offline'},auth,'connection-retry','wake'],
+   [{...good,state:'connected',returnPath:{ok:false,hint:'firewall'}},auth,'tv-cannot-reach-computer',null],
+   [{...good,state:'waiting',returnPath:{ok:false}},auth,'tv-cannot-reach-computer',null],
+   [{...good,state:'connected',returnPath:{ok:null}},auth,'healthy',null],
+   [{...good,state:'offline',returnPath:{ok:false}},auth,'connection-retry','wake']
   ]){const value=repairPlan(report,inspection);assert.equal(value.code,code);assert.equal(value.action,action);}
   assert.equal(repairPlan({...good,state:'connected',profileContext:{mismatch:true}},auth).action,null);
+ });
+ await test('Connected but unreachable from the TV is reported, never verified and never restarted',async()=>{
+  let actions=0;const state={...good,state:'connected',returnPath:{ok:false,hint:'Windows trata la red como Privada'}};
+  const fix=createDesktopRepair({status:async()=>state,recovery:fakeRecovery,start:async()=>actions++,restart:async()=>actions++,wake:async()=>actions++});
+  const result=await fix();assert.equal(result.repair.code,'tv-cannot-reach-computer');assert.equal(result.repair.verified,false);assert.equal(result.repair.outcome,'blocked');
+  assert.equal(result.repair.needsReview,true);assert.equal(actions,0);assert.ok(result.actions.includes('Windows trata la red como Privada'));
+  for(const value of ['waiting']){const other=await createDesktopRepair({status:async()=>({...state,state:value}),recovery:fakeRecovery,start:async()=>actions++,restart:async()=>actions++,wake:async()=>actions++})();assert.equal(other.repair.verified,false);assert.equal(actions,0);}
+  let calls=0;const monitor=createRepairMonitor({readState:()=>state,repair:async()=>{calls++;return{};}});await monitor.tick();assert.equal(calls,0);
  });
  await test('Process context is comparable without paths or secrets',()=>{
   const a=userDataContext({env:{HOME:'C:/owner',LOCALAPPDATA:'C:/local'},registry:{file:'C:/roaming/devices.json'},platform:'win32'});

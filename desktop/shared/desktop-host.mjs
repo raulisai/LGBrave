@@ -26,6 +26,8 @@ import {adoptPackagedSettings,currentPackage} from './app-package.mjs';
 import {connectSession} from '../../scripts/inspector-tunnel.mjs';
 import {openInspectorTunnel} from '../../scripts/inspector-tunnel.mjs';
 import {busyPorts, describeBusy} from './port-check.mjs';
+import {createReturnPathCheck} from './return-path.mjs';
+import {PORT} from '../../scripts/holy/config.mjs';
 
 process.chdir(ROOT);
 const diagnostics=new DiagnosticLog();
@@ -75,6 +77,19 @@ const runtime = new LabRuntime({
     ? new HolyBridge(cdp, {...options, catalog, library,preferences,diagnostics}) : new BrowserBridge(cdp, {...options,preferences,diagnostics,home:lumaOrigin()+'/luma-home/'})
 });
 const startedAddress = lanAddress();
+// Holy on the TV also needs the way back (TV → this computer); outgoing SSH/CDP alone cannot show it.
+const returnPath=createReturnPathCheck({host:lanAddress,port:PORT});
+let reportedReturn='';
+const checkReturnPath=()=>{
+  const run=runtime.tunnel?.run;
+  if(process.env.LUMA_OFFLINE_TEST==='1'||!run||!['connected','waiting'].includes(runtime.state)||!returnPath.due(run))return;
+  returnPath.check(run).then(result=>{
+    const key=[result.ok,result.code].join('|');
+    if(key===reportedReturn)return;reportedReturn=key;
+    diagnostics.event('connection','return-path',{state:result.ok===true?'ok':result.ok===false?'blocked':'unknown',code:result.code,...(result.hint?{error:{message:result.hint}}:{})},result.ok===false?'warn':'info');
+    if(result.ok===false)console.log(result.hint);
+  }).catch(()=>{});
+};
 const doctorBudget=new RepairJournal({file:join(ROOT,'.local','doctor-state.json')});
 const doctor = createDoctor({catalog, library, runtime, playbackIncident:()=>latestPlaybackExit(join(ROOT,'.local/logs/holy-playback.jsonl')), tv:tvAddress,profile:{inspect:recovery.inspect,restore:()=>{const unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));try{return recovery.restore();}finally{unlock();}}},
   reserveRepair:(action,code)=>{let unlock;try{unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));return doctorBudget.reserve(action,code);}catch{return{allowed:false,reason:'repair-busy'};}finally{unlock?.();}}, startedAddress, currentAddress:lanAddress,
@@ -100,6 +115,8 @@ const report = () => {
   const status = {state,context:userDataContext(), app:runtime.cdp?.target.description || '', host:lanAddress(), tv:tvAddress(),
     error:runtime.lastError || '', holder:runtime.holder || '', paused:Math.max(0, Math.round((runtime.pausedUntil - Date.now()) / 1000)),
     profile:profiles.status(),peerSync:peerSync?.status()||null, updated:Date.now(), pid:process.pid, appPackage};
+  const way=returnPath.status();
+  if(runtime.tunnel&&['connected','waiting'].includes(state)){status.returnPath=way;if(way.ok===false&&way.hint)status.checks=[way.hint];}
   const code=runtime.lastCause||'';
   const stateKey=[state,status.app,status.error,status.profile.state,code].join('|');
   if(stateKey!==reportedState){reportedState=stateKey;diagnostics.event('connection','state',{state,error:status.error,phase:status.profile.state,code,source:status.app},status.error?'warn':'info');}
@@ -130,6 +147,7 @@ try {
     } else {
       try{recovery.capture();}catch(error){diagnostics.event('profile','recovery-error',{error},'error');}
       await runtime.step();
+      checkReturnPath();
     }
     if(runtime.state==='connected'||runtime.state==='waiting')await profiles.flush();
     report();

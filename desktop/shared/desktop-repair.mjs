@@ -21,7 +21,7 @@ export function createDesktopRepair({status,recovery,start,restart,wake,log=()=>
    };
    try{
     before=await status({probe:true});plan=repairPlan(before);
-    if(['connected','standby','starting','restarting','conflict'].includes(before.state)){actions.push(plan.message);return result(before,{...plan,outcome:plan.verified?'verified':plan.pending?'pending':'waiting',ok:true,verified:!!plan.verified});}
+    if(['connected','standby','starting','restarting','conflict'].includes(before.state)){actions.push(plan.message);return result(before,{...plan,outcome:plan.verified?'verified':plan.needsReview?'blocked':plan.pending?'pending':'waiting',ok:!plan.needsReview,verified:!!plan.verified});}
     if(lock)try{release=lock();}catch{actions.push('Doctor espera una reserva exclusiva; se conserva la sesión actual.');return result(before,{ok:false,verified:false,outcome:'busy',pending:true,code:'repair-busy'});}
     // Re-read after taking the cross-process lock: a healthy session may have appeared.
     let after=await status({probe:true});

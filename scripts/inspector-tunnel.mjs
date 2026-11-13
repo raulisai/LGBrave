@@ -111,7 +111,9 @@ export async function openInspectorTunnel({
     };
     const profile=reserve&&typeof session.ssh.sftp==='function'&&lease?.commitSnapshot
       ?createTVProfileStore({ssh:session.ssh,guard:assertActive,commit:path=>lease.commitSnapshot(path)}):null;
-    return {endpoint:`http://127.0.0.1:${server.address().port}`, closed, close, assertActive, profile};
+    // Short read-only shell commands on the TV through this same reserved session (exit 0 only).
+    const run=(text,timeout)=>{assertActive();return command(session.ssh,text,timeout);};
+    return {endpoint:`http://127.0.0.1:${server.address().port}`, closed, close, assertActive, profile, run};
   } catch (error) {
     await close();
     // A lease can arrive after a transport error already completed close().

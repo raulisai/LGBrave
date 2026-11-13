@@ -35,7 +35,9 @@ export async function status({probe = false} = {}) {
   const context=userDataContext();
   const mismatch=profileMismatch(live,context,tv);
   const repairNeeded=!!(mismatch&& !['connected','standby','starting','restarting'].includes(state) || state==='setup'&&tv.configured&&!tv.needsUpdate);
+  const unreachable=live?.returnPath?.ok===false&&['connected','waiting'].includes(state);
   const label=repairNeeded?'El servicio necesita recargar el perfil de esta computadora'
+    :unreachable?'La TV no llega a esta computadora: revisa el firewall'
     :state==='standby'&&live?.paused?`TV cedida a otra computadora; reintenta en ${live.paused} s`
     :state==='standby'&&live?.holder?`La TV la atiende ${live.holder}`:labels[state] || state;
   // The catalogue page for any device on the WiFi: served by this same process whenever it
@@ -112,7 +114,7 @@ export async function doctor() {
   const peers = await Promise.all(config().peers.map(async host => ({host,reachable:await tcpOpen(host,43190,800)})));
   const diagnosis=repairPlan(report,repairRecovery.inspect());
   if(diagnosis.code!=='healthy')checks.push(diagnosis.message);
-  return {...report,checks:[...new Set(checks)],peers,diagnosis,coverage:['profile-context-mismatch','registry-unreadable','authorization-missing','tv-address-mismatch','tv-unreachable','other-owner','service-stopped','service-unresponsive','service-error','connection-retry','local-conflict','app-not-open']};
+  return {...report,checks:[...new Set(checks)],peers,diagnosis,coverage:['tv-cannot-reach-computer','profile-context-mismatch','registry-unreadable','authorization-missing','tv-address-mismatch','tv-unreachable','other-owner','service-stopped','service-unresponsive','service-error','connection-retry','local-conflict','app-not-open']};
 }
 const repairLog=new DiagnosticLog();
 const repairRecovery=createProfileRecovery({diagnostics:repairLog});
