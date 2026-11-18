@@ -75,7 +75,9 @@ try {
       if (url.endsWith('/movie/tt6628920')) return '<script>body: JSON.stringify({ type: "movie", id: "tt6628920", token: "TOKEN" })</script>';
       return JSON.stringify({ ok: true, sources });
     };
-    assert.deepEqual(await repelishd.resolve(items[0], load), { url: 'https://mxdrop.to/e/4', referrer: 'https://playlatinsrc.co/movie/tt6628920', server: undefined, version: 'latino', alternatives: ['https://mxdrop.to/e/3', 'https://doodstream.com/e/2'] });
+    assert.deepEqual(await repelishd.resolve(items[0], load), { url: 'https://mxdrop.to/e/4', referrer: 'https://playlatinsrc.co/movie/tt6628920', server: undefined, version: 'latino', alternatives: ['https://mxdrop.to/e/3'] });
+    // Doodstream now redirects to a Cloudflare check (playmogo.com) that closes the TV app.
+    assert.equal(pickServer([{ url: 'https://doodstream.com/e/2' }, { url: 'https://playmogo.com/e/2' }]), null);
     assert.equal(JSON.parse(requests.at(-1).body).token, 'TOKEN');
     await assert.rejects(repelishd.resolve(items[0], async (url, options) => (options?.method === 'POST' ? '{"ok":true,"sources":[{"url":"https://unlimplay.com/f/1"}]}' : load(url))), error => error.unsafe === true);
   });

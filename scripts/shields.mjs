@@ -99,12 +99,14 @@ export const lumaRules = [
   '! Luma · reglas propias complementarias',
   // Cuevana's observed ad loaders: keep popa.js/movie-player.js and all media.
   '||cuevana3c.pro/js/varkus.js$script',
-  '||latgw.fun^$domain=cuevana3c.pro',
-  '||dingerepilobe.com^$domain=cuevana3c.pro',
-  '||waughyciliary.com^$domain=cuevana3c.pro',
+  '||cuevana3t.pro/js/varkus.js$script',
+  '||cuevana3w.pro/js/varkus.js$script',
+  '||latgw.fun^$domain=cuevana3c.pro|cuevana3t.pro|cuevana3w.pro',
+  '||dingerepilobe.com^$domain=cuevana3c.pro|cuevana3t.pro|cuevana3w.pro',
+  '||waughyciliary.com^$domain=cuevana3c.pro|cuevana3t.pro|cuevana3w.pro',
   // Observed player-side popunder loader. Keep JW Player, HLS and /dl intact.
   '||ikhjerbhye3wjkhoduh5xiczuvd.lol/assets/jquery/ev-player.js$script',
-  'cuevana3c.pro##+js(no-window-open-if)',
+  'cuevana3c.pro,cuevana3t.pro,cuevana3w.pro##+js(no-window-open-if)',
   // TV trace 2026-10-23: this loader creates the delayed blank-frame QR ad.
   // Scope to the observed publisher; leave its player, HLS and segments intact.
   '||unboltsecole.com^$script,domain=jkanime.net',

@@ -300,7 +300,7 @@ export function holyAutoplay(options = {}) {
     const frame = document.querySelector('iframe.player_conte[src^="https://jkanime.net/jkplayer/"]');
     if (frame && once('jk-frame', 99)) { location.assign(frame.src); out.action = 'open jkplayer'; return out; }
   }
-  if (out.top && /^(www\.)?cuevana3c\.pro$/.test(host)) {
+  if (out.top && /^(www\.)?cuevana3[a-z]?\.pro$/.test(host)) {
     const server = document.querySelector('.tab-video-item li[data-server]');
     if (server && once('cuevana-server', 99)) { server.click(); out.action = 'cuevana server'; return out; }
   }

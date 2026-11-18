@@ -52,6 +52,8 @@ export class HolyBridge extends BrowserBridge {
     this.catalog = options.catalog;
     this.library = options.library;
     this.apiBase = options.apiBase || origin();
+    // This computer's name on the network, for YouTube's referrer (see youtubeReferrer).
+    this.hostName = /^[a-z0-9-]{1,63}$/i.test(options.hostName || '') ? options.hostName : '';
     this.homeAliases = new Set();
     this.rememberHomeAlias(cdp.target?.url);
     this.mute = options.mute === true;
@@ -426,6 +428,15 @@ export class HolyBridge extends BrowserBridge {
     }
     await this.openTarget(session, target);
   }
+  // YouTube refuses some restricted embeds when the referrer is an IP address (192.168.x.x, 127.0.0.1:
+  // «Este video no está disponible») and plays the same video for a host name (2026-11-17, «El chico nuevo»).
+  youtubeReferrer() {
+    try {
+      const url = new URL(this.apiBase);
+      if (/^\d{1,3}(\.\d{1,3}){3}$|^\[/.test(url.hostname)) url.hostname = this.hostName || 'localhost';
+      return url.origin + '/';
+    } catch { return 'http://localhost/'; }
+  }
   async openTarget(session, target) {
     if (this.session !== session || this.stopped) return;
     this.library.start(session.item);
@@ -434,7 +445,7 @@ export class HolyBridge extends BrowserBridge {
     session.resumeAt = session.forceResume || this.library.resumeAt(session.item);
     session.queue = [...(target.alternatives || [])];
     const youtubeEmbed = session.item.source === 'youtube' && /^https:\/\/www\.youtube-nocookie\.com\/embed\/[\w-]{11}\?/.test(target.embed || '');
-    session.referrer = youtubeEmbed ? this.apiBase + '/' : target.referrer;
+    session.referrer = youtubeEmbed ? this.youtubeReferrer() : target.referrer;
     // Languages of this episode (when the site offers several) and the one being played.
     session.versions = Array.isArray(target.versions) ? target.versions : [];
     session.version = target.version || '';
@@ -607,7 +618,10 @@ export class HolyBridge extends BrowserBridge {
       }
       const playing = primary && !primary.paused && !session.userPaused && primary.t > 0 ? primary : null;
       // Inspect the player before reacting to navigation errors or expired opening clocks.
-      if (this.navigation.phase === 'error' && !this.isUserPaused(session) && !primary) {
+      // A player page that is still empty when it finishes loading (Nupload builds JW Player by
+      // script) is not a dead server yet: give it the usual opening time to show its video.
+      const building = this.navigation.empty && session.phase === 'opening' && Date.now() - session.opened < (session.sawVideo ? this.serverTimeout : this.emptyTimeout);
+      if (this.navigation.phase === 'error' && !this.isUserPaused(session) && !primary && !building) {
         if (session.phase === 'opening') session.failReason = this.navigation.error || 'error de navegación';
         if (session.phase === 'opening' && await this.serverFailed(session)) return;
         if (session.phase === 'playing') { await this.rescue(session, session.position?.t || 0); return; }

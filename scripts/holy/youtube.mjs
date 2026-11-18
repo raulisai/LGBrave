@@ -14,6 +14,18 @@ export const watchURL = id => `https://www.youtube.com/watch?v=${id}`;
 // The official privacy-enhanced player, shared by TV and web.
 export const embedURL = id => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
 const validId = id => /^[\w-]{11}$/.test(String(id || ''));
+// The embed page says up front whether it will play there («previewPlayabilityStatus»): «OK», or
+// «UNPLAYABLE» with the reason (age restriction, or an uploader/licence block on embedding).
+export function embedStatus(html) {
+  const match = /previewPlayabilityStatus\\?"\s*:\s*\{\s*\\?"status\\?"\s*:\s*\\?"([A-Z_]+)\\?"(?:\s*,\s*\\?"reason\\?"\s*:\s*\\?"((?:[^"\\]|\\u[0-9a-fA-F]{4}|\\[^"])*))?/.exec(String(html || ''));
+  if (!match) return null;
+  let reason = match[2] || '';
+  try { reason = JSON.parse('"' + reason.replace(/\\?"/g, '') + '"'); } catch { /* Keep it as read. */ }
+  return { status: match[1], reason, age: /edad|\bage\b/i.test(reason) };
+}
+// The TV sends a host-name referrer (holy-bridge youtubeReferrer): check with the same kind.
+const EMBED_REFERRER = 'http://localhost:43190/';
+const AGE_ERROR = 'Este vídeo de YouTube tiene restricción de edad: YouTube solo lo muestra con una cuenta iniciada.';
 
 // «1:36:32» → 5792 seconds; '' when YouTube does not say (live, premieres).
 export function seconds(value) {
@@ -318,7 +330,7 @@ export const youtube = {
         body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion: version, hl: 'es-419' } }, continuation: next.token }), timeout: 5000 }).catch(() => '');
       try { videos = [...videos, ...results(null, JSON.parse(text))]; } catch { /* Keep the first page. */ }
     }
-    return pick(videos, query);
+    return playable(pick(videos, query), load);
   },
   // Prefer the channel's complete playlist: channel-search ranking omits real episodes.
   async episodes(show, load) {
@@ -408,6 +420,25 @@ export const youtube = {
       else if (error instanceof SyntaxError) throw Error('YouTube no confirmó este vídeo.');
       else throw error;
     }
+    // Seen 2026-11: an age-restricted film and an embed-blocked one both hung 45 s («no avanzó»).
+    if (embed) {
+      const state = embedStatus(await load(embed, { referrer: EMBED_REFERRER }).catch(() => ''));
+      if (state?.age) throw Error(AGE_ERROR);
+      if (state?.status === 'UNPLAYABLE') embed = '';
+    }
     return { url: watchURL(id), embed };
   }
 };
+// Films shown in search: drop the ones YouTube will not play without an account (age), read from
+// their embed pages in parallel. A page that does not answer keeps its film.
+async function playable(items, load) {
+  const films = items.filter(item => item.kind === 'movie').slice(0, 16);
+  const blocked = new Set();
+  await Promise.all(films.map(async item => {
+    const id = /[?&]v=([\w-]{11})/.exec(item.url || '')?.[1];
+    if (!validId(id)) return;
+    const state = embedStatus(await load(embedURL(id), { referrer: EMBED_REFERRER, timeout: 4000 }).catch(() => ''));
+    if (state?.age) blocked.add(item.url);
+  }));
+  return blocked.size ? items.filter(item => !blocked.has(item.url)) : items;
+}

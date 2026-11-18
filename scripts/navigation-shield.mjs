@@ -6,7 +6,7 @@ import { playerAssist } from './player-assist.mjs';
 export function navigationShield() {
   // The owner's bookmarked sites (and their embeds, through ancestorOrigins). window.open replaces the
   // single page on this TV, so popups are blocked on all of them; the rest of the shield is exact-match.
-  const SITES = /(^|\.)(cuevana3c\.pro|jkanime\.net|repelishd\.blog|animeyt\.cc|animeonline\.ninja|asialiveaction\.com|framextv\.(cc|xyz)|onlyflix\.to|doramasflix\.(io|beer|in)|doramasia\.com|doramasmp4\.cyou)$/;
+  const SITES = /(^|\.)(cuevana3[a-z]?\.pro|jkanime\.net|repelishd\.blog|animeyt\.cc|animeonline\.ninja|asialiveaction\.com|framextv\.(cc|xyz)|onlyflix\.to|doramasflix\.(io|beer|in)|doramasia\.com|doramasmp4\.cyou)$/;
   if (location.hostname === 'challenges.cloudflare.com') return; // human check: leave untouched
   const origins = [location.origin, ...Array.from(location.ancestorOrigins || [])];
   const protectedSite = origins.some(origin => {
@@ -87,14 +87,14 @@ export function navigationShield() {
     // This keeps its original origin and headers and avoids the heavy catalogue.
     // Keyboard libraries may synthesize .click(); the destination is still
     // restricted to this site's supplied HTTPS player, with no privileged API.
-    if (event.button === 0 && /^(www\.)?cuevana3c\.pro$/.test(location.hostname)) {
+    if (event.button === 0 && /^(www\.)?cuevana3[a-z]?\.pro$/.test(location.hostname)) {
       const server = path.find(node => node?.hasAttribute?.('data-server'));
       const play = path.some(node => node?.classList?.contains('video-play'));
       const candidate = server || (play && document.querySelector('.tab-video-item li[data-server]'));
       if (candidate) {
         try {
           const url = new URL(candidate.getAttribute('data-server'));
-          if (url.protocol === 'https:' && url.hostname === 'tungtungsahur.cuevana3c.pro' && !url.username && !url.password) {
+          if (url.protocol === 'https:' && /^tungtungsahur\.cuevana3[a-z]?\.pro$/.test(url.hostname) && !url.username && !url.password) {
             // The site's own player supports this ad preference; do not change
             // cookies, rewrite media, or remove any security response headers.
             url.searchParams.set('pops', 'false');

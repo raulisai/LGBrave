@@ -14,7 +14,7 @@ import {startServer} from '../../scripts/holy/server.mjs';
 import {createDoctor} from '../../scripts/holy/doctor.mjs';
 import {latestPlaybackExit} from '../../scripts/holy/playback-log.mjs';
 import {createAutostart} from '../../scripts/holy/autostart.mjs';
-import {lanAddress, tvAddress, config, ROOT,lumaOrigin,userDataContext} from './desktop-config.mjs';
+import {lanAddress, tvAddress, config, ROOT,lumaOrigin,userDataContext,localName} from './desktop-config.mjs';
 import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
 import {FilterUpdates} from '../../scripts/filter-updates.mjs';
 import {installCrashGuard} from '../../scripts/crash-guard.mjs';
@@ -74,7 +74,7 @@ const runtime = new LabRuntime({
   },
   selectTarget: targets => findLumaTarget(targets, 'com.lgapp.holy') || findLumaTarget(targets),
   makeBridge: (cdp, options) => options.target.description === 'com.lgapp.holy' || options.target.url?.includes('/com.lgapp.holy/')
-    ? new HolyBridge(cdp, {...options, catalog, library,preferences,diagnostics}) : new BrowserBridge(cdp, {...options,preferences,diagnostics,home:lumaOrigin()+'/luma-home/'})
+    ? new HolyBridge(cdp, {...options, catalog, library,preferences,diagnostics,hostName:localName()}) : new BrowserBridge(cdp, {...options,preferences,diagnostics,home:lumaOrigin()+'/luma-home/'})
 });
 const startedAddress = lanAddress();
 // Holy on the TV also needs the way back (TV → this computer); outgoing SSH/CDP alone cannot show it.

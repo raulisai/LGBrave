@@ -295,8 +295,19 @@ export const animeyt = {
   },
   // Mytsumi lists the real servers in its tabs (data-player-url). The direct MP4 file first
   // (no player code, no ads), then ok.ru (proven on the TV), then the rest; MEGA never.
+  // Since 2026-11 the episode embeds mytsumi.com/multiplayer/options.php?value=<id> (a play button that
+  // opens multiplayer/contenedor.php?id=<id>, whose «videoTabs» JSON lists the servers); older episodes
+  // still embed mytsumi.com/container.php.
   async resolve(entry, load) {
     const page = await load(entry.url);
+    const multi = decode(/<iframe[^>]*\ssrc="(https:\/\/mytsumi\.com\/multiplayer\/options\.php\?[^"]+)"/.exec(page)?.[1] || '');
+    const id = multi ? new URL(multi).searchParams.get('value') : '';
+    if (id && /^[\w-]{4,40}$/.test(id)) {
+      const container = 'https://mytsumi.com/multiplayer/contenedor.php?id=' + encodeURIComponent(id);
+      const players = this.parseContainer(await load(container, { referrer: multi }).catch(() => ''));
+      if (!players.length) throw Error('AnimeYT no mostró servidores para este episodio.');
+      return { url: players[0], referrer: container, alternatives: players.slice(1, 3) };
+    }
     const src = decode(/<iframe[^>]*src="(https:\/\/mytsumi\.com\/container\.php\?[^"]+)"/.exec(page)?.[1] || '');
     if (!src) throw Error('AnimeYT no indicó el reproductor de este episodio.');
     const container = new URL(src);
@@ -306,8 +317,12 @@ export const animeyt = {
     return { url: players[0], referrer: container.href, alternatives: [...players.slice(1, 3), container.href] };
   },
   parseContainer(html) {
+    let listed = [];
+    try { listed = JSON.parse(/const videoTabs = (\[[\s\S]*?\]);/.exec(String(html || ''))?.[1] || '[]'); } catch { /* Older markup below. */ }
     const tabs = [...String(html || '').matchAll(/data-player-url="([^"]+)"\s+data-player-kind="([^"]*)"\s+data-player-label="([^"]*)"/g)]
       .map(([, url, kind, label]) => ({ url: decode(url), kind, label }))
+      .concat((Array.isArray(listed) ? listed : []).filter(tab => tab && tab.status === 'active' && !tab.is_fake_player && typeof tab.url === 'string')
+        .map(tab => ({ url: tab.url, kind: tab.is_mp4 ? 'video' : 'embed', label: String(tab.tab_name || '') })))
       .filter(tab => /^https:\/\//.test(tab.url) && !/(^|\.)mega\.(nz|io)$/.test(new URL(tab.url).hostname));
     const rank = tab => (tab.kind === 'video' ? 0 : /(^|\.)ok\.ru$/.test(new URL(tab.url).hostname) ? 1 : 2);
     return unique(tabs.sort((a, b) => rank(a) - rank(b)).map(tab => { const url = new URL(tab.url); if (/(^|\.)ok\.ru$/.test(url.hostname)) url.searchParams.set('autoplay', '1'); return url.href; }));
@@ -411,15 +426,19 @@ export const onlyflix = {
 // player address in base64. Many episodes still say «NO SERVERS AVAILABLE»; those fail with
 // a clear message and Holy tries the same title on the other sites.
 const beerURL = 'https://doramasflix.beer/';
-const beerCards = (html, base = beerURL) => [...String(html).matchAll(/<a href="(https:\/\/doramasflix\.beer\/series\/[a-z0-9-]+\/)" class="v6-arch-card">([\s\S]*?)<\/a>/g)].map(([, url, block]) =>
-  item({ source: 'doramasflixbeer', kind: 'dorama', url, show: url, isShow: true, language: 'Subtitulado', title: decode(text(/class="v6-arch-text-title">([\s\S]*?)<\/h3>/.exec(block)?.[1]).replace(/\s*\(\d{4}\)$/, '')),
-    year: /\((\d{4})\)<\/h3>/.exec(block)?.[1] || '', poster: attr(/<img[^>]*>/.exec(block)?.[0] || '', 'src'), rating: /⭐\s*([\d.]+)/.exec(block)?.[1] || '' })).filter(entry => entry.title);
+// Cards: «v6-clean-card» since 2026-11 (earlier «v6-arch-card»); the title carries the year.
+const beerCards = (html, base = beerURL) => [...new Map([...String(html).matchAll(/<a href="(https:\/\/doramasflix\.beer\/series\/[a-z0-9-]+\/)" class="v6-(?:arch|clean)-card">([\s\S]*?)<\/a>/g)].map(([, url, block]) => {
+  const name = text(/class="v6-(?:arch-text|text-primary)-title">([\s\S]*?)<\/h3>/.exec(block)?.[1]);
+  return item({ source: 'doramasflixbeer', kind: 'dorama', url, show: url, isShow: true, language: 'Subtitulado', title: decode(name.replace(/\s*\(\d{4}\)$/, '')),
+    year: /\((\d{4})\)$/.exec(name)?.[1] || '', poster: attr(/<img[^>]*>/.exec(block)?.[0] || '', 'src'), rating: /⭐\s*([\d.]+)/.exec(block)?.[1] || '' });
+}).filter(entry => entry.title).map(entry => [entry.url, entry])).values()];
 export const doramasflixbeer = {
   id: 'doramasflixbeer', name: 'DoramasFlix .beer', site: beerURL, language: 'Subtitulado',
   parseHome: html => beerCards(html),
   more(load) { return genrePages(load, [2, 3, 4].map(page => [`${beerURL}series/page/${page}/`, '']), html => beerCards(html), `${beerURL}series/`); },
   parseSearch: html => beerCards(html),
-  searchURL: query => beerURL + '?s=' + encodeURIComponent(query),
+  // «?s=» answers the cached home page; WordPress's /search/<words>/ really searches.
+  searchURL: query => beerURL + 'search/' + encodeURIComponent(query) + '/',
   async detail(entry, load) {
     const html = await load(entry.show || entry.url);
     return { show: entry.show || entry.url, genres: unique([...html.matchAll(/href="https:\/\/doramasflix\.beer\/generos\/[a-z0-9-]+\/">([^<]+)</g)].map(match => genre(match[1]))).filter(Boolean),

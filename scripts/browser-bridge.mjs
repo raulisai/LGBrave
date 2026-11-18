@@ -238,9 +238,10 @@ export class BrowserBridge {
     if (/CERT_|SSL_/.test(error)) return 'No se pudo establecer una conexión segura con el sitio.';
     return 'No pudimos cargar esta página. Reintenta o vuelve al inicio.';
   }
-  async navigationFailed(error, recover = false) {
+  // extra.empty: the page loaded but showed nothing yet (a player built by script may still come).
+  async navigationFailed(error, recover = false, extra = {}) {
     clearTimeout(this.navigationTimer);
-    this.navigation = { ...this.navigation, phase: 'error', error, progress: 0 };
+    this.navigation = { ...this.navigation, phase: 'error', error, progress: 0, empty: false, ...extra };
     if (recover) {
       this.recovering = true; this.navigationId = (this.navigationId || 0) + 1; this.mainRequest = null;
       await this.cdp.call('Page.stopLoading').catch(() => {});
@@ -271,7 +272,7 @@ export class BrowserBridge {
         if (this.tabs.current.media) this.resumePlayback(this.tabs.current.media).catch(() => {});
       }
       await this.status();
-    } else if (final) await this.navigationFailed('El sitio no mostró contenido. Reintenta o abre otra página.');
+    } else if (final) await this.navigationFailed('El sitio no mostró contenido. Reintenta o abre otra página.', false, { empty: true });
   }
   async request(params, sessionId) {
     const { requestId, request, resourceType, frameId } = params;
@@ -285,12 +286,12 @@ export class BrowserBridge {
         // For an observed ad domain replacing the top page, use its regular
         // subdocument rules too, but only inside the scoped test site. Do not
         // apply script-type filters to arbitrary video hosts or typed addresses.
-        if (mainDocument && /(^|\.)cuevana3c\.pro$/.test(new URL(source).hostname) && request.url !== this.explicitNavigationURL && !result.should_block) {
+        if (mainDocument && /(^|\.)cuevana3[a-z]?\.pro$/.test(new URL(source).hostname) && request.url !== this.explicitNavigationURL && !result.should_block) {
           result = checkRequest(this.engine, request.url, source, 'Document', request.method);
           // A click-to-play may ask a script to replace the movie's top page
           // with an unrelated advertiser. Do not block embedded Documents or
           // Media/XHR. Ordinary links and addresses from Luma remain usable.
-          if (!result.should_block && /^(www\.)?cuevana3c\.pro$/.test(new URL(source).hostname) && !/(^|\.)cuevana3c\.pro$/.test(new URL(request.url).hostname) &&
+          if (!result.should_block && /^(www\.)?cuevana3[a-z]?\.pro$/.test(new URL(source).hostname) && !/(^|\.)cuevana3[a-z]?\.pro$/.test(new URL(request.url).hostname) &&
               this.requestedNavigation?.url === request.url && this.requestedNavigation.reason === 'scriptInitiated') {
             result = { should_block: true, filter: { raw_line: 'Luma: salida automática de la página de reproducción' } };
           }

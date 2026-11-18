@@ -59,7 +59,7 @@ export const PREFERRED = { anime: 'jkanime' };
 // Which of the owner's sites carry each kind of title (for finding a title elsewhere).
 // Pages of the retired public catalogue (its titles lived at imdb.com): their cached details go too.
 const imdbPage = key => key.startsWith('https://www.imdb.com/title/');
-const KIND_SITES = { movie: ['cuevana', 'repelishd', 'pelisflix', 'doramasflix', 'onlyflix'], series: ['cuevana', 'pelisflix', 'onlyflix'], anime: ['jkanime', 'animeyt'], dorama: ['doramasflix', 'doramasmp4', 'asialiveaction', 'doramasflixbeer'] };
+const KIND_SITES = { movie: ['cuevana', 'repelishd', 'doramasflix'], series: ['cuevana'], anime: ['jkanime', 'animeyt'], dorama: ['doramasflix', 'doramasmp4', 'asialiveaction', 'doramasflixbeer'] };
 const plain = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, ' y ').replace(/[^a-z0-9]+/g, ' ').trim();
 // Same work on two sites: same title (or the same main title before «:»), and close years when both say.
 export function sameTitle(a, b) {
@@ -299,6 +299,31 @@ export class Catalog {
     // «onepiece» finds «One Piece» too.
     const joined = fold(query).replace(/[^a-z0-9]+/g, '');
     return this.items.filter(item => words.every(word => fold(item.title).includes(word)) || (joined.length >= 4 && fold(item.title).replace(/[^a-z0-9]+/g, '').includes(joined))).slice(0, 30);
+  }
+  // true / false once checked against the show's list (or the page itself); null while unknown.
+  upNextKnown(entry) {
+    this.upNext ||= new Map();
+    const known = this.upNext.get(entry.url);
+    const fresh = known && known.at && Date.now() - known.at < (known.ok ? 6 * 3600000 : 30 * 60000);
+    if (!fresh && !known?.pending) {
+      this.upNext.set(entry.url, { ...known, pending: true });
+      this.checkUpNext(entry).then(ok => {
+        this.upNext.set(entry.url, { ok, at: Date.now() });
+        if (ok !== (known?.ok ?? null)) this.version++;
+      }, () => this.upNext.set(entry.url, { ok: known?.ok ?? null, at: Date.now() }));
+      if (this.upNext.size > 300) this.upNext.delete(this.upNext.keys().next().value);
+    }
+    return known?.ok ?? null;
+  }
+  async checkUpNext(entry) {
+    const same = url => String(url || '').replace(/\/+$/, '') === String(entry.url).replace(/\/+$/, '');
+    const connector = this.connector(entry.source);
+    if (entry.show && connector?.episodes) {
+      const listed = (await this.episodes(entry.source, entry.show)).flatMap(season => season.episodes);
+      if (listed.length) return listed.some(episode => same(episode.url));
+    }
+    // Sites without a list (one address per number): the page itself says whether it exists.
+    return this.fetch(entry.url, { referrer: connector?.site, timeout: 9000 }).then(() => true, error => (/respondió (404|410)\b/.test(error.message) ? false : null));
   }
   async episodes(sourceId, show) {
     const connector = this.connector(sourceId);
@@ -546,7 +571,10 @@ export class Catalog {
     const score = items => library.scored(items, profile).map(item => ({ ...item, localWatched: library.get(entryKey(item))?.watched || 0 }));
     // With a profile, the best match first; without one, the sites' own order (newest first).
     const best = items => (personal ? score(items).sort((a, b) => (b.match || 0) - (a.match || 0)) : score(items));
-    const continuing = library.continueWatching();
+    // «Siguiente capítulo» is guessed from the address (capitulo-12 → 13): checked against the site's
+    // list and dropped once it is not there (Between Steps 12 → 13 opened a 404 on 2026-11-17: 13 is not
+    // released anywhere). While unchecked it stays, so the row never blinks out.
+    const continuing = library.continueWatching().filter(entry => !entry.upNext || this.upNextKnown(entry) !== false);
     const playable = list => list.filter(item => !item.isShow);
     const shows = list => list.filter(item => item.isShow);
     // Airing anime (JKAnime's schedule): the shows being watched first, then the best match, long runs before short ones.

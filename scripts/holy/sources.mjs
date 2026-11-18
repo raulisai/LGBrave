@@ -195,13 +195,14 @@ export const cuevana = {
     return lists.filter(list => list.episodes.length).sort((a, b) => a.number - b.number);
   },
   // The page lists Latino first. The site's own player supports pops=false (fewer ad windows).
+  // The site rotates its domain (cuevana3c.pro → cuevana3t.pro, also cuevana3w.pro): any of them.
   // The rest of the site's servers stay as alternatives if the first never starts.
   player(detail, page) {
     const urls = [];
     for (const value of detail.players) {
       try {
         const url = new URL(value);
-        if (url.protocol !== 'https:' || !/(^|\.)cuevana3c\.pro$/.test(url.hostname)) continue;
+        if (url.protocol !== 'https:' || !/(^|\.)cuevana3[a-z]?\.pro$/.test(url.hostname)) continue;
         url.searchParams.set('pops', 'false');
         if (!urls.includes(url.href)) urls.push(url.href);
       } catch { /* Next server. */ }
@@ -343,73 +344,106 @@ export const jkanime = {
   }
 };
 
+// RePelisHD (rebuilt in Nov 2026 as a Next.js site, cards `<a class="cv">`, films and series).
+// The older WordPress markup (`<article class="item movies">`) is still read so a cached or
+// rolled-back page keeps working. Players: the page embeds playlatinsrc.co/movie/<imdb> or
+// playlatinsrc.co/serial/<imdb>; that site's own API lists the servers per film or episode.
+const REPELIS_PAGE = /\/(ver-pelicula|ver-serie)\//;
+const repelisEpisode = url => /\/ver-serie\/[^/?#]+\/temporada-(\d+)\/episodio-(\d+)/.exec(url || '');
+const repelisShow = url => (/^(.*\/ver-serie\/[^/?#]+)/.exec(url || '')?.[1] || '');
+function repelisCards(html, base) {
+  const cards = [];
+  for (const block of String(html).match(/<a class="cv"[\s\S]*?<\/a>/g) || []) {
+    const link = attr(/<a [^>]*>/.exec(block)?.[0] || '', 'href');
+    if (!REPELIS_PAGE.test(link || '') || repelisEpisode(link)) continue;
+    const url = absolute(link, base), series = /\/ver-serie\//.test(link), image = /<img[^>]*>/.exec(block)?.[0] || '';
+    const versions = [...block.matchAll(/class="vers-([a-z]+)"/g)].map(match => match[1]);
+    cards.push(item({ source: 'repelishd', kind: series ? 'series' : 'movie', url, title: attr(/<a [^>]*>/.exec(block)?.[0] || '', 'title') || text(/class="cv-t">([\s\S]*?)<\/div>/.exec(block)?.[1]) || attr(image, 'alt'),
+      poster: absolute(attr(image, 'src') || attr(image, 'data-src'), base), year: text(/class="cv-m">([^<]*)/.exec(block)?.[1]).match(/\d{4}/)?.[0] || '',
+      rating: (attr(/<a [^>]*>/.exec(block)?.[0] || '', 'data-voto') || '').replace(',', '.'),
+      ...(versions.length ? { language: languageLabel(versions) } : {}), ...(series ? { show: url, isShow: true } : {}) }));
+  }
+  for (const block of String(html).split('<article class="item movies"').slice(1)) {
+    const link = /<a href="([^"]+)"/.exec(block)?.[1];
+    if (!/\/ver-pelicula\//.test(link || '')) continue;
+    const image = /<img[^>]*>/.exec(block)?.[0];
+    cards.push(item({ source: 'repelishd', kind: 'movie', url: absolute(link, base), title: text(/<h3>([\s\S]*?)<\/h3>/.exec(block)?.[1]) || attr(image, 'alt'),
+      poster: absolute(attr(image, 'src') || attr(image, 'data-src'), base), year: text(/<\/h3>\s*<span>([^<]*)/.exec(block)?.[1]),
+      rating: text(/icon-star2><\/span>([^<]*)/.exec(block)?.[1]), badge: text(/class="quality">([^<]*)/.exec(block)?.[1]) }));
+  }
+  // Series: every episode seen (949 of 949 in 10 series, 2026-11-17) is on Dropload or Doodstream,
+  // both behind a Cloudflare check that closes the TV app. Listed again once a safe server appears.
+  return [...new Map(cards.filter(card => card.title && (REPELIS_SERIES || !card.isShow)).map(card => [card.url, card])).values()];
+}
+export const REPELIS_SERIES = false;
+const playlatin = html => /playlatinsrc\.co\/(movie|serial)\/(tt\d{5,9})/.exec(html || '');
 export const repelishd = {
   id: 'repelishd', name: 'RePelisHD', site: 'https://repelishd.blog/', language: 'Latino',
-  parseHome(html, base = this.site) {
-    const items = [];
-    for (const heading of ['Últimas Películas Agregadas', 'Películas en Cines', 'Tendencias de hoy', 'Películas Recomendadas']) {
-      const section = between(html, '>' + heading + '</h2>', '<h2');
-      for (const block of section.split('<article class="item movies"').slice(1)) {
-        const link = /<a href="([^"]+)"/.exec(block)?.[1];
-        if (!/\/ver-pelicula\//.test(link || '')) continue;
-        const image = /<img[^>]*>/.exec(block)?.[0];
-        items.push(item({
-          source: 'repelishd', kind: 'movie', url: absolute(link, base), title: text(/<h3>([\s\S]*?)<\/h3>/.exec(block)?.[1]) || attr(image, 'alt'),
-          poster: absolute(attr(image, 'src') || attr(image, 'data-src'), base), year: text(/<\/h3>\s*<span>([^<]*)/.exec(block)?.[1]),
-          rating: text(/icon-star2><\/span>([^<]*)/.exec(block)?.[1]), badge: text(/class="quality">([^<]*)/.exec(block)?.[1])
-        }));
-      }
-    }
-    return items;
-  },
+  parseHome(html, base = this.site) { return repelisCards(html, base); },
   parseDetail(html) {
-    const extra = between(html, '<div class="extra">', '</div>');
-    const spans = [...extra.matchAll(/<span>([^<]*)<\/span>/g)].map(match => match[1]);
+    const ld = /"genre":\s*(\[[^\]]*\])/.exec(html || '')?.[1];
+    let genres = [];
+    try { genres = ld ? JSON.parse(ld).flatMap(name => genresFromWords(String(name))) : []; } catch { /* Older page below. */ }
+    if (!genres.length) genres = [...between(html, '<div class="extra">', '</div>').matchAll(/<span>([^<]*)<\/span>/g)].flatMap(match => genresFromWords(match[1]));
+    const overview = decode(/og:description" content="([^"]*)"/.exec(html)?.[1] || '').replace(/^Ver .{2,160}?(sin registro|en español latino|en español latino y castellano)\.\s*/i, '');
+    const image = /"image":\s*\[[^\]]*"(https:\/\/image\.tmdb\.org\/t\/p\/w1280\/[^"]+)"/.exec(html || '')?.[1] || '';
     return {
-      genres: spans.flatMap(genresFromWords),
-      overview: unrepeated(decode(/og:description" content="([^"]*)"/.exec(html)?.[1] || '')),
-      imdb: /var imdb\s*=\s*'(tt\d+)'/.exec(html)?.[1] || '',
-      country: country(/class="country"><a[^>]*>([^<]+)/.exec(html)?.[1])
+      genres: [...new Set(genres)], overview: unrepeated(overview), backdrop: image,
+      imdb: playlatin(html)?.[2] || /var imdb\s*=\s*'(tt\d+)'/.exec(html)?.[1] || '',
+      country: country(/<b>País<\/b><span>([^<]+)/.exec(html)?.[1] || /class="country"><a[^>]*>([^<]+)/.exec(html)?.[1])
     };
   },
-  async more(load) {
-    const slugs = [['accion', 'Acción'], ['comedia', 'Comedia'], ['drama', 'Drama'], ['terror', 'Terror'], ['thriller', 'Suspenso'], ['ciencia-ficcion', 'Ciencia ficción'], ['romance', 'Romance'],
-      ['animacion', 'Animación'], ['aventuras', 'Aventura'], ['crimen', 'Crimen'], ['fantasia', 'Fantasía'], ['familia', 'Familia'], ['misterio', 'Misterio'], ['documental', 'Documental'], ['belica', 'Bélica'], ['suspenso', 'Suspenso']];
-    return genrePages(load, slugs.map(([slug, name]) => [`https://repelishd.blog/${slug}/`, name]), html => this.parseSearch(html));
+  searchURL: query => 'https://repelishd.blog/buscar?q=' + encodeURIComponent(query),
+  parseSearch(html, base = this.site) { return repelisCards(html, base); },
+  // Every season and episode is on the series player page (data-season / data-episode).
+  async episodes(show, load) {
+    const html = await load(repelisShow(show) || show);
+    const imdb = playlatin(html)?.[2];
+    if (!imdb) return [];
+    const player = await load('https://playlatinsrc.co/serial/' + imdb, { referrer: show });
+    const base = repelisShow(show) || show.replace(/\/$/, '');
+    const seasons = new Map();
+    for (const match of String(player).matchAll(/data-season="(\d+)" data-episode="(\d+)"(?: data-label="([^"]*)")?/g)) {
+      const season = Number(match[1]), episode = Number(match[2]);
+      if (!season || !episode) continue;
+      const name = decode(match[3] || '').replace(/^S\d+ E\d+\s*[—-]\s*/, '');
+      if (!seasons.has(season)) seasons.set(season, new Map());
+      seasons.get(season).set(episode, { url: `${base}/temporada-${season}/episodio-${episode}`, season, episode, label: `T${season} · Episodio ${episode}${name ? ' · ' + name : ''}` });
+    }
+    return [...seasons].sort((a, b) => a[0] - b[0]).map(([number, list]) => ({ title: 'Temporada ' + number, number, episodes: [...list.values()].sort((a, b) => a.episode - b.episode) }));
   },
-  searchURL: query => 'https://repelishd.blog/index.php?do=search&subaction=search&story=' + encodeURIComponent(query),
-  parseSearch(html, base = this.site) {
-    return html.split('<article class="item movies"').slice(1).map(block => {
-      const link = /<a href="([^"]+)"/.exec(block)?.[1];
-      if (!/\/ver-pelicula\//.test(link || '')) return null;
-      const image = /<img[^>]*>/.exec(block)?.[0];
-      return item({ source: 'repelishd', kind: 'movie', url: absolute(link, base), title: text(/<h3>([\s\S]*?)<\/h3>/.exec(block)?.[1]) || attr(image, 'alt'),
-        poster: absolute(attr(image, 'src') || attr(image, 'data-src'), base), year: text(/<\/h3>\s*<span>([^<]*)/.exec(block)?.[1]),
-        rating: text(/icon-star2><\/span>([^<]*)/.exec(block)?.[1]), badge: text(/class="quality">([^<]*)/.exec(block)?.[1]) });
-    }).filter(Boolean);
-  },
-  // The page embeds playlatinsrc.co/movie/<imdb>, which asks its own API for servers.
-  // Holy asks the same API and opens Mixdrop (then Doodstream) directly. Dropload/
-  // dr0pstream and UnlimPlay load a Cloudflare check that closes the TV app: a title
-  // with only those is refused instead of opened.
+  // Holy asks playlatinsrc's API (the same request its page makes) and opens Mixdrop, then
+  // Doodstream, directly. Dropload/dr0pstream and UnlimPlay load a Cloudflare check that closes
+  // the TV app: a title with only those is refused instead of opened.
   async resolve(entry, load) {
-    const detail = this.parseDetail(await load(entry.url));
+    const episode = repelisEpisode(entry.url);
+    const page = episode ? repelisShow(entry.url) : entry.url;
+    const detail = this.parseDetail(await load(page));
     if (!detail.imdb) throw Error('RePelisHD no indicó el reproductor de este título.');
-    const page = 'https://playlatinsrc.co/movie/' + detail.imdb;
-    const html = await load(page, { referrer: entry.url });
+    const player = `https://playlatinsrc.co/${episode ? 'serial' : 'movie'}/${detail.imdb}`;
+    const html = await load(player, { referrer: entry.url });
     const token = /token:\s*"([^"]+)"/.exec(html)?.[1];
     if (!token) throw Error('PlayLatinSrc cambió su página.');
     const data = JSON.parse(await load('https://playlatinsrc.co/api/embed-links', {
-      method: 'POST', referrer: page, headers: { 'Content-Type': 'application/json', Origin: 'https://playlatinsrc.co' },
-      body: JSON.stringify({ type: 'movie', id: detail.imdb, token })
+      method: 'POST', referrer: player, headers: { 'Content-Type': 'application/json', Origin: 'https://playlatinsrc.co' },
+      body: JSON.stringify({ type: episode ? 'tv' : 'movie', id: detail.imdb, token })
     }));
-    const [choice, ...rest] = rankServers(data.sources || []);
+    let sources = data.sources || [];
+    if (episode) {
+      const [season, number] = [Number(episode[1]), Number(episode[2])];
+      const found = (data.tv?.seasons || []).find(item => Number(item.season_number) === season)?.episodes?.find(item => Number(item.episode_number) === number);
+      if (!found) throw Error(`RePelisHD todavía no tiene el capítulo ${number} de la temporada ${season}.`);
+      sources = (found.sources || []).map(source => ({ ...source, version: source.version || data.tv?.version || '' }));
+    }
+    const [choice, ...rest] = rankServers(sources);
     if (!choice) throw Object.assign(Error('Este título solo tiene servidores que cierran la app en la TV.'), { unsafe: true });
-    return { url: choice.url, referrer: page, server: choice.name, version: choice.version, alternatives: rest.slice(0, 3).map(source => source.url) };
+    return { url: choice.url, referrer: player, server: choice.name, version: choice.version, alternatives: rest.slice(0, 3).map(source => source.url) };
   }
 };
 
-const RISKY = /(^|\.)(dr0pstream\.com|dropload\.(io|tv)|unlimplay\.com)$/;
+// Doodstream now redirects to playmogo.com behind a Cloudflare check (2026-11-17); it closed the
+// TV app on its only try (30/10). Same treatment as Dropload.
+const RISKY = /(^|\.)(dr0pstream\.com|dropload\.(io|tv)|unlimplay\.com|doodstream\.com|dood\.[a-z]+|d0000d\.com|dsvplay\.com|playmogo\.com)$/;
 const SERVER_RANK = [/(^|\.)(mixdrop|mxdrop|m1xdrop)\.[a-z]+$/, /(^|\.)(doodstream|dood|d0000d|dsvplay)\.[a-z]+$/];
 const VERSION_RANK = ['latino', 'castellano', 'subtitulado'];
 export const pickServer = sources => rankServers(sources)[0] || null;

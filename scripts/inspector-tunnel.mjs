@@ -12,9 +12,14 @@ const PROCESS_EVENTS = ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGTERM', 'exit'];
 export async function connectSession(device) {
   // SSH only. inspect._runApp() can launch an app the user has closed.
   const {Session} = require('@webos-tools/cli/lib/base/novacom');
+  // The SDK can answer one step twice when the TV drops the link: a socket «error» after «connect»
+  // or «timeout», an SSH «error» after «ready». Its async.waterfall then throws «Callback was
+  // already called» outside any handler (13 times 12–17/11, each right after Holy closed on the TV).
+  const once = next => { let done = false; return (...args) => { if (done) return; done = true; next(...args); }; };
   class AssistSession extends Session {
+    checkConnection(target, next) { return super.checkConnection(target, once(next)); }
     begin(target, next) {
-      return super.begin({...target, keepaliveInterval:5000, keepaliveCountMax:2}, next);
+      return super.begin({...target, keepaliveInterval:5000, keepaliveCountMax:2}, once(next));
     }
   }
   const before = new Map(PROCESS_EVENTS.map(event => [event, new Set(process.listeners(event))]));

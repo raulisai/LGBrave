@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { youtube, parseSearch, cleanTitle, seconds, embedURL, watchURL, episodeNames, continuation, playlistResults } from './holy/youtube.mjs';
+import { youtube, parseSearch, cleanTitle, seconds, embedURL, watchURL, episodeNames, continuation, playlistResults, embedStatus } from './holy/youtube.mjs';
 import { HolyBridge } from './holy/holy-bridge.mjs';
 import { Catalog } from './holy/catalog.mjs';
 import { Library } from './holy/library.mjs';
@@ -93,6 +93,27 @@ try {
     // A page that is not YouTube's answer never becomes a player; a network failure says so.
     await assert.rejects(youtube.resolve({ url: watchURL('aaaaaaaaaa2') }, async () => '<html>cambió</html>'), /no confirmó/);
     await assert.rejects(youtube.resolve({ url: watchURL('aaaaaaaaaa2') }, async () => { throw Error('timeout'); }), /timeout/);
+  });
+
+  // Real embed pages seen 2026-11-17 (shortened): the status is in previewPlayabilityStatus.
+  const embedPage = (status, reason = '') => '<script>var ytcfg={"PLAYER_VARS":{"embedded_player_response":"{\\"previewPlayabilityStatus\\":{\\"status\\":\\"' + status + '\\"' + (reason ? ',\\"reason\\":\\"' + reason + '\\"' : ',\\"playableInEmbed\\":true') + '}}"}}</script>';
+  await check('Reproductor incrustado: restricción de edad da un aviso claro; bloqueo de incrustación usa la página; OK se queda', async () => {
+    assert.deepEqual(embedStatus(embedPage('OK')), { status: 'OK', reason: '', age: false });
+    assert.deepEqual(embedStatus(embedPage('UNPLAYABLE', 'Lamentablemente, este contenido tiene restricci\\u00f3n de edad.')), { status: 'UNPLAYABLE', reason: 'Lamentablemente, este contenido tiene restricción de edad.', age: true });
+    assert.equal(embedStatus('<html>sin datos</html>'), null);
+    const answer = page => async (url, options = {}) => (url.includes('/oembed') ? '{"type":"video"}' : (assert.equal(options.referrer, 'http://localhost:43190/', 'referrer con nombre de host, como la TV'), page));
+    assert.equal((await youtube.resolve({ url: watchURL('aaaaaaaaaa2') }, answer(embedPage('OK')))).embed, embedURL('aaaaaaaaaa2'));
+    assert.equal((await youtube.resolve({ url: watchURL('aaaaaaaaaa2') }, answer(embedPage('UNPLAYABLE', 'Este video no est\\u00e1 disponible.')))).embed, '');
+    await assert.rejects(youtube.resolve({ url: watchURL('aaaaaaaaaa2') }, answer(embedPage('UNPLAYABLE', 'restricci\\u00f3n de edad'))), /restricción de edad/);
+    // A failed or unreadable embed page never blocks a confirmed video.
+    assert.equal((await youtube.resolve({ url: watchURL('aaaaaaaaaa2') }, async url => (url.includes('/oembed') ? '{"type":"video"}' : '<html></html>'))).embed, embedURL('aaaaaaaaaa2'));
+  });
+  await check('Búsqueda: una película con restricción de edad no aparece; si su ficha no responde, se queda', async () => {
+    const results = page([video('ageblock001', 'El chico nuevo', '1:25:00'), video('goodfilm001', 'El chico nuevo película completa', '1:28:33')]);
+    const items = await youtube.search('el chico nuevo', async url => (url.includes('/embed/ageblock001') ? embedPage('UNPLAYABLE', 'restricci\\u00f3n de edad') : url.includes('/embed/') ? embedPage('OK') : results));
+    assert.deepEqual(items.map(item => item.url.slice(-11)), ['goodfilm001']);
+    const kept = await youtube.search('el chico nuevo', async url => { if (url.includes('/embed/')) throw Error('timeout'); return results; });
+    assert.equal(kept.length, 2);
   });
 
   await check('Catálogo: YouTube es solo búsqueda; no se lee como sitio ni marca error al refrescar', async () => {
@@ -261,10 +282,10 @@ try {
     const load = async (url, options = {}) => { asked.push([options.method || 'GET', url, options.body ? JSON.parse(options.body).continuation : '']); return options.method === 'POST' ? JSON.stringify(more) : withNext([video('ccccccccc02', 'El chico nuevo', '1:28:33')]); };
     const items = await youtube.search('el chico nuevo', load);
     assert.deepEqual(items.map(item => item.url.slice(-11)).sort(), ['ccccccccc02', 'eeeeeeeee01']);
-    assert.deepEqual(asked.map(([method, url, token]) => [method, new URL(url).pathname, token]), [['GET', '/results', ''], ['POST', '/youtubei/v1/search', 'TOKEN']]);
+    assert.deepEqual(asked.filter(([, url]) => !url.includes('/embed/')).map(([method, url, token]) => [method, new URL(url).pathname, token]), [['GET', '/results', ''], ['POST', '/youtubei/v1/search', 'TOKEN']]);
     const many = Array.from({ length: 14 }, (_, index) => video('fffffffff' + String(index).padStart(2, '0'), 'El chico nuevo parte ' + index + ' película completa', '1:30:00'));
     asked.length = 0;
-    await youtube.search('el chico nuevo', async (url, options = {}) => { asked.push(options.method || 'GET'); return withNext(many); });
+    await youtube.search('el chico nuevo', async (url, options = {}) => { if (!url.includes('/embed/')) asked.push(options.method || 'GET'); return withNext(many); });
     assert.deepEqual(asked, ['GET']);
     // A slow or broken second page keeps the first.
     const kept = await youtube.search('el chico nuevo', async (url, options = {}) => { if (options.method === 'POST') throw Error('timeout'); return withNext([video('ccccccccc02', 'El chico nuevo', '1:28:33')]); });
@@ -286,11 +307,14 @@ try {
     ]) {
       const calls=[],bridge=Object.create(HolyBridge.prototype);
       const session={item:{source,url:watchURL('aaaaaaaaaa2'),title:'Prueba'}};
-      Object.assign(bridge,{session,apiBase:'http://192.168.1.65:43190',library:{start(){},resumeAt:()=>927},cdp:{call:async(method,params)=>{calls.push({method,params});return {};}}});
+      Object.assign(bridge,{session,apiBase:'http://192.168.1.65:43190',hostName:'djoker',library:{start(){},resumeAt:()=>927},cdp:{call:async(method,params)=>{calls.push({method,params});return {};}}});
       for(const method of ['recordPlayback','resetStallClocks','prepareDocument','beginNavigation','status'])bridge[method]=()=>{};
       await bridge.openTarget(session,{url:watchURL('aaaaaaaaaa2'),embed,referrer:'https://source.example/'});
       assert.equal(session.resumeAt,927);assert.equal(session.target,expected);
-      assert.deepEqual(calls.find(c=>c.method==='Page.navigate').params,{url:expected,referrer:expected===embed?'http://192.168.1.65:43190/':'https://source.example/'});
+      assert.deepEqual(calls.find(c=>c.method==='Page.navigate').params,{url:expected,referrer:expected===embed?'http://djoker:43190/':'https://source.example/'});
+      // YouTube refuses some restricted embeds for an IP referrer: the computer's name, else localhost.
+      bridge.hostName='';assert.equal(bridge.youtubeReferrer(),'http://localhost:43190/');
+      bridge.apiBase='http://mac.local:43190';assert.equal(bridge.youtubeReferrer(),'http://mac.local:43190/');
     }
   });
 } finally { rmSync(directory, { recursive: true, force: true }); }

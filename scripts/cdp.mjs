@@ -6,11 +6,13 @@ export function findLumaTarget(targets, appId = 'com.lgapp.lab') {
     target.url?.startsWith(`file:///media/developer/apps/usr/palm/applications/${appId}/`)));
 }
 
-export async function connectTV(endpoint, appId = 'com.lgapp.lab', {guard = () => {}} = {}) {
+// select: pick another target (the desktop player simulation uses a local Chrome page).
+export async function connectTV(endpoint, appId = 'com.lgapp.lab', {guard = () => {}, select} = {}) {
   guard();
   const response = await fetch(`${endpoint}/json`, {signal:AbortSignal.timeout(3000)});
   if (!response.ok) throw Error('No se pudo consultar el inspector de la TV.');
-  const target = findLumaTarget(await response.json(), appId);
+  const list = await response.json();
+  const target = select ? select(list) : findLumaTarget(list, appId);
   if (!target) throw Error(`No se encontró la app ${appId} en el inspector.`);
   guard();
   // Some inspectors advertise localhost:9998. Always keep the WebSocket on the

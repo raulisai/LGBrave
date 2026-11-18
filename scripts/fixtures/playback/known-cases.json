@@ -100,16 +100,16 @@
       ]
     },
     {
-      "id": "source-onlyflix",
+      "id": "source-pelisflix-onlyflix-retired",
       "scope": "controlled",
-      "sources": [
-        "onlyflix"
-      ],
-      "description": "Formato conocido de OnlyFlix: tarjetas, temporadas, servidores en inglés, Referer y alternativas, sin Internet.",
+      "sources": [],
+      "description": "PelisFlix y OnlyFlix retirados (17/11): sus reproductores nunca arrancaron en la TV (Nupload 0/16, vidapi/vidfast/nontongo/medmedia 0/8) ni en la simulación de escritorio con los filtros de Holy. Sin fuente ni búsqueda; caché y detalles descartados al cargar; sus series se ven en Cuevana. Sin Internet.",
       "evidence": [
-        "scripts/test-holy-sites.mjs"
+        "scripts/holy/connectors.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
       ],
       "tests": [
+        "scripts/test-holy-site-changes.mjs",
         "scripts/test-holy-sites.mjs"
       ]
     },
@@ -120,20 +120,6 @@
         "doramasflixbeer"
       ],
       "description": "Formato conocido de DoramasFlix .beer: tarjetas, temporadas, servidores en base64, Referer y alternativas, sin Internet.",
-      "evidence": [
-        "scripts/test-holy-sites.mjs"
-      ],
-      "tests": [
-        "scripts/test-holy-sites.mjs"
-      ]
-    },
-    {
-      "id": "source-pelisflix",
-      "scope": "controlled",
-      "sources": [
-        "pelisflix"
-      ],
-      "description": "Formato conocido de PelisFlix: tarjetas, temporadas, versiones Latino/Castellano/Subtitulado con servidores en base64, Referer y alternativas, sin Internet.",
       "evidence": [
         "scripts/test-holy-sites.mjs"
       ],
@@ -572,6 +558,110 @@
       ],
       "tests": [
         "scripts/test-holy-youtube.mjs"
+      ]
+    },
+    {
+      "id": "cuevana-domain-rotation",
+      "scope": "controlled",
+      "sources": [
+        "cuevana"
+      ],
+      "description": "Cuevana pasó de cuevana3c.pro a cuevana3t.pro: su propio reproductor (tungtungsahur) se acepta en cualquier cuevana3?.pro; antes Holy abría la ficha y no arrancaba solo (45 s). Simulación: «Big Bang» T1E1 y «Todo en todas partes…» arrancan en 6 s.",
+      "evidence": [
+        "scripts/holy/sources.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
+      ],
+      "tests": [
+        "scripts/test-holy-site-changes.mjs"
+      ]
+    },
+    {
+      "id": "repelishd-rebuilt",
+      "scope": "controlled",
+      "sources": [
+        "repelishd"
+      ],
+      "description": "RePelisHD rediseñado (tarjetas cv, /buscar, JSON-LD, playlatinsrc en iframe). Películas por Mixdrop; series ocultas porque sus capítulos solo tienen Dropload/Doodstream (Cloudflare que cierra la app). Doodstream/playmogo como servidores de riesgo.",
+      "evidence": [
+        "scripts/holy/sources.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
+      ],
+      "tests": [
+        "scripts/test-holy-site-changes.mjs",
+        "scripts/test-holy.mjs"
+      ]
+    },
+    {
+      "id": "youtube-embed-referrer-age",
+      "scope": "controlled",
+      "sources": [
+        "youtube"
+      ],
+      "description": "YouTube rechaza algunas subidas restringidas si el referrer es una IP: Holy envía el nombre de la computadora. Restricción de edad: aviso claro y fuera de la búsqueda; incrustación bloqueada: página de YouTube. «El chico nuevo» (1 h 28 min) arranca en la simulación.",
+      "evidence": [
+        "scripts/holy/youtube.mjs",
+        "scripts/holy/holy-bridge.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
+      ],
+      "tests": [
+        "scripts/test-holy-youtube.mjs"
+      ]
+    },
+    {
+      "id": "upnext-verified",
+      "scope": "controlled",
+      "sources": [],
+      "description": "«Siguiente capítulo» adivinado por la dirección se comprueba con la lista del sitio o la página y se quita si no existe (Between Steps 13: 404 en todos los sitios).",
+      "evidence": [
+        "scripts/holy/catalog.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
+      ],
+      "tests": [
+        "scripts/test-holy-site-changes.mjs"
+      ]
+    },
+    {
+      "id": "empty-player-page-grace",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Una página de reproductor vacía al terminar de cargar (JW Player por script) espera 15 s antes de cambiar de servidor; un error real de red no espera.",
+      "evidence": [
+        "scripts/holy/holy-bridge.mjs",
+        "scripts/browser-bridge.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
+      ],
+      "tests": [
+        "scripts/test-holy-site-changes.mjs"
+      ]
+    },
+    {
+      "id": "doramasflixbeer-cards",
+      "scope": "controlled",
+      "sources": [
+        "doramasflixbeer"
+      ],
+      "description": "DoramasFlix .beer: tarjetas v6-clean-card y búsqueda /search/ (la búsqueda ?s= devolvía la portada en caché; 0 títulos).",
+      "evidence": [
+        "scripts/holy/more-sources.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
+      ],
+      "tests": [
+        "scripts/test-holy-site-changes.mjs"
+      ]
+    },
+    {
+      "id": "animeyt-multiplayer",
+      "scope": "controlled",
+      "sources": [
+        "animeyt"
+      ],
+      "description": "AnimeYT incrusta mytsumi multiplayer (options.php → contenedor.php con videoTabs JSON): ok.ru primero, MEGA, inactivos y falsos fuera. Simulación: One Piece: Heroines arranca por ok.ru en 6 s.",
+      "evidence": [
+        "scripts/holy/more-sources.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
+      ],
+      "tests": [
+        "scripts/test-holy-site-changes.mjs"
       ]
     }
   ],
