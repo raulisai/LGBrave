@@ -635,6 +635,21 @@
       ]
     },
     {
+      "id": "starved-video-dead-mirror",
+      "scope": "controlled",
+      "sources": [
+        "cuevana"
+      ],
+      "description": "En la TV, el Latino de Game of Thrones 1x4 (Cuevana) toca un espejo de CDN caído: el vídeo existe pero nunca recibe datos (readyState 0). Se cambia a los 25 s en vez de 45; un vídeo con datos sigue esperando.",
+      "evidence": [
+        "scripts/holy/holy-bridge.mjs",
+        "docs/REPRODUCCION-REVISION-20261117.md"
+      ],
+      "tests": [
+        "scripts/test-holy-site-changes.mjs"
+      ]
+    },
+    {
       "id": "doramasflixbeer-cards",
       "scope": "controlled",
       "sources": [

@@ -125,5 +125,25 @@ try {
     assert.deepEqual(hard.failed, ['net::ERR_NAME_NOT_RESOLVED'], 'un error real de red no espera');
   });
 
+  await check('Vídeo sin un solo dato (espejo del CDN caído): se cambia a los 25 s, no a los 45', async () => {
+    const make = (opened, video) => {
+      const bridge = Object.create(HolyBridge.prototype), failed = [];
+      const session = { phase: 'opening', opened: Date.now() - opened, item: { title: 'Game of Thrones' }, queue: [], tried: new Set() };
+      Object.assign(bridge, { session, mainFrame: 'main', frames: new Map([['main', 'https://tungtungsahur.cuevana3t.pro/?token=x']]), navigation: { phase: 'ready' },
+        serverTimeout: 28000, emptyTimeout: 15000, startTimeout: 45000, starvedTimeout: 25000, stallTimeout: 20000, midStall: 25000, mute: true, library: { progress() {}, resumeAt: () => 0 },
+        isHome: () => false, playerContexts: async () => [{ id: 1 }], evaluateWithGesture: async () => ({ url: 'https://lkhjerbhye3wikhoduh5xiczuvd.lol/v/x', top: false, action: '', videos: [video] }),
+        isUserPaused: () => false, recordPlayback() {}, status: async () => {}, serverFailed: async value => { failed.push(value.failReason); return true; } });
+      return { bridge, failed };
+    };
+    const empty = { t: 0, d: 0, paused: false, ready: 0, network: 2 };
+    const early = make(20000, empty); await early.bridge.watch();
+    assert.deepEqual(early.failed, [], 'a los 20 s todavía espera');
+    const dead = make(26000, empty); await dead.bridge.watch();
+    assert.deepEqual(dead.failed, ['el vídeo no recibió datos en 25 s']);
+    // A video that has data but is still loading keeps the usual 45 s.
+    const loading = make(26000, { ...empty, ready: 1 }); await loading.bridge.watch();
+    assert.deepEqual(loading.failed, [], 'con datos sigue esperando');
+  });
+
   console.log(passed + ' comprobaciones de cambios de sitios y arranque del 17/11 correctas (sin TV ni Internet).');
 } finally { globalThis.fetch = nativeFetch; rmSync(directory, { recursive: true, force: true }); }

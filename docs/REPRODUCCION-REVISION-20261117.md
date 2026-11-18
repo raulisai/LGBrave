@@ -45,4 +45,19 @@ Chrome de escritorio es más nuevo que el Chromium 120 de la TV: que reproduzca 
 | PelisFlix | Big Bang 1x1 | nupload.my | no (anuncios trampa, sin vídeo) |
 | OnlyFlix | Game of Thrones 1x4 | vidapi, nontongo, medmedia, vidfast | no (404, vacío, trampa QR) |
 
-Pendiente: confirmar en la TV, con permiso y sin otra prueba a la vez, Cuevana (serie y película), RePelisHD y AnimeYT.
+## En la TV (LG, 18/11, 01:25–01:50 México)
+
+La TV había cambiado de IP (192.168.1.134 → 192.168.1.154; .134 no respondía); se actualizó `.local/desktop-config.json` y se reinició el servicio. Holy se abrió en la TV (no había otra app delante), cada título se pidió como si se eligiera en pantalla, el servicio común reprodujo y se salió con la tecla Atrás. Al terminar se cerró Holy y se quitaron de «Continuar viendo» las entradas creadas por la prueba. Between Steps 12 avanzó 15 s sobre su posición guardada.
+
+| Título | Fuente | Servidor | Arranca | Salida (s) |
+|---|---|---|---|---|
+| Big Bang 1x1 (dos veces) | Cuevana | tungtungsahur.cuevana3t.pro | sí, 14.7 s y 9.6 s | 76.6, 89.4 |
+| Game of Thrones 1x5 | Cuevana | tungtungsahur.cuevana3t.pro | sí, 11 s | 62 |
+| Between Steps 12 | DoramasMP4 | ok.ru | sí, 14.5 s | (reanudado) |
+| Amadeus | RePelisHD | mxdrop.to | sí, 17.2 s | 17 |
+| One Piece: Heroines 1 | AnimeYT → JKAnime (preferencia de anime) | jkanime.net | sí, 10 s | 16 |
+| Game of Thrones 1x4 | Cuevana | Latino → Subtitulado | sí, 57 s (3 de 3) → **34.6 s** tras el arreglo | 65 |
+
+**Game of Thrones 1x4:** el Latino carga JW Player, pero su vídeo nunca recibe datos (readyState 0, nada en búfer). Su lista sale de un espejo de CDN rotativo: `…stoneyardcreativeworks.cfd` cierra la conexión también desde la PC, y en otro intento `acek-cdn` dejó colgado el primer segmento. En la PC tocó un espejo sano. Cuevana solo tiene un servidor Latino para ese capítulo, así que Holy esperaba 45 s y pasaba a Subtitulado con el aviso «Español latino no se pudo abrir: probando Subtitulado…». Ahora, un vídeo sin un solo dato en ningún marco se descarta a los 25 s (los servidores sanos de la TV tuvieron datos antes de 17 s); un vídeo que ya tiene datos sigue con los 45 s. Caso `starved-video-dead-mirror`.
+
+Nota: la captura de pantalla por CDP sale negra durante el vídeo (capa de hardware de webOS); la reproducción se comprobó con la posición guardada al salir y con `currentTime` dentro del marco del reproductor.

@@ -22,6 +22,10 @@ const PAUSE_DELAY = 1200;
 const episodic = item => !!item && item.kind !== 'movie' && !!item.show;
 // A server that does not even show a video player is given up sooner than one that is loading.
 const EMPTY_TIMEOUT = 15000;
+// A player whose video never received a byte (readyState 0 in every frame) has a dead stream: its CDN
+// mirror is down (Cuevana's Latino of Game of Thrones 1x4 on the TV, 2026-11-18). Every server that
+// worked on the TV had data within 17 s, so this is given up long before the 45 s for slow servers.
+const STARVED_TIMEOUT = 25000;
 // After this many failed servers of one site, the same title on another site comes first.
 const SITE_TRIES = 2;
 // A video that stops advancing this long in the middle (not paused by the owner) is moved to
@@ -59,6 +63,7 @@ export class HolyBridge extends BrowserBridge {
     this.mute = options.mute === true;
     this.serverTimeout = options.serverTimeout || SERVER_TIMEOUT;
     this.emptyTimeout = options.emptyTimeout || EMPTY_TIMEOUT;
+    this.starvedTimeout = options.starvedTimeout || STARVED_TIMEOUT;
     this.startTimeout = options.startTimeout || START_TIMEOUT;
     this.stallTimeout = options.stallTimeout || 20000;
     this.nextDelay = options.nextDelay || NEXT_DELAY;
@@ -704,9 +709,12 @@ export class HolyBridge extends BrowserBridge {
         if (this.isUserPaused(session) || !mid || Math.abs(best.t - mid.t) > 0.5) session.midStall = { t: best.t, since: Date.now() };
         else if (Date.now() - mid.since > this.midStall && (session.rescues || 0) < MAX_RESCUES) { this.recordPlayback('video-stalled', session, best); await this.rescue(session, best.t); return; }
       }
-      const limit = session.queue?.length || session.leftover?.queue?.length ? (session.sawVideo ? this.serverTimeout : Math.min(this.serverTimeout, this.emptyTimeout)) : this.startTimeout;
+      const shown = results.flatMap(frame => frame.videos);
+      const starved = shown.length > 0 && shown.every(video => !video.ready && !(video.t > 0));
+      let limit = session.queue?.length || session.leftover?.queue?.length ? (session.sawVideo ? this.serverTimeout : Math.min(this.serverTimeout, this.emptyTimeout)) : this.startTimeout;
+      if (starved) limit = Math.min(limit, this.starvedTimeout);
       if (!this.isUserPaused(session) && session.phase === 'opening' && Date.now() - session.opened > limit && !session.position) {
-        session.failReason = session.sawVideo ? `el vídeo apareció pero no avanzó en ${Math.round(limit / 1000)} s` : `sin vídeo en la página tras ${Math.round(limit / 1000)} s`;
+        session.failReason = starved ? `el vídeo no recibió datos en ${Math.round(limit / 1000)} s` : session.sawVideo ? `el vídeo apareció pero no avanzó en ${Math.round(limit / 1000)} s` : `sin vídeo en la página tras ${Math.round(limit / 1000)} s`;
         if (await this.serverFailed(session)) return;
         // Leave the page usable: the owner can pick another server with the remote.
         session.phase = 'manual'; session.error = 'No se pudo iniciar solo';
