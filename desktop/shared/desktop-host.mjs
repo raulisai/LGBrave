@@ -14,7 +14,9 @@ import {startServer} from '../../scripts/holy/server.mjs';
 import {createDoctor} from '../../scripts/holy/doctor.mjs';
 import {latestPlaybackExit} from '../../scripts/holy/playback-log.mjs';
 import {createAutostart} from '../../scripts/holy/autostart.mjs';
-import {lanAddress, tvAddress, config, ROOT,lumaOrigin,userDataContext,localName} from './desktop-config.mjs';
+import {lanAddress, tvAddress, config, saveConfig, webosRegistry, ROOT,lumaOrigin,userDataContext,localName} from './desktop-config.mjs';
+import {createTvFinder} from './tv-discovery.mjs';
+import {syncDeviceProfile} from '../../scripts/webos-cli.mjs';
 import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
 import {FilterUpdates} from '../../scripts/filter-updates.mjs';
 import {installCrashGuard} from '../../scripts/crash-guard.mjs';
@@ -77,6 +79,10 @@ const runtime = new LabRuntime({
     ? new HolyBridge(cdp, {...options, catalog, library,preferences,diagnostics,hostName:localName()}) : new BrowserBridge(cdp, {...options,preferences,diagnostics,home:lumaOrigin()+'/luma-home/'})
 });
 const startedAddress = lanAddress();
+// The router can give the TV another IP; find it again (only the TV that takes this computer's key).
+const tvFinder = createTvFinder({address:tvAddress, lan:lanAddress, profile:()=>webosRegistry().devices?.find(entry=>entry.name===config().device),
+  save:tvIp=>{saveConfig({...config(),tvIp});syncDeviceProfile(config());},
+  log:(event,data)=>diagnostics.event('connection',event,data,event==='tv-moved'?'warn':'info')});
 // Holy on the TV also needs the way back (TV → this computer); outgoing SSH/CDP alone cannot show it.
 const returnPath=createReturnPathCheck({host:lanAddress,port:PORT});
 let reportedReturn='';
@@ -148,6 +154,7 @@ try {
       try{recovery.capture();}catch(error){diagnostics.event('profile','recovery-error',{error},'error');}
       await runtime.step();
       checkReturnPath();
+      tvFinder.maybe(runtime.state)?.then(result=>{if(result?.found){runtime.lastError=`La TV cambió de IP (${result.from} → ${result.found}); se reconecta sola.`;wakeLoop();}});
     }
     if(runtime.state==='connected'||runtime.state==='waiting')await profiles.flush();
     report();

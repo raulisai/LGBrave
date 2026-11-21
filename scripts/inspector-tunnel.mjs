@@ -1,5 +1,6 @@
 import net from 'node:net';
 import {createRequire} from 'node:module';
+import {readFileSync} from 'node:fs';
 import {config, computerLabel} from './desktop-config.mjs';
 import {acquireTVLease, sshCommand, requestTVHandoff, tvLeaseHolder, armSessionWatchdog} from './tv-lease.mjs';
 import {createTVProfileStore} from '../desktop/shared/tv-profile-store.mjs';
@@ -9,9 +10,20 @@ const require = createRequire(import.meta.url);
 // Ctrl+C they force process.exit() before the lab can stop cleanly. The tunnel
 // closes its own SSH session, so they are dropped right away.
 const PROCESS_EVENTS = ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGTERM', 'exit'];
+// The SDK reads novacom-devices.json once per process (a singleton) and keeps that copy, so a
+// TV address changed while the service runs (the router gave the TV another IP and the service
+// found it again) would never be used until a restart. Reload it before every connection.
+export function refreshDeviceList({Appdata = require('@webos-tools/cli/lib/base/cli-appdata'), read = file => JSON.parse(readFileSync(file, 'utf8'))} = {}) {
+  try {
+    const data = new Appdata();
+    const list = read(data.deviceListFile);
+    if (Array.isArray(list) && list.length) data.deviceList = list;
+  } catch { /* Keep the SDK's own copy. */ }
+}
 export async function connectSession(device) {
   // SSH only. inspect._runApp() can launch an app the user has closed.
   const {Session} = require('@webos-tools/cli/lib/base/novacom');
+  refreshDeviceList();
   // The SDK can answer one step twice when the TV drops the link: a socket «error» after «connect»
   // or «timeout», an SSH «error» after «ready». Its async.waterfall then throws «Callback was
   // already called» outside any handler (13 times 12–17/11, each right after Holy closed on the TV).
