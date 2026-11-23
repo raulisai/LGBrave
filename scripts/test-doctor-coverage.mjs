@@ -32,7 +32,7 @@ try{
    [{...good,repairNeeded:true},auth,'profile-context-mismatch','restart'],
    [{...good,state:'unresponsive'},auth,'service-unresponsive','restart'],
    [{...good,state:'error'},auth,'service-error','restart'],
-   [{...good,state:'offline',tvReachable:false},auth,'tv-unreachable',null],
+   [{...good,state:'offline',tvReachable:false},auth,'tv-unreachable','find-tv'],
    [{...good,state:'waiting'},auth,'app-not-open',null],
    [{...good,state:'offline'},auth,'connection-retry','wake'],
    [{...good,state:'connected',returnPath:{ok:false,hint:'firewall'}},auth,'tv-cannot-reach-computer',null],

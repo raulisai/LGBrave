@@ -14,9 +14,8 @@ import {startServer} from '../../scripts/holy/server.mjs';
 import {createDoctor} from '../../scripts/holy/doctor.mjs';
 import {latestPlaybackExit} from '../../scripts/holy/playback-log.mjs';
 import {createAutostart} from '../../scripts/holy/autostart.mjs';
-import {lanAddress, tvAddress, config, saveConfig, webosRegistry, ROOT,lumaOrigin,userDataContext,localName} from './desktop-config.mjs';
-import {createTvFinder} from './tv-discovery.mjs';
-import {syncDeviceProfile} from '../../scripts/webos-cli.mjs';
+import {lanAddress, tvAddress, config, ROOT,lumaOrigin,userDataContext,localName} from './desktop-config.mjs';
+import {localTvFinder} from './tv-discovery.mjs';
 import {acquireRuntimeLock} from '../../scripts/runtime-lock.mjs';
 import {FilterUpdates} from '../../scripts/filter-updates.mjs';
 import {installCrashGuard} from '../../scripts/crash-guard.mjs';
@@ -80,9 +79,8 @@ const runtime = new LabRuntime({
 });
 const startedAddress = lanAddress();
 // The router can give the TV another IP; find it again (only the TV that takes this computer's key).
-const tvFinder = createTvFinder({address:tvAddress, lan:lanAddress, profile:()=>webosRegistry().devices?.find(entry=>entry.name===config().device),
-  save:tvIp=>{saveConfig({...config(),tvIp});syncDeviceProfile(config());},
-  log:(event,data)=>diagnostics.event('connection',event,data,event==='tv-moved'?'warn':'info')});
+const tvFinder = localTvFinder({log:(event,data)=>diagnostics.event('connection',event,data,event==='tv-moved'?'warn':'info')});
+const tvMoved=result=>{if(result?.found){runtime.lastError=`La TV cambió de IP (${result.from} → ${result.found}); se reconecta sola.`;try{wakeLoop();}catch{/* Loop not started yet: it reads the new address when it does. */}}return result;};
 // Holy on the TV also needs the way back (TV → this computer); outgoing SSH/CDP alone cannot show it.
 const returnPath=createReturnPathCheck({host:lanAddress,port:PORT});
 let reportedReturn='';
@@ -97,7 +95,7 @@ const checkReturnPath=()=>{
   }).catch(()=>{});
 };
 const doctorBudget=new RepairJournal({file:join(ROOT,'.local','doctor-state.json')});
-const doctor = createDoctor({catalog, library, runtime, playbackIncident:()=>latestPlaybackExit(join(ROOT,'.local/logs/holy-playback.jsonl')), tv:tvAddress,profile:{inspect:recovery.inspect,restore:()=>{const unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));try{return recovery.restore();}finally{unlock();}}},
+const doctor = createDoctor({catalog, library, runtime, findTv:()=>tvFinder.search().then(tvMoved), playbackIncident:()=>latestPlaybackExit(join(ROOT,'.local/logs/holy-playback.jsonl')), tv:tvAddress,profile:{inspect:recovery.inspect,restore:()=>{const unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));try{return recovery.restore();}finally{unlock();}}},
   reserveRepair:(action,code)=>{let unlock;try{unlock=acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock'));return doctorBudget.reserve(action,code);}catch{return{allowed:false,reason:'repair-busy'};}finally{unlock?.();}}, startedAddress, currentAddress:lanAddress,
   supervised:!!process.send, restart:() => { finish('doctor-restart').then(() => process.exit(1)); },
   autostart:createAutostart()});
@@ -154,7 +152,7 @@ try {
       try{recovery.capture();}catch(error){diagnostics.event('profile','recovery-error',{error},'error');}
       await runtime.step();
       checkReturnPath();
-      tvFinder.maybe(runtime.state)?.then(result=>{if(result?.found){runtime.lastError=`La TV cambió de IP (${result.from} → ${result.found}); se reconecta sola.`;wakeLoop();}});
+      tvFinder.maybe(runtime.state)?.then(tvMoved);
     }
     if(runtime.state==='connected'||runtime.state==='waiting')await profiles.flush();
     report();

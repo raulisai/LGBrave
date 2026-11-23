@@ -26,7 +26,7 @@ export function createDoctor({
   catalog, library, runtime, tv = { host: '192.168.1.134', port: 9922 }, startedAddress, currentAddress,
   autostart = { status: async () => ({ installed: true, loaded: true }), install: async () => {} },
   supervised = !!process.env.HOLY_SUPERVISED, restart = () => process.kill(process.pid, 'SIGTERM'),
-  profile, reserveRepair, playbackIncident = () => null, diskFree = () => { const fs = statfsSync('.'); return fs.bavail * fs.bsize; }, probe = tcpOpen, now = Date.now, rss = () => process.memoryUsage().rss, log = console.log
+  profile, reserveRepair, findTv, playbackIncident = () => null, diskFree = () => { const fs = statfsSync('.'); return fs.bavail * fs.bsize; }, probe = tcpOpen, now = Date.now, rss = () => process.memoryUsage().rss, log = console.log
 } = {}) {
   const check = (id, label, level, detail, fix = null, hint = '') => ({ id, label, level, detail, fix, hint });
   const journal=new RepairJournal({now});
@@ -44,7 +44,9 @@ export function createDoctor({
     const reachable = await probe(target.host, target.port);
     checks.push(reachable
       ? check('tv-net', 'TV en la red', 'ok', `${target.host} responde`)
-      : check('tv-net', 'TV en la red', 'warn', `${target.host} no responde`, null, 'Enciende la TV y comprueba que está en la misma red que la computadora.'));
+      : check('tv-net', 'TV en la red', 'warn', `${target.host} no responde`, findTv ? 'find-tv' : null, findTv
+        ? 'Se busca la TV en la red local por si el router le dio otra IP (solo la que acepta la llave de esta computadora). Si no aparece, enciéndela y comprueba que está en la misma red.'
+        : 'Enciende la TV y comprueba que está en la misma red que la computadora.'));
 
     const state = runtime?.state;
     const connection=repairPlan({state,tv:{...target,configured:target.configured??true},running:true,tvReachable:reachable},inspection||{});
@@ -107,6 +109,14 @@ export function createDoctor({
             if(['connected','standby','starting','restarting'].includes(runtime?.state)){done.push({fix,ok:true,text:'La sesión cambió durante el diagnóstico; se conserva'});continue;}
             const permit=reserve('wake','connection-retry');if(!permit.allowed){done.push({fix,ok:false,pending:true,text:'Reconexión en espera para evitar intentos repetidos'});continue;}
             await runtime.disconnect(); done.push({ fix, ok: true, pending:true,text: 'Sesión pasiva reiniciada; esperando conexión' });
+          }
+          else if (fix === 'find-tv') {
+            if(['connected','standby'].includes(runtime?.state)){done.push({fix,ok:true,text:'La sesión cambió durante el diagnóstico; se conserva'});continue;}
+            const permit=reserve('find-tv','tv-unreachable');if(!permit.allowed){done.push({fix,ok:false,pending:true,text:'La búsqueda de la TV espera unos segundos para no repetirse'});continue;}
+            const result=await findTv();
+            done.push(result?.found?{fix,ok:true,pending:true,text:`La TV cambió de IP: ahora está en ${result.found}; reconectando`}
+              :result?.skipped==='answers'?{fix,ok:true,pending:true,text:'La TV ya responde en su dirección; reconectando'}
+              :{fix,ok:false,text:'No se encontró la TV en la red: enciéndela y comprueba que está en la misma Wi-Fi que la computadora'});
           }
           else if(fix==='profile'){
             if(['connected','standby'].includes(runtime?.state)){done.push({fix,ok:true,text:'Se conserva la conexión activa'});continue;}

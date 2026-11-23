@@ -1,7 +1,7 @@
 import {repairPlan} from './repair-policy.mjs';
 import {RepairJournal} from './repair-journal.mjs';
 // Same coordinator for manual Doctor and the supervisor. Only existing authorization is restored.
-export function createDesktopRepair({status,recovery,start,restart,wake,log=()=>{},journal=new RepairJournal(),lock,
+export function createDesktopRepair({status,recovery,start,restart,wake,findTv,log=()=>{},journal=new RepairJournal(),lock,
   wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),verifyAttempts=6,verifyDelay=250}){
  let pending;
  return function repair(){
@@ -39,7 +39,14 @@ export function createDesktopRepair({status,recovery,start,restart,wake,log=()=>
     // Do not turn a newly recovered connection or another owner's reservation into a restart.
     after=await status({probe:true});
     if(['connected','standby','starting','restarting'].includes(after.state)){actions.push('El estado cambió durante el diagnóstico; se conserva la sesión actual.');return result(after);}
-    if(plan.action==='start')await start();
+    if(plan.action==='find-tv'){
+      const found=findTv?await findTv().catch(()=>null):null;
+      if(!found?.found){actions.push(findTv?'No se encontró la TV en la red: enciéndela y comprueba que está en la misma Wi-Fi que la computadora.':'La TV no responde al puerto de desarrollo; se esperará sin reiniciar en bucle.');
+        return result(after,{...plan,ok:true,verified:false,outcome:'waiting',waiting:true});}
+      actions.push(`La TV cambió de IP: ahora está en ${found.found}; se guardó y se reconecta.`);
+      if(wake)await wake();
+    }
+    else if(plan.action==='start')await start();
     else if(plan.action==='restart')await restart();
     else if(wake)await wake();
     else {actions.push('El servicio ya reintenta la conexión pasiva.');return result(after,{ok:true,pending:true,outcome:'pending',verified:false});}

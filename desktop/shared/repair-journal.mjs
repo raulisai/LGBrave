@@ -1,6 +1,6 @@
 import {readFileSync,writeFileSync,renameSync,mkdirSync,existsSync} from 'node:fs';
 import {dirname} from 'node:path';
-const ACTIONS=new Set(['start','restart','wake','refresh']);
+const ACTIONS=new Set(['start','restart','wake','refresh','find-tv']);
 const WINDOW=10*60000;
 export class RepairJournal {
   constructor({file,now=Date.now}={}){this.file=file;this.now=now;this.memory={v:1,attempts:[]};}

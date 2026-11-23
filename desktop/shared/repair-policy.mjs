@@ -22,7 +22,8 @@ export function repairPlan(report, inspection={}) {
   if(!report.running)return plan('service-stopped','start','Iniciar el servicio de esta computadora.');
   if(report.repairNeeded||report.profileContext?.mismatch)return plan('profile-context-mismatch','restart','Recargar el servicio con el perfil actual de esta computadora.');
   if(state==='setup')return plan('profile-stale','restart','El perfil ya existe; recargar el servicio que todavía no lo reconoce.');
-  if(report.tvReachable===false)return plan('tv-unreachable',null,'La TV no responde al puerto de desarrollo; se esperará sin reiniciar en bucle.',{waiting:true});
+  // The router may have given the TV another IP (18–19/11): look for it before waiting.
+  if(report.tvReachable===false)return plan('tv-unreachable','find-tv','La TV no responde en su dirección guardada; se busca en la red local por si cambió de IP (solo la TV que acepta la llave de esta computadora).',{waiting:true});
   if(state==='waiting')return plan('app-not-open',null,'Servicio disponible. Abre Holy o Luma con el control de la TV.',{waiting:true});
   if(state==='offline')return plan('connection-retry','wake','Reintentar la conexión pasiva. Si el inspector no está disponible, abre Holy o Luma en la TV.',{pending:true});
   return plan('diagnosis-required',null,'No hay una reparación automática acreditada para este estado; se conserva el servicio.',{needsReview:true});

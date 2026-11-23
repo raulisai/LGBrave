@@ -3,6 +3,8 @@ import {createRequire} from 'node:module';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {homedir} from 'node:os';
+import {config, saveConfig, tvAddress, lanAddress, webosRegistry} from './desktop-config.mjs';
+import {syncDeviceProfile} from '../../scripts/webos-cli.mjs';
 const require = createRequire(import.meta.url);
 
 // The router hands the TV a new IP now and then (.134 → .154 → .155, 18–19/11) and the
@@ -87,13 +89,23 @@ export function createTvFinder({address, lan, profile, save, log = () => {}, now
     log('tv-moved', {state: 'found', from: tv.host, to: result.host});
     return {found: result.host, from: tv.host};
   }
+  const start = () => {
+    running = run().catch(error => { log('tv-search', {state: 'error', error}); return {found: ''}; }).finally(() => { running = null; });
+    return running;
+  };
   return {
     maybe(state) {
       if (state !== 'offline' || running || now() < next) return null;
       next = now() + interval;
-      running = run().catch(error => { log('tv-search', {state: 'error', error}); return {found: ''}; }).finally(() => { running = null; });
-      return running;
+      return start();
     },
+    // Doctor: look right now, whatever the wait (still one search at a time).
+    search() { return running || start(); },
     get busy() { return !!running; },
   };
 }
+
+// This computer's real wiring: saved config, webOS profile and its key.
+export const tvProfile = () => webosRegistry().devices?.find(entry => entry.name === config().device);
+export function saveTvAddress(tvIp) { saveConfig({...config(), tvIp}); syncDeviceProfile(config()); }
+export const localTvFinder = (options = {}) => createTvFinder({address: tvAddress, lan: lanAddress, profile: tvProfile, save: saveTvAddress, ...options});

@@ -13,6 +13,7 @@ import {config, saveConfig, readJSON, tvAddress, lanAddress, localName, ROOT,use
 import {currentPackage,launchThroughShell} from './app-package.mjs';
 import {tcpOpen} from '../../scripts/holy/doctor.mjs';
 import {syncDeviceProfile} from '../../scripts/webos-cli.mjs';
+import {localTvFinder} from './tv-discovery.mjs';
 import {PORT} from '../../scripts/holy/config.mjs';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -118,7 +119,9 @@ export async function doctor() {
 }
 const repairLog=new DiagnosticLog();
 const repairRecovery=createProfileRecovery({diagnostics:repairLog});
-export const repair=createDesktopRepair({status,recovery:repairRecovery,start,restart,wake:()=>ask('/wake','POST'),
+// Doctor's button also looks for the TV on the network when the router gave it another IP.
+const repairFinder=localTvFinder({log:(event,data)=>repairLog.event('connection',event,data,event==='tv-moved'?'warn':'info')});
+export const repair=createDesktopRepair({status,recovery:repairRecovery,start,restart,wake:()=>ask('/wake','POST'),findTv:()=>repairFinder.search(),
   journal:new RepairJournal({file:join(ROOT,'.local','doctor-state.json')}),lock:()=>acquireRuntimeLock(join(ROOT,'.local','doctor-repair.lock')),
   log:result=>repairLog.event('doctor','repair',{phase:result.outcome,state:result.after,code:result.code,action:result.action,attempt:result.attempt})});
 
