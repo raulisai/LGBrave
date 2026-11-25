@@ -1,0 +1,74 @@
+{
+  "at": "2026-11-08T07:20:47.446Z",
+  "code": "0.9.31",
+  "installed": {
+    "before": "0.9.24",
+    "after": "0.9.31",
+    "app": "com.lgapp.holy",
+    "ipk": "artifacts/com.lgapp.holy_0.9.31_all.ipk",
+    "sha256": "0ac349f140ffc8926eaf305edfab59f3917211d7ce0e7e664391f3d0c8dff943",
+    "rollback": "private original app backup and repackaged IPK 0.9.24"
+  },
+  "localGate": {
+    "ok": true,
+    "syntaxFiles": 191,
+    "matrix": {
+      "cases": 42,
+      "sources": 11,
+      "scopes": {
+        "controlled": 28,
+        "tv-user-confirmed": 1,
+        "tv-metrics": 11,
+        "desktop-http": 1,
+        "navigation-only": 1
+      }
+    },
+    "inputHash": "62b6a723b034c4eab239f9a7ec5b83eb1a37665c46a63d5f8f3d5fe13c9e87eb",
+    "outputHash": "62b6a723b034c4eab239f9a7ec5b83eb1a37665c46a63d5f8f3d5fe13c9e87eb"
+  },
+  "tv": {
+    "report": "validation-031.json",
+    "scope": "Real LG TV with isolated test library; selected movie image and audio confirmed by user.",
+    "queue": "passed: yellow add/show/remove and empty state",
+    "pause": "passed: single-language movie with alternatives; episodic menus",
+    "serverSwitch": "passed: Between Steps 5 Streamtape to Primeload at requested 57.677s; observed 62.396s, dub, 1280x720, no MediaError",
+    "externalFailures": [
+      "Doodstream movie alternate: target disappeared about 4s after request, cause unconfirmed; no successful playback.",
+      "Initial run: Flaswish stalled, recovered Streamtape; Pelisflix Silent Night sample failed."
+    ],
+    "overall": "partial external coverage; no full-length or all-provider certification"
+  },
+  "restored": {
+    "section": "Inicio",
+    "connected": true,
+    "activeBackend": "Mac 0.9.31",
+    "windows": "standby; code not updated in this task",
+    "noPlaybackDescriptor": true,
+    "localRuntimeOwnerCount": 1,
+    "searchEngine": "google",
+    "historyEntries": 57,
+    "historyUnchanged": true,
+    "realQueuePreserved": true,
+    "syntheticTitlesInRealQueue": false,
+    "health": [
+      {
+        "computer": "Mac",
+        "http": 200,
+        "tv": "connected",
+        "peerSync": "synced"
+      },
+      {
+        "computer": "Windows",
+        "http": 200,
+        "tv": "standby",
+        "peerSync": "synced"
+      }
+    ]
+  },
+  "pending": [
+    "Windows backend update and same-version playback handoff validation.",
+    "Queue is local per computer.",
+    "Unconfirmed native/target closures, including Doodstream sample.",
+    "LAN API authentication, first-use SSH trust, and transitive toolchain dependency alerts."
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "at": "2026-11-08T06:59:15.439Z",
+  "scope": "LG real; one isolated interceptor, temporary history/queue/preferences; no physical audio confirmation.",
+  "cases": [
+    {
+      "label": "yellow-queue",
+      "checks": {
+        "added": true,
+        "shown": true,
+        "removed": true
+      },
+      "title": "Ask E. Jean",
+      "emptyView": {
+        "text": "HOLY\nInicio\nPelículas\nAnime\nDoramas\nSeries\nLo mejor\nMi cola\nGustos\nBuscar\nConectado a la computadora\nAsk E. Jean\n\nCastellano\n2026\n★ 8.7\nHD\nPelícula · Cuevana 3\n\nDocumental\n\nThe thrilling story of E. Jean Carroll’s life, from her early days as Miss Cheerleader USA to her rise as a trailblazing journalist, author, and beloved advice colum…\n\nOK\nReproducir\nCalificar\nAgregar a Mi cola\nBuscar con la voz",
+        "skeleton": true
+      }
+    },
+    {
+      "label": "movie-0",
+      "source": "pelisflix",
+      "title": "Silent Night (Venganza silenciosa)",
+      "checks": {},
+      "error": "No se cumplió la condición"
+    },
+    {
+      "label": "movie-1",
+      "source": "repelishd",
+      "title": "A cualquier precio",
+      "checks": {
+        "advancing": false,
+        "chosenLanguage": false
+      },
+      "phase": "playing",
+      "video": {
+        "before": {
+          "t": 5.821,
+          "d": 6393.28,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1728,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1
+        },
+        "after": {
+          "t": 10.843,
+          "d": 6393.28,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1728,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1
+        }
+      },
+      "versionKind": "",
+      "error": "No se cumplió la condición"
+    },
+    {
+      "label": "between-steps",
+      "source": "doramasflix",
+      "title": "Between Steps",
+      "checks": {
+        "advancing": false,
+        "chosenLanguage": true,
+        "pauseHeld": true,
+        "languageMenu": true,
+        "backFromLanguages": true,
+        "serverMenu": true,
+        "serverChanged": false,
+        "resumeAfterSwitch": true,
+        "languageAfterSwitch": true,
+        "returnHome": true
+      },
+      "phase": "playing",
+      "video": {
+        "before": {
+          "t": 5.295,
+          "d": 3981.618,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1280,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1
+        },
+        "after": {
+          "t": 10.514,
+          "d": 3981.618,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1280,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1
+        }
+      },
+      "versionKind": "dub",
+      "pauseOptions": [
+        "resume",
+        "play",
+        "play",
+        "versions",
+        "servers",
+        "episodes"
+      ],
+      "languages": [
+        "Español latino",
+        "Coreano · subtítulos en español"
+      ],
+      "serverChoices": 3,
+      "switch": {
+        "requestedHost": "flaswish.com",
+        "positionRequested": 10.717,
+        "phase": "playing",
+        "actualHost": "streamtape.com",
+        "observed": {
+          "t": 10.717,
+          "d": 3981.618,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1280,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1
+        }
+      },
+      "backMs": 3919,
+      "saved": null
+    },
+    {
+      "label": "final-home",
+      "checks": {
+        "atHome": true
+      },
+      "searchEngine": "google"
+    }
+  ],
+  "errors": [],
+  "finished": "2026-11-08T07:03:48.776Z"
+}

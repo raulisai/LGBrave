@@ -8,3 +8,5 @@ Después de vincular este Mac con la TV, usa `npm run desktop:start`.
 `npm run holy:autostart -- on` configura el inicio de sesión (el script de compilación no lo activa salvo `LUMA_AUTOSTART=1 mac/build.sh`).
 No ejecutes el antiguo `npm run lab` al mismo tiempo que el servicio común.
 Para el relevo seguro, ambos equipos deben tener la versión actualizada.
+
+Guía completa: [Instalación](../docs/INSTALACION.md), [Arquitectura y diagramas](../docs/ARQUITECTURA.md) y [riesgos abiertos](../docs/REVISION-CALIDAD-SEGURIDAD-20261107.md).

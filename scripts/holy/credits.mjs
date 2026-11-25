@@ -1,3 +1,4 @@
+import { publicFetch } from './public-fetch.mjs';
 // Who is in each title and who directed it, so tastes can follow people («Con Adam Sandler»).
 // Cinemeta (the public catalogue behind Stremio, no key) answers by IMDb id with the three
 // top-billed actors, the directors, the IMDb rating and the awards line. A title without an IMDb
@@ -34,7 +35,7 @@ async function json(get, url, options = {}) {
 }
 
 export class Credits {
-  constructor({ file = '.local/holy-credits.json', fetch: get = fetch, now = Date.now, log = () => {} } = {}) {
+  constructor({ file = '.local/holy-credits.json', fetch: get = publicFetch, now = Date.now, log = () => {} } = {}) {
     Object.assign(this, { file, get, now, log });
     let data = {};
     try { if (existsSync(file)) data = JSON.parse(readFileSync(file, 'utf8')); } catch { data = {}; }

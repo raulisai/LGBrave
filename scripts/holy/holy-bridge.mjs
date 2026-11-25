@@ -263,7 +263,7 @@ export class HolyBridge extends BrowserBridge {
       if (ownedHome && url.pathname.startsWith('/holy-api/') &&
           (url.origin === new URL(this.apiBase).origin || this.homeAliases.has(url.origin))) {
         const destination = new URL(url.pathname + url.search, this.apiBase);
-        const headers = Object.entries(params.request.headers || {}).filter(([name]) => name.toLowerCase() !== 'origin')
+        const headers = Object.entries(params.request.headers || {}).filter(([name]) => !['origin', 'host', ':authority'].includes(name.toLowerCase()))
           .map(([name,value]) => ({name,value:String(value)}));
         headers.push({name:'Origin',value:new URL(this.apiBase).origin});
         await this.cdp.call('Fetch.continueRequest', {requestId:params.requestId,url:destination.href,headers},sessionId).catch(() => {});
@@ -300,7 +300,7 @@ export class HolyBridge extends BrowserBridge {
       const current = this.frames.get(this.mainFrame) || '';
       const onHome = this.isHome(current);
       if (action === 'forward' || (onHome && !this.session)) return;
-      if (this.session?.card?.kind === 'versions') {
+      if (['versions', 'servers'].includes(this.session?.card?.kind)) {
         const open = this.session; await this.hideEndCard(open); await this.showPauseCard(open);
         if (this.session === open) for (const id of this.remoteContexts) this.cdp.evaluate('window.__holyBackHandled&&window.__holyBackHandled()', id).catch(() => {});
         return;
@@ -432,7 +432,8 @@ export class HolyBridge extends BrowserBridge {
     session.key = entryKey(session.item);
     // After a rescue the second comes from the stalled server, whatever site plays next.
     session.resumeAt = session.forceResume || this.library.resumeAt(session.item);
-    session.queue = [...(target.alternatives || [])];
+    session.serverChoices = [...new Set([target.url, ...(target.alternatives || [])].filter(url => typeof url === 'string' && /^https:\/\//.test(url)))];
+    session.queue = session.serverChoices.filter(url => url !== target.url);
     const youtubeEmbed = session.item.source === 'youtube' && /^https:\/\/www\.youtube-nocookie\.com\/embed\/[\w-]{11}\?/.test(target.embed || '');
     session.referrer = youtubeEmbed ? this.apiBase + '/' : target.referrer;
     // Languages of this episode (when the site offers several) and the one being played.
@@ -569,7 +570,7 @@ export class HolyBridge extends BrowserBridge {
     }
     return [...this.pageContexts().map(id => ({ id })), ...[...this.childSessions].flatMap(([sessionId, entry]) => [...entry.contexts].map(id => ({ id, sessionId })))];
   }
-  isUserPaused(session) { return !!(session?.userPaused || session?.lastPaused || ['pause','versions'].includes(session?.card?.kind)); }
+  isUserPaused(session) { return !!(session?.userPaused || session?.lastPaused || ['pause','versions','servers'].includes(session?.card?.kind)); }
   resetStallClocks(session) { session.stall = null; session.midStall = null; session.endStall = null; session.missingSince = 0; }
   // Every second during a session: start the player, then save the position.
   async watch() {
@@ -673,13 +674,13 @@ export class HolyBridge extends BrowserBridge {
         // Rewound from the card: back to watching.
         else if (session.card?.kind === 'end' && !ended && best.t < best.d - 15) await this.hideEndCard(session);
         // An episode paused for a moment (not at its end): the pause panel; playing again hides it.
-        if (!ended && (episodic(session.item) || (session.versions || []).length > 1)) {
+        if (!ended && (episodic(session.item) || (session.versions || []).length > 1 || (session.serverChoices || []).length > 1)) {
           if (best.paused && !best.mediaError && best.t > 1) {
             session.pausedSince ||= Date.now();
             if (!session.card && Date.now() - session.pausedSince > this.pauseDelay) await this.showPauseCard(session);
           } else {
             session.pausedSince = 0;
-            if (['pause', 'versions'].includes(session.card?.kind)) await this.hideEndCard(session);
+            if (['pause', 'versions', 'servers'].includes(session.card?.kind)) await this.hideEndCard(session);
           }
         }
       }
@@ -836,6 +837,7 @@ export class HolyBridge extends BrowserBridge {
     if (previous?.url) { card.options.push({ action: 'play', item: episode(item, previous) }); buttons.push({ label: 'Anterior', detail: previous.label, icon: 'previous' }); }
     if (next?.url) { card.options.push({ action: 'play', item: episode(item, next) }); buttons.push({ label: 'Siguiente', detail: next.label, icon: 'next' }); }
     if ((session.versions || []).length > 1) { card.options.push({ action: 'versions' }); buttons.push({ label: 'Idioma', detail: current?.label || '', icon: 'language' }); }
+    if ((session.serverChoices || []).length > 1) { card.options.push({ action: 'servers' }); buttons.push({ label: 'Servidor', detail: this.serverLabel(session.target), icon: 'server' }); }
     if (series) { card.options.push({ action: 'episodes' }); buttons.push({ label: 'Capítulos', icon: 'list' }); }
     await this.curtain(endCardSource({ mode: 'pause', title: item.title, next: item.subtitle || (item.episode ? 'Episodio ' + item.episode : ''), buttons }));
     await this.curtain(cardFlagSource('menu'));
@@ -850,6 +852,34 @@ export class HolyBridge extends BrowserBridge {
       title: session.item.title, next: session.item.subtitle || (session.item.episode ? 'Episodio ' + session.item.episode : ''),
       buttons: versions.map(version => ({ label: version.label, detail: version.id === session.version ? 'Ahora' : '', icon: 'language' })) }));
     await this.curtain(cardFlagSource(true));
+  }
+  serverLabel(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'Servidor'; }
+  }
+  async showServersCard(session) {
+    const servers = session.serverChoices || [];
+    if (this.session !== session || servers.length < 2) return;
+    const start = Math.max(0, servers.indexOf(session.target));
+    session.card = { kind: 'servers', focus: start, options: servers.map(url => ({ action: 'server', url })), timer: null };
+    await this.curtain(endCardSource({ mode: 'pause', kicker: 'SERVIDOR', hint: '← → para elegir · OK para cambiar · Atrás para volver', start,
+      title: session.item.title, next: session.item.subtitle || '',
+      buttons: servers.map((url, index) => ({ label: this.serverLabel(url), detail: url === session.target ? 'Ahora' : 'Servidor ' + (index + 1), icon: 'server' })) }));
+    await this.curtain(cardFlagSource(true));
+  }
+  async switchServer(session, url) {
+    if (this.session !== session || !session.serverChoices?.includes(url)) return;
+    if (url === session.target) return this.resumeVideo(session);
+    const at = session.position?.t || 0;
+    if (at > 1) this.library.progress(session.key, session.item.url, at, session.position?.d || 0);
+    session.forceResume = session.resumeAt = at;
+    // Only alternatives of this copy and language; automatic recovery keeps the others.
+    session.queue = session.serverChoices.filter(other => other !== url);
+    session.servers = (session.servers || 0) + 1;
+    session.siteServers = (session.siteServers || 0) + 1;
+    session.sawVideo = false;
+    if (!await this.installCurtain(session, curtainSource({ homes:[this.home,this.packagedHome,...this.homeAliases], title: session.item.title,
+      backdrop: session.item.backdrop || session.item.poster || '', message: 'Cambiando de servidor…' }))) return;
+    await this.openServer(session, url);
   }
   async switchVersion(session, version) {
     this.library.setLanguage?.(session.item, version);
@@ -903,6 +933,8 @@ export class HolyBridge extends BrowserBridge {
     if (option.action === 'play') return this.play(option.item);
     if (option.action === 'resume') return this.resumeVideo(session);
     if (option.action === 'versions') { session.card = null; return this.showVersionsCard(session); }
+    if (option.action === 'servers') return this.showServersCard(session);
+    if (option.action === 'server') return this.switchServer(session, option.url);
     if (option.action === 'version') return this.switchVersion(session, option.version);
     if (option.action === 'episodes' && session.item?.show) return this.toEpisodes(session.item);
     return this.command({ action: 'home' });

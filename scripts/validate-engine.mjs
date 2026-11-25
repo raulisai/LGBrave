@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import adblock from 'adblock-rs';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
 const tests = [];
 function test(name, fn) {
   try { fn(); tests.push({ name, pass: true }); }
@@ -35,6 +35,8 @@ test('Excepción de CSS', () => assert.ok(!engine('editorial.example##.ad\nedito
 test('Selector genérico', () => assert.ok(engine('##.generic-ad').hiddenClassIdSelectors(['generic-ad'],[],[]).includes('.generic-ad')));
 test('Generación de scriptlet', () => assert.ok(engine('editorial.example##+js(marker)').urlCosmeticResources(source).injected_script.includes('window.marker=true')));
 const report = { capturedAt: new Date().toISOString(), scope: 'Semántica del motor Node; cada integración en TV se mide por separado.', passed: tests.filter(t=>t.pass).length, total: tests.length, tests };
-writeFileSync('evidence/browser-lab/engine-validation.json',JSON.stringify(report,null,2));
+const evidence = process.env.LUMA_TEST_EVIDENCE_DIR || 'evidence/browser-lab';
+mkdirSync(evidence,{recursive:true});
+writeFileSync(evidence + '/engine-validation.json',JSON.stringify(report,null,2));
 console.log(JSON.stringify(report,null,2));
 if(tests.some(t=>!t.pass))process.exitCode=1;

@@ -1,3 +1,4 @@
+import { publicFetch } from './public-fetch.mjs';
 // Lists of well-known titles from public sources, matched against the owner's catalogue:
 // awards and festivals (Wikidata: Oscars, Cannes, Venice, Berlin, BAFTA, Golden Globes, Goya, Ariel,
 // César, Japan Academy, Emmy), K-drama awards (Wikipedia: Baeksang), critics' polls published on
@@ -20,7 +21,7 @@ const main = value => String(value || '').split(/[:(]/)[0].trim();
 // ------------------------------------------------------------------ fetchers
 // A busy answer (429, 503) is asked once more after the wait the server asks for (3 s by default).
 async function json(url, { timeout = 20000, retry = true, ...options } = {}) {
-  const response = await fetch(url, { ...options, headers: { 'User-Agent': UA, Accept: 'application/json', ...(options.headers || {}) }, signal: AbortSignal.timeout(timeout) });
+  const response = await publicFetch(url, { ...options, headers: { 'User-Agent': UA, Accept: 'application/json', ...(options.headers || {}) }, signal: AbortSignal.timeout(timeout) });
   if ([429, 503].includes(response.status) && retry) {
     await new Promise(resolve => setTimeout(resolve, Math.min(30, Number(response.headers.get('retry-after')) || 3) * 1000));
     return json(url, { timeout, retry: false, ...options });
@@ -132,7 +133,7 @@ export function pollLines(html) {
 }
 const literal = value => '"' + String(value).replace(/["\\\n\r]/g, ' ').trim() + '"';
 async function bbc(url) {
-  const response = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'text/html' }, signal: AbortSignal.timeout(20000) });
+  const response = await publicFetch(url, { headers: { 'User-Agent': UA, Accept: 'text/html' }, signal: AbortSignal.timeout(20000) });
   if (!response.ok) throw Error('bbc.com respondió ' + response.status);
   const lines = pollLines(await response.text());
   if (lines.length < 50) throw Error('la página de la encuesta cambió');

@@ -151,7 +151,7 @@ try {
     const site = { id: 'x', name: 'X', site: 'https://x.example/', parseHome: () => [], versions: async () => [{ id: 'a', label: 'Español latino', kind: 'dub', target: { url: 'https://p.example/a' } }, { id: 'b', label: 'Coreano · subtítulos en español', kind: 'sub', target: { url: 'https://p.example/b' } }] };
     const plain = { id: 'y', name: 'Y', site: 'https://y.example/', parseHome: () => [] };
     const catalog = new Catalog({ file: join(directory, 'sc.json'), detailsFile: join(directory, 'scd.json'), fetch: async () => '', connectors: [site, plain] });
-    const server = startServer({ catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img'), root: directory });
+    const server = startServer({ resolveHost: async () => ['93.184.216.34'], catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img'), root: directory });
     await new Promise(resolve => (server.listening ? resolve() : server.once('listening', resolve)));
     const base = `http://127.0.0.1:${server.address().port}`;
     try {

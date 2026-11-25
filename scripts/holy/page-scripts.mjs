@@ -165,7 +165,7 @@ export function holyEndCard(data) {
     .shade.top{background:linear-gradient(180deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.55) 30%,transparent 55%)}
     .p.top{top:70px;bottom:auto}
     h1.small{font-size:46px}
-    .p.top .row{align-items:stretch}
+    .p.top .row{align-items:stretch;max-width:calc(100vw - 160px);overflow-x:auto;padding:8px 4px 16px}
     .p.top .b{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;height:96px;min-width:230px;max-width:380px;white-space:normal;text-align:left}
     .p.top .b small{position:relative;font-size:20px;font-weight:600;opacity:.75}
     .hint{margin:18px 0 0;font-size:21px;color:#bdbdbd}
@@ -199,7 +199,7 @@ export function holyEndCard(data) {
     panel.className = 'p top';
     panel.append(make('div', 'k', data.kicker || 'EN PAUSA'), make('h1', 'small', data.title || ''), make('p', 'sub', data.next || ''));
     const row = make('div', 'row');
-    const glyph = { play: '▶', previous: '⏮', next: '⏭', list: '≡', language: '🌐' };
+    const glyph = { play: '▶', previous: '⏮', next: '⏭', list: '≡', language: '🌐', server: '▤' };
     (data.buttons || []).forEach((entry, index) => {
       const button = option(make('button', 'b'), index);
       button.append(make('span', '', `${glyph[entry.icon] || ''}  ${entry.label}`));
@@ -226,6 +226,7 @@ export function holyEndCard(data) {
   }
   const focus = (index, stopped) => {
     options.forEach((node, at) => node.classList.toggle('f', at === index));
+    if (data.mode === 'pause' && index >= 0) options[index]?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
     if (stopped && fill) { clearInterval(timer); fill.style.transition = 'none'; fill.style.width = '0'; label.textContent = '▶  Ver ahora'; }
   };
   focus(data.mode === 'pause' ? (Number.isInteger(data.start) ? data.start : -1) : 0, false);

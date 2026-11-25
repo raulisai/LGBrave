@@ -72,7 +72,7 @@ try {
   await check('Servidor: /holy-api/resolve abre desde un navegador cualquiera y marca «empezado»; /holy-api/forget la quita', async () => {
     const library = new Library(join(directory, 'lib.json'));
     const catalog = newCatalog([{ ...site, versions: async () => [{ id: 'a', label: 'Español latino', kind: 'dub', target: { url: 'https://p.example/a' } }, { id: 'b', label: 'Coreano · subtítulos en español', kind: 'sub', target: { url: 'https://p.example/b', referrer: 'https://x.example/' } }] }]);
-    const server = startServer({ catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img'), root: directory, webRoot: join(directory, 'no-web-build') });
+    const server = startServer({ resolveHost: async () => ['93.184.216.34'], catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img'), root: directory, webRoot: join(directory, 'no-web-build') });
     await new Promise(resolve => (server.listening ? resolve() : server.once('listening', resolve)));
     const base = `http://127.0.0.1:${server.address().port}`;
     const resolveCall = (body, headers = {}) => fetch(base + '/holy-api/resolve', { method: 'POST', headers: { 'Content-Type': 'text/plain', ...headers }, body: JSON.stringify(body) });
@@ -111,7 +111,7 @@ try {
     writeFileSync(join(webRoot, 'assets', 'app.js'), 'console.log(1)');
     mkdirSync(join(directory, 'tv-root'), { recursive: true });
     writeFileSync(join(directory, 'tv-root', 'index.html'), '<!doctype html><title>Holy TV</title>');
-    const server = startServer({ catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img2'), root: join(directory, 'tv-root'), webRoot });
+    const server = startServer({ resolveHost: async () => ['93.184.216.34'], catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img2'), root: join(directory, 'tv-root'), webRoot });
     await new Promise(resolve => (server.listening ? resolve() : server.once('listening', resolve)));
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
@@ -126,7 +126,7 @@ try {
   await check('Servidor: sin build web todavía, la raíz da 404 en vez de fallar', async () => {
     const library = new Library(join(directory, 'lib3.json'));
     const catalog = newCatalog();
-    const server = startServer({ catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img3'), root: join(directory, 'nada'), webRoot: join(directory, 'tampoco-existe') });
+    const server = startServer({ resolveHost: async () => ['93.184.216.34'], catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img3'), root: join(directory, 'nada'), webRoot: join(directory, 'tampoco-existe') });
     await new Promise(resolve => (server.listening ? resolve() : server.once('listening', resolve)));
     const base = `http://127.0.0.1:${server.address().port}`;
     try { assert.equal((await fetch(base + '/')).status, 404); } finally { server.close(); catalog.stop(); }

@@ -114,7 +114,7 @@ try {
     const site = { ...youtube, async resolve(entry) { return { url: entry.url, embed: embeddable ? embedURL('aaaaaaaaaa2') : '' }; } };
     const library = new Library(join(directory, 'lib.json'));
     const catalog = new Catalog({ file: join(directory, 's.json'), detailsFile: join(directory, 'sd.json'), knownLists: null, connectors: [site], fetch: async () => '' });
-    const server = startServer({ catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img'), root: directory, webRoot: join(directory, 'none') });
+    const server = startServer({ resolveHost: async () => ['93.184.216.34'], catalog, library, port: 0, log: () => {}, imageDir: join(directory, 'img'), root: directory, webRoot: join(directory, 'none') });
     await new Promise(resolve => (server.listening ? resolve() : server.once('listening', resolve)));
     const base = `http://127.0.0.1:${server.address().port}`;
     const play = () => fetch(base + '/holy-api/resolve', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ item: { source: 'youtube', url: watchURL('aaaaaaaaaa2'), kind: 'movie', title: 'Shrek 2' } }) }).then(response => response.json());

@@ -1,0 +1,268 @@
+{
+  "date": "2026-11-07",
+  "revision": "319aec0dcdc915ee4a7bbeee5d8f2482e13edfcb",
+  "codeVersion": "0.9.29",
+  "tree": "Includes uncommitted server selector and queue changes from previous task. No fixes to application code in this review.",
+  "scope": "Mac, controlled local fixtures, npm registry advisory lookup; no TV navigation or attacks on live services.",
+  "static": {
+    "scope": "First-party runnable code and CI paths; vendored research and snapshots excluded. Heuristics do not constitute full secret detection or static analysis.",
+    "sourceFiles": 199,
+    "lines": 24936,
+    "largest": [
+      {
+        "path": "src/anime-classics-data.js",
+        "lines": 2194
+      },
+      {
+        "path": "src/Holy.svelte",
+        "lines": 1145
+      },
+      {
+        "path": "scripts/test-holy-robust.mjs",
+        "lines": 1065
+      },
+      {
+        "path": "scripts/holy/holy-bridge.mjs",
+        "lines": 968
+      },
+      {
+        "path": "scripts/browser-bridge.mjs",
+        "lines": 730
+      },
+      {
+        "path": "src/HolyWeb.svelte",
+        "lines": 722
+      },
+      {
+        "path": "scripts/holy/catalog.mjs",
+        "lines": 656
+      },
+      {
+        "path": "src/App.svelte",
+        "lines": 608
+      },
+      {
+        "path": "scripts/toolbar.mjs",
+        "lines": 519
+      },
+      {
+        "path": "scripts/holy/more-sources.mjs",
+        "lines": 517
+      },
+      {
+        "path": "scripts/holy/sources.mjs",
+        "lines": 508
+      },
+      {
+        "path": "scripts/holy/library.mjs",
+        "lines": 495
+      }
+    ],
+    "patterns": {
+      "private_key_literal": [
+        "scripts/test-app-package.mjs"
+      ],
+      "raw_html": [
+        "src/Icon.svelte"
+      ]
+    },
+    "syntax": {
+      "files": 183,
+      "failed": []
+    },
+    "node": "v22.22.3"
+  },
+  "probes": [
+    {
+      "id": "SEC-01",
+      "status": 200,
+      "initialDnsChecks": 1,
+      "redirectTargetHits": 1,
+      "confirmed": true,
+      "method": "Public HTTPS first hop and DNS simulated; actual HTTP redirect followed between two ephemeral loopback fixtures through API -> Catalog -> fetchText. No real private system queried."
+    },
+    {
+      "id": "SEC-02",
+      "status": 200,
+      "queued": true,
+      "remotePrivateCallerAccepted": true,
+      "method": "Actual loopback HTTP client with unrelated private Origin, plus authorization helper with private source IP; no credentials."
+    },
+    {
+      "id": "QUAL-01",
+      "status": 404,
+      "body": {
+        "ok": false,
+        "error": "no disponible"
+      },
+      "capacity": 100
+    },
+    {
+      "id": "SEC-03",
+      "timedOut": true,
+      "unhandledRejectionLogged": true,
+      "subsequentHealthStatus": 200,
+      "method": "Malformed absolute request target sent only to fresh isolated child using production crash guard; worker stays alive but request receives no response."
+    }
+  ],
+  "playbackGate": {
+    "v": 1,
+    "started": "2026-11-07T21:41:05.902Z",
+    "scope": "Pruebas controladas offline y compilación. No acredita disponibilidad externa ni reproducción física.",
+    "node": "v22.22.3",
+    "platform": "darwin",
+    "commit": "319aec0dcdc915ee4a7bbeee5d8f2482e13edfcb",
+    "checks": [
+      {
+        "name": "suite completa",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 39308
+      },
+      {
+        "name": "build Luma",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 437
+      },
+      {
+        "name": "build Holy TV",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 334
+      },
+      {
+        "name": "build Holy web",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 304
+      }
+    ],
+    "ok": true,
+    "matrix": {
+      "cases": 37,
+      "sources": 11,
+      "scopes": {
+        "controlled": 23,
+        "tv-user-confirmed": 1,
+        "tv-metrics": 11,
+        "desktop-http": 1,
+        "navigation-only": 1
+      }
+    },
+    "inputHash": "dc36440050eb1fa6ce437d3bc4d5466c6cda5ef31c5273fbc36969e445c1cfcd",
+    "outputHash": "dc36440050eb1fa6ce437d3bc4d5466c6cda5ef31c5273fbc36969e445c1cfcd",
+    "finished": "2026-11-07T21:41:46.348Z"
+  },
+  "dependencyAudit": {
+    "counts": {
+      "info": 0,
+      "low": 2,
+      "moderate": 4,
+      "high": 3,
+      "critical": 1,
+      "total": 10
+    },
+    "packages": [
+      {
+        "name": "@sveltejs/vite-plugin-svelte",
+        "severity": "low",
+        "paths": [
+          "node_modules/@sveltejs/vite-plugin-svelte"
+        ],
+        "advisories": []
+      },
+      {
+        "name": "@webos-tools/cli",
+        "severity": "high",
+        "paths": [
+          "node_modules/@webos-tools/cli"
+        ],
+        "advisories": []
+      },
+      {
+        "name": "body-parser",
+        "severity": "high",
+        "paths": [
+          "node_modules/@webos-tools/cli/node_modules/body-parser"
+        ],
+        "advisories": [
+          "https://github.com/advisories/GHSA-27r3-jxmh-p828"
+        ]
+      },
+      {
+        "name": "brace-expansion",
+        "severity": "high",
+        "paths": [
+          "node_modules/@webos-tools/cli/node_modules/brace-expansion",
+          "node_modules/@webos-tools/cli/node_modules/rimraf/node_modules/brace-expansion"
+        ],
+        "advisories": [
+          "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+          "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+          "https://github.com/advisories/GHSA-qhr7-859c-m2p7"
+        ]
+      },
+      {
+        "name": "deepmerge",
+        "severity": "low",
+        "paths": [
+          "node_modules/deepmerge"
+        ],
+        "advisories": [
+          "https://github.com/advisories/GHSA-gcqx-w48m-w2h4"
+        ]
+      },
+      {
+        "name": "glob",
+        "severity": "moderate",
+        "paths": [
+          "node_modules/@webos-tools/cli/node_modules/rimraf/node_modules/glob"
+        ],
+        "advisories": [
+          "https://github.com/advisories/GHSA-3g3m-2fjr-6pw4"
+        ]
+      },
+      {
+        "name": "minimatch",
+        "severity": "moderate",
+        "paths": [
+          "node_modules/@webos-tools/cli/node_modules/rimraf/node_modules/minimatch"
+        ],
+        "advisories": [
+          "https://github.com/advisories/GHSA-g3hv-75wg-m249"
+        ]
+      },
+      {
+        "name": "proxy-addr",
+        "severity": "critical",
+        "paths": [
+          "node_modules/@webos-tools/cli/node_modules/proxy-addr"
+        ],
+        "advisories": [
+          "https://github.com/advisories/GHSA-jqcg-44mw-7w3h"
+        ]
+      },
+      {
+        "name": "qs",
+        "severity": "moderate",
+        "paths": [
+          "node_modules/@webos-tools/cli/node_modules/qs"
+        ],
+        "advisories": [
+          "https://github.com/advisories/GHSA-4mjr-xmp4-gh2g",
+          "https://github.com/advisories/GHSA-6pq8-jhm2-2vcw",
+          "https://github.com/advisories/GHSA-x5fp-wj9c-mxmx"
+        ]
+      },
+      {
+        "name": "rimraf",
+        "severity": "moderate",
+        "paths": [
+          "node_modules/@webos-tools/cli/node_modules/rimraf"
+        ],
+        "advisories": []
+      }
+    ]
+  }
+}

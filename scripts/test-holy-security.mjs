@@ -18,7 +18,7 @@ const directory = mkdtempSync(join(tmpdir(), 'holy-security-'));
 let passed = 0;
 const check = async (name, work) => { await work(); passed++; };
 const TV = '192.168.1.134';
-const req = (ip, headers = {}) => ({ headers, socket: { remoteAddress: ip } });
+const req = (ip, headers = {}) => ({ headers: { host: '192.168.1.65:43190', ...headers }, socket: { remoteAddress: ip } });
 const resolveHost = async host => ({ 'intranet.example.com': ['10.0.0.5'], 'rebind.example.com': ['93.184.216.34', '127.0.0.1'], 'v6.example.com': ['fd00::1'] })[host] || ['93.184.216.34'];
 
 try {
@@ -28,9 +28,10 @@ try {
     b.apiBase='http://192.168.1.65:43190';b.homeAliases=new Set(['http://192.168.1.102:43190']);b.frames=new Map([['root',b.packagedHome],['child','https://player.example/']]);
     b.cdp={call:async(method,params)=>calls.push({method,params})};
     const original=BrowserBridge.prototype.request;BrowserBridge.prototype.request=async p=>fallback.push(p);
-    const request=(frameId,url=b.apiBase+'/holy-api/vote')=>({frameId,requestId:'test',request:{url,headers:{'Content-Type':'application/json'}}});
+    const request=(frameId,url=b.apiBase+'/holy-api/vote')=>({frameId,requestId:'test',request:{url,headers:{'Content-Type':'application/json',Host:'192.168.1.102:43190'}}});
     try {
       await b.request(request('root'));assert.equal(calls.length,1);assert.deepEqual(calls[0].params.headers.find(h=>h.name==='Origin'),{name:'Origin',value:b.apiBase});
+      assert.ok(!calls[0].params.headers.some(header=>header.name.toLowerCase()==='host'), 'Mapped API uses destination Host, never the stale alias');
       await b.request(request('root','http://192.168.1.102:43190/holy-api/language'));assert.equal(calls[1].params.url,b.apiBase+'/holy-api/language');
       for(const p of [request('child'),request('missing'),request('root','http://router.lan/holy-api/vote')])await b.request(p);
       b.frames.set('root','https://player.example/');await b.request(request('root'));
@@ -53,8 +54,8 @@ try {
     assert.equal(await publicHttpsURL('https://intranet.example.com/a', { resolve: resolveHost }), false);
     assert.equal(await publicHttpsURL('https://rebind.example.com/a', { resolve: resolveHost }), false);
     assert.equal(await publicHttpsURL('https://v6.example.com/a', { resolve: resolveHost }), false);
-    // Si el nombre no existe no se puede descargar nada: la petición posterior falla sola.
-    assert.equal(await publicHttpsURL('https://no-existe.example.com/', { resolve: async () => { throw Error('ENOTFOUND'); } }), true);
+    // No DNS answer is not a trusted public destination; fail closed.
+    assert.equal(await publicHttpsURL('https://no-existe.example.com/', { resolve: async () => { throw Error('ENOTFOUND'); } }), false);
     assert.equal(publicTarget('http://cdn.ejemplo.com/a.jpg'), true);
     assert.equal(publicTarget('http://127.0.0.1/a.jpg'), false);
     assert.equal(publicTarget('http://[fd00::1]/a.jpg'), false);

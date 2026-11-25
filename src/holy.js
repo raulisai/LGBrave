@@ -37,6 +37,7 @@ export const SECTIONS = [
   { id: 'dorama', name: 'Doramas' },
   { id: 'series', name: 'Series' },
   { id: 'mejor', name: 'Lo mejor' },
+  { id: 'cola', name: 'Mi cola' },
   { id: 'gustos', name: 'Gustos' },
   { id: 'buscar', name: 'Buscar' }
 ];
@@ -56,7 +57,7 @@ export function withLayout(row) {
 // below (two versions of one film may still share a row). «Continuar viendo», the airing schedule
 // and «Todos los títulos» keep every title. A row the repeats left too short goes: lists and
 // personal rows need 3 titles, the others `least` (5); each row shows at most `limit`.
-const KEEP = new Set(['continue', 'anime-airing', 'category-all']);
+const KEEP = new Set(['queue', 'continue', 'anime-airing', 'category-all']);
 const identity = item => genreKey(item.title) + '|' + (item.kind === 'movie' ? 'movie|' + (item.year || '') : 'show');
 export function dedupeRows(rows, { limit = 40, least = 5 } = {}) {
   const shown = new Set(), out = [];
@@ -73,6 +74,7 @@ export function dedupeRows(rows, { limit = 40, least = 5 } = {}) {
 export function sectionRows(data, section) {
   const rows = Array.isArray(data?.rows) ? data.rows : [];
   const best = Array.isArray(data?.best) ? data.best : [];
+  if (section === 'cola') return rows.filter(row => row.id === 'queue').map(withLayout);
   if (section === 'inicio') return dedupeRows(rows.filter(row => row.items?.length)).map(withLayout);
   if (section === 'mejor') return dedupeRows(best.filter(row => row.items?.length)).map(withLayout);
   const items = (Array.isArray(data?.items) ? data.items : rows.flatMap(row => row.items)).filter(item => item.kind === section);

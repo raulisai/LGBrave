@@ -1,3 +1,4 @@
+import { beginTrustedSession } from './ssh-host-trust.mjs';
 import net from 'node:net';
 import {createRequire} from 'node:module';
 import {config, computerLabel} from './desktop-config.mjs';
@@ -14,7 +15,7 @@ export async function connectSession(device) {
   const {Session} = require('@webos-tools/cli/lib/base/novacom');
   class AssistSession extends Session {
     begin(target, next) {
-      return super.begin({...target, keepaliveInterval:5000, keepaliveCountMax:2}, next);
+      return beginTrustedSession(super.begin.bind(this), target, device, next);
     }
   }
   const before = new Map(PROCESS_EVENTS.map(event => [event, new Set(process.listeners(event))]));

@@ -897,9 +897,12 @@ try {
       assert.equal((await fetch(base + '/holy-api/doctor', { method: 'OPTIONS', headers: { Origin: 'https://evil.example', 'Access-Control-Request-Method': 'POST' } })).status, 403);
       // «null» (file:// pages, but also any sandboxed iframe on any website) is never enough for Doctor.
       assert.equal((await post('doctor', { Origin: 'null' })).status, 403);
-      for (const origin of [base, `http://192.168.1.102:${PORT}`, `http://localhost:${server.address().port}`]) assert.equal((await post('doctor', { Origin: origin })).status, 200, origin);
+      assert.equal((await post('doctor', { Origin: base })).status, 200);
+      for (const origin of [`http://192.168.1.102:${PORT}`, `http://localhost:${server.address().port}`]) assert.equal((await post('doctor', { Origin: origin })).status, 403, 'Unrelated private origin: ' + origin);
+      const localAlias = `http://localhost:${server.address().port}`;
+      assert.equal((await fetch(localAlias + '/holy-api/doctor', { method: 'POST', headers: { Origin: localAlias }, body: '{}' })).status, 200);
       assert.equal((await post('doctor')).status, 200);
-      assert.equal(prescribed, 4);
+      assert.equal(prescribed, 3);
       const req = (ip, headers = {}) => ({ headers, socket: { remoteAddress: ip } });
       assert.equal(mutationAllowed(req('192.168.1.134')), false);
       assert.equal(mutationAllowed(req('::ffff:127.0.0.1')), true);
@@ -910,7 +913,7 @@ try {
       assert.equal(mutationAllowed(req('192.168.1.134', { origin: `https://192.168.evil.com:${PORT}` })), false);
       // A bare «.local» name (the Mac renamed itself to serve Holy by a friendly address,
       // e.g. holy-mac.local) only ever resolves on this LAN, as safe a sign as a private IP.
-      assert.equal(mutationAllowed(req('192.168.1.134', { origin: `http://holy-mac.local:${PORT}` })), true);
+      assert.equal(mutationAllowed(req('192.168.1.134', { origin: `http://holy-mac.local:${PORT}`, host: `holy-mac.local:${PORT}` })), true);
       assert.equal(mutationAllowed(req('192.168.1.134', { origin: `http://evil.local.example.com:${PORT}` })), false);
     } finally { await new Promise(resolve => server.close(resolve)); }
   });
@@ -923,7 +926,7 @@ try {
     writeFileSync(imagePath(urls[1]) + '.type', 'image/png');
     writeFileSync(imagePath(urls[2]), 'partial'); writeFileSync(imagePath(urls[2]) + '.type', 'invalid\r\nheader');
     let fetched = 0;
-    const server = startServer({ port: 0, imageDir, root: directory, log: () => {}, fetchImage: async () => { fetched++; return new Response('recovered', { headers: { 'Content-Type': 'image/png' } }); } });
+    const server = startServer({ port: 0, imageDir, root: directory, log: () => {}, resolveHost: async () => ['93.184.216.34'], fetchImage: async () => { fetched++; return new Response('recovered', { headers: { 'Content-Type': 'image/png' } }); } });
     await new Promise(resolve => server.listening ? resolve() : server.once('listening', resolve));
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
@@ -949,7 +952,7 @@ try {
       assert.equal((await vote('{roto')).status, 400);
       for (const shape of ['null', '[]', '42']) assert.equal((await vote(shape)).status, 400);
       assert.equal((await vote(JSON.stringify({ item: { url: 'javascript:1' }, vote: 1 }))).status, 400);
-      assert.equal((await vote('x'.repeat(40000))).status, 400);
+      assert.equal((await vote('x'.repeat(40000))).status, 413);
       const ok = await (await vote(JSON.stringify({ item: { url: 'https://x/1', title: 'A', kind: 'movie', genres: ['Acción'] }, vote: 2 }))).json();
       assert.deepEqual([ok.ok, ok.vote, ok.taste.liked, ok.taste.loved], [true, 2, 1, 1]);
       const pref = await (await vote(JSON.stringify({ pref: { type: 'studio', name: 'MAPPA', value: 1 } }))).json();

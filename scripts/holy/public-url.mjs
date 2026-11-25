@@ -54,15 +54,14 @@ export function publicTarget(value) {
 const defaultResolve = async host => (await lookup(host, { all: true, verbatim: true })).map(entry => entry.address);
 
 // Shape plus DNS: refuses names that point at a private address (the usual SSRF disguise).
-// A name that does not resolve at all is let through: the request that follows fails by itself.
-// Addresses are checked here and again by the OS when fetching, so this narrows the window for
-// DNS rebinding rather than closing it; the Host check and the origin rules cover the rest.
+// A missing or failed DNS answer is refused. This helper is only a preflight check:
+// public-fetch.mjs also validates every redirect and filters the lookup used by the socket.
 export async function publicHttpsURL(value, { resolve = defaultResolve, timeout = 1500 } = {}) {
   const url = publicHostURL(value);
   if (!url) return false;
   let addresses;
   try {
     addresses = await Promise.race([resolve(url.hostname), new Promise((_, reject) => setTimeout(() => reject(Error('dns')), timeout).unref())]);
-  } catch { return true; }
-  return Array.isArray(addresses) && addresses.every(address => !privateAddress(address));
+  } catch { return false; }
+  return Array.isArray(addresses) && addresses.length > 0 && addresses.every(address => !privateAddress(address));
 }

@@ -1,3 +1,5 @@
+> Guía vigente: [Instalación y operación](../docs/INSTALACION.md). Flujos: [Arquitectura](../docs/ARQUITECTURA.md). Riesgos: [Revisión de calidad y seguridad](../docs/REVISION-CALIDAD-SEGURIDAD-20261107.md). Los detalles fechados de abajo son históricos.
+
 # Windows
 
 `HolyLuma.cs` es la aplicación nativa de bandeja. Se compila e instala con

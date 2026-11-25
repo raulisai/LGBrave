@@ -1,3 +1,4 @@
+import { publicFetch } from './public-fetch.mjs';
 import { readFileSync, writeFileSync, renameSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { isIP } from 'node:net';
@@ -71,7 +72,7 @@ export class SiteRegistry {
   }
 }
 // What a site answers now; a redirect to another domain usually means it moved.
-export async function checkSite(url, fetcher = fetch) {
+export async function checkSite(url, fetcher = publicFetch) {
   const site = cleanSite(url), started = Date.now();
   try {
     const response = await fetcher(site, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' }, signal: AbortSignal.timeout(10000) });

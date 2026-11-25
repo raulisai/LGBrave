@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-07T03:04:32.554Z",
+  "updatedAt": "2026-11-10T05:15:31.192Z",
   "enabled": [
     "brave-default-adblock-filters",
     "brave-default-privacy-filters",
@@ -14,25 +14,25 @@
       "uuid": "default",
       "permissions": 1,
       "format": "Standard",
-      "bytes": 5240088,
-      "sha256": "4ee92515519f3b97743128bb44c1cadbbba4f9b84d057dc3783c1c9e6fb409f1",
-      "lines": 137843,
+      "bytes": 5202778,
+      "sha256": "f09476b34bc52d7f32a78f957ac70eb43e5be6d8a15a044a410bcc1fc2596269",
+      "lines": 136021,
       "sources": [
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
-          "sha256": "07b98305929ede01613ccc32fc5addea1d0b81f4ea29150677d599254a43903b"
+          "sha256": "73d674807c88016fef58ba055381efea22585faab1a262a6d5fbab3a0bb62ccd"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2020.txt",
-          "sha256": "1c6e62c5d3daecaebf1d75d72807e61879bbe55234807c3c2d03b8d35e863535"
+          "sha256": "f68b1fceccba46ae349f9db803b3fcd3b8b71234d9d80d0cc0259b9672340d96"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2021.txt",
-          "sha256": "98f1e4dca0f03b395fa38c3a244faa72b230bfb65daf7f2fb35bf7877032db70"
+          "sha256": "0772b56c297919bbbd70caece419b3ff889a209b333f8ab12bf564747bf39059"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2022.txt",
-          "sha256": "2b40860ffdb57e265a38c576ece70bca228b149155513ba6dad30db6a69bdedc"
+          "sha256": "135a3adc233c6a86f63c51b869c364e396f0dae59796cee65284f72b6e725430"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2023.txt",
@@ -40,23 +40,23 @@
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2024.txt",
-          "sha256": "2d152221f44d20e629ffdf641a8e35d99ddc4419a62b6878b0a48a75f9537e19"
+          "sha256": "d25427a9c20963b47531556a536aa95a540337d8c5f16f25cf3a65c5fbdad79d"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2025.txt",
-          "sha256": "8f598f8e2728118f6fe329605d11abccd84a0836d15ffe14dbdf8263174cacf6"
+          "sha256": "b82583fef7352c2b7b6372c241d836279e170734e55a10c5cf0fc9cdcd17f074"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2026.txt",
-          "sha256": "8cb91d39c03edc2efd84ae5c861fdac2c442f8ff48afcc83780eeaf9c222a790"
+          "sha256": "21724cd6ca841cbf949346f9c0348c7d98ab408b14e041a64270e595b9c80ff6"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-general.txt",
-          "sha256": "bf48fe2e1fe98587bea7887edec836b6cd84c71f5015897f2b79eb57a675a669"
+          "sha256": "cc2f8efab4b66bb88df67e7c3213b2b1d2ea64c196e1ce17d70ab504b0022533"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
-          "sha256": "7066bcc230436300f78034ff252e9c97a4678453c3ca7d36ea66b032853b91ae"
+          "sha256": "dfa322b7847aa3f1d0dbc59eed02828d0899b1371591c98e81cd024fb3183909"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt",
@@ -68,23 +68,23 @@
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
-          "sha256": "a9eb6e28a7a87943b568cdaab51a63b1a725a77bad9d1ea3e71cbfb8e8856c9c"
+          "sha256": "cd5e693e97c5fa4d177d81a9a9474c13712bf5f2bafe043265d9d48d6d575be4"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/ubo-link-shorteners.txt",
-          "sha256": "35ae356dbb21a3ad4d2daa8ec3d495ad6b3efbbefdc87b46809c78d34a6e218e"
+          "sha256": "6e38081111c8650358482be69349f0fce48b4854b1f7958b8776f838d4653a23"
         },
         {
           "url": "https://easylist.to/easylist/easylist.txt",
-          "sha256": "4b5c696c996f617ebf019ca96fb3e21f9b246d7294152571b24294a585721d15"
+          "sha256": "36bf73a9675afa009c5016dae3999bd9f8f7c0190e76f684f4e700eb9275d337"
         },
         {
           "url": "https://malware-filter.gitlab.io/malware-filter/urlhaus-filter-agh-online.txt",
-          "sha256": "854c31dc8c30570cdebed59b764be293c084cd61718bb3058f3c6423a4f7b29f"
+          "sha256": "59e598d8509fd70f94a5d4c94ed391b7c8c8d72971b652cfec3d660d047374e5"
         },
         {
           "url": "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-unbreak.txt",
-          "sha256": "8052ae54377cdab0adae2fccf7b4cce9a1e5f61baa27420f3ff430f7b5dfbffe"
+          "sha256": "f5551aeda2e6b49cc4141592c4f14334b23320506ff14b9e214bf4135390d0b6"
         },
         {
           "url": "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-specific.txt",
@@ -113,17 +113,17 @@
       "uuid": "4D715457-307C-4383-8873-73A2FD263F71",
       "permissions": 1,
       "format": "Standard",
-      "bytes": 1695053,
-      "sha256": "19fb65f720f26021e58bfc8a39bf98d085bf7260601ac921bff1daddd028155f",
-      "lines": 60598,
+      "bytes": 1698229,
+      "sha256": "1e5bce682ac9e083d8d8fd4da639b740581744e71c79b7503f636121867d75e3",
+      "lines": 60717,
       "sources": [
         {
           "url": "https://easylist.to/easylist/easyprivacy.txt",
-          "sha256": "4af8c86b3151d3a596e8865eb62f1e90c373eca3262e5f32958ecd75939fe20e"
+          "sha256": "3fcbbfb4676f653af8376ef66486365c61a552379e8cd2804011ce97374748d2"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
-          "sha256": "b52f8ad4a46e50dafe1fd29189d04e482e25101b756d25f64caf79a653af6467"
+          "sha256": "7e6c46274393f6c88468771bda7087b7d5ba22770e850f41398a50b0311418dd"
         }
       ]
     },
@@ -132,13 +132,13 @@
       "uuid": "E99CBD02-FFD1-4651-9BDD-6A9ED7B87819",
       "permissions": 1,
       "format": "Standard",
-      "bytes": 272177,
-      "sha256": "4e1b8aaebc66bf1545ef4a7e8dde1b1870d8861cfc98d03465a973903a69d014",
-      "lines": 6488,
+      "bytes": 272262,
+      "sha256": "6b41c226089ea6bf40f2f0f7f4ad13b25106a93c4129f46071b13119b825957b",
+      "lines": 6489,
       "sources": [
         {
           "url": "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-firstparty.txt",
-          "sha256": "9f10695ef69166b5fb1be6569f606083cdf949583a14dca8ddf4a414b155e231"
+          "sha256": "249bdea46c29f0a4cf718111b64a99fda796b56947569ad1f36a1347f7d319b5"
         },
         {
           "url": "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-firstparty-regional.txt",
@@ -151,17 +151,17 @@
       "uuid": "AC023D22-AE88-4060-A978-4FEEEC4221693",
       "permissions": 1,
       "format": "Standard",
-      "bytes": 1621200,
-      "sha256": "1fa0340e731ef32663fb4bd286cd0030c1a2a2eee30e7ae31d259e4d71b51552",
-      "lines": 35272,
+      "bytes": 1621364,
+      "sha256": "af479255de1a75abe98b299507c0050da5ac40e845128bf2bd4e2ad9b1acecbb",
+      "lines": 35275,
       "sources": [
         {
           "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster_ubo.txt",
-          "sha256": "e239b1955485da23735f837a07de3d1c875e8aeb50c422a58fa11e8092e19ffb"
+          "sha256": "1f1c4d0e5968bed6fa6a553784bc191bf8958708c4b55b4bf3e97fe7a16269f4"
         },
         {
           "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/annoyances-cookies.txt",
-          "sha256": "b6151f068d3eb81992e9266fcf27a47de5e0448a9045cd935f1af86d04c7ea3c"
+          "sha256": "ccae3d5d37c948acf2718b9d344ebf0083f270dd540b01511e6ed08c81681b07"
         },
         {
           "url": "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-cookie-specific.txt",
@@ -174,13 +174,13 @@
       "uuid": "2F3DCE16-A19A-493C-A88F-2E110FBD37D6",
       "permissions": 1,
       "format": "Standard",
-      "bytes": 50774,
-      "sha256": "1dfb26367e4b2cb0af8ce6949987495f4db49fc17f19dd0e58efc984009bd197",
-      "lines": 1020,
+      "bytes": 50899,
+      "sha256": "d1f0b36e9c685c4bfe7182e7a336581851961876bd2eb166d84673c0a2dcce65",
+      "lines": 1021,
       "sources": [
         {
           "url": "https://secure.fanboy.co.nz/fanboy-mobile-notifications.txt",
-          "sha256": "df4e5fea30cc3d3387bf5a5f9d4682442b31c58c210c109d63ce85868befb9bb"
+          "sha256": "67926a7e851945ef5aa3df4f80069d02005dfeba04e24cc7006dddc31f917c49"
         }
       ]
     },
@@ -189,21 +189,21 @@
       "uuid": "AE657374-1851-4DC4-892B-9212B13B15A7",
       "permissions": 0,
       "format": "Standard",
-      "bytes": 128171,
-      "sha256": "76d9c4a9870b212f5a3fbc7264af229444eba469f27bb70b16999ab6ae69d186",
-      "lines": 2719,
+      "bytes": 128374,
+      "sha256": "4ff32530d8ddc2a48ec9313eb4429c287c6ee2e105a7fb398030531ea647710c",
+      "lines": 2723,
       "sources": [
         {
           "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt",
-          "sha256": "76d9c4a9870b212f5a3fbc7264af229444eba469f27bb70b16999ab6ae69d186"
+          "sha256": "4ff32530d8ddc2a48ec9313eb4429c287c6ee2e105a7fb398030531ea647710c"
         }
       ]
     }
   },
   "resources": {
     "resources.json": {
-      "bytes": 425337,
-      "sha256": "e9b5f3037e8061c61f4f4fc6d0f5d48f34ba7f6309a16f7e10b8ba385a3535c7"
+      "bytes": 429611,
+      "sha256": "46b4af61c6fbd6b2fea5e750ff086dd833a0f07ada5b46ee0923c39f3aac1115"
     },
     "custom-resources.json": {
       "bytes": 596542,
@@ -211,12 +211,12 @@
     }
   },
   "brave": {
-    "mirrorCommit": "3152f9eb5f857ba088b1d484506c6b288f0451ac",
-    "packagerCommit": "705bf285aa805b430349c16230ec657af5e9fc12",
-    "uBlockCommit": "4dfbb048607ec4fd19c1c252fd255df6cc653720",
+    "mirrorCommit": "5d1ee1ddfedfe4f95921d98dbbb5aaf9305d9632",
+    "packagerCommit": "00f50f9349fa26c291bce012f0e9cba0f29fc98f",
+    "uBlockCommit": "cfa955fa8e1732e895e59fc6b8014e2317695ff3",
     "locale": "es",
     "catalogSha256": "d822848060307363bc3e517d690e961f8c9e393e58e5a2989ecca39aee274fd0"
   },
-  "revision": "19c5d586f0682f84505608e30597751a131e6bf61ead6e9be835fffa42228c42",
-  "directory": "generations/19c5d586f0682f845056"
+  "revision": "2d3bc99fe55df8927a818780d931dcdf979d397649ec6eba9645fc9ee7b3de18",
+  "directory": "generations/2d3bc99fe55df8927a81"
 }

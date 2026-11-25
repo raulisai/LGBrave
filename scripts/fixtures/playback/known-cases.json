@@ -546,6 +546,85 @@
         "scripts/test-holy-fast-back.mjs",
         "scripts/test-holy-security.mjs"
       ]
+    },
+    {
+      "id": "manual-server-at-same-position",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Selector Servidor en pausa junto a Idioma, solo con alternativas de la misma versión; selección por control, conserva idioma y segundo solicitado. Cola persistente separada del historial con amarillo desde el catálogo.",
+      "evidence": [
+        "docs/SERVIDORES-COLA-20261107.md"
+      ],
+      "tests": [
+        "scripts/test-holy-queue-servers.mjs",
+        "scripts/test-holy-pause.mjs",
+        "scripts/test-holy-versions.mjs"
+      ]
+    },
+    {
+      "id": "public-download-pinned-dns",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Lectores de catálogo comprueban cada salto y la resolución del socket; mantienen POST, cookies, Referer y gzip con límites de bytes y concurrencia.",
+      "evidence": [
+        "docs/ENDURECIMIENTO-20261107.md"
+      ],
+      "tests": [
+        "scripts/test-public-fetch.mjs",
+        "scripts/test-holy-security.mjs"
+      ]
+    },
+    {
+      "id": "ssh-host-identity-after-auth",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Identidad de servidor persistida solo tras autenticación; misma TV tras cambio de IP, cambio de clave rechazado y carreras sin sobrescritura. Sin conexión física.",
+      "evidence": [
+        "docs/ENDURECIMIENTO-20261107.md"
+      ],
+      "tests": [
+        "scripts/test-ssh-host-trust.mjs"
+      ]
+    },
+    {
+      "id": "holy-http-domain-errors",
+      "scope": "controlled",
+      "sources": [],
+      "description": "API termina solicitudes malformadas y comunica cola llena sin perder títulos; origen propio y nombres Windows permitidos, origen privado ajeno rechazado.",
+      "evidence": [
+        "docs/ENDURECIMIENTO-20261107.md"
+      ],
+      "tests": [
+        "scripts/test-holy-http-errors.mjs",
+        "scripts/test-holy-queue-servers.mjs",
+        "scripts/test-holy-robust.mjs"
+      ]
+    },
+    {
+      "id": "empty-queue-tv-render",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Mi cola vacía muestra su mensaje e instrucciones, sin carga indefinida. La plantilla real de Svelte conserva Inicio, Buscar y Gustos. Hallazgo físico al desplegar Holy0.9.29.",
+      "evidence": [
+        "docs/DESPLIEGUE-TV-20261108.md"
+      ],
+      "tests": [
+        "scripts/test-holy-empty-queue.mjs",
+        "scripts/test-holy-queue-servers.mjs"
+      ]
+    },
+    {
+      "id": "movie-single-language-server-pause",
+      "scope": "controlled",
+      "sources": [],
+      "description": "Una película de un solo idioma con servidores alternativos abre el panel de pausa y ofrece Servidor. Detectado en RePelisHD en LG; la ausencia de otros idiomas no debe ocultarlo.",
+      "evidence": [
+        "docs/DESPLIEGUE-TV-20261108.md"
+      ],
+      "tests": [
+        "scripts/test-holy-pause.mjs",
+        "scripts/test-holy-queue-servers.mjs"
+      ]
     }
   ],
   "caveats": [

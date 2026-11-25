@@ -1,0 +1,293 @@
+{
+  "date": "2026-11-07",
+  "codeVersion": "0.9.30",
+  "scope": "Controlled Mac tests, isolated dependency install, external HTTP source samples. No TV navigation, video/audio test or Windows deployment.",
+  "status": {
+    "SEC-01": "corrected for shared catalogue/image transport; per-hop and socket DNS checks",
+    "SEC-05": "bounded streaming bodies and downloads in shared transport",
+    "SEC-03": "400 response tested; no hanging malformed URL",
+    "QUAL-01": "409 queue_full and actual Svelte error feedback tested",
+    "SEC-04": "TOFU after authenticated SSH, later mismatch rejected; initial out-of-band trust remains open",
+    "SEC-02": "partial: unrelated browser Origin cannot mutate; native LAN device authentication remains open",
+    "QUAL-02": "partial: syntax check and isolated test outputs; type checking/lint remain open",
+    "DEP-01": "open: no forced SDK downgrade or transitive override"
+  },
+  "gate": {
+    "v": 1,
+    "started": "2026-11-07T22:12:48.394Z",
+    "scope": "Pruebas controladas offline y compilación. No acredita disponibilidad externa ni reproducción física.",
+    "node": "v22.22.3",
+    "platform": "darwin",
+    "commit": "319aec0dcdc915ee4a7bbeee5d8f2482e13edfcb",
+    "checks": [
+      {
+        "name": "sintaxis JS/MJS",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 3240
+      },
+      {
+        "name": "suite completa",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 40214
+      },
+      {
+        "name": "build Luma",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 423
+      },
+      {
+        "name": "build Holy TV",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 324
+      },
+      {
+        "name": "build Holy web",
+        "ok": true,
+        "exitCode": 0,
+        "durationMs": 287
+      }
+    ],
+    "ok": true,
+    "matrix": {
+      "cases": 40,
+      "sources": 11,
+      "scopes": {
+        "controlled": 26,
+        "tv-user-confirmed": 1,
+        "tv-metrics": 11,
+        "desktop-http": 1,
+        "navigation-only": 1
+      }
+    },
+    "inputHash": "809ff4efece2bf7ae001e219bc87c124aea362e5430b283bd0fe0953ba772682",
+    "outputHash": "809ff4efece2bf7ae001e219bc87c124aea362e5430b283bd0fe0953ba772682",
+    "finished": "2026-11-07T22:13:32.927Z"
+  },
+  "dependencyInstall": {
+    "ok": true,
+    "scope": "Clean npm ci --ignore-scripts verifies dependency lock and JS modules only; native adblock build not run.",
+    "modules": {
+      "ssh": "function",
+      "transport": "function"
+    }
+  },
+  "dependencyAudit": {
+    "command": "npm audit --package-lock-only --json",
+    "counts": {
+      "info": 0,
+      "low": 2,
+      "moderate": 4,
+      "high": 3,
+      "critical": 1,
+      "total": 10
+    },
+    "newTransport": "undici@7.30.2",
+    "transportFlagged": false
+  },
+  "httpProbe": {
+    "v": 1,
+    "at": "2026-11-07T22:06:14.247Z",
+    "scope": "Lectura HTTP y resolución de muestras. Sin reproducir vídeo, tocar TV o cambiar biblioteca/servicios.",
+    "sites": [
+      {
+        "source": "cuevana",
+        "ok": false,
+        "samples": [
+          {
+            "title": "Frecuencia explosiva",
+            "ok": false,
+            "reason": "La página no entregó un enlace de reproductor."
+          }
+        ],
+        "titles": 35,
+        "availability": "unavailable",
+        "ms": 512
+      },
+      {
+        "source": "repelishd",
+        "ok": true,
+        "samples": [
+          {
+            "title": "Funny Money: The Dane Cook Story",
+            "ok": true,
+            "host": "mxdrop.to",
+            "alternatives": 1,
+            "language": ""
+          }
+        ],
+        "titles": 48,
+        "availability": "samples-resolved",
+        "ms": 989
+      },
+      {
+        "source": "jkanime",
+        "ok": true,
+        "samples": [
+          {
+            "title": "Seitokai ni mo Ana wa Aru!",
+            "ok": true,
+            "host": "jkanime.net",
+            "alternatives": 1,
+            "language": "sub"
+          }
+        ],
+        "titles": 64,
+        "availability": "samples-resolved",
+        "ms": 745
+      },
+      {
+        "source": "animeyt",
+        "ok": true,
+        "samples": [
+          {
+            "title": "Kashita Maryoku wa «Revo Barai» de Kyousei Choushuu",
+            "ok": true,
+            "host": "archive.org",
+            "alternatives": 3,
+            "language": ""
+          }
+        ],
+        "titles": 28,
+        "availability": "samples-resolved",
+        "ms": 1292
+      },
+      {
+        "source": "doramasmp4",
+        "ok": true,
+        "samples": [
+          {
+            "title": "Love Me to Hurt Me",
+            "ok": false,
+            "reason": "La página no entregó un enlace de reproductor."
+          },
+          {
+            "title": "Oops! Mysterious Sounds",
+            "ok": true,
+            "host": "ok.ru",
+            "alternatives": 2,
+            "language": ""
+          },
+          {
+            "title": "Between Steps5",
+            "ok": true,
+            "host": "morencius.com",
+            "alternatives": 2,
+            "language": ""
+          }
+        ],
+        "titles": 20,
+        "availability": "partial",
+        "ms": 2621
+      },
+      {
+        "source": "doramasflix",
+        "ok": true,
+        "samples": [
+          {
+            "title": "Between Steps5 español",
+            "ok": true,
+            "host": "streamtape.com",
+            "alternatives": 2,
+            "language": "dub"
+          }
+        ],
+        "titles": 18,
+        "availability": "samples-resolved",
+        "ms": 3031
+      },
+      {
+        "source": "onlyflix",
+        "ok": true,
+        "samples": [
+          {
+            "title": "The Dog Stars",
+            "ok": true,
+            "host": "share.cdnm.ink",
+            "alternatives": 4,
+            "language": ""
+          }
+        ],
+        "titles": 111,
+        "availability": "samples-resolved",
+        "ms": 1543
+      },
+      {
+        "source": "asialiveaction",
+        "ok": true,
+        "samples": [
+          {
+            "title": "Lovers & Gangsters",
+            "ok": true,
+            "host": "ok.ru",
+            "alternatives": 2,
+            "language": ""
+          }
+        ],
+        "titles": 12,
+        "availability": "samples-resolved",
+        "ms": 1875
+      },
+      {
+        "source": "doramasflixbeer",
+        "ok": false,
+        "samples": [],
+        "titles": 0,
+        "reason": "Sin muestra de episodios/películas.",
+        "ms": 700
+      },
+      {
+        "source": "pelisflix",
+        "ok": true,
+        "samples": [
+          {
+            "title": "Silent Night (Venganza silenciosa)",
+            "ok": true,
+            "host": "nupload.my",
+            "alternatives": 1,
+            "language": "dub"
+          }
+        ],
+        "titles": 60,
+        "availability": "samples-resolved",
+        "ms": 761
+      },
+      {
+        "source": "youtube",
+        "ok": true,
+        "samples": [
+          {
+            "title": "La Hija del Mariachi",
+            "ok": true,
+            "host": "www.youtube.com",
+            "alternatives": 0,
+            "language": ""
+          }
+        ],
+        "titles": 1,
+        "availability": "samples-resolved",
+        "ms": 3936
+      }
+    ],
+    "ok": false,
+    "allSamplesResolved": false
+  },
+  "deployment": {
+    "mac": {
+      "serviceReloaded": true,
+      "finalState": "waiting",
+      "appOpen": false,
+      "singleSupervisorAndWorker": true,
+      "httpHealthStatus": 200,
+      "catalogueTitles": 1313,
+      "peerSync": "synced",
+      "hostTrustFiles": 1,
+      "hostTrustValidAndUserPermissions": true
+    },
+    "windows": "Not deployed; no restart or navigation requested from Windows.",
+    "tv": "No app launch, package installation or navigation. No new video/audio validation."
+  }
+}

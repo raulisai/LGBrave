@@ -147,7 +147,7 @@
 
   // The big preview follows focus, a moment later so fast scrolling stays smooth.
   $effect(() => {
-    const next = focused || episodesView?.show || (section === 'buscar' || section === 'gustos' ? null : data.hero);
+    const next = focused || episodesView?.show || (section === 'buscar' || section === 'gustos' || section === 'cola' ? null : data.hero);
     clearTimeout(previewTimer);
     if (!preview) { preview = next; return; }
     previewTimer = setTimeout(() => { preview = next; }, pointing ? 260 : 160);
@@ -543,6 +543,16 @@
       else rowIndex--;
     } else if (direction === 'down' && rowIndex < rows.length - 1) rowIndex++;
   }
+  async function toggleQueue(item) {
+    if (!item || item.chip || item.discover || opening) return;
+    try {
+      const result = await getJSON(apiBase + '/holy-api/queue', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ item: plainItem(item) }), retries: 0 });
+      if (!result.ok) throw Error(result.error || 'No se pudo guardar la cola.');
+      await load();
+      notice = result.queued ? 'Agregado a Mi cola' : 'Quitado de Mi cola';
+    } catch (error) { notice = 'No se pudo cambiar la cola: ' + whyFailed(error); }
+  }
+  const inQueue = item => (data.rows.find(row => row.id === 'queue')?.items || []).some(entry => (entry.show || entry.url) === (item.show || item.url));
   function remote(event) {
     const code = event.keyCode;
     if (navigationError) return;
@@ -586,7 +596,7 @@
       else choose(focused);
     } else if (code === 403) { event.preventDefault(); if (section === 'gustos' && !inNav) rate(focused, -1); else forget(focused); }
     else if (code === 404 && !inNav && focused && !focused.chip && !focused.discover) { event.preventDefault(); openSheet(focused); }
-    else if (code === 405 && section === 'gustos') { event.preventDefault(); resetTaste(); }
+    else if (code === 405 && !inNav && focused) { event.preventDefault(); if (!event.repeat) { if (section === 'gustos' && focused.chip) resetTaste(); else toggleQueue(focused); } }
     else if (code === 461 || code === 27) {
       event.preventDefault();
       if (opening) { opening = null; command('home'); }
@@ -757,7 +767,7 @@
       {:else}
         <p class="taste-count">Califica al menos dos títulos para que Holy calcule cuánto te puede gustar cada uno.</p>
       {/if}
-      <p class="taste-keys"><span class="key">OK</span>Me gusta <span class="key red-key"></span>No me gusta <span class="key green-key"></span>Me encanta… <span class="key yellow-key"></span>Borrar</p>
+      <p class="taste-keys"><span class="key">OK</span>Me gusta <span class="key red-key"></span>No me gusta <span class="key green-key"></span>Me encanta… <span class="key yellow-key"></span>Mi cola · En una preferencia: borrar gustos</p>
     </aside>
   {/if}
 
@@ -790,6 +800,7 @@
             {#if row?.id === 'continue' && !inNav}<span class="key red-key"></span>Quitar de la fila (2 veces){/if}
             {/if}
             {#if !preview.chip && !preview.discover && !inNav}<span class="key green-key"></span>{preview.vote === 2 ? 'Te encanta' : preview.vote === 1 ? 'Te gusta' : preview.vote === -1 ? 'No es para ti' : 'Calificar'}{/if}
+            {#if !preview.chip && !preview.discover && !inNav}<button class="queue-action" onclick={() => toggleQueue(preview)}><span class="key yellow-key"></span>{inQueue(preview) ? 'Quitar de Mi cola' : 'Agregar a Mi cola'}</button>{/if}
             <span class="key blue-key"></span>Buscar con la voz
           </p>
           {#if preview.matchReason && preview.match != null}<p class="match-reason">{preview.matchReason}</p>{/if}
@@ -805,6 +816,9 @@
         {#if episodesView}
           <h2>{episodesView.loading ? 'Cargando episodios de ' + episodesView.show.title + '…' : episodesView.error}</h2>
           <p>Atrás vuelve a los resultados.</p>
+        {:else if section === 'cola'}
+          <h2>Tu cola está vacía</h2>
+          <p>Selecciona un título y pulsa el botón amarillo para agregarlo a Mi cola.</p>
         {:else if section === 'gustos'}
           <h2>{tasteLoading ? 'Preparando títulos para calificar…' : 'No hay títulos para calificar todavía.'}</h2>
           <p>Holy usa el catálogo de tus sitios. Vuelve cuando termine de leerlos.</p>
@@ -815,7 +829,7 @@
           <h2>{notice || 'Conectando con la computadora…'}</h2>
           <p>Holy toma los estrenos de tus sitios favoritos y los ordena según lo que ves.</p>
         {/if}
-        {#if (episodesView?.loading || (section === 'gustos' && tasteLoading) || (!episodesView && section !== 'buscar' && section !== 'gustos' && !notice && apiBase))}
+        {#if (episodesView?.loading || (section === 'gustos' && tasteLoading) || (!episodesView && section !== 'buscar' && section !== 'gustos' && section !== 'cola' && !notice && apiBase))}
           <!-- Waiting looks like the rows that are coming. -->
           <div class="skeleton" aria-hidden="true">
             {#each [0, 1] as line}<div class="skeleton-row"><span class="skeleton-title"></span><div>{#each Array(8) as _, index}<span class="skeleton-card" class:wide={episodesView} style:animation-delay={`${(line * 8 + index) * 60}ms`}></span>{/each}</div></div>{/each}
@@ -1066,6 +1080,8 @@
   .bar-track{flex:1;height:12px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}
   .bar-track span{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#2e9e4f,#46d369)}
   .avoid{margin:16px 0 0;font-size:20px;color:#ffb3b6}
+  .queue-action{display:inline-flex;align-items:center;gap:8px;border:0;background:none;color:inherit;font:inherit;padding:0;margin-left:16px;cursor:pointer}
+  .queue-action .yellow-key{min-width:28px;width:28px;height:28px}
   .taste-keys{display:flex;align-items:center;gap:10px;margin:22px 0 0;font-size:18px;color:#ddd}
   .taste-keys .key{min-width:44px;height:30px;font-size:15px}
   .taste-keys .red-key,.taste-keys .yellow-key{min-width:28px;width:28px;margin-left:12px}

@@ -1,0 +1,202 @@
+{
+  "code": "0.9.31",
+  "at": "2026-11-08T07:11:54.249Z",
+  "scope": "LG real; one isolated interceptor; temporary history/queue/preferences. Movie image and audio confirmed by user; other media results are TV metrics.",
+  "cases": [
+    {
+      "label": "yellow-queue",
+      "checks": {
+        "added": true,
+        "shown": true,
+        "removed": true,
+        "emptyMessage": true,
+        "noEmptyLoader": true,
+        "noUnqueuedPreview": true
+      },
+      "title": "Ask E. Jean",
+      "emptyView": {
+        "text": "HOLY\nInicio\nPelículas\nAnime\nDoramas\nSeries\nLo mejor\nMi cola\nGustos\nBuscar\nConectado a la computadora\nTu cola está vacía\n\nSelecciona un título y pulsa el botón amarillo para agregarlo a Mi cola.",
+        "skeleton": false,
+        "preview": false
+      }
+    },
+    {
+      "label": "movie-0",
+      "source": "repelishd",
+      "title": "A cualquier precio",
+      "checks": {
+        "advancing": true,
+        "framesAdvancing": null,
+        "languageChoiceKept": true,
+        "pauseHeld": true,
+        "serverMenu": true,
+        "serverRequestAccepted": true,
+        "serverChanged": false,
+        "resumeAfterSwitch": false,
+        "advancingAfterSwitch": false,
+        "languageAfterSwitch": false,
+        "returnHome": true
+      },
+      "phase": "playing",
+      "video": {
+        "before": {
+          "t": 5.802,
+          "d": 6393.28,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1728,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1,
+          "frameCallback": true,
+          "presentedFrames": null
+        },
+        "after": {
+          "t": 11.636,
+          "d": 6393.28,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1728,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1,
+          "frameCallback": true,
+          "presentedFrames": null
+        }
+      },
+      "versionKind": "",
+      "pauseOptions": [
+        "resume",
+        "servers"
+      ],
+      "serverChoices": 2,
+      "switch": {
+        "requestedHost": "doodstream.com",
+        "positionRequested": 57.638,
+        "actualHost": "",
+        "observed": null
+      },
+      "backMs": 1464,
+      "saved": 58
+    },
+    {
+      "label": "between-steps",
+      "source": "doramasflix",
+      "title": "Between Steps",
+      "checks": {
+        "advancing": true,
+        "framesAdvancing": null,
+        "languageChoiceKept": true,
+        "pauseHeld": true,
+        "languageMenu": true,
+        "backFromLanguages": true,
+        "serverMenu": true,
+        "serverRequestAccepted": true,
+        "serverChanged": true,
+        "resumeAfterSwitch": true,
+        "advancingAfterSwitch": true,
+        "languageAfterSwitch": true,
+        "returnHome": true
+      },
+      "phase": "playing",
+      "video": {
+        "before": {
+          "t": 5.847,
+          "d": 3981.618,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1280,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1,
+          "frameCallback": true,
+          "presentedFrames": null
+        },
+        "after": {
+          "t": 11.464,
+          "d": 3981.618,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1280,
+          "h": 720,
+          "frames": 0,
+          "audioBytes": 0,
+          "muted": false,
+          "volume": 1,
+          "frameCallback": true,
+          "presentedFrames": null
+        }
+      },
+      "versionKind": "dub",
+      "pauseOptions": [
+        "resume",
+        "play",
+        "play",
+        "versions",
+        "servers",
+        "episodes"
+      ],
+      "languages": [
+        "Español latino",
+        "Coreano · subtítulos en español"
+      ],
+      "serverChoices": 3,
+      "switch": {
+        "requestedHost": "primeload.co",
+        "positionRequested": 57.677,
+        "phase": "playing",
+        "actualHost": "primeload.co",
+        "observed": {
+          "t": 62.395666,
+          "d": 3981.560887999949,
+          "paused": false,
+          "ready": 4,
+          "error": 0,
+          "w": 1280,
+          "h": 720,
+          "frames": 369,
+          "audioBytes": 226518,
+          "muted": false,
+          "volume": 1,
+          "frameCallback": true,
+          "presentedFrames": null
+        }
+      },
+      "backMs": 2834,
+      "saved": 62
+    },
+    {
+      "label": "final-home",
+      "checks": {
+        "atHome": true
+      },
+      "searchEngine": "google"
+    }
+  ],
+  "errors": [],
+  "finished": "2026-11-08T07:17:12.095Z",
+  "assessment": {
+    "localGate": "passed: 191 JS/MJS, complete suite, 42 cases / 11 source contracts / 3 builds; stable code fingerprint",
+    "tv": "partial external coverage; queue and menus passed; series server change passed; movie alternate closed target",
+    "userConfirmed": {
+      "title": "A cualquier precio",
+      "image": true,
+      "audio": true
+    },
+    "limits": [
+      "Doodstream alternate did not resume; Holy target disappeared after selection; cause unconfirmed.",
+      "Frame counters were unavailable on initial hosts; positive frame/audio counters observed on Primeload.",
+      "No full-length or prolonged playback certification."
+    ]
+  }
+}

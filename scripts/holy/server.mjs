@@ -1,3 +1,5 @@
+import { publicFetch, publicAddresses, readLimited } from './public-fetch.mjs';
+import { HttpError } from './http-error.mjs';
 import http from 'node:http';
 import { DiagnosticLog } from '../diagnostics.mjs';
 import { checkSite } from './site-registry.mjs';
@@ -60,7 +62,7 @@ function localOrigin(origin) {
   try {
     const url = new URL(origin), host = url.hostname.replace(/^\[|\]$/g, '');
     return ['http:', 'https:'].includes(url.protocol) && url.origin === origin && !url.username && !url.password &&
-      (local(host) || host === 'localhost' || /^[a-z0-9-]+\.local$/i.test(host)) ? url : null;
+      (local(host) || /^[a-z0-9-]+(?:\.local)?$/i.test(host)) ? url : null;
   } catch { return null; }
 }
 
@@ -86,7 +88,10 @@ export function mutationAllowed(req, port = PORT, { tv = currentTV(), strict = f
   const url = localOrigin(origin);
   if (!url) return false;
   const originPort = Number(url.port || (url.protocol === 'https:' ? 443 : 80));
-  return originPort === port || originPort === PORT;
+  if (originPort !== port && originPort !== PORT) return false;
+  // CORS/Origin is not device authentication, but an unrelated LAN webpage must not write.
+  try { return url.host === new URL('http://' + req.headers.host).host; }
+  catch { return false; }
 }
 // Actions that change which sites are read or that restart services: never from an opaque origin.
 const STRICT = new Set(['/holy-api/sites', '/holy-api/doctor']);
@@ -98,7 +103,7 @@ function body(req, limit = 16384) {
     // Too big: keep draining (so the client still gets an answer) but stop storing.
     req.on('data', chunk => { size += chunk.length; if (size <= limit) chunks.push(chunk); });
     req.on('end', () => {
-      if (size > limit) { reject(Error('body')); return; }
+      if (size > limit) { reject(new HttpError(413, 'body_too_large', 'La petición supera el tamaño permitido.')); return; }
       try {
         const value = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
         if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('json');
@@ -109,7 +114,7 @@ function body(req, limit = 16384) {
   });
 }
 
-export function startServer({ catalog, library, doctor, peerSync, port = PORT, root = 'dist-holy', webRoot = 'dist-holy-web', imageDir = '.local/holy-images', log = console.log, status = () => ({}), fetchImage = fetch, diagnostics = new DiagnosticLog(), resolveHost } = {}) {
+export function startServer({ catalog, library, doctor, peerSync, port = PORT, root = 'dist-holy', webRoot = 'dist-holy-web', imageDir = '.local/holy-images', log = console.log, status = () => ({}), fetchImage = publicFetch, diagnostics = new DiagnosticLog(), resolveHost } = {}) {
   const started = Date.now();
   const playback=new WebPlayback({library,file:join(dirname(imageDir),'web-playback-sessions.json')});
   mkdirSync(imageDir, { recursive: true });
@@ -138,19 +143,20 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
     if (!pending.has(key)) pending.set(key, (async () => {
       // Redirects are followed here, one hop at a time, so an image host can never bounce the
       // request to this computer or the home network.
-      let target = catalog?.liveURL?.(url) || url, response;
+      let target = catalog?.liveURL?.(parsed.href) || parsed.href, response;
       for (let hop = 0; ; hop++) {
         if (!publicTarget(target)) { diagnostics.event('http', 'image-redirect-refused', { host: new URL(target).hostname }, 'warn'); throw Error('host'); }
-        response = await fetchImage(target, { headers: { 'User-Agent': UA, Referer: parsed.origin + '/' }, signal: AbortSignal.timeout(15000), redirect: 'manual' });
+        await publicAddresses(new URL(target).hostname.replace(/^\[|\]$/g, ''), resolveHost);
+        response = await fetchImage(target, { headers: { 'User-Agent': UA, Referer: parsed.origin + '/' }, signal: AbortSignal.timeout(15000), redirect: 'manual', maxBytes: 4e6 });
         const next = response.status >= 300 && response.status < 400 && response.headers.get('location');
         if (!next) break;
+        await response.body?.cancel().catch(() => {});
         if (hop >= 4) throw Error('image redirects');
         target = new URL(next, target).href;
       }
       const type = response.headers.get('content-type') || 'image/jpeg';
       if (!response.ok || !type.startsWith('image/')) throw Error('image ' + response.status);
-      const body = Buffer.from(await response.arrayBuffer());
-      if (body.length > 4e6) throw Error('size');
+      const body = await readLimited(response, 4e6);
       writeFileSync(path + '.tmp', body); writeFileSync(path + '.type.tmp', type);
       renameSync(path + '.tmp', path); renameSync(path + '.type.tmp', path + '.type');
       return { body, type };
@@ -167,13 +173,13 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
       homeCache = { key, raw, gz: gzipSync(raw) };
     }
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    if (/\bgzip\b/.test(req.headers['accept-encoding'] || '')) { res.setHeader('Content-Encoding', 'gzip'); res.setHeader('Vary', 'Accept-Encoding'); res.end(homeCache.gz); }
+    if (/\bgzip\b/.test(req.headers['accept-encoding'] || '')) { res.setHeader('Content-Encoding', 'gzip'); res.setHeader('Vary', [...new Set(String(res.getHeader('Vary') || '').split(',').map(value => value.trim()).filter(Boolean).concat('Accept-Encoding'))].join(', ')); res.end(homeCache.gz); }
     else res.end(homeCache.raw);
   };
   const sendJSON = (req, res, value) => {
     const raw = Buffer.from(JSON.stringify(value));
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    if (raw.length > 2048 && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) { res.setHeader('Content-Encoding', 'gzip'); res.setHeader('Vary', 'Accept-Encoding'); res.end(gzipSync(raw)); }
+    if (raw.length > 2048 && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) { res.setHeader('Content-Encoding', 'gzip'); res.setHeader('Vary', [...new Set(String(res.getHeader('Vary') || '').split(',').map(value => value.trim()).filter(Boolean).concat('Accept-Encoding'))].join(', ')); res.end(gzipSync(raw)); }
     else res.end(raw);
   };
   let clientErrors=0, clientWindow=Date.now();
@@ -202,10 +208,14 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
     // Never sniffed into another type, never shown inside another site's frame.
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    const url = new URL(req.url, 'http://holy.local');
+    let url;
+    try {
+      try { url = new URL(req.url, 'http://holy.local'); }
+      catch { throw new HttpError(400, 'invalid_url', 'La dirección de la petición no es válida.'); }
+      if (!['GET', 'HEAD', 'POST', 'OPTIONS'].includes(req.method)) { res.setHeader('Allow', 'GET, HEAD, POST, OPTIONS'); throw new HttpError(405, 'method_not_allowed', 'Método no permitido.'); }
     if (/^\/(favicon\.ico|apple-touch-icon.*\.png)$/.test(url.pathname)) { res.writeHead(204).end(); return; }
     if(url.pathname==='/holy-api/profile-sync'){if(peerSync)await peerSync.handle(req,res);else res.writeHead(404).end();return;}
-    const mutation = ['/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh', '/holy-api/resolve', '/holy-api/forget', '/holy-api/sites'].includes(url.pathname) &&
+    const mutation = ['/holy-api/queue', '/holy-api/vote', '/holy-api/language', '/holy-api/client-error', '/holy-api/taste-profile', '/holy-api/doctor', '/holy-api/refresh', '/holy-api/resolve', '/holy-api/forget', '/holy-api/sites'].includes(url.pathname) &&
       (req.method === 'POST' || (req.method === 'OPTIONS' && req.headers['access-control-request-method'] === 'POST'));
     if (mutation && !mutationAllowed(req, server.address()?.port || port, { strict: STRICT.has(url.pathname) })) {
       diagnostics.event('http', 'origin-refused', { action: url.pathname, origin: String(req.headers.origin || req.headers.referer || 'sin origen').slice(0, 120) }, 'warn');
@@ -217,7 +227,6 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
     const reader = readOrigin(req);
     if (reader) { res.setHeader('Access-Control-Allow-Origin', reader); if (reader !== '*') res.setHeader('Vary', 'Origin'); }
     if (req.method === 'OPTIONS') { res.writeHead(204, reader ? { 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' } : {}).end(); return; }
-    try {
       if (url.pathname === '/holy-api/home') {
         res.setHeader('Cache-Control', 'no-store');
         // ?v=2: packed (current screens); without it, the plain rows older installed screens expect.
@@ -236,6 +245,10 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
         const show = await publicAddress(url.searchParams.get('show'));
         const seasons = show ? await catalog.episodes(url.searchParams.get('source') || '', show).catch(error => ({ error: error.message })) : [];
         res.end(JSON.stringify(Array.isArray(seasons) ? { seasons } : { seasons: [], error: seasons.error }));
+      } else if (url.pathname === '/holy-api/queue' && req.method === 'POST') {
+        const { item } = await body(req);
+        if (!await publicAddress(item?.url) || !catalog.connector(String(item?.source || ''))) throw Error('Título no válido.');
+        sendJSON(req, res, { ok: true, queued: library.toggleQueue(item), libraryVersion: library.version });
       } else if (url.pathname === '/holy-api/versions') {
         // The versions (audio / subtitles) a title offers and the one remembered for its series.
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -370,10 +383,10 @@ export function startServer({ catalog, library, doctor, peerSync, port = PORT, r
       } else res.writeHead(404).end();
     } catch (error) {
       // Images: which site's picture failed, so a broken image host can be told apart from a slow one.
-      const imageHost = url.pathname === '/holy-api/img' ? (() => { try { return new URL(url.searchParams.get('u') || '').hostname; } catch { return ''; } })() : '';
-      diagnostics.event('http','request-error',{error,action:url.pathname,...(imageHost?{host:imageHost}:{})},'error');
-      const code = error.message === 'host' ? 403 : ['json', 'body'].includes(error.message) || /dirección válida|gusto no es válido|archivo de gustos no es compatible/.test(error.message) ? 400 : 404;
-      if (!res.headersSent) res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }).end(JSON.stringify({ ok: false, error: code === 400 ? error.message : 'no disponible' }));
+      const imageHost = url?.pathname === '/holy-api/img' ? (() => { try { return new URL(url.searchParams.get('u') || '').hostname; } catch { return ''; } })() : '';
+      diagnostics.event('http','request-error',{error,action:url?.pathname || 'invalid-url',...(imageHost?{host:imageHost}:{})},'error');
+      const code = error instanceof HttpError ? error.status : error.message === 'host' ? 403 : ['json', 'body'].includes(error.message) || /dirección válida|gusto no es válido|archivo de gustos no es compatible/.test(error.message) ? 400 : 404;
+      if (!res.headersSent) res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }).end(JSON.stringify({ ok: false, error: error instanceof HttpError || code === 400 ? error.message : 'no disponible', ...(error instanceof HttpError ? { code: error.code } : {}) }));
       else res.end();
     }
   });

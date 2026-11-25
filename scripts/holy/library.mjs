@@ -1,3 +1,4 @@
+import { HttpError } from './http-error.mjs';
 import {genreLabel} from '../../src/holy-genres.js';
 import { tasteKey, prefKey, publicTasteURL, cleanTasteMeta, cleanLanguages, mergeLibraryState, normalizeTaste } from './taste-state.mjs';
 import { readFileSync, mkdirSync, writeFileSync, renameSync, copyFileSync, existsSync } from 'node:fs';
@@ -34,6 +35,19 @@ function cleanEntry(entry) {
   if (!record(entry) || typeof entry.key !== 'string' || typeof entry.url !== 'string' || !/^https:\/\//.test(entry.url)) return null;
   return { ...entry, title: String(entry.title || ''), genres: strings(entry.genres), studios: strings(entry.studios), t: number(entry.t), duration: number(entry.duration), plays: Math.max(1, number(entry.plays)),
     watched: number(entry.watched), updatedAt: number(entry.updatedAt) || 0, finished: entry.finished === true };
+}
+// Queue is local to this computer; keep catalogue fields, never player URLs or progress.
+function cleanQueued(item) {
+  if (!record(item) || !publicTasteURL(item.url) || !item.source || !item.title || item.chip || item.discover) return null;
+  const out = {};
+  for (const key of ['url','show','source','title','kind','poster','backdrop','subtitle','language']) {
+    if (typeof item[key] === 'string') out[key] = (['url','show','poster','backdrop'].includes(key) ? publicTasteURL(item[key]) : item[key]).slice(0, 2048);
+  }
+  out.isShow = item.isShow === true;
+  out.genres = strings(item.genres);
+  if (typeof item.year === 'string') out.year = item.year.slice(0, 10);
+  for (const key of ['year','episode']) if (Number.isFinite(item[key])) out[key] = item[key];
+  return out;
 }
 // Ratings: 2 «Me encanta», 1 «Me gusta», −1 «No es para mí».
 export const RATINGS = [2, 1, -1];
@@ -94,6 +108,7 @@ export class Library {
     this.tasteMeta = cleanTasteMeta(data.tasteMeta);
     // The language chosen for each series («Between Steps» in Latino, in Korean…), by show key.
     this.languages = cleanLanguages(data.languages);
+    this.watchQueue = (Array.isArray(data.watchQueue) ? data.watchQueue : []).map(cleanQueued).filter(Boolean).slice(0, 100);
     this.progressSamples = new Map();
     this.asked = data.asked && typeof data.asked === 'object' && !Array.isArray(data.asked) ? Object.fromEntries(Object.entries(data.asked).filter(([, at]) => Number.isFinite(at))) : {};
   }
@@ -105,7 +120,7 @@ export class Library {
     mkdirSync(dirname(this.file), { recursive: true });
     const temporary = this.file + '.tmp';
     for (const key of Object.keys(this.asked).slice(0, -200)) delete this.asked[key];
-    writeFileSync(temporary, JSON.stringify({ entries: this.entries, votes: this.votes, prefs: this.prefs, asked: this.asked, tasteMeta: this.tasteMeta, languages: this.languages }, null, 2) + '\n', { mode: 0o600 });
+    writeFileSync(temporary, JSON.stringify({ watchQueue: this.watchQueue, entries: this.entries, votes: this.votes, prefs: this.prefs, asked: this.asked, tasteMeta: this.tasteMeta, languages: this.languages }, null, 2) + '\n', { mode: 0o600 });
     renameSync(temporary, this.file);
   }
   tasteStamp() { this.tasteMeta.clock = Math.max(this.now(), this.tasteMeta.clock + 1, ...this.entries.map(e=>(e.updatedAt||0)+1), ...this.votes.map(v=>v.at+1), ...this.prefs.map(p=>p.at+1)); return this.tasteMeta.clock; }
@@ -170,6 +185,19 @@ export class Library {
     return this.languages[key] || null;
   }
   remove(key) { this.tasteMeta.removedEntries[key] = this.tasteStamp(); this.progressSamples.delete(key); this.entries = this.entries.filter(entry => entry.key !== key); this.save(); }
+  toggleQueue(item) {
+    const clean = cleanQueued(item);
+    if (!clean) throw new HttpError(400, 'invalid_queue_item', 'Ese título no se puede agregar a la cola.');
+    const key = entryKey(clean);
+    const exists = this.watchQueue.some(entry => entryKey(entry) === key);
+    if (exists) this.watchQueue = this.watchQueue.filter(entry => entryKey(entry) !== key);
+    else {
+      if (this.watchQueue.length >= 100) throw new HttpError(409, 'queue_full', 'Tu cola está llena (100 títulos). Quita uno para agregar otro.');
+      this.watchQueue.push(clean);
+    }
+    this.save();
+    return !exists;
+  }
   // Unfinished first; a finished episode becomes its next episode when the site's pattern allows it.
   continueWatching(limit = 20) {
     const list = [];

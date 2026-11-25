@@ -1,3 +1,5 @@
+> Guía de detalles y pruebas históricas del panel. Para instalar o actualizar hoy sigue [Instalación y operación](INSTALACION.md); para flujos y riesgos, [Arquitectura](ARQUITECTURA.md) y [Revisión 2026-11-07](REVISION-CALIDAD-SEGURIDAD-20261107.md). Las versiones/IP de cada ensayo de abajo son históricas, no el estado vivo.
+
 # Holy y Luma en Windows · código 0.9.21, EXE 0.9.13, TV Luma 0.9.2 / Holy 0.9.5
 
 El mismo proyecto ejecuta los dos navegadores de la TV desde Windows o macOS. Holy conserva catálogo, conectores, reproducción y gustos de `origin/holy`; Luma conserva su interfaz y sus marcadores. No es el navegador Brave completo: ambos reutilizan su motor de filtrado.
@@ -6,7 +8,7 @@ El mismo proyecto ejecuta los dos navegadores de la TV desde Windows o macOS. Ho
 
 Windows ya ejecuta el canal directo cifrado entre bibliotecas. Comparte Me gusta, gustos, idiomas e historial/progreso aunque sea el equipo de respaldo. Tras vincularse una vez por la TV, los datos pueden viajar directamente por la red local con la TV apagada; cada equipo conserva su copia y combina los cambios al reconectarse. La clave queda fuera del proyecto, en el directorio del usuario.
 
-**Mac pendiente de activar:** tras actualizar el repositorio, ejecutar mac/Activar-sincronizacion.command. Instrucciones completas: docs/TAREAS-MAC-SINCRONIZACION.md. No se afirma que la Mac anterior ya esté ejecutando el canal nuevo.
+**Actualización documental 2026-11-07:** la sincronización de Mac ya se activó y se comprobó en tareas anteriores. Comprueba el estado vivo con `npm run profile:status`; el activador queda disponible para otra instalación. Las pruebas fechadas que siguen no describen automáticamente la versión instalada actual.
 
 Comandos: npm run profile:setup, npm run profile:status. Para el minuto de los reproductores externos del navegador se preparó Holy Companion: npm run browser:companion y cargar artifacts/holy-companion una vez en Chrome/Brave/Edge, con los permisos que apruebe el usuario. La TV ya registra el minuto sin complemento; los Me gusta del catálogo tampoco lo requieren. Detalle: docs/SINCRONIZACION-DISPOSITIVOS.md.
 

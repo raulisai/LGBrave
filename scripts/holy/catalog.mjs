@@ -1,3 +1,4 @@
+import { publicFetch } from './public-fetch.mjs';
 import { readFileSync, mkdirSync, writeFileSync, renameSync, existsSync, copyFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fetchText, country, languageLabel, genreList } from './sources.mjs';
@@ -95,7 +96,7 @@ export const sameEpisode = (a, b) => !!a.episode && a.episode === b.episode &&
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 const GONE_PAGE = /vp_video_stub_txt|can't find the video you are looking for|deleted by the creator|file was deleted|video not found/i;
 export async function playerGone(url, referrer) {
-  const response = await fetch(url, { headers: { 'User-Agent': UA, Referer: referrer }, signal: AbortSignal.timeout(4000) });
+  const response = await publicFetch(url, { headers: { 'User-Agent': UA, Referer: referrer }, signal: AbortSignal.timeout(4000) });
   if ([404, 410].includes(response.status)) return true;
   return response.ok && GONE_PAGE.test(await response.text());
 }
@@ -325,13 +326,13 @@ export class Catalog {
     this.sessions ||= new Map();
     let session = this.sessions.get(referrer);
     if (fresh || !session || Date.now() - session.at > 5 * 60000) {
-      const page = await fetch(this.liveURL(referrer), { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) });
+      const page = await publicFetch(this.liveURL(referrer), { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) });
       const html = await page.text();
       session = { at: Date.now(), token: /csrf-token" content="([^"]+)"/.exec(html)?.[1] || '', cookie: page.headers.getSetCookie().map(value => value.split(';')[0]).join('; ') };
       this.sessions.set(referrer, session);
       if (this.sessions.size > 50) this.sessions.delete(this.sessions.keys().next().value);
     }
-    const response = await fetch(this.liveURL(url), { method: 'POST', signal: AbortSignal.timeout(10000), headers: { 'User-Agent': UA, Referer: referrer, Cookie: session.cookie, 'X-CSRF-TOKEN': session.token, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body: '_token=' + encodeURIComponent(session.token) });
+    const response = await publicFetch(this.liveURL(url), { method: 'POST', signal: AbortSignal.timeout(10000), headers: { 'User-Agent': UA, Referer: referrer, Cookie: session.cookie, 'X-CSRF-TOKEN': session.token, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body: '_token=' + encodeURIComponent(session.token) });
     // An expired session (419 and the like) is renewed once.
     if (!response.ok && !fresh && [401, 403, 419].includes(response.status)) return this.post(url, referrer, true);
     if (!response.ok) throw Error(new URL(url).hostname + ' respondió ' + response.status);
@@ -565,6 +566,7 @@ export class Catalog {
       items: library.similarTo(anchor, score(pool), 30).map(item => ({ ...item, vote: library.voteOf(item) })) })).filter(row => row.items.length >= 6) : [];
     const people = listRows.filter(row => row.group === 'people' && row.owned >= 3);
     const rows = [
+      { id: 'queue', title: 'Mi cola', items: library.watchQueue || [] },
       { id: 'continue', title: 'Continuar viendo', items: score(continuing) },
       { id: 'foryou', title: 'Recomendado para ti', items: forYou.map(item => ({ ...item, vote: library.voteOf(item) })) },
       ...because, ...people,

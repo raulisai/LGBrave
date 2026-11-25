@@ -29,6 +29,7 @@ const step=(name,file,args=[],timeout=180000)=>new Promise(resolve=>{
 try {
  report.matrix=validatePlaybackMatrix(loadPlaybackMatrix());
  report.inputHash=fingerprint();save();
+ if(!await step('sintaxis JS/MJS','scripts/check-syntax.mjs'))throw Error('Falló la sintaxis.');
  if(!await step('suite completa','scripts/test-local.mjs'))throw Error('Falló la suite.');
  for(const [name,mode] of [['Luma',null],['Holy TV','holy'],['Holy web','holy-web']]){
   if(!await step('build '+name,'scripts/playback-build.mjs',[mode||'production'],60000))throw Error('Falló build '+name);

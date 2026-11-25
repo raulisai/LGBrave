@@ -1,3 +1,4 @@
+import { publicFetch } from './public-fetch.mjs';
 // Site connectors for Holy. Each one reads the newest titles from a site the owner
 // already bookmarked, adds details (genres, synopsis, backdrop) and finds the
 // player the site itself would open, so the TV can go straight to the video.
@@ -8,7 +9,7 @@ import { dedupe } from './versions.mjs';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
 export async function fetchText(url, { referrer, timeout = 15000, method = 'GET', body, headers = {} } = {}) {
-  const response = await fetch(url, {
+  const response = await publicFetch(url, {
     method, body,
     headers: { 'User-Agent': UA, 'Accept-Language': 'es-MX,es;q=0.9,en;q=0.5', ...(referrer ? { Referer: referrer } : {}), ...headers },
     redirect: 'follow', signal: AbortSignal.timeout(timeout)
